@@ -26,7 +26,7 @@ function Board({ xIsNext, c_squares, onPlay }) {
     const tempSquares = c_squares.slice();
     tempSquares[i] = xIsNext ? "X" : "O";
 
-    onPlay(tempSquares);
+    onPlay(tempSquares, i);
   }
 
   
@@ -79,10 +79,17 @@ function MovesList({ history, jumpTo, isAscending}) {
     const description = index > 0 
       ? "Go to move #" + index 
       : "Go to game start";
+
+    const position = element.location;
+    const positionText = position 
+  ? `(${position.row}, ${position.col})` 
+  : '';
     
     return (
       <li key={index}>
-        <button onClick={() => jumpTo(index)}>{description}</button>
+        <button onClick={() => jumpTo(index)}>
+                    {description} {positionText}
+        </button>
       </li>
     );
   });
@@ -100,16 +107,32 @@ function AscendingButton({isAscending, setIsAscending}) {
   );
 }
 
+function ResetButton({ onReset }) {
+  return (
+    <button onClick={onReset}>
+      Start New Game
+    </button>
+  );
+}
+
 export default function Game() {
-  const [history, setHistory] = useState([Array(9).fill(null)]);
+  const [history, setHistory] = useState([
+  {
+    squares: Array(9).fill(null),
+    location: null
+  }
+]);
   const [currentMove, setCurrentMove] = useState(0);
-  const currentSquares = history[currentMove];
+  const currentSquares = history[currentMove].squares;
   const xIsNext = currentMove % 2 === 0;
   const [isAscending, setIsAscending] = useState(true);
 
+  console.log(history)
  
-  function handlePlay(nextSquares) {
-    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+  function handlePlay(nextSquares, index) {
+    const row = Math.floor(index / 3)
+    const col = index % 3
+    const nextHistory = [...history.slice(0, currentMove + 1), {squares:nextSquares, location:{row,col}  }];
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
   }
@@ -122,6 +145,13 @@ export default function Game() {
  
   return (
     <div className="game">
+      <div className="reset-button-container">
+        <ResetButton onReset={() => {
+          setHistory([{squares: Array(9).fill(null), location: null}]);
+          setCurrentMove(0);
+          setIsAscending(true);
+        }} />
+      </div>
       <div className="ascend-button-container">
         <AscendingButton isAscending={isAscending} setIsAscending={setIsAscending} />
       </div>
