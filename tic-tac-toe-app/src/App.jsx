@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 
 function Square({ value, onSquareClick, winningLine, index }) {
@@ -29,9 +29,6 @@ function Board({ xIsNext, c_squares, onPlay }) {
     onPlay(tempSquares, i);
   }
 
-  
-  
-
   let status;
   if (winnerInfo.player) {
     status = "The winner is " + winnerInfo.player;
@@ -43,7 +40,8 @@ function Board({ xIsNext, c_squares, onPlay }) {
 const boardRows = Array(3).fill(null).map((_, i) => {
   const squaresInRow = Array(3).fill(null).map((_, j) => {
     const index = i * 3 + j;
-    return <Square  value={c_squares[index]} 
+    return <Square  key ={index}
+                     value={c_squares[index]} 
                     onSquareClick={() => HandleClick(index)}  
                     winningLine = {winnerInfo.line} 
                     index = {index}/>;
@@ -115,42 +113,92 @@ function ResetButton({ onReset }) {
   );
 }
 
+//////////////////////////////////////////////////////////////
 export default function Game() {
-  const [history, setHistory] = useState([
-  {
-    squares: Array(9).fill(null),
-    location: null
-  }
-]);
+  const [history, setHistory] = useState([]);
   const [currentMove, setCurrentMove] = useState(0);
-  const currentSquares = history[currentMove].squares;
-  const xIsNext = currentMove % 2 === 0;
+  const [isLoading, setIsLoading] = useState(true);
   const [isAscending, setIsAscending] = useState(true);
 
-  console.log(history)
- 
+  // Hämta spelet från servern vid första render
+  useEffect(() => {
+    fetch("/tic-tac-toe-api/api/game")
+      .then(res => res.json())
+      .then(data => {
+        setHistory(data.history);
+        setCurrentMove(data.currentMove);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to load game:", err);
+        // Starta nytt spel om hämtning misslyckas
+        const initialGame = { history: [{ squares: Array(9).fill(null), location: null }], currentMove: 0 };
+        setHistory(initialGame.history);
+        setCurrentMove(initialGame.currentMove);
+        setIsLoading(false);
+      });
+  }, []);
+
+  const currentSquares = history[currentMove]?.squares || Array(9).fill(null);
+  const xIsNext = currentMove % 2 === 0;
+
   function handlePlay(nextSquares, index) {
-    const row = Math.floor(index / 3)
-    const col = index % 3
-    const nextHistory = [...history.slice(0, currentMove + 1), {squares:nextSquares, location:{row,col}  }];
+    const row = Math.floor(index / 3);
+    const col = index % 3;
+    const nextHistory = [...history.slice(0, currentMove + 1), { squares: nextSquares, location: { row, col } }];
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
+
+    // Spara till servern
+    fetch("/tic-tac-toe-api/api/game", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        history: nextHistory,
+        currentMove: nextHistory.length - 1
+      })
+    })
+    .catch(err => console.error("Failed to save game:", err));
   }
 
-  
   function jumpTo(nextMove) {
     setCurrentMove(nextMove);
+
+    // Spara till servern
+    fetch("/tic-tac-toe-api/api/game", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        history,
+        currentMove: nextMove
+      })
+    })
+    .catch(err => console.error("Failed to save game:", err));
   }
 
- 
+  function resetGame() {
+    const initialGame = { history: [{ squares: Array(9).fill(null), location: null }], currentMove: 0 };
+    setHistory(initialGame.history);
+    setCurrentMove(initialGame.currentMove);
+    setIsAscending(true);
+
+    // Spara till servern
+    fetch("/tic-tac-toe-api/api/game", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(initialGame)
+    })
+    .catch(err => console.error("Failed to reset game:", err));
+  }
+
+  if (isLoading) {
+    return <div>Loading game...</div>;
+  }
+
   return (
     <div className="game">
       <div className="reset-button-container">
-        <ResetButton onReset={() => {
-          setHistory([{squares: Array(9).fill(null), location: null}]);
-          setCurrentMove(0);
-          setIsAscending(true);
-        }} />
+        <ResetButton onReset={resetGame} />
       </div>
       <div className="ascend-button-container">
         <AscendingButton isAscending={isAscending} setIsAscending={setIsAscending} />
@@ -159,11 +207,10 @@ export default function Game() {
         <CurrentMoveIndicator currentMove={currentMove} />
       </div>
       <div className="game-board">
-      
         <Board
-          xIsNext={xIsNext} 
-          c_squares={currentSquares} 
-          onPlay={handlePlay} 
+          xIsNext={xIsNext}
+          c_squares={currentSquares}
+          onPlay={handlePlay}
         />
       </div>
       <div className="game-info">
@@ -172,6 +219,8 @@ export default function Game() {
     </div>
   );
 }
+
+
 
 function calculateWinner(squares) {
   const lines = [
