@@ -1,10 +1,14 @@
 import { useState } from "react";
 
 
-function Square({ value, onSquareClick }) {
-
+function Square({ value, onSquareClick, winningLine, index }) {
+  const isWinning = winningLine && winningLine.includes(index);
+  
   return (
-    <button className="square" onClick={onSquareClick}>
+    <button 
+      className={`square ${isWinning ? 'winning' : ''}`} 
+      onClick={onSquareClick}
+    >
       {value}
     </button>
   );
@@ -13,8 +17,11 @@ function Square({ value, onSquareClick }) {
 
 function Board({ xIsNext, c_squares, onPlay }) {
 
+  const winnerInfo = calculateWinner(c_squares); // ← här!
+  const isDraw = !winnerInfo.player && c_squares.every(square => square !== null);
+
   function HandleClick(i) {
-    if (c_squares[i] || calculateWinner(c_squares)) return;
+    if (c_squares[i] || winnerInfo.player || isDraw) return;
 
     const tempSquares = c_squares.slice();
     tempSquares[i] = xIsNext ? "X" : "O";
@@ -23,38 +30,41 @@ function Board({ xIsNext, c_squares, onPlay }) {
   }
 
   
-  const winner = calculateWinner(c_squares);
+  
 
   let status;
-  if (winner) {
-    status = "The winner is " + winner;
+  if (winnerInfo.player) {
+    status = "The winner is " + winnerInfo.player;
   } else {
     const nextPlayer = xIsNext ? "X" : "O";
     status = "Next is " + nextPlayer;
   }
 
+const boardRows = Array(3).fill(null).map((_, i) => {
+  const squaresInRow = Array(3).fill(null).map((_, j) => {
+    const index = i * 3 + j;
+    return <Square  value={c_squares[index]} 
+                    onSquareClick={() => HandleClick(index)}  
+                    winningLine = {winnerInfo.line} 
+                    index = {index}/>;
+  });
+
+  return (
+    <div className="board-row" key={i}>
+      {squaresInRow}
+    </div>
+  );
+});
+
   return (
     <>
       <div className="status">{status}</div>
-      <div className="board-row">
-        <Square value={c_squares[0]} onSquareClick={() => HandleClick(0)} />
-        <Square value={c_squares[1]} onSquareClick={() => HandleClick(1)} />
-        <Square value={c_squares[2]} onSquareClick={() => HandleClick(2)} />
-      </div>
-      <div className="board-row">
-        <Square value={c_squares[3]} onSquareClick={() => HandleClick(3)} />
-        <Square value={c_squares[4]} onSquareClick={() => HandleClick(4)} />
-        <Square value={c_squares[5]} onSquareClick={() => HandleClick(5)} />
-      </div>
-      <div className="board-row">
-        <Square value={c_squares[6]} onSquareClick={() => HandleClick(6)} />
-        <Square value={c_squares[7]} onSquareClick={() => HandleClick(7)} />
-        <Square value={c_squares[8]} onSquareClick={() => HandleClick(8)} />
-      </div>
+      {boardRows}
     </>
   );
 }
 
+//////////
 function CurrentMoveIndicator({ currentMove }) {
   return (
     <p className="current-move-badge">
@@ -64,8 +74,8 @@ function CurrentMoveIndicator({ currentMove }) {
 }
 
 
-function MovesList({ history, jumpTo }) {
-  const moves = history.map((element, index) => {
+function MovesList({ history, jumpTo, isAscending}) {
+  const moves1 = history.map((element, index) => {
     const description = index > 0 
       ? "Go to move #" + index 
       : "Go to game start";
@@ -77,7 +87,17 @@ function MovesList({ history, jumpTo }) {
     );
   });
 
-  return <><ol>{moves}</ol> </>; 
+  const moves = isAscending ? moves1 : moves1.slice().reverse();
+
+  return <><ul>{moves}</ul> </>; 
+}
+
+function AscendingButton({isAscending, setIsAscending}) {
+  return (
+    <button className="ascend-button" onClick={() => setIsAscending(!isAscending)}>
+      {isAscending ? "Descending" : "Ascending"}
+    </button>
+  );
 }
 
 export default function Game() {
@@ -85,6 +105,7 @@ export default function Game() {
   const [currentMove, setCurrentMove] = useState(0);
   const currentSquares = history[currentMove];
   const xIsNext = currentMove % 2 === 0;
+  const [isAscending, setIsAscending] = useState(true);
 
  
   function handlePlay(nextSquares) {
@@ -101,6 +122,9 @@ export default function Game() {
  
   return (
     <div className="game">
+      <div className="ascend-button-container">
+        <AscendingButton isAscending={isAscending} setIsAscending={setIsAscending} />
+      </div>
       <div className="move-indicator-container">
         <CurrentMoveIndicator currentMove={currentMove} />
       </div>
@@ -113,7 +137,7 @@ export default function Game() {
         />
       </div>
       <div className="game-info">
-        <MovesList history={history} jumpTo={jumpTo} />
+        <MovesList history={history} jumpTo={jumpTo} isAscending={isAscending} />
       </div>
     </div>
   );
@@ -133,8 +157,9 @@ function calculateWinner(squares) {
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      
+      return( {player: squares[a],line: lines[i]});
     }
   }
-  return null;
+  return( {player: null, line: null});
 }
