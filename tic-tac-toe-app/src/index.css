@@ -82,9 +82,26 @@ body {
 }
 .game {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
 }
 
 .game-info {
   margin-left: 20px;
+}
+
+.current-move-badge {
+  background-color: #007bff;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin: 0 0 0 25px; /* ingen marginal upp/ned, 25px till vänster */
+}
+.move-indicator-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 10px 0;
 }
