@@ -24,13 +24,10 @@ jobs:
       - name: Deploy to server
         run: |
           echo "$DEPLOY_KEY" > deploy_key && chmod 600 deploy_key
-          ssh -o StrictHostKeyChecking=no -i deploy_key yourusername@46.101.221.97 << 'ENDSSH'
-            cd ~/tic-tac-toe-app
-            git pull origin main
-            npm install
-            npm run build
-            sudo cp -r dist/* /var/www/tic-tac-toe/
-            echo "Deploy completed!"
-          ENDSSH
+          # Ladda upp dist-mappen till servern med rsync
+          rsync -avz -e "ssh -i deploy_key -o StrictHostKeyChecking=no" dist/ yourusername@46.101.221.97:~/tic-tac-toe-app/dist/
+          # Kopiera filerna till rätt plats på servern med sudo
+          ssh -o StrictHostKeyChecking=no -i deploy_key yourusername@46.101.221.97 'sudo cp -r ~/tic-tac-toe-app/dist/* /var/www/tic-tac-toe/'
+          echo "Deploy completed!"
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
