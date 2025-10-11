@@ -2,9 +2,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  base: '/tic-tac-toe/',  // ← Detta används vid `npm run build`
+  base: '/',  // ← Viktigt: servas från roten
   plugins: [react()],
-  server: {               // ← Lägg till detta block
+  server: {
     proxy: {
       '/tic-tac-toe-api': {
         target: 'https://celestial.se',
