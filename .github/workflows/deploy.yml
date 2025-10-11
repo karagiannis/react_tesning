@@ -16,16 +16,20 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          cd tic-tac-toe-app
+          npm install
 
       - name: Build project
-        run: npm run build
+        run: |
+          cd tic-tac-toe-app
+          npm run build
 
       - name: Deploy to server
         run: |
           echo "$DEPLOY_KEY" > deploy_key && chmod 600 deploy_key
           # Ladda upp dist-mappen till servern med rsync
-          rsync -avz -e "ssh -i deploy_key -o StrictHostKeyChecking=no" dist/ yourusername@46.101.221.97:~/tic-tac-toe-app/dist/
+          rsync -avz -e "ssh -i deploy_key -o StrictHostKeyChecking=no" tic-tac-toe-app/dist/ yourusername@46.101.221.97:~/tic-tac-toe-app/dist/
           # Kopiera filerna till rätt plats på servern med sudo
           ssh -o StrictHostKeyChecking=no -i deploy_key yourusername@46.101.221.97 'sudo cp -r ~/tic-tac-toe-app/dist/* /var/www/tic-tac-toe/'
           echo "Deploy completed!"
