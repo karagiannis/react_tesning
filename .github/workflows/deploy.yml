@@ -28,6 +28,8 @@ jobs:
       - name: Deploy to server
         run: |
           echo "$DEPLOY_KEY" > deploy_key && chmod 600 deploy_key
+          # Skapa målmappen på servern om den inte finns
+          ssh -o StrictHostKeyChecking=no -i deploy_key yourusername@46.101.221.97 'mkdir -p ~/tic-tac-toe-app/dist'
           # Ladda upp dist-mappen till servern med rsync
           rsync -avz -e "ssh -i deploy_key -o StrictHostKeyChecking=no" tic-tac-toe-app/dist/ yourusername@46.101.221.97:~/tic-tac-toe-app/dist/
           # Kopiera filerna till rätt plats på servern med sudo
