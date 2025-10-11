@@ -1,0 +1,36 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy to server
+        run: |
+          echo "$DEPLOY_KEY" > deploy_key && chmod 600 deploy_key
+          ssh -o StrictHostKeyChecking=no -i deploy_key yourusername@46.101.221.97 << 'ENDSSH'
+            cd ~/tic-tac-toe-app
+            git pull origin main
+            npm install
+            npm run build
+            sudo cp -r dist/* /var/www/tic-tac-toe/
+            echo "Deploy completed!"
+          ENDSSH
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
