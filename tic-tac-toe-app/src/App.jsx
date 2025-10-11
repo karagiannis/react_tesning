@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 
-// Deploy test
-// Deploy test2
+
 
 function Square({ value, onSquareClick, winningLine, index }) {
   const isWinning = winningLine && winningLine.includes(index);
