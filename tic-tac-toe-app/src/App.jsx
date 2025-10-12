@@ -2,6 +2,119 @@ import { useState, useEffect } from "react";
 
 
 
+export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Kolla om token finns i localStorage vid start
+  useEffect(() => {
+    const token = localStorage.getItem('jwtToken');
+    if (token) {
+      // Här kan du också validera token mot servern om du vill
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true); // Uppdatera tillståndet när inloggning lyckas
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('jwtToken'); // Ta bort token
+    setIsLoggedIn(false); // Uppdatera tillståndet
+  };
+
+  if (isLoggedIn) {
+    return <Game onLogout={handleLogout} />; // Skicka med logout-funktion om du vill ha det
+  } else {
+    return <LoginForm onLoginSuccess={handleLoginSuccess} />;
+  }
+}
+
+
+// Anta att du har en funktion för att logga in mot din API
+// Du kan importera den från en annan fil eller definiera den här
+async function loginAPI(username, password) {
+  const response = await fetch('/tic-tac-toe-api/api/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded', // Viktigt för OAuth2PasswordRequestForm
+    },
+    body: new URLSearchParams({
+      username: username,
+      password: password,
+    }),
+  });
+
+  if (!response.ok) {
+    // Kasta ett fel om inloggning misslyckas (t.ex. 401)
+    const errorData = await response.json().catch(() => ({ detail: "Login failed" }));
+    throw new Error(errorData.detail || "Login failed");
+  }
+
+  const data = await response.json();
+  return data.access_token; // Returnera token
+}
+
+function LoginForm({ onLoginSuccess }) { // Ta emot en callback-funktion
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(""); // För att visa felmeddelanden
+  const [loading, setLoading] = useState(false); // För att visa laddningsindikator
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Förhindra standardbeteende för formuläret
+    setError(""); // Rensa tidigare fel
+    setLoading(true); // Sätt laddning till true
+
+    try {
+      const token = await loginAPI(username, password);
+      // Om inloggning lyckas:
+      localStorage.setItem("jwtToken", token); // Spara token i localStorage
+      onLoginSuccess(); // Anropa callback för att t.ex. visa Game-komponenten
+    } catch (err) {
+      // Om inloggning misslyckas:
+      setError(err.message || "An error occurred during login.");
+    } finally {
+      setLoading(false); // Sätt laddning till false
+    }
+  };
+
+  return (
+    <div className="login-form-container">
+      <form className="login-form" onSubmit={handleSubmit}>
+        <h2>Login</h2>
+        {error && <div className="error-message">{error}</div>}
+        <div className="form-group">
+          <label htmlFor="username">Username:</label>
+          <input
+            type="text"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            disabled={loading} // Inaktivera fält vid laddning
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            disabled={loading} // Inaktivera fält vid laddning
+          />
+        </div>
+        <button type="submit" disabled={loading}>
+          {loading ? "Logging in..." : "Login"} {/* Visa olika text beroende på laddning */}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+
 function Square({ value, onSquareClick, winningLine, index }) {
   const isWinning = winningLine && winningLine.includes(index);
   
@@ -115,7 +228,7 @@ function ResetButton({ onReset }) {
 }
 
 //////////////////////////////////////////////////////////////
-export default function Game() {
+ function Game() {
   const [history, setHistory] = useState([]);
   const [currentMove, setCurrentMove] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
