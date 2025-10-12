@@ -386,7 +386,6 @@ function resetGame() {
     <div className="game">
       <div className="logout-button-container">
         <LogOutButton onLogout={onLogout} />
-        <button classeName="logout-button" onClick={onLogout}>Logout</button>
       </div>
       <div className="reset-button-container">
         <ResetButton onReset={resetGame} />
