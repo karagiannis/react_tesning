@@ -1,25 +1,26 @@
+
+
 import { useState, useEffect } from "react";
-
-
 
 function RegisterForm({ onRegister }) { // Ta emot onRegister som en prop
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // Lägg till state för bekräftelse
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState(""); // State för felmeddelanden
+  const [successMessage, setSuccessMessage] = useState(""); // State för lyckomeddelande
   const [loading, setLoading] = useState(false); // State för laddning
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Förhindra standardbeteende för formuläret
+    e.preventDefault();
 
-    // Enkel validering
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
     setError(""); // Rensa tidigare fel
-    setLoading(true); // Sätt laddning till true
+    setSuccessMessage(""); // Rensa tidigare lyckomeddelande
+    setLoading(true);
 
     try {
       const response = await fetch('/tic-tac-toe-api/api/register', {
@@ -34,38 +35,58 @@ function RegisterForm({ onRegister }) { // Ta emot onRegister som en prop
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ detail: "Registration failed" }));
-        throw new Error(errorData.detail || "Registration failed");
+        // Hantera fel från servern
+        let errorDetail = "Registration failed";
+        try {
+          const errorData = await response.json();
+          errorDetail = errorData.detail || errorDetail;
+        } catch (jsonError) {
+          // Om svaret inte är JSON, använd statusText eller generisk text
+          errorDetail = response.statusText || errorDetail;
+          console.error(jsonError);
+        }
+        throw new Error(errorDetail);
       }
 
       const data = await response.json();
-      console.log(data.msg); // Logga svaret ("User registered successfully")
+      console.log(data.msg); // "User registered successfully"
 
-      // Anropa onRegister-prop med användarnamn och lösenord
-      // (Du kan välja att inte skicka lösenordet, beroende på hur du hanterar nästa steg)
-      onRegister(username, password);
+      // Rensa formuläret efter lyckad registrering
+      setUsername("");
+      setPassword("");
+      setConfirmPassword("");
+
+      // Sätt lyckomeddelandet lokalt i RegisterForm
+      setSuccessMessage("Registration successful! Please check your email to confirm your account.");
+
+      // Anropa onRegister-prop med ett objekt som indikerar lyckad registrering
+      // och innehåller relevant data (t.ex. meddelandet)
+      onRegister({ success: true, message: data.msg, username: username }); // Du kan skicka användarnamn om det är relevant
 
     } catch (err) {
       setError(err.message);
+      // Du kan också skicka felinformation till App om du vill hantera det där
+      // onRegister({ success: false, error: err.message });
     } finally {
-      setLoading(false); // Sätt laddning till false
+      setLoading(false);
     }
   };
 
   return (
     <div className="register-form-container">
-      <form className="register-form" onSubmit={handleSubmit}> {/* Använd onSubmit på formuläret */}
+      <form className="register-form" onSubmit={handleSubmit}>
         <h2>Register</h2>
         {error && <div className="error-message">{error}</div>}
+        {successMessage && <div className="success-message">{successMessage}</div>}
         <div className="form-group">
-          <label htmlFor="reg-username">e-mail:</label>
+          <label htmlFor="reg-username">Username:</label>
           <input
             type="text"
             id="reg-username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            disabled={loading} // Inaktivera vid laddning
+            disabled={loading}
           />
         </div>
         <div className="form-group">
@@ -76,7 +97,7 @@ function RegisterForm({ onRegister }) { // Ta emot onRegister som en prop
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            disabled={loading} // Inaktivera vid laddning
+            disabled={loading}
           />
         </div>
         <div className="form-group">
@@ -87,68 +108,70 @@ function RegisterForm({ onRegister }) { // Ta emot onRegister som en prop
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            disabled={loading} // Inaktivera vid laddning
+            disabled={loading}
           />
         </div>
         <button type="submit" disabled={loading}>
-          {loading ? "Registering..." : "Register"} {/* Visa olika text beroende på laddning */}
+          {loading ? "Registering..." : "Register"}
         </button>
       </form>
     </div>
   );
 }
 
-
-
-
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   //const [showLogin, setShowLogin] = useState(true); // Tillstånd för att visa login eller register
+  const [successReg, setSuccessReg] = useState(false); // State för att indikera lyckad registrering
 
   // Kolla om token finns i localStorage vid start
   useEffect(() => {
     const token = localStorage.getItem('jwtToken');
     if (token) {
-      // Här kan du också validera token mot servern om du vill
       setIsLoggedIn(true);
     }
   }, []);
 
   const handleLoginSuccess = () => {
-    setIsLoggedIn(true); // Uppdatera tillståndet när inloggning lyckas
+    setIsLoggedIn(true);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('jwtToken'); // Ta bort token
-    setIsLoggedIn(false); // Uppdatera tillståndet
+    localStorage.removeItem('jwtToken');
+    setIsLoggedIn(false);
   };
 
-  // Uppdaterad handleRegister-funktion
-  const handleRegister = () => {
-    // Efter lyckad registrering via API, sätt isLoggedIn till true
-    // Detta kommer att trigga render av Game-komponenten
-    // Du kan också välja att återgå till LoginForm här istället
-    // genom att sätta setShowLogin(true) och låta användaren logga in manuellt.
-    // För nu, vi loggar in direkt efter registrering.
-    handleLoginSuccess(); // Detta sätter isLoggedIn till true
-    // Alternativt, om du vill visa LoginForm igen:
-     setShowLogin(true);
+  // Uppdaterad handleRegister-funktion som tar emot ett resultatobjekt
+  const handleRegister = (result) => {
+    if (result && result.success) {
+      console.log("Registration success in App:", result.message); // Exempel på logik i App
+      setSuccessReg(true); // Sätt state för lyckad registrering i App
+      // Här kan du t.ex. sätta ett timeout för att rensa meddelandet efter ett tag
+      // setTimeout(() => setSuccessReg(false), 5000); // Rensa efter 5 sekunder
+    }
+    // Du kan också hantera felresultat här om du skickar dem från RegisterForm
+    // else if (result && !result.success) {
+    //   console.error("Registration error in App:", result.error);
+    // }
   };
 
   if (isLoggedIn) {
-    return <Game onLogout={handleLogout} />; // Skicka med logout-funktion om du vill ha det
+    return <Game onLogout={handleLogout} />;
   } else {
-    // Visa BÅDE LoginForm och RegisterForm när användaren inte är inloggad
     return (
       <div>
         <h2>Login</h2>
         <LoginForm onLoginSuccess={handleLoginSuccess} />
+        {/* Visa ett meddelande i App om registrering lyckades */}
+        {successReg && <div className="app-success-message">Registration successful! Please check your email.</div>}
         <h2>Register</h2>
         <RegisterForm onRegister={handleRegister} />
       </div>
     );
   }
 }
+
+
 
 
 
@@ -183,6 +206,9 @@ async function loginAPI(username, password) {
   const data = await response.json();
   return data.access_token; // Returnera token
 }
+
+
+
 
 function LoginForm({ onLoginSuccess }) { // Ta emot en callback-funktion
   const [username, setUsername] = useState("");
