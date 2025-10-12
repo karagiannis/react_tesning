@@ -114,7 +114,7 @@ function LoginForm({ onLoginSuccess }) { // Ta emot en callback-funktion
   );
 }
 
-
+///////// Board och Square komponenter samt Gasme komponenten /////
 function Square({ value, onSquareClick, winningLine, index }) {
   const isWinning = winningLine && winningLine.includes(index);
   
@@ -234,76 +234,142 @@ function ResetButton({ onReset }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAscending, setIsAscending] = useState(true);
 
-  // Hämta spelet från servern vid första render
-  useEffect(() => {
-    fetch("/tic-tac-toe-api/api/game")
-      .then(res => res.json())
-      .then(data => {
-        setHistory(data.history);
-        setCurrentMove(data.currentMove);
-        setIsLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to load game:", err);
-        // Starta nytt spel om hämtning misslyckas
-        const initialGame = { history: [{ squares: Array(9).fill(null), location: null }], currentMove: 0 };
-        setHistory(initialGame.history);
-        setCurrentMove(initialGame.currentMove);
-        setIsLoading(false);
-      });
-  }, []);
+  // I din Game-komponent
+useEffect(() => {
+  // Hämta token från localStorage
+  const token = localStorage.getItem("jwtToken");
 
-  const currentSquares = history[currentMove]?.squares || Array(9).fill(null);
-  const xIsNext = currentMove % 2 === 0;
-
-  function handlePlay(nextSquares, index) {
-    const row = Math.floor(index / 3);
-    const col = index % 3;
-    const nextHistory = [...history.slice(0, currentMove + 1), { squares: nextSquares, location: { row, col } }];
-    setHistory(nextHistory);
-    setCurrentMove(nextHistory.length - 1);
-
-    // Spara till servern
-    fetch("/tic-tac-toe-api/api/game", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        history: nextHistory,
-        currentMove: nextHistory.length - 1
-      })
-    })
-    .catch(err => console.error("Failed to save game:", err));
+  // Kontrollera att token finns
+  if (!token) {
+    console.error("No token found, cannot fetch game data.");
+    // Här kan du t.ex. omdirigera till login eller visa ett meddelande
+    return;
   }
 
-  function jumpTo(nextMove) {
-    setCurrentMove(nextMove);
-
-    // Spara till servern
-    fetch("/tic-tac-toe-api/api/game", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        history,
-        currentMove: nextMove
-      })
-    })
-    .catch(err => console.error("Failed to save game:", err));
-  }
-
-  function resetGame() {
+  // GÖR detta fetch-anrop med token
+  fetch("/tic-tac-toe-api/api/game", {
+    // Lägg till headers-objektet
+    headers: {
+      "Authorization": `Bearer ${token}` // <-- Detta är nyckeln
+    }
+  })
+  .then(res => {
+     if (!res.ok) {
+        // Hantera fel, t.ex. 401 om token inte längre är giltig
+        if (res.status === 401) {
+            // Kasta token och omdirigera till login
+            localStorage.removeItem("jwtToken");
+            // Här kan du trigga omdirigering, t.ex. via en prop eller ett state
+            console.error("Token expired or invalid, redirecting to login.");
+            // Om du har en onLogout prop: onLogout();
+        }
+        throw new Error(`HTTP error! status: ${res.status}`);
+     }
+     return res.json();
+  })
+  .then(data => {
+    setHistory(data.history);
+    setCurrentMove(data.currentMove);
+    setIsLoading(false);
+  })
+  .catch(err => {
+    console.error("Failed to load game:", err);
+    // Starta nytt spel om hämtning misslyckas p.g.a. auth-fel eller annat
     const initialGame = { history: [{ squares: Array(9).fill(null), location: null }], currentMove: 0 };
     setHistory(initialGame.history);
     setCurrentMove(initialGame.currentMove);
-    setIsAscending(true);
+    setIsLoading(false);
+  });
+}, []); // Kom ihåg att lägga till onLogout i dependencies om du använder den
 
-    // Spara till servern
-    fetch("/tic-tac-toe-api/api/game", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(initialGame)
-    })
-    .catch(err => console.error("Failed to reset game:", err));
+
+
+  // ... (Game-komponentens början med state och useEffect)
+
+const currentSquares = history[currentMove]?.squares || Array(9).fill(null);
+const xIsNext = currentMove % 2 === 0;
+
+function handlePlay(nextSquares, index) {
+  const token = localStorage.getItem("jwtToken"); // <-- Hämta token
+  if (!token) { // <-- Kontrollera att token finns
+    console.error("No token found, cannot save game data.");
+    // Här kan du t.ex. omdirigera till login eller visa ett meddelande
+    return;
   }
+
+  const row = Math.floor(index / 3);
+  const col = index % 3;
+  const nextHistory = [...history.slice(0, currentMove + 1), { squares: nextSquares, location: { row, col } }];
+  setHistory(nextHistory);
+  setCurrentMove(nextHistory.length - 1);
+
+  // Spara till servern MED token
+  fetch("/tic-tac-toe-api/api/game", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}` // <-- Lägg till Authorization header
+    },
+    body: JSON.stringify({
+      history: nextHistory,
+      currentMove: nextHistory.length - 1
+    })
+  })
+  .catch(err => {
+    console.error("Failed to save game:", err);
+    // Kanske återställ till föregående tillstånd?
+  });
+}
+
+function jumpTo(nextMove) {
+  const token = localStorage.getItem("jwtToken"); // <-- Hämta token
+  if (!token) { // <-- Kontrollera att token finns
+    console.error("No token found, cannot save game data.");
+    return;
+  }
+
+  setCurrentMove(nextMove);
+
+  // Spara till servern MED token
+  fetch("/tic-tac-toe-api/api/game", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}` // <-- Lägg till Authorization header
+    },
+    body: JSON.stringify({
+      history,
+      currentMove: nextMove
+    })
+  })
+  .catch(err => console.error("Failed to save game:", err));
+}
+
+function resetGame() {
+  const token = localStorage.getItem("jwtToken"); // <-- Hämta token
+  if (!token) { // <-- Kontrollera att token finns
+    console.error("No token found, cannot reset game.");
+    return;
+  }
+
+  const initialGame = { history: [{ squares: Array(9).fill(null), location: null }], currentMove: 0 };
+  setHistory(initialGame.history);
+  setCurrentMove(initialGame.currentMove);
+  setIsAscending(true);
+
+  // Spara till servern MED token
+  fetch("/tic-tac-toe-api/api/game", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}` // <-- Lägg till Authorization header
+    },
+    body: JSON.stringify(initialGame)
+  })
+  .catch(err => console.error("Failed to reset game:", err));
+}
+
+// ... (resten av Game-komponenten, inklusive render)
 
   if (isLoading) {
     return <div>Loading game...</div>;
