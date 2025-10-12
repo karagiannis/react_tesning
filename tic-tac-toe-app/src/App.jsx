@@ -121,14 +121,13 @@ function RegisterForm({ onRegister }) { // Ta emot onRegister som en prop
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  //const [showLogin, setShowLogin] = useState(true); // Tillstånd för att visa login eller register
+  const [showLogin, setShowLogin] = useState(true); // <-- Nytt tillstånd: visa login eller register
   const [successReg, setSuccessReg] = useState(false); // State för att indikera lyckad registrering
 
   // Kolla om token finns i localStorage vid start
   useEffect(() => {
     const token = localStorage.getItem('jwtToken');
     if (token) {
-      //Här kan du också verifiera token med servern om du vill
       setIsLoggedIn(true);
     }
   }, []);
@@ -142,18 +141,24 @@ export default function App() {
     setIsLoggedIn(false);
   };
 
-  // Uppdaterad handleRegister-funktion som tar emot ett resultatobjekt
+  // Uppdaterad handleRegister-funktion
   const handleRegister = (result) => {
     if (result && result.success) {
-      console.log("Registration success in App:", result.message); // Exempel på logik i App
-      setSuccessReg(true); // Sätt state för lyckad registrering i App
-      // Här kan du t.ex. sätta ett timeout för att rensa meddelandet efter ett tag
-      // setTimeout(() => setSuccessReg(false), 5000); // Rensa efter 5 sekunder
+      console.log("Registration success in App:", result.message);
+      setSuccessReg(true);
+      // Efter lyckad registrering, gå tillbaka till inloggning
+      setShowLogin(true); // <-- Viktigt: Gå tillbaka till login-vyn efter registrering
     }
-    // Du kan också hantera felresultat här om du skickar dem från RegisterForm
-    // else if (result && !result.success) {
-    //   console.error("Registration error in App:", result.error);
-    // }
+  };
+
+  // Funktion för att byta till register-vy
+  const switchToRegister = () => {
+    setShowLogin(false); // Visa RegisterForm
+  };
+
+  // Funktion för att byta till login-vy
+  const switchToLogin = () => {
+    setShowLogin(true); // Visa LoginForm
   };
 
   if (isLoggedIn) {
@@ -161,17 +166,22 @@ export default function App() {
   } else {
     return (
       <div>
-        <h2>Login</h2>
-        <LoginForm onLoginSuccess={handleLoginSuccess} />
-        {/* Visa ett meddelande i App om registrering lyckades */}
-        {successReg && <div className="app-success-message">Registration successful! Please check your email.</div>}
-        <h2>Register</h2>
-        <RegisterForm onRegister={handleRegister} />
+        {showLogin ? ( // <-- Visa LoginForm eller RegisterForm baserat på showLogin
+          <div>
+            <h2>Login</h2>
+            <LoginForm onLoginSuccess={handleLoginSuccess} onSwitchToRegister={switchToRegister} /> {/* Skicka med switch-funktionen */}
+            {successReg && <div className="app-success-message">Registration successful! Please check your email.</div>}
+          </div>
+        ) : (
+          <div>
+            <h2>Register</h2>
+            <RegisterForm onRegister={handleRegister} onSwitchToLogin={switchToLogin} /> {/* Skicka med switch-funktionen */}
+          </div>
+        )}
       </div>
     );
   }
 }
-
 
 
 
@@ -209,32 +219,28 @@ async function loginAPI(username, password) {
 }
 
 
-
-
-function LoginForm({ onLoginSuccess }) { // Ta emot en callback-funktion
+function LoginForm({ onLoginSuccess, onSwitchToRegister }) { // Ta emot onSwitchToRegister som prop
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(""); // För att visa felmeddelanden
-  const [loading, setLoading] = useState(false); // För att visa laddningsindikator
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Förhindra standardbeteende för formuläret
-    setError(""); // Rensa tidigare fel
-    setLoading(true); // Sätt laddning till true
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
-      const token = await loginAPI(username, password);
-      // Om inloggning lyckas:
-      localStorage.setItem("jwtToken", token); // Spara token i localStorage
-      onLoginSuccess(); // Anropa callback för att t.ex. visa Game-komponenten
-    } catch (err) {
-      // Om inloggning misslyckas:
-      setError(err.message || "An error occurred during login.");
-    } finally {
-      setLoading(false); // Sätt laddning till false
-    }
-  };
-
+    // Använd den separat definierade funktionen
+    const token = await loginAPI(username, password);
+    localStorage.setItem("jwtToken", token); // Spara token
+    onLoginSuccess(); // Uppdatera App-komponentens tillstånd
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="login-form-container">
       <form className="login-form" onSubmit={handleSubmit}>
@@ -248,7 +254,7 @@ function LoginForm({ onLoginSuccess }) { // Ta emot en callback-funktion
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            disabled={loading} // Inaktivera fält vid laddning
+            disabled={loading}
           />
         </div>
         <div className="form-group">
@@ -259,16 +265,22 @@ function LoginForm({ onLoginSuccess }) { // Ta emot en callback-funktion
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            disabled={loading} // Inaktivera fält vid laddning
+            disabled={loading}
           />
         </div>
         <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"} {/* Visa olika text beroende på laddning */}
+          {loading ? "Logging in..." : "Login"}
         </button>
       </form>
+      {/* Lägg till knappen för att gå till registrering */}
+      <button onClick={onSwitchToRegister} className="switch-form-button">
+        Need an account? Register
+      </button>
     </div>
   );
 }
+
+
 
 ///////// Board och Square komponenter samt Gasme komponenten /////
 function Square({ value, onSquareClick, winningLine, index }) {
