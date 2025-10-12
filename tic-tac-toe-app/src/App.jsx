@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 
+
+
 function RegisterForm({ onRegister }) { // Ta emot onRegister som en prop
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -10,15 +12,37 @@ function RegisterForm({ onRegister }) { // Ta emot onRegister som en prop
   const [successMessage, setSuccessMessage] = useState(""); // State för lyckomeddelande
   const [loading, setLoading] = useState(false); // State för laddning
 
+  // Funktion för att rensa fel när lösenord ändras
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    if (error === "Passwords do not match.") { // Rensa fel om det gäller lösenordsmatchning
+      setError("");
+    }
+    if (successMessage) { // Rensa lyckomeddelande om användaren börjar ändra efter lyckad registrering
+      setSuccessMessage("");
+    }
+  };
+
+  const handleConfirmPasswordChange = (e) => {
+    setConfirmPassword(e.target.value);
+    if (error === "Passwords do not match.") { // Rensa fel om det gäller lösenordsmatchning
+      setError("");
+    }
+    if (successMessage) { // Rensa lyckomeddelande om användaren börjar ändra efter lyckad registrering
+      setSuccessMessage("");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      // Välj att inte rensa fälten här, utan låt användaren se och korrigera
       return;
     }
 
-    setError(""); // Rensa tidigare fel
+    setError(""); // Rensa tidigare fel (t.ex. matchningsfel)
     setSuccessMessage(""); // Rensa tidigare lyckomeddelande
     setLoading(true);
 
@@ -30,18 +54,16 @@ function RegisterForm({ onRegister }) { // Ta emot onRegister som en prop
         },
         body: JSON.stringify({
           username: username,
-          password: password,
+          password: password, // Skicka det första lösenordet
         }),
       });
 
       if (!response.ok) {
-        // Hantera fel från servern
         let errorDetail = "Registration failed";
         try {
           const errorData = await response.json();
           errorDetail = errorData.detail || errorDetail;
         } catch (jsonError) {
-          // Om svaret inte är JSON, använd statusText eller generisk text
           errorDetail = response.statusText || errorDetail;
           console.error(jsonError);
         }
@@ -60,13 +82,10 @@ function RegisterForm({ onRegister }) { // Ta emot onRegister som en prop
       setSuccessMessage("Registration successful! Please check your email to confirm your account.");
 
       // Anropa onRegister-prop med ett objekt som indikerar lyckad registrering
-      // och innehåller relevant data (t.ex. meddelandet)
-      onRegister({ success: true, message: data.msg, username: username }); // Du kan skicka användarnamn om det är relevant
+      onRegister({ success: true, message: data.msg, username: username });
 
     } catch (err) {
       setError(err.message);
-      // Du kan också skicka felinformation till App om du vill hantera det där
-      // onRegister({ success: false, error: err.message });
     } finally {
       setLoading(false);
     }
@@ -79,12 +98,13 @@ function RegisterForm({ onRegister }) { // Ta emot onRegister som en prop
         {error && <div className="error-message">{error}</div>}
         {successMessage && <div className="success-message">{successMessage}</div>}
         <div className="form-group">
-          <label htmlFor="reg-username">Username:</label>
+          <label htmlFor="reg-username">E-mail:</label>
           <input
             type="text"
             id="reg-username"
+            name="username" // <-- Lägg till name-attribut
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)} // Rensar inte fel här
             required
             disabled={loading}
           />
@@ -94,8 +114,9 @@ function RegisterForm({ onRegister }) { // Ta emot onRegister som en prop
           <input
             type="password"
             id="reg-password"
+            name="password" // <-- Lägg till name-attribut
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handlePasswordChange} // <-- Använd den nya funktionen
             required
             disabled={loading}
           />
@@ -105,8 +126,9 @@ function RegisterForm({ onRegister }) { // Ta emot onRegister som en prop
           <input
             type="password"
             id="reg-confirm-password"
+            name="confirm-password" // <-- Lägg till name-attribut
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={handleConfirmPasswordChange} // <-- Använd den nya funktionen
             required
             disabled={loading}
           />
@@ -118,6 +140,8 @@ function RegisterForm({ onRegister }) { // Ta emot onRegister som en prop
     </div>
   );
 }
+
+// ... (resten av din App.jsx kod, som du uppdaterat tidigare)
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
