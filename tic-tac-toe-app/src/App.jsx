@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 
 
+function LogOutButton({ onLogout }) {
+  return (
+    <button className="logout-button" onClick={onLogout}>
+      Logout
+    </button>
+  );
+}
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -228,7 +235,7 @@ function ResetButton({ onReset }) {
 }
 
 //////////////////////////////////////////////////////////////
- function Game() {
+ function Game({ onLogout }) { // Ta emot onLogout prop om du vill använda den
   const [history, setHistory] = useState([]);
   const [currentMove, setCurrentMove] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -377,6 +384,10 @@ function resetGame() {
 
   return (
     <div className="game">
+      <div className="logout-button-container">
+        <LogOutButton onLogout={onLogout} />
+        <button classeName="logout-button" onClick={onLogout}>Logout</button>
+      </div>
       <div className="reset-button-container">
         <ResetButton onReset={resetGame} />
       </div>
