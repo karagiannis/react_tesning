@@ -273,9 +273,11 @@ function LoginForm({ onLoginSuccess, onSwitchToRegister }) { // Ta emot onSwitch
         </button>
       </form>
       {/* Lägg till knappen för att gå till registrering */}
-      <button onClick={onSwitchToRegister} className="switch-form-button">
-        Need an account? Register
-      </button>
+        <div className="switch-form-container">
+          <button onClick={onSwitchToRegister} className="switch-form-button">
+          Need an account? Register
+          </button>
+        </div>
     </div>
   );
 }

@@ -143,6 +143,57 @@ body {
   font-size: 0.875rem;
 }
 
+/* src/index.css */
+
+/* --- Basstilar för hela sidan --- */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f0f2f5; /* Ljusgrå bakgrund */
+}
+
+/* --- Stilar för inloggnings och registerformulär --- */
+
+/* Container för både login och register formulär */
+.login-form-container,
+.register-form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Centrerar vertikalt om det finns utrymme */
+  min-height: 100vh; /* Fyller hela skärmens höjd */
+  padding: 2rem;
+  box-sizing: border-box;
+  position: relative; /* Viktigt för att absolutpositionera knappen */
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px; /* Maxbredd för formuläret */
+  margin: 0 auto; /* Centrerar formuläret horisontellt */
+}
+
+/* Stil för själva formuläret */
+.login-form,
+.register-form {
+  width: 100%;
+  padding: 0; /* Inre marginaler hanteras av containern */
+  margin: 0; /* Yttre marginaler hanteras av containern */
+}
+
+/* Rubrik i formulären */
+.login-form h2,
+.register-form h2 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #333;
+}
+
+/* Grupp av label + input */
 .form-group {
   margin-bottom: 1rem;
 }
@@ -169,7 +220,9 @@ body {
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* Ljusblå gloria vid fokus */
 }
 
-.login-form button {
+/* Knappar i formulären */
+.login-form button,
+.register-form button {
   width: 100%;
   padding: 0.75rem;
   background-color: #007bff; /* Blå knapp */
@@ -181,20 +234,78 @@ body {
   transition: background-color 0.2s; /* Mjuk övergång för bakgrundsfärg */
 }
 
-.login-form button:hover:not(:disabled) {
+.login-form button:hover:not(:disabled),
+.register-form button:hover:not(:disabled) {
   background-color: #0056b3; /* Mörkare blå vid hover */
 }
 
-.login-form button:disabled {
+.login-form button:disabled,
+.register-form button:disabled {
   background-color: #cccccc; /* Grå knapp vid laddning */
   cursor: not-allowed; /* Visa att knappen inte kan klickas */
 }
+
+/* --- Stilar för "Switch Form" knappen --- */
+
+/* Container för knappen (endast för login-form-container) */
+.login-form-container .switch-form-container {
+  position: absolute; /* Placera den absolut inom containern */
+  top: 10px;          /* 10px från toppen */
+  right: 10px;        /* 10px från högerkanten */
+  /* Ingen marginal behövs längre */
+}
+
+/* Stil för själva "Register"-knappen */
+.switch-form-button {
+  padding: 5px 10px;      /* Liten padding */
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-decoration: none;  /* Ta bort understrykning om det är en <a> */
+}
+
+.switch-form-button:hover {
+  background-color: #e0e0e0;
+}
+
+/* --- Stilar för felmeddelanden --- */
+.error-message {
+  color: #e53e3e; /* Röd färg för fel */
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+/* --- Stilar för lyckosmeddelanden --- */
+.success-message {
+  color: #28a745; /* Grön färg för lyckomeddelande */
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+/* --- Stilar för Appens lyckosmeddelande --- */
+.app-success-message {
+  color: #28a745; /* Grön färg */
+  margin: 1rem 0; /* Marginal ovanför och under */
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+
+
+
 .logout-button-container {
   display: flex;
   justify-content: center;
   width: 100%;
   margin: 10px 0;
 }
+
+
 .logout-button {
   padding: 10px 20px;
   background-color: #ff4d4d; /* Röd bakgrund för logout */
@@ -213,6 +324,9 @@ body {
   cursor: not-allowed; /* Visa att knappen inte kan klickas */
 }
 
+
+
+/* Stilar från React boiler plate  */
 #root {
   max-width: 1280px;
   margin: 0 auto;
