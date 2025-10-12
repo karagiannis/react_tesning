@@ -36,6 +36,22 @@ function RegisterForm({ onRegister }) { // Ta emot onRegister som en prop
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // --- NY VALIDERING ---
+    // 1. Validera e-postadressformat
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(username)) {
+      setError("Please enter a valid email address.");
+      return; // Avbryt hanteringen om e-post inte är giltig
+    }
+
+    // 2. Validera lösenordslängd
+    const minPasswordLength = 6; // Du kan ändra detta till önskad längd
+    if (password.length < minPasswordLength) {
+      setError(`Password must be at least ${minPasswordLength} characters long.`);
+      return; // Avbryt hanteringen om lösenordet är för kort
+    }
+    // --- SLUT NY VALIDERING ---
+
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       // Välj att inte rensa fälten här, utan låt användaren se och korrigera
