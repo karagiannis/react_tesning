@@ -128,6 +128,7 @@ export default function App() {
   useEffect(() => {
     const token = localStorage.getItem('jwtToken');
     if (token) {
+      //Här kan du också verifiera token med servern om du vill
       setIsLoggedIn(true);
     }
   }, []);
