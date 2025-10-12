@@ -1,16 +1,109 @@
 import { useState, useEffect } from "react";
 
 
-function LogOutButton({ onLogout }) {
+
+function RegisterForm({ onRegister }) { // Ta emot onRegister som en prop
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // Lägg till state för bekräftelse
+  const [error, setError] = useState(""); // State för felmeddelanden
+  const [loading, setLoading] = useState(false); // State för laddning
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Förhindra standardbeteende för formuläret
+
+    // Enkel validering
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setError(""); // Rensa tidigare fel
+    setLoading(true); // Sätt laddning till true
+
+    try {
+      const response = await fetch('/tic-tac-toe-api/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: "Registration failed" }));
+        throw new Error(errorData.detail || "Registration failed");
+      }
+
+      const data = await response.json();
+      console.log(data.msg); // Logga svaret ("User registered successfully")
+
+      // Anropa onRegister-prop med användarnamn och lösenord
+      // (Du kan välja att inte skicka lösenordet, beroende på hur du hanterar nästa steg)
+      onRegister(username, password);
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false); // Sätt laddning till false
+    }
+  };
+
   return (
-    <button className="logout-button" onClick={onLogout}>
-      Logout
-    </button>
+    <div className="register-form-container">
+      <form className="register-form" onSubmit={handleSubmit}> {/* Använd onSubmit på formuläret */}
+        <h2>Register</h2>
+        {error && <div className="error-message">{error}</div>}
+        <div className="form-group">
+          <label htmlFor="reg-username">e-mail:</label>
+          <input
+            type="text"
+            id="reg-username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            disabled={loading} // Inaktivera vid laddning
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="reg-password">Password:</label>
+          <input
+            type="password"
+            id="reg-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            disabled={loading} // Inaktivera vid laddning
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="reg-confirm-password">Confirm Password:</label>
+          <input
+            type="password"
+            id="reg-confirm-password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            disabled={loading} // Inaktivera vid laddning
+          />
+        </div>
+        <button type="submit" disabled={loading}>
+          {loading ? "Registering..." : "Register"} {/* Visa olika text beroende på laddning */}
+        </button>
+      </form>
+    </div>
   );
 }
 
+
+
+
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  //const [showLogin, setShowLogin] = useState(true); // Tillstånd för att visa login eller register
 
   // Kolla om token finns i localStorage vid start
   useEffect(() => {
@@ -30,13 +123,42 @@ export default function App() {
     setIsLoggedIn(false); // Uppdatera tillståndet
   };
 
+  // Uppdaterad handleRegister-funktion
+  const handleRegister = () => {
+    // Efter lyckad registrering via API, sätt isLoggedIn till true
+    // Detta kommer att trigga render av Game-komponenten
+    // Du kan också välja att återgå till LoginForm här istället
+    // genom att sätta setShowLogin(true) och låta användaren logga in manuellt.
+    // För nu, vi loggar in direkt efter registrering.
+    handleLoginSuccess(); // Detta sätter isLoggedIn till true
+    // Alternativt, om du vill visa LoginForm igen:
+     setShowLogin(true);
+  };
+
   if (isLoggedIn) {
     return <Game onLogout={handleLogout} />; // Skicka med logout-funktion om du vill ha det
   } else {
-    return <LoginForm onLoginSuccess={handleLoginSuccess} />;
+    // Visa BÅDE LoginForm och RegisterForm när användaren inte är inloggad
+    return (
+      <div>
+        <h2>Login</h2>
+        <LoginForm onLoginSuccess={handleLoginSuccess} />
+        <h2>Register</h2>
+        <RegisterForm onRegister={handleRegister} />
+      </div>
+    );
   }
 }
 
+
+
+function LogOutButton({ onLogout }) {
+  return (
+    <button className="logout-button" onClick={onLogout}>
+      Logout
+    </button>
+  );
+}
 
 // Anta att du har en funktion för att logga in mot din API
 // Du kan importera den från en annan fil eller definiera den här
