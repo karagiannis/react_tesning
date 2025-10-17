@@ -1,0 +1,28 @@
+\frametitle{Bekräftelse och leverans av material}
+
+  \begin{block}{Ange e-postadress för kopia av dokument}
+    \vspace{0.2cm}
+    \textit{För din dokumentation skickas en kopia av alla relevanta filer till den e-postadress du anger nedan.}
+    \vspace{0.4cm}
+
+    % Fältet motsvarar en e-postinput i appens gränssnitt
+    \textbf{E-postadress:} \underline{\hspace{6cm}}
+    \vspace{0.5cm}
+
+    \begin{itemize}
+      \item Avtal (PDF med BankID-signatur)
+      \item Riskanalys och grafisk rapport (PDF)
+      \item Sammanställning av dina svar
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.5cm}
+  \begin{center}
+    \beamerbutton{Skicka material till min e-post}
+  \end{center}
+
+  \vspace{0.6cm}
+  \small
+  \textit{När du bekräftar skickas all information krypterat via säker anslutning.
+  Du får även ett meddelande som bekräftar att signeringen slutförts.}
+
