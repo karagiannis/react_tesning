@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 *.txt
 kommandon-personliga.txt
+*.toc
+*.vrb
+*.log
+*.aux
+*.nav

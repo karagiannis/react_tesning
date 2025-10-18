@@ -1,0 +1,861 @@
+\documentclass[10pt]{beamer}
+
+% Språk och tecken
+\usepackage[swedish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{comment}
+
+% Typsnitt – sans-serif för ren presentation
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+% Tema: Använd default (enklare att anpassa färger)
+\usetheme{default}
+\usefonttheme{structurebold}
+
+% Varm färgpalett – beige, terracotta, mörkbrun
+\definecolor{warmbeige}{RGB}{245, 240, 230}     % Ljus bakgrund
+\definecolor{warmbrown}{RGB}{101, 73, 50}        % Mörk text & accent
+\definecolor{terracotta}{RGB}{204, 102, 85}      % För knappar / viktig info
+\definecolor{olive}{RGB}{120, 110, 90}           % Sekundär accent
+
+% Bakgrund och text
+\setbeamercolor{background canvas}{bg=warmbeige}
+\setbeamercolor{normal text}{fg=warmbrown}
+\setbeamercolor{structure}{fg=warmbrown}
+
+% Titel och frame-titel
+\setbeamercolor{title}{fg=white, bg=warmbrown}
+\setbeamercolor{frametitle}{fg=white, bg=warmbrown}
+
+% Knappar och länkar
+\setbeamercolor{button}{bg=terracotta, fg=white}
+\setbeamercolor{button border}{use=button, fg=button.bg}
+
+% Block (t.ex. exempel, varningar)
+\setbeamercolor{block title}{fg=white, bg=olive}
+\setbeamercolor{block body}{bg=warmbeige!70!white}
+
+% Stil för knappar
+\setbeamertemplate{buttons}[rounded]
+
+% Typsnittsstorlek
+\setbeamerfont{frametitle}{size=\Large}
+\setbeamerfont{title}{size=\LARGE}
+
+% Titel
+\title[Kundonboarding]{Kundonboarding: Accept eller Reject}
+\author[Celestial AB]{Celestial AB}
+\institute{Risk \& Compliance}
+\date{\today}
+
+% Snygga länkar utan röda ramar
+\hypersetup{
+  colorlinks=true,
+  linkcolor=terracotta,
+  urlcolor=terracotta
+}
+
+\begin{document}
+
+
+% Hero-sektionen (förbättrad, mer lättläst och säljande)
+\begin{frame}[plain]
+  % Knappar uppe till höger
+  \begin{flushright}
+    \vspace{-0.8cm}
+    \hyperlink{login}{\beamerbutton{Logga in}} \hspace{0.3cm}
+    \hyperlink{register}{\beamerbutton{Registrera}}
+  \end{flushright}
+
+  \vspace{1.2cm}
+  \centering
+  {\usebeamerfont{title}\color{warmbrown}\textbf{Onboardingstöd för redovisnings- och revisionsbyråer}}
+
+  \vspace{0.8cm}
+
+  % Kort introduktion / värde
+  \begin{block}{Snabb översikt}
+    Automatisera riskbedömningen och säkerställ att onboarding av nya klienter sker enligt penningtvättslagen och tillsynsmyndighetens riktlinjer.
+  \end{block}
+
+  \vspace{0.5cm}
+
+  % AI och automatisering
+  \begin{block}{AI-stöd och kontroll}
+    Vår AI-baserade programvara samlar automatiskt all nödvändig information, kontrollerar klienten mot penningtvättsregister och företagsbankkonton för att upptäcka \textit{layering}, och hjälper dig att skriva och signera avtal med BankID.
+  \end{block}
+
+  \vspace{0.5cm}
+
+  % Compliance och lag
+  \begin{block}{Compliance och lagkrav}
+    Följ vår mall så sker onboardingprocessen enligt \textit{Länsstyrelsen Stockholms författningssamling 01FS 2024–20}.
+  \end{block}
+
+  \vspace{0.5cm}
+
+  % Funktioner (kortare, visuellt uppdelat)
+  \begin{block}{Vad du får hjälp med}
+    \begin{columns}[T]
+      \begin{column}{0.48\textwidth}
+        \textbullet\ Ägarstruktur \\
+        \textbullet\ Alternativ verklig huvudman \\
+        \textbullet\ Bankkonton \\
+        \textbullet\ Finansiell information \\
+        \textbullet\ Folkbokföringsregistret \\
+        \textbullet\ Företagsdokument
+      \end{column}
+      \begin{column}{0.48\textwidth}
+        \textbullet\ Aktiefakta \\
+        \textbullet\ Arbetsställen \\
+        \textbullet\ Fastighetsinformation \\
+        \textbullet\ Firmatecknare \\
+        \textbullet\ Företagsärenden \\
+        \textbullet\ Koncernträd
+      \end{column}
+    \end{columns}
+  \end{block}
+
+  \vspace{0.5cm}
+
+  % CTA
+  \beamerbutton{Börja onboarding nu} \hspace{0.5cm} \beamerbutton{Se demo}
+\end{frame}
+
+% Herosektion fortsättning – mer lättläst
+\begin{frame}[plain]
+  \frametitle{Onboardingstöd – fortsättning}
+  \footnotesize
+  \begin{minipage}{0.92\textwidth}
+    \textbf{Få full kontroll över klienten med våra automatiserade kontroller:}
+    \medskip
+    \begin{columns}[T]
+      \begin{column}{0.48\textwidth}
+        \textbullet\ Kreditbeslut \\
+        \textbullet\ Penningtvättsregistret \\
+        \textbullet\ Rating av företag \\
+        \textbullet\ Sanktionslistor \\
+        \textbullet\ Styrelseuppdrag \\
+        \textbullet\ Verksamhetsbeskrivning
+      \end{column}
+      \begin{column}{0.48\textwidth}
+        \textbullet\ Näringsförbud \\
+        \textbullet\ PEP \\
+        \textbullet\ Riskindikatorer \\
+        \textbullet\ Styrelsemedlemmar \\
+        \textbullet\ Verklig huvudman
+      \end{column}
+    \end{columns}
+  \end{minipage}
+\end{frame}
+
+%Registreringssidan
+
+\begin{frame}[label=register]
+  \frametitle{Skapa konto}
+
+  \vspace{0.5cm}
+  \begin{minipage}{0.9\textwidth}
+    \small
+    \textbf{E-post:} \underline{\hspace{6.5cm}} \\
+    \textbf{Lösenord:} \underline{\hspace{6.5cm}} \\
+    \footnotesize\textit{(Minst 12 tecken, en siffra, en versal)} \\
+    \textbf{Bekräfta lösenord:} \underline{\hspace{6.5cm}} \\
+
+    \vspace{0.8cm}
+    $\Box$ Jag bekräftar att jag är en människa (inte en bot).
+    \footnotesize
+    \textit{(Vi använder automatiska skydd, t.ex. Cloudflare, för att förhindra missbruk och spam.)}
+
+    \vspace{1.2cm}
+    \centering
+    \beamerbutton{Skapa konto}
+    
+    \vspace{1.2cm}
+    \textcolor{warmbrown}{\textbf{eller}}
+    
+    \vspace{0.6cm}
+    \colorbox{white}{%
+      \parbox{5cm}{\centering\footnotesize\textbf{Logga in med Google}}%
+    }
+  \end{minipage}
+  
+  \vspace{0.8cm}
+  \begin{center}
+    \footnotesize
+    Har du redan konto? \hyperlink{login}{\beamergotobutton{Logga in}}
+  \end{center}
+\end{frame}
+
+%Sidan som simulerar registreringskoder erhållna via e-post
+\begin{frame}[label=verify]
+  \frametitle{Verifiera din registrering}
+
+  \vspace{0.5cm}
+  \begin{minipage}{0.9\textwidth}
+    \small
+    \textbf{Ange den registreringskod du fått via e-post eller sms:} \underline{\hspace{5cm}} \\
+
+    \vspace{0.8cm}
+    \begin{block}{Info}
+      Av säkerhetsskäl och på grund av problem med e-postlänkar (t.ex. Sendgrid) används nu registreringskoder istället för klickbara länkar.
+    \end{block}
+
+    \vspace{1.2cm}
+    \centering
+    \beamerbutton{Verifiera kod}
+    
+    \vspace{1.2cm}
+    \textcolor{warmbrown}{\textbf{eller}}
+    
+    \vspace{0.6cm}
+    \colorbox{white}{%
+      \parbox{5cm}{\centering\footnotesize\textbf{Skicka ny kod}}%
+    }
+  \end{minipage}
+\end{frame}
+
+%Login sidan
+
+\begin{frame}[label=login]
+  \frametitle{Logga in}
+
+  \vspace{0.5cm}
+  \begin{minipage}{0.9\textwidth}
+    \small
+    \textbf{E-post:} \underline{\hspace{6.5cm}} \\
+    \textbf{Lösenord:} \underline{\hspace{6.5cm}} \\
+
+    \vspace{0.8cm}
+    \centering
+    \beamerbutton{Logga in}
+
+    \vspace{1.2cm}
+    \textcolor{warmbrown}{\textbf{eller}}
+
+    \vspace{0.6cm}
+    \colorbox{white}{%
+      \parbox{5cm}{\centering\footnotesize\textbf{Logga in med Google}}%
+    }
+  \end{minipage}
+
+  \vspace{0.8cm}
+  \begin{center}
+    \footnotesize
+    Har du inget konto? \hyperlink{register}{\beamergotobutton{Registrera}}
+  \end{center}
+\end{frame}
+
+% --- Kommentar: Inloggad vy med vänster sidebar och ikoner ---
+% När användaren är inloggad visas följande layout:
+%
+% 1. Vänster sidebar
+%    - Expanderbar
+%    - Mini-thumbnails över slidsen / steg i onboarding
+%    - Menylista med kugghjul för inställningar
+%
+% 2. Ikoner uppe i vänster sidebar eller över content-ytan
+%    - LLM: Klick på denna fäller ut en chattpanel till höger.
+%           LLM får via ett JSON-paket all data som appen hittills hämtat
+%           för att kunna svara på frågor efter bästa förmåga.
+%
+%    - Dokumentation: Klick fäller ut dokumentationspanel där användaren
+%           ser hur programmet används och vilka tester som körs.
+%
+%    - Support: Klick fäller ut en supportpanel med möjlighet till
+%           chatt och delning av skärm (likt Fortnox). 
+%           Knappen i den utfällda menyn heter "Supportinloggning".
+%           Symbol: ring med frågetecken.
+%
+% 3. Content-ytan
+%    - Visar huvudfunktioner, formulär och PDF/graph-visualisering
+%    - Eventuellt LLM / supportpanel fälls ut till höger, påverkar
+%      content-bredd dynamiskt.
+%
+% Kommentar: Denna design följer principen om modulär sidebar och
+% dynamiska paneler, vilket möjliggör både onboarding och interaktiv
+% assistans utan att navigera bort från huvudytan.
+
+% Slide 1: Inledning och bakgrund
+\begin{frame}[label=intro]
+  \frametitle{Inledning och bakgrund}
+
+  \small
+  Denna onboarding säkerställer att byrån uppfyller penningtvättslagstiftningens krav vid antagandet av nya kunder. Processen efterlever tillsynsmyndighetens krav där verksamhetsutövaren (byrån) är skyldig att redovisa hur man säkerställt att byrån inte gör sig skyldig till penningtvätt.\\
+  Länsstyrelserna, som ansvarar för tillsynen, har skärpt kraven på redovisningsbyråer och utfärdar sanktionsavgifter på hundratusentals kronor vid bristande efterlevnad.\\
+  Det är dessa myndighetskrav som tvingar oss att ställa specifika frågor och att spara dokumentationen i minst fem år.\\
+  Processen är därmed en följd av myndighetskrav och syftar till att förebygga penningtvätt och ekonomisk brottslighet.
+
+  \vspace{1.2cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+%Slide 2: Uppdragets syfte och art:
+\begin{frame}[label=uppdrag]
+  \frametitle{Uppdragets syfte och art}
+
+  \small
+  Vad exakt är det kunden vill ha hjälp med?
+
+  \vspace{0.5cm}
+  \textbf{Typ av uppdrag:}
+  \begin{itemize}
+    \item[$\Box$] Bokföring
+    \item[$\Box$] Lönehantering
+    \item[$\Box$] Rådgivning
+    \item[$\Box$] Deklaration
+    \item[$\Box$] Annat
+  \end{itemize}
+
+  \vspace{0.3cm}
+  \textbf{Frekvens:}
+  \begin{itemize}
+    \item[$\Box$] Löpande
+    \item[$\Box$] Engångsuppdrag
+    \item[$\Box$] Periodiskt
+  \end{itemize}
+
+  \vspace{0.3cm}
+  \textbf{Eventuella särskilda omständigheter:}
+  \begin{block}{Textfält}
+    \underline{\hspace{10cm}}
+  \end{block}
+
+  \vspace{1cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+
+% Slide 3: Kundens verksamhetsart
+\begin{frame}[label=verksamhet]
+  \frametitle{Kundens verksamhetsart}
+
+  \small
+  Penningtvättslagen (PTL) kräver att redovisningsbyråer fastställer varje kunds riskprofil.\\
+  Tillsynsmyndigheten Länsstyrelsen Stockholm ställer tydliga krav på att byrån ska kunna visa att man förstått kundens affärsidé, verksamhetshistorik samt kund- och leverantörsstruktur.\\
+  Det är viktigt att kunna bevisa detta vid en eventuell granskning. Om byrån inte kan styrka att man tydligt övertygat sig om att kundens affärer är rena, kan stora sanktionsavgifter tillfogas – även om kunden själv är helt felfri. Detta kallas "klandervärt risktagande" och innebär ansvar för byrån utan att brottspengar behöver vara inblandade.\\
+  Se gärna mer information och exempel på faktiska sanktionsbeslut hos 
+  \href{https://www.lansstyrelsen.se/stockholm/samhalle/betalning-ekonomi-och-pengar/forhindra-penningtvatt-och-finansiering-av-terrorism/ingripanden-och-sanktioner-penningtvatt.html}{Länsstyrelsen Stockholm}.
+
+  \vspace{1cm}
+  \begin{block}{Syfte}
+    Vi ställer dessa frågor för att följa lagkrav och skydda både dig och byrån – inte av nyfikenhet.
+  \end{block}
+
+  \vspace{0.8cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Slide 4: Frågor som stödjer riskbedömning
+\begin{frame}[label=riskfragor]
+  \frametitle{Frågor som stödjer riskbedömning}
+
+  \small
+  Flera av dessa frågor har lagstöd och hjälper oss att bedöma risken:
+  \begin{itemize}
+    \item Vad är företagets huvudsakliga affärsidé?
+    \item Vilka typer av kunder har företaget? (Privatpersoner / Företag / Offentlig sektor)
+    \item Har företaget återkommande utländska affärspartners?
+    \item Vilka är de största leverantörerna, och var är de etablerade?
+    \item Har verksamheten ändrats på senare tid?
+    \item Är du eller någon i företaget en PEP (person i politiskt utsatt ställning)?
+  \end{itemize}
+
+  \vspace{0.5cm}
+  	\textbf{Organisationsnummer:} \underline{\hspace{5cm}}
+  \footnotesize
+  \begin{block}{Info}
+    Organisationsnumret används för att hämta officiell information från Bolagsverket eller Roaring.io.
+  \end{block}
+
+  \vspace{0.5cm}
+  	\textbf{Personnummer:} \underline{\hspace{5cm}}
+  \footnotesize
+  \begin{block}{Info}
+    Personnumret används för att hämta officiell information från Bolagsverket eller Roaring.io.
+  \end{block}
+
+  \vspace{0.8cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+% Slide 4.1: Identitetskontroll och dokumentation (obligatorisk)
+% Denna slide är alltid med och följer 3 kap. 2 och 4 §§.
+\begin{frame}[label=identitetskontroll]
+  \frametitle{Identitetskontroll och dokumentation}
+
+  \small
+  För att uppfylla penningtvättslagens krav måste identiteten kontrolleras och dokumenteras enligt följande:
+  \begin{itemize}
+    \item \textbf{Fysisk person:} Pass, körkort eller annan identitetshandling med foto utfärdad av myndighet, tillförlitlig elektronisk legitimation, eller dokument/uppgifter från oberoende och tillförlitliga källor.
+    \item \textbf{Juridisk person:} Registreringsbevis eller motsvarande utdrag (ej äldre än en vecka), samt uppgifter om företrädare.
+    \item \textbf{Ombud/företrädare:} Fullmakt eller motsvarande behörighetshandling.
+  \end{itemize}
+
+  \vspace{0.5cm}
+  \textbf{Dokumentation:}
+  \begin{itemize}
+    \item Anteckna identitetshandlingens nummer och giltighetstid eller bevara kopia.
+    \item Bevara kopia av elektronisk legitimation eller andra dokument som legat till grund för kontrollen.
+    \item Kopia av registreringsbevis, fullmakt och andra relevanta handlingar ska sparas.
+    \item All dokumentation ska sparas minst fem år och vara sökbar.
+  \end{itemize}
+
+  \vspace{0.8cm}
+  \begin{minipage}{0.45\textwidth}
+    \begin{flushleft}
+      % Simulerad knapp för att ta foto med webbkamera
+      \beamerbutton{Ta foto med webbkamera}
+      \footnotesize
+      	\textit{(Personen håller upp sitt ID/körkort)}
+    \end{flushleft}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.45\textwidth}
+    \begin{flushright}
+      \hyperlink{nextslide}{\beamerbutton{Nästa}}
+    \end{flushright}
+  \end{minipage}
+\end{frame}
+
+% Slide 4.2: Identitetskontroll – sammanfattande tabell
+% Tabell enligt Länsstyrelsen Stockholms författningssamling 01FS 2024:20 och penningtvättslagen (2017:630)
+\begin{frame}[label=kontrolltabell]
+  \frametitle{Identitetskontroll – sammanfattande tabell}
+  \footnotesize
+  \textit{Tabellen nedan sammanfattar kraven enligt Länsstyrelsen Stockholms författningssamling 01FS 2024:20 och lagen (2017:630) om åtgärder mot penningtvätt och finansiering av terrorism.}
+  \vspace{0.3cm}
+  \begin{tabular}{|p{2.8cm}|p{5.2cm}|p{5.2cm}|}
+    \hline
+    \textbf{Vem kontrolleras} & \textbf{Vad kontrolleras} & \textbf{Dokumentation av kontrollen} \\
+    \hline
+    Fysisk person & 
+    1. Pass, körkort eller annan identitetshandling med foto utfärdad av myndighet eller tillförlitlig utfärdare.\\
+    2. Tillförlitlig elektronisk legitimation.\\
+    3. Andra dokument/uppgifter från oberoende och tillförlitliga källor. Vid svårigheter, använd flera källor. &
+    1. Anteckna identitetshandlingens nummer och giltighetstid eller bevara kopia.\\
+    2. Bevara kopia av bekräftelsen på elektronisk legitimation.\\
+    3. Bevara kopia av dokument/uppgifter som legat till grund för kontrollen. \\
+    \hline
+    Fysisk person på distans &
+    1. Tillförlitlig elektronisk legitimation.\\
+    2. Namn, personnummer/samordningsnummer och adress mot externa register/intyg/oberoende källor, samt\\
+    a) Skicka bekräftelse till folkbokföringsadress, eller\\
+    b) Inhämta vidimerad kopia av identitetshandling. &
+    1. Bevara kopia av bekräftelsen på elektronisk legitimation.\\
+    2. Bevara kopia av dokument/uppgifter som legat till grund för kontrollen samt kopia av bekräftelsebrev eller vidimerad kopia. \\
+    \hline
+    Företrädare, ombud eller motsvarande &
+    1. Se identitetskontroll för fysisk person eller fysisk person på distans.\\
+    2. Fullmakt, förordnande eller motsvarande behörighetshandling. &
+    1. Se dokumentationskrav för fysisk person eller fysisk person på distans.\\
+    2. Bevara kopia av fullmakt, förordnande eller motsvarande behörighetshandling. \\
+    \hline
+    Juridisk person &
+    Registreringsbevis, registerutdrag eller uppgifter från andra tillförlitliga och oberoende källor. &
+    Bevara kopia av de kontrollerade handlingarna. \\
+    \hline
+    Verklig huvudman &
+    Se identitetskontroll för fysisk person eller fysisk person på distans. &
+    Se dokumentationskrav för fysisk person eller fysisk person på distans. \\
+    \hline
+  \end{tabular}
+  \vspace{0.3cm}
+  \footnotesize
+  \textit{Se även:}
+  \begin{itemize}
+    \item Länsstyrelsen Stockholms författningssamling 01FS 2024:20, 3 kap. 4 § och tabell 1
+    \item Lagen (2017:630) om åtgärder mot penningtvätt och finansiering av terrorism
+  \end{itemize}
+\end{frame}
+
+
+
+  % Slide 4.3: Skärpt kundkännedom vid PEP
+  % OBS! Denna slide visas dynamiskt om kunden eller någon i företaget är PEP.
+  \begin{frame}[label=pepfordjupning]
+    \frametitle{Skärpt kundkännedom – PEP}
+
+    \small
+    Eftersom du eller någon i företaget är en PEP (person i politiskt utsatt ställning) krävs fördjupad kontroll enligt penningtvättslagen. Vänligen besvara följande frågor:
+    \begin{itemize}
+      \item Vad är ursprunget till de medel som ska användas i affärsförbindelsen?
+      \item Beskriv affärsverksamhetens syfte och art.
+      \item Vilka ekonomiska medel och resurser har företaget tillgång till?
+      \item Finns det ytterligare dokumentation som styrker medlens ursprung?
+      \item Har du eller någon i företaget affärsrelationer med högriskländer?
+      \item Finns det andra omständigheter som kan påverka riskbedömningen?
+    \end{itemize}
+
+    \vspace{0.8cm}
+    \begin{flushright}
+      \hyperlink{nextslide}{\beamerbutton{Nästa}}
+    \end{flushright}
+  \end{frame}
+
+% Slides 5 till 9: Jämförelse mot Bolagsverket/Roaring.io
+
+% Slide 5: Verksamhetsbeskrivning & verksamhetskoder
+\begin{frame}[label=verksamhetskod]
+  \frametitle{Verksamhetsbeskrivning och SNI-koder}
+  \small
+  \textbf{Beskrivning:} \underline{\hspace{8cm}} \\
+  \textbf{Bransch/SNI-kod:} \underline{\hspace{8cm}} \\
+  \textbf{Sekundära namn:} \underline{\hspace{8cm}} \\
+  \vspace{0.5cm}
+  \begin{block}{Jämförelse}
+    Om beskrivningen eller bransch inte stämmer med kundens uppgifter, diskutera och dokumentera avvikelsen.
+  \end{block}
+  \vspace{0.8cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Slide 6: Ägarstruktur & verklig huvudman
+\begin{frame}[label=agarstruktur]
+  \frametitle{Ägarstruktur och verklig huvudman}
+  \small
+  \textbf{Ägare:} \underline{\hspace{8cm}} \\
+  \textbf{Verklig huvudman:} \underline{\hspace{8cm}} \\
+  \textbf{Alternativa huvudmän:} \underline{\hspace{8cm}} \\
+  \textbf{Ägarandelar:} \underline{\hspace{8cm}} \\
+  \vspace{0.5cm}
+  \begin{block}{Jämförelse}
+    Om ägaruppgifter avviker från kundens svar, diskutera och dokumentera.
+  \end{block}
+  \vspace{0.8cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Slide 7: Styrelsemedlemmar & firmatecknare
+\begin{frame}[label=styrelse]
+  \frametitle{Styrelsemedlemmar och firmatecknare}
+  \small
+  \textbf{Styrelse:} \underline{\hspace{8cm}} \\
+  \textbf{VD:} \underline{\hspace{8cm}} \\
+  \textbf{Firmatecknare:} \underline{\hspace{8cm}} \\
+  \textbf{Signaturrätt:} \underline{\hspace{8cm}} \\
+  \textbf{Historik:} \underline{\hspace{8cm}} \\
+  \vspace{0.5cm}
+  \begin{block}{Jämförelse}
+    Om styrelseuppgifter avviker från kundens svar, diskutera och dokumentera.
+  \end{block}
+  \vspace{0.8cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Slide 8: Riskindikatorer & sanktionslistor
+\begin{frame}[label=riskindikator]
+  \frametitle{Riskindikatorer och sanktionslistor}
+  \small
+  \textbf{Riskpoäng:} \underline{\hspace{8cm}} \\
+  \textbf{Larm:} \underline{\hspace{8cm}} \\
+  \textbf{Sanktionslistor:} \underline{\hspace{8cm}} \\
+  \textbf{PEP:} \underline{\hspace{8cm}} \\
+  \vspace{0.5cm}
+  \begin{block}{Jämförelse}
+    Om riskindikatorer eller sanktionslistor avviker från kundens svar, diskutera och dokumentera.
+  \end{block}
+  \vspace{0.8cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Slide 9: Övriga datapunkter
+\begin{frame}[label=ovrigt]
+  \frametitle{Övriga datapunkter}
+  \small
+  \textbf{Fastigheter:} \underline{\hspace{8cm}} \\
+  \textbf{Engagemang:} \underline{\hspace{8cm}} \\
+  \textbf{Rättsliga ärenden:} \underline{\hspace{8cm}} \\
+  \vspace{0.5cm}
+  \begin{block}{Jämförelse}
+    Om övriga datapunkter avviker från kundens svar, diskutera och dokumentera.
+  \end{block}
+  \vspace{0.8cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Slide 10: Ekonomisk rådgivning
+\begin{frame}[label=ekorad]
+  \frametitle{Ekonomisk rådgivning – likviditetsanalys}
+  \small
+  Vi erbjuder gratis ekonomisk rådgivning baserat på analys av företagets likviditet och transaktionshistorik.\
+  \vspace{0.5cm}
+  \textbf{IBAN:} \underline{\hspace{7cm}} \\
+  \textbf{Bank:} \underline{\hspace{7cm}} \\
+  \vspace{0.5cm}
+  \begin{block}{Likviditetsflöde}
+    \textit{Diagram över likviditet som funktion av datum presenteras här.}
+  \end{block}
+  \vspace{0.5cm}
+  \begin{block}{Info}
+    Rådgivningen baseras på insamlad bankdata och presenteras som en översikt över företagets likviditet.\
+    Samtycke krävs för att hämta bankdata via Open Banking.
+  \end{block}
+  \vspace{0.8cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Slide 11: Bokföringsdata och integration
+\begin{frame}[label=layering]
+  \frametitle{Bokföringsdata och integration}
+  \small
+  Ladda upp din SIE-fil för att få en djupare analys av företagets ekonomi.\
+  \vspace{0.5cm}
+  \textbf{Dropyta för SIE-fil:} \fbox{\rule{6cm}{0.7cm}} \\
+  \vspace{0.5cm}
+  \textbf{Integration mot bokföringsprogram:}
+  \begin{itemize}
+    \item \beamerbutton{Fortnox}
+    \item \beamerbutton{...}
+  \end{itemize}
+  \vspace{0.5cm}
+  \begin{block}{Info}
+    Endast bokföringsprogram med öppna API:er kan integreras automatiskt.\
+    %{Layering-analysen sker i bakgrunden och presenteras inte för kunden.}
+  \end{block}
+  \vspace{0.8cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Slide 12: Likviditetsgraf och rådgivning
+\begin{frame}[label=likviditetsgraf]
+  \frametitle{Likviditetsanalys – visualisering}
+  \small
+  Nedan visas en graf över företagets likviditet över tid. Byråchefen kan använda denna för att diskutera företagets ekonomiska situation och ge råd.\\
+  \vspace{0.5cm}
+  \textbf{Grafyta:} \fbox{\rule{10cm}{4cm}} \\
+  \vspace{0.5cm}
+  \begin{block}{Rådgivning}
+    Här kan byråchefen ge kommentarer kring likviditetsutvecklingen och föreslå åtgärder vid behov.
+  \end{block}
+  \vspace{0.8cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Slide 13: Riskbedömning och besked
+\begin{frame}[label=riskbesked]
+  \frametitle{Riskbedömning och besked}
+  \small
+  Efter analys av insamlad data görs en samlad riskbedömning.\\
+  \vspace{0.5cm}
+  \begin{block}{Besked}
+    \textbf{Resultat:} \underline{\hspace{6cm}} \\
+    %\textit{(Exempel: "Vi kan tyvärr inte gå vidare med samarbetet denna gång. Beslutet grundar sig på en samlad AI-baserad riskbedömning.")}
+  \end{block}
+  \vspace{0.5cm}
+  \begin{block}{Kommentar}
+    Vi använder AI-stöd för att göra en objektiv och transparent riskbedömning. Om du har frågor om beslutet är du välkommen att kontakta oss.
+  \end{block}
+  \vspace{0.8cm}
+  \begin{flushright}
+    \beamerbutton{Avsluta}\hspace{0.5cm}\beamerbutton{Nästa}
+  \end{flushright}
+\end{frame}
+
+% Slide 14: Kundens förväntade skyldigheter
+\begin{frame}
+  \frametitle{Kundens förväntade skyldigheter}
+  \small
+  Efter att kunden godkänts i riskbedömningen informeras om vilka skyldigheter som gäller under samarbetet:
+  \begin{itemize}
+    \item Lämna korrekta, fullständiga och aktuella uppgifter till byrån.
+    \item Inkomma med begärda underlag i tid.
+    \item Omgående rapportera förändringar i verksamheten eller annan relevant information.
+    \item Samarbeta vid frågor om kundkännedom och verksamhetens art.
+    \item Förstå och följa grundläggande redovisningsskyldigheter.
+    \item Vara medveten om att samarbetet kan avslutas vid avtalsbrott eller bristande efterlevnad.
+  \end{itemize}
+  \vspace{0.5cm}
+  \textit{Dessa skyldigheter regleras i uppdragsavtalet och enligt lag.}
+  \vspace{0.8cm}
+  \begin{flushright}
+    \beamerbutton{Nästa}
+  \end{flushright}
+\end{frame}
+
+% Slide 15: Avtalsvillkor och godkännande (med PDF och sidebar)
+% ----------------------------------------------------------
+% SLIDE: Avtalsvillkor och godkännande (BankID-signering)
+% ----------------------------------------------------------
+\begin{frame}[fragile]
+  \frametitle{Avtalsvillkor och godkännande}
+
+  \begin{block}{Avtal (skrolla för att läsa)}
+    \vspace{0.2cm}
+    % Här visas avtalet i en inbäddad PDF-komponent.
+    % Exempelvis:
+    % \includepdf[pages=1,width=\linewidth,pagecommand={}]{avtal.pdf}
+    %
+    % I webbgränssnittet motsvarar detta en skrollbar vy.
+    \textit{\footnotesize Avtalet visas här i PDF-format. Användaren kan skrolla för att läsa hela innehållet.}
+    \vspace{0.4cm}
+  \end{block}
+
+  \vspace{0.4cm}
+  \begin{center}
+    \beamerbutton{Signera med BankID}
+  \end{center}
+
+  \vspace{0.6cm}
+  \small
+  Efter genomförd signering ersätts PDF-dokumentet automatiskt med en version där
+  namnet från BankID-identifieringen infogas som signatur i dokumentet.
+  \medskip
+
+  \textit{Exempel:}\\
+  \textbf{Signerad av:} Anna Svensson (BankID)
+
+\end{frame}
+
+% ----------------------------------------------------------
+% SLIDE 16: E-postbekräftelse och leverans av dokument
+% ----------------------------------------------------------
+\begin{frame}[fragile]
+  \frametitle{Bekräftelse och leverans av material}
+
+  \begin{block}{Ange e-postadress för kopia av dokument}
+    \vspace{0.2cm}
+    \textit{För din dokumentation skickas en kopia av alla relevanta filer till den e-postadress du anger nedan.}
+    \vspace{0.4cm}
+
+    % Fältet motsvarar en e-postinput i appens gränssnitt
+    \textbf{E-postadress:} \underline{\hspace{6cm}}
+    \vspace{0.5cm}
+
+    \begin{itemize}
+      \item Avtal (PDF med BankID-signatur)
+      \item Riskanalys och grafisk rapport (PDF)
+      \item Sammanställning av dina svar
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.5cm}
+  \begin{center}
+    \beamerbutton{Skicka material till min e-post}
+  \end{center}
+
+  \vspace{0.6cm}
+  \small
+  \textit{När du bekräftar skickas all information krypterat via säker anslutning.  
+  Du får även ett meddelande som bekräftar att signeringen slutförts.}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Sida för inställningar som erhålles vid klick på kuggghjulet uppe till höger
+
+% --- Slide: Inställningar (via kugghjulet) ---
+\begin{frame}[fragile]
+  \frametitle{Inställningar – åtkomst via kugghjulet uppe till höger}
+
+  \begin{block}{Syfte}
+    Denna sida låter användaren hantera sitt konto och konfigurera hur onboarding-appen beter sig.
+    För denna version används inga användarroller; allt hanteras av kontoägaren.
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{Funktionalitet}
+    \begin{enumerate}
+      \item \textbf{Registrera användare} – Lägg till användare genom att ange deras e-postadress.
+      En inbjudan skickas automatiskt till mottagaren.
+      \vspace{0.2cm}
+      \item \textbf{Ladda upp konfigurationsfil} – Innehåller textinnehåll för editerbara slides.
+      Vissa slides (t.ex.\ drop zones och inmatning av personnummer/org.nr) är låsta, men kan vara flyttbara i listan.
+      Resultatslides genereras dynamiskt av programmet, är ej editerbara men kan ordnas om.
+      \vspace{0.2cm}
+      \item \textbf{Avmarkera tester} – Möjlighet att avaktivera specifika riskbedömningstester som användaren anser oväsentliga.
+      \vspace{0.2cm}
+      \item \textbf{Prenumeration och konto} – Hantera prenumerationsstatus:
+        \begin{itemize}
+          \item Förnya prenumeration
+          \item Avsluta prenumeration
+          \item Ta bort konto
+        \end{itemize}
+      \vspace{0.2cm}
+      \item \textbf{Fakturor (Accounts Payable)} – Visa lista över leverantörsfakturor.
+      Användaren kan:
+        \begin{itemize}
+          \item Ladda ner fakturor som PDF
+          \item Exportera till hårddisk
+          \item Synka mot Dropbox
+        \end{itemize}
+    \end{enumerate}
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{Framtida UI-idéer}
+    \begin{itemize}
+      \item React-komponenter i Tailwind CSS (exempel: Themesberg-komponentbiblioteket)
+      \item Moderna “card”-sektioner för varje inställningskategori
+      \item Tydlig visuell hierarki med \texttt{hover}-effekter och “expand/collapse”-komponenter
+      \item Integration med backend via REST eller gRPC för användar- och filhantering
+    \end{itemize}
+  \end{block}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Administrationspanel}
+\framesubtitle{Översikt och funktioner för systemadministration}
+
+\begin{block}{Syfte}
+Ge systemadministratören kontroll över användning, fakturering och support utan att lagra personlig data.
+\end{block}
+
+\begin{columns}[T]
+\column{0.48\textwidth}
+\begin{itemize}
+  \item \textbf{Dashboard:} Översikt över API-anrop, driftstatus, aktiva användarsessioner.
+  \item \textbf{Supportcenter:} Live-kö, supportinloggning med spegling av användarskärm, chatt.
+  \item \textbf{Fakturering:} Automatisk PDF-fakturering, betalningsövervakning, påminnelser.
+\end{itemize}
+
+\column{0.48\textwidth}
+\begin{itemize}
+  \item \textbf{Systeminställningar:} API-gränser, funktionstillgång, MCP-konfiguration.
+  \item \textbf{Meddelanden:} Informationsutskick, uppdateringsnotiser.
+  \item \textbf{Säkerhet:} Loggning av metadata, åtkomstkontroll, sessionsspårning.
+\end{itemize}
+\end{columns}
+
+\begin{block}{Teknisk bas}
+Frontend i React + Tailwind, kommunikation via FastAPI (JSON).  
+Fejkad backend under utvecklingsfas för visuell design och testning.
+\end{block}
+
+\end{frame}
+
+
+
+\end{document}
+
+
+

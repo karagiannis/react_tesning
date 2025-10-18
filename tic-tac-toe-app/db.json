@@ -1,0 +1,13 @@
+{
+  "users": [
+    { "id": 1, "name": "Aurora AB", "paid": true, "apiCalls": 245 },
+    { "id": 2, "name": "Lars Consulting", "paid": false, "apiCalls": 132 }
+  ],
+  "supportQueue": [
+    { "id": 1, "userId": 2, "message": "Behöver hjälp med KYC-steget" }
+  ],
+  "invoices": [
+    { "id": 1, "userId": 1, "amount": 299, "status": "paid" },
+    { "id": 2, "userId": 2, "amount": 299, "status": "unpaid" }
+  ]
+}
