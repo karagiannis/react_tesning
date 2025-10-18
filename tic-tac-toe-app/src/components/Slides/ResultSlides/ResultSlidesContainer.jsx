@@ -31,7 +31,7 @@ export default function ResultSlidesContainer({ onNext, onBack }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex flex-col">
       {/* Tab Navigation */}
       <div className="sticky top-0 z-40">
         <ResultsTabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
@@ -60,7 +60,7 @@ export default function ResultSlidesContainer({ onNext, onBack }) {
           </div>
           <button
             onClick={onNext}
-            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg hover:from-orange-600 hover:to-amber-600 transition-colors font-medium flex items-center shadow-md"
+            className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-500 text-white rounded-lg hover:from-brand-600 hover:to-brand-600 transition-colors font-medium flex items-center shadow-md"
           >
             Fortsätt
             <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -10,7 +10,7 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
   const shareData = mockRoaringData.shareFacts;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
       <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-6xl w-full max-h-[90vh] overflow-y-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
@@ -165,19 +165,19 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
         </div>
 
         {/* Bolagsverket ärenden */}
-        <div className="mb-6 p-6 bg-amber-50 rounded-xl border border-amber-200">
+        <div className="mb-6 p-6 bg-brand-50 rounded-xl border border-brand-200">
           <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <svg className="w-6 h-6 mr-2 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             Bolagsverket ärendehistorik
           </h2>
           <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="p-4 bg-white rounded-lg border border-amber-200 text-center">
-              <div className="text-3xl font-bold text-amber-600">{caseData.openCases}</div>
+            <div className="p-4 bg-white rounded-lg border border-brand-200 text-center">
+              <div className="text-3xl font-bold text-brand-600">{caseData.openCases}</div>
               <div className="text-sm text-gray-600">Öppna ärenden</div>
             </div>
-            <div className="p-4 bg-white rounded-lg border border-amber-200 text-center">
+            <div className="p-4 bg-white rounded-lg border border-brand-200 text-center">
               <div className="text-3xl font-bold text-gray-600">{caseData.closedCases}</div>
               <div className="text-sm text-gray-600">Avslutade ärenden</div>
             </div>
@@ -186,7 +186,7 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
             <div className="space-y-2">
               <h3 className="font-semibold text-gray-700 text-sm">Senaste ärenden:</h3>
               {caseData.cases.map((caseItem, index) => (
-                <div key={index} className="p-3 bg-white rounded-lg border border-amber-200">
+                <div key={index} className="p-3 bg-white rounded-lg border border-brand-200">
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="font-medium text-gray-800">{caseItem.caseType}</div>
@@ -302,7 +302,7 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
           </button>
           <button
             onClick={onNext}
-            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg hover:from-orange-600 hover:to-amber-600 transition-colors font-medium flex items-center"
+            className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-500 text-white rounded-lg hover:from-brand-600 hover:to-brand-600 transition-colors font-medium flex items-center"
           >
             Fortsätt onboarding
             <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

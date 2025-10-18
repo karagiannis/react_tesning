@@ -50,14 +50,14 @@ export default function VerifySlide({ onNext }) {
   const isCodeComplete = code.every(digit => digit !== '');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-8">
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-10">
-        <h1 className="text-3xl font-bold text-amber-900 mb-6 text-center">
+        <h1 className="text-3xl font-bold text-brand-900 mb-6 text-center">
           Verifiera din registrering
         </h1>
         
         <div className="mb-6">
-          <label className="block text-sm font-medium text-amber-800 mb-4 text-center">
+          <label className="block text-sm font-medium text-brand-800 mb-4 text-center">
             Ange den registreringskod du fått via e-post eller SMS
           </label>
           
@@ -73,13 +73,13 @@ export default function VerifySlide({ onNext }) {
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={handlePaste}
-                className="w-12 h-14 text-center text-2xl font-bold border-2 border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="w-12 h-14 text-center text-2xl font-bold border-2 border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               />
             ))}
           </div>
 
-          <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded">
-            <p className="text-sm text-amber-800">
+          <div className="bg-brand-50 border-l-4 border-brand-500 p-4 rounded">
+            <p className="text-sm text-brand-800">
               <strong>Info:</strong> Av säkerhetsskäl och på grund av problem med e-postlänkar (t.ex. Sendgrid) används nu registreringskoder istället för klickbara länkar.
             </p>
           </div>
@@ -90,7 +90,7 @@ export default function VerifySlide({ onNext }) {
           disabled={!isCodeComplete}
           className={`w-full px-8 py-3 rounded-lg font-semibold transition-all ${
             isCodeComplete
-              ? 'bg-orange-600 hover:bg-orange-700 text-white cursor-pointer'
+              ? 'bg-brand-600 hover:bg-brand-700 text-white cursor-pointer'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
@@ -98,8 +98,8 @@ export default function VerifySlide({ onNext }) {
         </button>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-amber-700 mb-2">eller</p>
-          <button className="text-orange-600 hover:text-orange-700 font-semibold text-sm">
+          <p className="text-sm text-brand-700 mb-2">eller</p>
+          <button className="text-brand-600 hover:text-brand-700 font-semibold text-sm">
             Skicka ny kod
           </button>
         </div>

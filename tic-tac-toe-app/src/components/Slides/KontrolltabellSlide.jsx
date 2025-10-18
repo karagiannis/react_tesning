@@ -1,37 +1,37 @@
 export default function KontrolltabellSlide({ onNext }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-8">
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
       <div className="max-w-6xl w-full bg-white rounded-2xl shadow-2xl p-10">
-        <h1 className="text-3xl font-bold text-amber-900 mb-4">
+        <h1 className="text-3xl font-bold text-brand-900 mb-4">
           Identitetskontroll – sammanfattande tabell
         </h1>
         
-        <p className="text-sm text-amber-700 mb-6 italic">
+        <p className="text-sm text-brand-700 mb-6 italic">
           Tabellen nedan sammanfattar kraven enligt Länsstyrelsen Stockholms författningssamling 01FS 2024:20 
           och lagen (2017:630) om åtgärder mot penningtvätt och finansiering av terrorism.
         </p>
 
         <div className="overflow-x-auto mb-6">
-          <table className="w-full border-collapse border border-amber-300 text-sm">
+          <table className="w-full border-collapse border border-brand-300 text-sm">
             <thead>
-              <tr className="bg-amber-800 text-white">
-                <th className="border border-amber-300 p-3 text-left font-semibold">Vem kontrolleras</th>
-                <th className="border border-amber-300 p-3 text-left font-semibold">Vad kontrolleras</th>
-                <th className="border border-amber-300 p-3 text-left font-semibold">Dokumentation av kontrollen</th>
+              <tr className="bg-brand-800 text-white">
+                <th className="border border-brand-300 p-3 text-left font-semibold">Vem kontrolleras</th>
+                <th className="border border-brand-300 p-3 text-left font-semibold">Vad kontrolleras</th>
+                <th className="border border-brand-300 p-3 text-left font-semibold">Dokumentation av kontrollen</th>
               </tr>
             </thead>
             <tbody>
               {/* Fysisk person */}
-              <tr className="bg-amber-50">
-                <td className="border border-amber-300 p-3 font-semibold align-top">Fysisk person</td>
-                <td className="border border-amber-300 p-3 align-top">
+              <tr className="bg-brand-50">
+                <td className="border border-brand-300 p-3 font-semibold align-top">Fysisk person</td>
+                <td className="border border-brand-300 p-3 align-top">
                   <ol className="list-decimal list-inside space-y-2">
                     <li>Pass, körkort eller annan identitetshandling med foto utfärdad av myndighet eller tillförlitlig utfärdare.</li>
                     <li>Tillförlitlig elektronisk legitimation.</li>
                     <li>Andra dokument/uppgifter från oberoende och tillförlitliga källor. Vid svårigheter, använd flera källor.</li>
                   </ol>
                 </td>
-                <td className="border border-amber-300 p-3 align-top">
+                <td className="border border-brand-300 p-3 align-top">
                   <ol className="list-decimal list-inside space-y-2">
                     <li>Anteckna identitetshandlingens nummer och giltighetstid eller bevara kopia.</li>
                     <li>Bevara kopia av bekräftelsen på elektronisk legitimation.</li>
@@ -42,8 +42,8 @@ export default function KontrolltabellSlide({ onNext }) {
 
               {/* Fysisk person på distans */}
               <tr className="bg-white">
-                <td className="border border-amber-300 p-3 font-semibold align-top">Fysisk person på distans</td>
-                <td className="border border-amber-300 p-3 align-top">
+                <td className="border border-brand-300 p-3 font-semibold align-top">Fysisk person på distans</td>
+                <td className="border border-brand-300 p-3 align-top">
                   <ol className="list-decimal list-inside space-y-2">
                     <li>Tillförlitlig elektronisk legitimation.</li>
                     <li>Namn, personnummer/samordningsnummer och adress mot externa register/intyg/oberoende källor, samt:
@@ -54,7 +54,7 @@ export default function KontrolltabellSlide({ onNext }) {
                     </li>
                   </ol>
                 </td>
-                <td className="border border-amber-300 p-3 align-top">
+                <td className="border border-brand-300 p-3 align-top">
                   <ol className="list-decimal list-inside space-y-2">
                     <li>Bevara kopia av bekräftelsen på elektronisk legitimation.</li>
                     <li>Bevara kopia av dokument/uppgifter som legat till grund för kontrollen samt kopia av bekräftelsebrev eller vidimerad kopia.</li>
@@ -63,15 +63,15 @@ export default function KontrolltabellSlide({ onNext }) {
               </tr>
 
               {/* Företrädare, ombud */}
-              <tr className="bg-amber-50">
-                <td className="border border-amber-300 p-3 font-semibold align-top">Företrädare, ombud eller motsvarande</td>
-                <td className="border border-amber-300 p-3 align-top">
+              <tr className="bg-brand-50">
+                <td className="border border-brand-300 p-3 font-semibold align-top">Företrädare, ombud eller motsvarande</td>
+                <td className="border border-brand-300 p-3 align-top">
                   <ol className="list-decimal list-inside space-y-2">
                     <li>Se identitetskontroll för fysisk person eller fysisk person på distans.</li>
                     <li>Fullmakt, förordnande eller motsvarande behörighetshandling.</li>
                   </ol>
                 </td>
-                <td className="border border-amber-300 p-3 align-top">
+                <td className="border border-brand-300 p-3 align-top">
                   <ol className="list-decimal list-inside space-y-2">
                     <li>Se dokumentationskrav för fysisk person eller fysisk person på distans.</li>
                     <li>Bevara kopia av fullmakt, förordnande eller motsvarande behörighetshandling.</li>
@@ -81,22 +81,22 @@ export default function KontrolltabellSlide({ onNext }) {
 
               {/* Juridisk person */}
               <tr className="bg-white">
-                <td className="border border-amber-300 p-3 font-semibold align-top">Juridisk person</td>
-                <td className="border border-amber-300 p-3 align-top">
+                <td className="border border-brand-300 p-3 font-semibold align-top">Juridisk person</td>
+                <td className="border border-brand-300 p-3 align-top">
                   Registreringsbevis, registerutdrag eller uppgifter från andra tillförlitliga och oberoende källor.
                 </td>
-                <td className="border border-amber-300 p-3 align-top">
+                <td className="border border-brand-300 p-3 align-top">
                   Bevara kopia av de kontrollerade handlingarna.
                 </td>
               </tr>
 
               {/* Verklig huvudman */}
-              <tr className="bg-amber-50">
-                <td className="border border-amber-300 p-3 font-semibold align-top">Verklig huvudman</td>
-                <td className="border border-amber-300 p-3 align-top">
+              <tr className="bg-brand-50">
+                <td className="border border-brand-300 p-3 font-semibold align-top">Verklig huvudman</td>
+                <td className="border border-brand-300 p-3 align-top">
                   Se identitetskontroll för fysisk person eller fysisk person på distans.
                 </td>
-                <td className="border border-amber-300 p-3 align-top">
+                <td className="border border-brand-300 p-3 align-top">
                   Se dokumentationskrav för fysisk person eller fysisk person på distans.
                 </td>
               </tr>
@@ -114,8 +114,8 @@ export default function KontrolltabellSlide({ onNext }) {
         </div>
 
         {/* Info box */}
-        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded mb-6">
-          <p className="text-sm text-amber-900">
+        <div className="bg-brand-50 border-l-4 border-brand-500 p-4 rounded mb-6">
+          <p className="text-sm text-brand-900">
             <strong>⚖️ Notera:</strong> Denna detaljerade tabell visar hur noggranna och specifika Länsstyrelsens 
             krav är. Varje kategori av person har olika kontrollmetoder och dokumentationskrav som måste följas 
             för att undvika sanktionsavgifter.
@@ -124,7 +124,7 @@ export default function KontrolltabellSlide({ onNext }) {
 
         <button
           onClick={onNext}
-          className="w-full bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-lg font-semibold transition-all"
+          className="w-full bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-lg font-semibold transition-all"
         >
           Nästa
         </button>

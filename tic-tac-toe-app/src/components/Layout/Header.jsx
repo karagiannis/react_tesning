@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Icon from '../Shared/Icon';
 
 export default function Header({ onPanelToggle }) {
   const [activePanel, setActivePanel] = useState(null);
@@ -10,27 +11,26 @@ export default function Header({ onPanelToggle }) {
   };
 
   return (
-    <header className="bg-white border-b border-amber-200 px-6 py-3 flex items-center justify-between">
+    <header className="bg-white border-b border-brand-200 px-6 py-3 flex items-center justify-between">
       {/* Logo/Title */}
       <div className="flex items-center gap-3">
-        <span className="text-2xl">🏢</span>
-        <h1 className="text-xl font-bold text-amber-900">Kundonboarding</h1>
+        <Icon name="building" className="w-7 h-7 text-brand-600" />
+        <h1 className="text-xl font-bold text-brand-900">Kundonboarding</h1>
       </div>
 
       {/* Icon Menu */}
       <div className="flex items-center gap-4">
-        {/* LLM Icon */}
+        {/* LLM - Stripe-style text only */}
         <button
           onClick={() => handlePanelClick('llm')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+          className={`px-4 py-2 rounded-lg transition-all font-mono font-bold text-base tracking-tight ${
             activePanel === 'llm'
-              ? 'bg-orange-600 text-white'
-              : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+              ? 'bg-brand-600 text-white'
+              : 'bg-brand-100 text-brand-800 hover:bg-brand-200'
           }`}
           title="LLM Assistent - Få hjälp med frågor baserat på insamlad data"
         >
-          <span className="text-xl">🤖</span>
-          <span className="text-sm font-medium">LLM</span>
+          LLM
         </button>
 
         {/* Documentation Icon */}
@@ -38,12 +38,12 @@ export default function Header({ onPanelToggle }) {
           onClick={() => handlePanelClick('documentation')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
             activePanel === 'documentation'
-              ? 'bg-orange-600 text-white'
-              : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+              ? 'bg-brand-600 text-white'
+              : 'bg-brand-100 text-brand-800 hover:bg-brand-200'
           }`}
           title="Dokumentation - Hur programmet används och vilka tester som körs"
         >
-          <span className="text-xl">📚</span>
+          <Icon name="document" className="w-5 h-5" />
           <span className="text-sm font-medium">Dokumentation</span>
         </button>
 
@@ -52,12 +52,12 @@ export default function Header({ onPanelToggle }) {
           onClick={() => handlePanelClick('support')}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
             activePanel === 'support'
-              ? 'bg-orange-600 text-white'
-              : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+              ? 'bg-brand-600 text-white'
+              : 'bg-brand-100 text-brand-800 hover:bg-brand-200'
           }`}
           title="Support - Chatt och skärmdelning (likt Fortnox)"
         >
-          <span className="text-xl">❓</span>
+          <Icon name="question" className="w-5 h-5" />
           <span className="text-sm font-medium">Support</span>
         </button>
       </div>

@@ -13,7 +13,7 @@ export default function AgarstrukturSlide({ onNext, onBack }) {
   const alternativeBeneficialOwners = beneficialOwnerData.alternativeBeneficialOwners || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
       <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl w-full">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
@@ -97,9 +97,9 @@ export default function AgarstrukturSlide({ onNext, onBack }) {
 
         {/* Alternativ verklig huvudman */}
         {alternativeBeneficialOwners && alternativeBeneficialOwners.length > 0 && (
-          <div className="mb-8 p-6 bg-amber-50 rounded-xl border border-amber-300">
+          <div className="mb-8 p-6 bg-brand-50 rounded-xl border border-brand-300">
             <h2 className="text-xl font-semibold text-gray-800 mb-3 flex items-center">
-              <svg className="w-5 h-5 mr-2 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Alternativ identifikation
@@ -128,7 +128,7 @@ export default function AgarstrukturSlide({ onNext, onBack }) {
           </button>
           <button
             onClick={onNext}
-            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg hover:from-orange-600 hover:to-amber-600 transition-colors font-medium flex items-center"
+            className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-500 text-white rounded-lg hover:from-brand-600 hover:to-brand-600 transition-colors font-medium flex items-center"
           >
             Nästa: Styrelse
             <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

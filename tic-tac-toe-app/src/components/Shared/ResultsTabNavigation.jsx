@@ -21,7 +21,7 @@ export default function ResultsTabNavigation({ activeTab, onTabChange }) {
                 flex items-center px-6 py-4 text-sm font-medium whitespace-nowrap
                 border-b-2 transition-all duration-200
                 ${activeTab === tab.id
-                  ? 'border-orange-500 text-orange-600 bg-orange-50'
+                  ? 'border-brand-500 text-brand-600 bg-brand-50'
                   : 'border-transparent text-gray-600 hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50'
                 }
               `}

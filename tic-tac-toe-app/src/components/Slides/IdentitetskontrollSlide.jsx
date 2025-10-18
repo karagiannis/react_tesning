@@ -88,13 +88,13 @@ export default function IdentitetskontrollSlide({ onNext }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-8">
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
       <div className="max-w-4xl w-full bg-white rounded-2xl shadow-2xl p-10">
-        <h1 className="text-3xl font-bold text-amber-900 mb-6">
+        <h1 className="text-3xl font-bold text-brand-900 mb-6">
           Identitetskontroll och dokumentation
         </h1>
 
-        <div className="text-sm text-amber-800 mb-6 space-y-3">
+        <div className="text-sm text-brand-800 mb-6 space-y-3">
           <p>
             För att uppfylla penningtvättslagens krav måste identiteten kontrolleras och dokumenteras enligt följande:
           </p>
@@ -112,8 +112,8 @@ export default function IdentitetskontrollSlide({ onNext }) {
             </li>
           </ul>
 
-          <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded mt-4">
-            <p className="font-semibold text-amber-900 mb-2">📋 Dokumentationskrav:</p>
+          <div className="bg-brand-50 border-l-4 border-brand-500 p-4 rounded mt-4">
+            <p className="font-semibold text-brand-900 mb-2">📋 Dokumentationskrav:</p>
             <ul className="list-disc list-inside space-y-1 text-sm">
               <li>Anteckna identitetshandlingens nummer och giltighetstid eller bevara kopia.</li>
               <li>Bevara kopia av elektronisk legitimation eller andra dokument som legat till grund för kontrollen.</li>
@@ -125,17 +125,17 @@ export default function IdentitetskontrollSlide({ onNext }) {
 
         {/* Camera Section */}
         <div className="bg-gray-100 rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-bold text-amber-900 mb-4">
+          <h2 className="text-xl font-bold text-brand-900 mb-4">
             📸 Ta foto med webbkamera
           </h2>
-          <p className="text-sm text-amber-700 mb-4">
+          <p className="text-sm text-brand-700 mb-4">
             Håll upp ditt körkort eller ID-handling framför kameran så att både ditt ansikte och handlingen syns tydligt.
           </p>
 
           {!isCameraActive && !capturedImage && (
             <button
               onClick={startCamera}
-              className="w-full bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+              className="w-full bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
             >
               <span className="text-xl">📷</span>
               Starta webbkamera
@@ -167,7 +167,7 @@ export default function IdentitetskontrollSlide({ onNext }) {
                 <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
                   <button
                     onClick={capturePhoto}
-                    className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-lg font-semibold transition-all shadow-lg"
+                    className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-lg font-semibold transition-all shadow-lg"
                   >
                     📸 Ta foto
                   </button>
@@ -229,14 +229,14 @@ export default function IdentitetskontrollSlide({ onNext }) {
           disabled={!capturedImage}
           className={`w-full px-8 py-3 rounded-lg font-semibold transition-all ${
             capturedImage
-              ? 'bg-orange-600 hover:bg-orange-700 text-white cursor-pointer'
+              ? 'bg-brand-600 hover:bg-brand-700 text-white cursor-pointer'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
           Nästa
         </button>
         {!capturedImage && (
-          <p className="text-center text-sm text-amber-600 mt-2">
+          <p className="text-center text-sm text-brand-600 mt-2">
             Du måste ta ett foto för att fortsätta
           </p>
         )}

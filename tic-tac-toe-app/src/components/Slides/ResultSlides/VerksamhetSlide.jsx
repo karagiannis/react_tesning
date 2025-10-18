@@ -3,12 +3,9 @@ import { mockRoaringData } from '../../../data/mockRoaringData';
 
 export default function VerksamhetSlide({ onNext, onBack, hideNavigation = false }) {
   const data = mockRoaringData.companyActivity;
-  
-  // Extract first SNI code for display
-  const primarySniCode = data.sniCodes && data.sniCodes[0] ? data.sniCodes[0] : { code: 'N/A', description: 'N/A' };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
       <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl w-full">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
@@ -20,9 +17,9 @@ export default function VerksamhetSlide({ onNext, onBack, hideNavigation = false
         </div>
 
         {/* Företagsinformation */}
-        <div className="mb-6 p-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-orange-200">
+        <div className="mb-6 p-6 bg-gradient-to-r from-brand-50 to-brand-50 rounded-xl border border-brand-200">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
-            <svg className="w-6 h-6 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
             Företagsinformation
@@ -81,7 +78,7 @@ export default function VerksamhetSlide({ onNext, onBack, hideNavigation = false
             {data.secondaryNames && data.secondaryNames.length > 0 && (
               <div className="mt-4 pt-4 border-t border-green-200">
                 <span className="text-gray-600 font-medium block mb-2">Alternativa namn:</span>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2">Identitetskontroll – sammanfattande tabell
                   {data.secondaryNames.map((name, index) => (
                     <span
                       key={index}
@@ -110,7 +107,7 @@ export default function VerksamhetSlide({ onNext, onBack, hideNavigation = false
             </button>
             <button
               onClick={onNext}
-              className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg hover:from-orange-600 hover:to-amber-600 transition-colors font-medium flex items-center"
+              className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-500 text-white rounded-lg hover:from-brand-600 hover:to-brand-600 transition-colors font-medium flex items-center"
             >
               Nästa: Ägarstruktur
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

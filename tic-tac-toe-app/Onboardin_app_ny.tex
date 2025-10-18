@@ -15,7 +15,19 @@
 \usetheme{default}
 \usefonttheme{structurebold}
 
-% Varm färgpalett – beige, terracotta, mörkbrun
+% FÄRGTEMA: Professionell grön AML/compliance-palett
+% OBS! React-appen använder nu grön färgskala (brand-50 till brand-900)
+% Definierad i tailwind.config.js:
+%   - brand-50: #f7f9f8 (nästan vit med grön nyans)
+%   - brand-100: #e8f0ed (mycket ljus grön)
+%   - brand-600: #00704a (primär grön för knappar)
+%   - brand-700: #005c3d (mörkare grön för hover)
+%   - brand-800: #004d32 (mörk skogsgrön för headers)
+%   - brand-900: #1a3a2e (mörkaste för text)
+% 
+% Detta LaTeX-dokument använder fortfarande varm beige/terracotta-palett
+% för presentationsformat. Vid implementation i React används den gröna paletten.
+
 \definecolor{warmbeige}{RGB}{245, 240, 230}     % Ljus bakgrund
 \definecolor{warmbrown}{RGB}{101, 73, 50}        % Mörk text & accent
 \definecolor{terracotta}{RGB}{204, 102, 85}      % För knappar / viktig info
@@ -594,65 +606,158 @@
   \end{flushright}
 \end{frame}
 
-% Slide 10: Ekonomisk rådgivning
-\begin{frame}[label=ekorad]
-  \frametitle{Ekonomisk rådgivning – likviditetsanalys}
+% =======================================================================
+% FLÖDE: Bokföringsdata → Verifikationsanalys → Likviditetsanalys
+% =======================================================================
+% Slide 10: Kombinerad inmatning av IBAN + SIE-fil (både Fortnox-hämtning och drop-yta)
+% Slide 11: Bokföringsanalys med klickbara verifikationsfel (likt Fortnox-klonen)
+% Slide 12: Likviditetsgraf + layering-detektering (AI-baserad riskanalys)
+%
+% Config.json styr:
+%   - Antal år för SIE-filhämtning (standard 7 år, kan minskas för nystartade företag)
+%   - Vilka risktester som är aktiverade
+%   - Textanpassningar och valfria fält
+%
+% Resultatslides (5-9) ska också använda grönt tema i React-implementationen.
+% =======================================================================
+
+% Slide 10: Bokföringsdata och bankkonto (kombinerad slide)
+\begin{frame}[label=bokforing_bank]
+  \frametitle{Bokföringsdata och bankkonto}
   \small
-  Vi erbjuder gratis ekonomisk rådgivning baserat på analys av företagets likviditet och transaktionshistorik.\
+  För att göra en fullständig riskbedömning behöver vi tillgång till företagets bokföringsunderlag och bankkonto.
+  
   \vspace{0.5cm}
-  \textbf{IBAN:} \underline{\hspace{7cm}} \\
-  \textbf{Bank:} \underline{\hspace{7cm}} \\
-  \vspace{0.5cm}
-  \begin{block}{Likviditetsflöde}
-    \textit{Diagram över likviditet som funktion av datum presenteras här.}
-  \end{block}
+  \begin{minipage}{0.48\textwidth}
+    \textbf{Bokföringsdata (SIE-filer):}\\
+    \vspace{0.3cm}
+    
+    % Integration mot Fortnox
+    \beamerbutton{Hämta från Fortnox}\\
+    \footnotesize\textit{(Hämtar X senaste åren automatiskt)}
+    
+    \vspace{0.3cm}
+    \textbf{eller}\\
+    \vspace{0.3cm}
+    
+    % Dropyta för manuell uppladdning
+    \textbf{Dropyta för SIE-fil:}\\
+    \fbox{\rule{5cm}{1.5cm}}\\
+    \footnotesize\textit{Dra och släpp SIE-filer här}
+    
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.48\textwidth}
+    \textbf{Bankkonto (Open Banking):}\\
+    \vspace{0.3cm}
+    \textbf{IBAN:} \underline{\hspace{5cm}} \\
+    \vspace{0.2cm}
+    \textbf{Bank:} \underline{\hspace{5cm}} \\
+    \vspace{0.4cm}
+    \beamerbutton{Hämta bankdata}\\
+    \footnotesize\textit{(Via Open Banking API)}
+  \end{minipage}
+  
   \vspace{0.5cm}
   \begin{block}{Info}
-    Rådgivningen baseras på insamlad bankdata och presenteras som en översikt över företagets likviditet.\
-    Samtycke krävs för att hämta bankdata via Open Banking.
+    \footnotesize
+    \textbf{Antal år:} Konfigureras i inställningar (standard 7 år enligt lag).\\
+    Nystartade företag kan ha färre år – systemet anpassar sig automatiskt.\\
+    \textbf{Integrationer:} Endast bokföringsprogram med öppna API:er (Fortnox, Visma, etc.)\\
+    \textbf{Samtycke:} Krävs för att hämta bankdata via Open Banking.
   \end{block}
-  \vspace{0.8cm}
+  
+  \vspace{0.5cm}
   \begin{flushright}
     \hyperlink{nextslide}{\beamerbutton{Nästa}}
   \end{flushright}
 \end{frame}
 
-% Slide 11: Bokföringsdata och integration
-\begin{frame}[label=layering]
-  \frametitle{Bokföringsdata och integration}
+% Slide 11: Bokföringsanalys och verifikationsfel
+\begin{frame}[label=bokanalys]
+  \frametitle{Bokföringsanalys och verifikationsfel}
   \small
-  Ladda upp din SIE-fil för att få en djupare analys av företagets ekonomi.\
+  Baserat på inladdade SIE-filer analyseras bokföringen automatiskt.\\
+  Eventuella fel och avvikelser presenteras nedan.
+  
   \vspace{0.5cm}
-  \textbf{Dropyta för SIE-fil:} \fbox{\rule{6cm}{0.7cm}} \\
+  \textbf{Status:} \underline{\hspace{8cm}} \\
+  \textit{(Exempel: "3 filer uppladdade. Analys pågår..." eller "Analys klar. 12 varningar hittade.")}
+  
   \vspace{0.5cm}
-  \textbf{Integration mot bokföringsprogram:}
-  \begin{itemize}
-    \item \beamerbutton{Fortnox}
-    \item \beamerbutton{...}
-  \end{itemize}
-  \vspace{0.5cm}
-  \begin{block}{Info}
-    Endast bokföringsprogram med öppna API:er kan integreras automatiskt.\
-    %{Layering-analysen sker i bakgrunden och presenteras inte för kunden.}
+  \begin{block}{Verifikationsfel och avvikelser (klickbara rader)}
+    \footnotesize
+    \begin{tabular}{|l|l|l|p{4cm}|}
+      \hline
+      \textbf{Ver.nr} & \textbf{Datum} & \textbf{Belopp} & \textbf{Beskrivning} \\
+      \hline
+      1523 & 2024-03-15 & 125,000 kr & Kontantuttag utan kvitto \\
+      \hline
+      2104 & 2024-05-22 & 89,500 kr & Momsavdrag på privat bil \\
+      \hline
+      2847 & 2024-08-10 & 45,000 kr & Utlandsbetalning till högriskland \\
+      \hline
+    \end{tabular}
   \end{block}
-  \vspace{0.8cm}
+  
+  \vspace{0.3cm}
+  \begin{block}{Funktionalitet}
+    \footnotesize
+    \textbf{Klick på rad:} Öppnar modal med fullständig verifikation (alla konteringar, bilagor, kommentarer)\\
+    \textbf{Användaren kan:} Bedöma om felet är allvarligt eller om kunden ändå kan accepteras\\
+    \textbf{Anteckningar:} Möjlighet att lägga till kommentarer per verifikation
+  \end{block}
+  
+  \vspace{0.5cm}
   \begin{flushright}
     \hyperlink{nextslide}{\beamerbutton{Nästa}}
   \end{flushright}
 \end{frame}
 
-% Slide 12: Likviditetsgraf och rådgivning
+% Slide 12: Likviditetsanalys och layering-detektering
 \begin{frame}[label=likviditetsgraf]
-  \frametitle{Likviditetsanalys – visualisering}
+  \frametitle{Likviditetsanalys och layering-detektering}
   \small
-  Nedan visas en graf över företagets likviditet över tid. Byråchefen kan använda denna för att diskutera företagets ekonomiska situation och ge råd.\\
-  \vspace{0.5cm}
-  \textbf{Grafyta:} \fbox{\rule{10cm}{4cm}} \\
-  \vspace{0.5cm}
-  \begin{block}{Rådgivning}
-    Här kan byråchefen ge kommentarer kring likviditetsutvecklingen och föreslå åtgärder vid behov.
+  Baserat på bankdata och bokföring analyseras företagets likviditet och transaktionsmönster.\\
+  Systemet letar automatiskt efter tecken på \textit{layering} (penningtvätt genom komplexa transaktioner).
+  
+  \vspace{0.4cm}
+  \begin{minipage}{0.58\textwidth}
+    \textbf{Likviditetsgraf:}\\
+    \fbox{\rule{6cm}{3.5cm}}\\
+    \footnotesize\textit{Visar likviditet över tid (månad/kvartal)}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.38\textwidth}
+    \textbf{Nyckeltal:}\\
+    \vspace{0.2cm}
+    Genomsnittlig likviditet: \underline{\hspace{2cm}}\\
+    Största uttag: \underline{\hspace{2cm}}\\
+    Största insättning: \underline{\hspace{2cm}}\\
+    Utlandsbetalningar: \underline{\hspace{2cm}}\\
+    Kontantuttag: \underline{\hspace{2cm}}\\
+  \end{minipage}
+  
+  \vspace{0.4cm}
+  \begin{block}{Layering-analys (dold för kund)}
+    \footnotesize
+    \textbf{AI-analys identifierar:}
+    \begin{itemize}
+      \item Onormala transaktionsmönster (snabba in/ut-betalningar)
+      \item Cirkulära betalningar mellan konton
+      \item Strukturering (många små betalningar för att undvika rapportering)
+      \item Betalningar till/från högriskländer eller skalbolag
+      \item Kontantintensiv verksamhet utan logisk förklaring
+    \end{itemize}
+    \textbf{Resultat:} Presenteras endast internt för byråchefen, ej för kunden.
   \end{block}
-  \vspace{0.8cm}
+  
+  \vspace{0.3cm}
+  \begin{block}{Rådgivning (valfritt)}
+    Byråchefen kan ge kommentarer kring likviditetsutvecklingen och föreslå åtgärder vid behov.
+  \end{block}
+  
+  \vspace{0.5cm}
   \begin{flushright}
     \hyperlink{nextslide}{\beamerbutton{Nästa}}
   \end{flushright}
@@ -768,6 +873,250 @@
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% POST-KONTRAKT SETUP: Hjälp kunden komma igång
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ----------------------------------------------------------
+% SLIDE 17: Läsrättigheter till företagsbankkontoß
+% ----------------------------------------------------------
+\begin{frame}[fragile]
+  \frametitle{Steg 1: Läsrättigheter till företagets bankkonto}
+
+  \begin{block}{Varför behövs detta?}
+    \vspace{0.2cm}
+    För att vi ska kunna hjälpa dig med löpande bokföring behöver vi läsrättigheter till ditt företagsbankkonto.
+    Detta gör att vi automatiskt kan hämta kontoutdrag och matcha betalningar mot fakturor.
+    \vspace{0.2cm}
+    \textbf{OBS:} Vi får ENDAST läsrättigheter – vi kan aldrig göra betalningar eller överföringar.
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{Så här gör du (välj din bank):}
+    \footnotesize
+    \begin{itemize}
+      \item \textbf{SEB:} Logga in på företag.seb.se → Inställningar → Behörigheter → Lägg till läsrättighet → Ange vårt org.nr: [AUTO-IFYLLT]
+      \item \textbf{Handelsbanken:} Företag.handelsbanken.se → Behörigheter → Kontoåtkomst → Lägg till extern part → Org.nr: [AUTO-IFYLLT]
+      \item \textbf{Nordea:} Logga in på företag.nordea.se → Administrera → Behörigheter → Open Banking → Ge läsrättighet → [AUTO-IFYLLT]
+      \item \textbf{Swedbank:} Företag.swedbank.se → Inställningar → Företagsbehörigheter → Lägg till mottagare → [AUTO-IFYLLT]
+      \item \textbf{Andra banker:} Kontakta din bank och be om läsrättighet (PSD2/Open Banking) för org.nr: [AUTO-IFYLLT]
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.4cm}
+  \begin{center}
+    \beamerbutton{✓ Klart – jag har gett läsrättighet}
+  \end{center}
+
+  \vspace{0.3cm}
+  \footnotesize
+  \textit{Tips: Ta en skärmdump när du givit behörigheten – då har du ett kvitto för framtida referens.}
+
+\end{frame}
+
+% ----------------------------------------------------------
+% SLIDE 18: Deklarationsombud via Skatteverket
+% ----------------------------------------------------------
+\begin{frame}[fragile]
+  \frametitle{Steg 2: Lägg till oss som deklarationsombud}
+
+  \begin{block}{Varför behövs detta?}
+    \vspace{0.2cm}
+    För att vi ska kunna deklarera F-skatt, moms och arbetsgivaravgifter åt dig behöver du lägga till oss
+    som deklarationsombud hos Skatteverket.
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{Så här gör du:}
+    \footnotesize
+    \begin{enumerate}
+      \item Gå till \textbf{skatteverket.se/etjanster}
+      \item Logga in med BankID
+      \item Välj \textbf{"Mina sidor"} → \textbf{"Fullmakter"} → \textbf{"Lägg till ombud"}
+      \item Ange vårt organisationsnummer: \textbf{[AUTO-IFYLLT från config.json]}
+      \item Välj behörigheter:
+        \begin{itemize}
+          \item ✓ Deklarationsombud (F-skatt)
+          \item ✓ Momsdeklaration
+          \item ✓ Arbetsgivardeklaration
+          \item ✓ Inkomstdeklaration för företag
+        \end{itemize}
+      \item Bekräfta med BankID
+    \end{enumerate}
+  \end{block}
+
+  \vspace{0.4cm}
+  \begin{center}
+    \beamerbutton{Verifiera att jag lagt till ombud}
+  \end{center}
+
+  \vspace{0.3cm}
+  \footnotesize
+  \textit{När du klickar verifierar vi via Skatteverkets Ombudshantering API att behörigheten är registrerad.}\\
+  \textit{Om det inte syns än: Det kan ta några minuter – prova igen om en stund.}
+
+\end{frame}
+
+% ----------------------------------------------------------
+% SLIDE 19: Digital dokumenthantering (Scan to Dropbox/Email)
+% ----------------------------------------------------------
+\begin{frame}[fragile]
+  \frametitle{Steg 3: Sätt upp digital dokumenthantering}
+
+  \begin{block}{Varför är detta viktigt?}
+    \vspace{0.2cm}
+    För att vi ska kunna bokföra snabbt och korrekt behöver vi få dina underlag digitalt.
+    Med rätt setup behöver du bara lägga fakturor och kvitton i skannern – resten sker automatiskt!
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{Alternativ 1: Scan to Email (enklast)}
+    \footnotesize
+    \textbf{Steg:}
+    \begin{enumerate}
+      \item Hitta "Scan to Email"-funktionen i din skanner (oftast under Settings/Network)
+      \item Lägg till vår e-postadress: \textbf{underlag@[DIN-BYRA].se} [AUTO-IFYLLT]
+      \item Testa genom att scanna ett kvitto och skicka
+      \item Vi bekräftar när vi mottagit test-dokumentet ✓
+    \end{enumerate}
+    \textbf{Funkar med:} De flesta kontorsskannrar (Fujitsu, Brother, HP, Canon, Epson)
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{Alternativ 2: Scan to Dropbox (rekommenderas)}
+    \footnotesize
+    \textbf{Steg:}
+    \begin{enumerate}
+      \item Vi skapar en delad Dropbox-mapp: \textbf{[FÖRETAGSNAMN]\_Underlag}
+      \item Du får en inbjudan på e-post – acceptera den
+      \item Konfigurera din skanner att spara till Dropbox-mappen
+      \item Skapa undermappar: \texttt{Leverantörsfakturor}, \texttt{Kvitton}, \texttt{Avtal}, \texttt{Löner}
+    \end{enumerate}
+    \textbf{Fördel:} Du kan släppa filer från mobilen, datorn eller skannern – allt hamnar på samma ställe!
+  \end{block}
+
+  \vspace{0.4cm}
+  \begin{center}
+    \beamerbutton{✓ Klart – jag har konfigurerat dokumenthantering}
+  \end{center}
+
+\end{frame}
+
+% ----------------------------------------------------------
+% SLIDE 19b: Guide för vanliga skannermärken (expanderbar)
+% ----------------------------------------------------------
+\begin{frame}[fragile]
+  \frametitle{Steg 3b: Scannerguide (per märke)}
+  \framesubtitle{Expandera din scannermodell för detaljerad guide}
+
+  \begin{block}{Fujitsu ScanSnap (iX-serien, S1300, etc.)}
+    \footnotesize
+    \begin{enumerate}
+      \item Öppna \textbf{ScanSnap Manager}
+      \item Högerklicka på ikonen → \textbf{Settings}
+      \item Under "Save" välj \textbf{"Specify a folder"}
+      \item Bläddra till din Dropbox-mapp: \texttt{Dropbox/[FÖRETAGSNAMN]\_Underlag/}
+      \item Klart! Testa genom att scanna ett dokument
+    \end{enumerate}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{block}{Brother (ADS-serien, MFC-serien)}
+    \footnotesize
+    \begin{enumerate}
+      \item Tryck på \textbf{Scan} på skannerns display
+      \item Välj \textbf{"to E-mail"} eller \textbf{"to Network"}
+      \item Lägg till e-post: \textbf{underlag@[DIN-BYRA].se}
+      \item Spara inställningen som favorit (t.ex. "Bokföring")
+      \item Framöver: Tryck bara på favoriten och scanna!
+    \end{enumerate}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{block}{HP OfficeJet / LaserJet (med ADF)}
+    \footnotesize
+    \begin{enumerate}
+      \item Gå till skannerns webbgränssnitt (skriv IP-adressen i webbläsare)
+      \item Välj \textbf{Scan/Digital Send} → \textbf{Email}
+      \item Konfigurera SMTP (vi hjälper dig med detta)
+      \item Lägg till mottagare: \textbf{underlag@[DIN-BYRA].se}
+      \item Spara som snabbval
+    \end{enumerate}
+  \end{block}
+
+  \vspace{0.3cm}
+  \footnotesize
+  \textit{Behöver du hjälp? Ring oss på [TELEFONNUMMER] så går vi igenom setup tillsammans! (5-10 min)}
+
+\end{frame}
+
+% ----------------------------------------------------------
+% SLIDE 20: Välkommen som kund! 🎉
+% ----------------------------------------------------------
+\begin{frame}[fragile]
+  \frametitle{🎉 Välkommen som kund!}
+
+  \begin{block}{Grattis – du är nu redo att börja!}
+    \vspace{0.2cm}
+    Alla steg är nu klara och vi kan börja arbeta med din bokföring.
+    Här är en sammanfattning av vad som hänt:
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{✓ Klart:}
+    \footnotesize
+    \begin{itemize}
+      \item ✓ Du har genomgått vår onboarding-process
+      \item ✓ Riskbedömning genomförd och godkänd
+      \item ✓ Avtal signerat med BankID
+      \item ✓ Läsrättigheter till bankkonto uppsatta
+      \item ✓ Deklarationsombud registrerat hos Skatteverket
+      \item ✓ Digital dokumenthantering konfigurerad
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{Nästa steg:}
+    \footnotesize
+    \begin{enumerate}
+      \item \textbf{Inom 24 timmar:} Din personliga redovisningskonsult kontaktar dig för att boka uppstartsmöte
+      \item \textbf{Uppstartsmöte:} Vi går igenom din verksamhet, förväntningar och bokföringsrutiner (30-45 min)
+      \item \textbf{Första bokföringen:} Vi påbörjar arbetet med din löpande bokföring
+      \item \textbf{Månadsmöte:} Varje månad får du en ekonomisk rapport och rådgivning
+    \end{enumerate}
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{Kontaktinformation}
+    \footnotesize
+    \textbf{Din redovisningskonsult:} [NAMN] – [E-POST] – [TELEFON] [AUTO-IFYLLT]\\
+    \textbf{Byråns support:} support@[DIN-BYRA].se – [SUPPORT-TELEFON]\\
+    \textbf{Akuta ärenden:} Ring alltid – vi svarar helgfria vardagar 08:00-17:00
+  \end{block}
+
+  \vspace{0.4cm}
+  \begin{center}
+    \Large\textbf{Tack för ditt förtroende!}\\
+    \vspace{0.2cm}
+    \normalsize\textit{Vi ser fram emot ett långt och framgångsrikt samarbete.}
+  \end{center}
+
+  \vspace{0.5cm}
+  \begin{flushright}
+    \beamerbutton{Stäng och gå till Min Sida}
+  \end{flushright}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Sida för inställningar som erhålles vid klick på kuggghjulet uppe till höger
 
@@ -787,11 +1136,18 @@
       \item \textbf{Registrera användare} – Lägg till användare genom att ange deras e-postadress.
       En inbjudan skickas automatiskt till mottagaren.
       \vspace{0.2cm}
-      \item \textbf{Ladda upp konfigurationsfil} – Innehåller textinnehåll för editerbara slides.
+      \item \textbf{Ladda upp konfigurationsfil (config.json)} – Innehåller:
+        \begin{itemize}
+          \item Textinnehåll för editerbara slides
+          \item Antal år för SIE-filhämtning (standard: 7 år enligt lag, kan reduceras för nystartade företag)
+          \item Aktiverade/avaktiverade risktester
+          \item Valfria fält och textanpassningar
+        \end{itemize}
       Vissa slides (t.ex.\ drop zones och inmatning av personnummer/org.nr) är låsta, men kan vara flyttbara i listan.
       Resultatslides genereras dynamiskt av programmet, är ej editerbara men kan ordnas om.
       \vspace{0.2cm}
       \item \textbf{Avmarkera tester} – Möjlighet att avaktivera specifika riskbedömningstester som användaren anser oväsentliga.
+      \textit{Exempel:} Layering-analys, PEP-kontroll, sanktionslistor, verifikationsfel-kontroll.
       \vspace{0.2cm}
       \item \textbf{Prenumeration och konto} – Hantera prenumerationsstatus:
         \begin{itemize}

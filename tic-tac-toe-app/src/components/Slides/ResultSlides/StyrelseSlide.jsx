@@ -6,7 +6,7 @@ export default function StyrelseSlide({ onNext, onBack }) {
   const signatoryData = mockRoaringData.signatories;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
       <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-5xl w-full">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
@@ -123,29 +123,29 @@ export default function StyrelseSlide({ onNext, onBack }) {
         )}
 
         {/* Firmatecknare */}
-        <div className="mb-8 p-6 bg-amber-50 rounded-xl border border-amber-300">
+        <div className="mb-8 p-6 bg-brand-50 rounded-xl border border-brand-300">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
-            <svg className="w-6 h-6 mr-2 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
             Firmatecknare
           </h2>
-          <div className="mb-4 p-4 bg-white rounded-lg border border-amber-200">
+          <div className="mb-4 p-4 bg-white rounded-lg border border-brand-200">
             <div className="flex items-center">
               <span className="text-gray-600 font-medium mr-2">Firmateckningsregler:</span>
-              <span className="text-amber-800 font-bold text-lg">{signatoryData.signingRules}</span>
+              <span className="text-brand-800 font-bold text-lg">{signatoryData.signingRules}</span>
             </div>
           </div>
           
           <div className="space-y-3 mb-4">
             {signatoryData.authorizedSignatories.map((signatory, index) => (
-              <div key={index} className="p-4 bg-white rounded-lg border border-amber-200">
+              <div key={index} className="p-4 bg-white rounded-lg border border-brand-200">
                 <div className="flex justify-between items-center">
                   <div>
                     <div className="font-semibold text-gray-800">{signatory.name}</div>
                     <div className="text-xs text-gray-500 font-mono">{signatory.personalNumber}</div>
                   </div>
-                  <span className="px-3 py-1 bg-amber-200 text-amber-900 rounded-full text-sm font-medium">
+                  <span className="px-3 py-1 bg-brand-200 text-brand-900 rounded-full text-sm font-medium">
                     {signatory.signingRight}
                   </span>
                 </div>
@@ -153,7 +153,7 @@ export default function StyrelseSlide({ onNext, onBack }) {
             ))}
           </div>
 
-          <div className="pt-4 border-t border-amber-200">
+          <div className="pt-4 border-t border-brand-200">
             <h3 className="font-semibold text-gray-800 mb-2">Giltiga kombinationer:</h3>
             <ul className="space-y-2">
               {signatoryData.signingCombinations.map((combination, index) => (
@@ -181,7 +181,7 @@ export default function StyrelseSlide({ onNext, onBack }) {
           </button>
           <button
             onClick={onNext}
-            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg hover:from-orange-600 hover:to-amber-600 transition-colors font-medium flex items-center"
+            className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-500 text-white rounded-lg hover:from-brand-600 hover:to-brand-600 transition-colors font-medium flex items-center"
           >
             Nästa: Riskindikatorer
             <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
