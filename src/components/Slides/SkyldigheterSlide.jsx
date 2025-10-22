@@ -2,6 +2,17 @@ import { useState } from 'react';
 
 export default function SkyldigheterSlide({ onNext, onBack }) {
   const [acknowledged, setAcknowledged] = useState(false);
+  const [showComplianceModal, setShowComplianceModal] = useState(false);
+  const [complianceChecks, setComplianceChecks] = useState({
+    kontanter: false,
+    vinstmarginal: false,
+    betalningUtanFaktura: false,
+    fakturaSpecifikation: false,
+    agarlån: false
+  });
+
+  // Check if all compliance items are checked
+  const allComplianceChecked = Object.values(complianceChecks).every(v => v);
 
   const skyldigheter = [
     {
@@ -155,6 +166,137 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
           </div>
         </div>
 
+        {/* Critical Compliance Requirements - ALWAYS MANDATORY */}
+        <div className="mb-6 p-6 bg-red-50 border-2 border-red-400 rounded-lg">
+          <div className="flex items-start gap-3 mb-4">
+            <svg className="w-7 h-7 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            <div className="flex-1">
+              <h4 className="font-bold text-red-900 text-lg mb-2">⚠️ KRITISKA FÖRBUD - DETTA ÄR OLAGLIGT</h4>
+              <p className="text-red-800 text-sm mb-4">
+                Följande handlingar är <strong>förbjudna enligt lag</strong> och kan leda till skattetillägg, företagsbot eller till och med fängelse. 
+                Redovisningsbyrån kan <strong>inte</strong> hjälpa dig om du bryter mot dessa regler.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3 pl-10">
+            <div className="flex items-start gap-3 p-3 bg-white rounded border-l-4 border-red-600">
+              <input
+                type="checkbox"
+                checked={complianceChecks.kontanter}
+                onChange={(e) => setComplianceChecks({...complianceChecks, kontanter: e.target.checked})}
+                className="mt-1 w-5 h-5 text-red-600 rounded focus:ring-red-500"
+              />
+              <div className="flex-1">
+                <p className="font-semibold text-gray-900">Kontanthantering utan tillstånd</p>
+                <p className="text-sm text-gray-700 mt-1">
+                  Det är <strong>OTILLÅTET att hantera kontanter</strong> utan särskilt tillstånd från Skatteverket. 
+                  Alla betalningar ska ske via bank/Swish med full spårbarhet.
+                </p>
+                <p className="text-xs text-red-700 mt-1 italic">Lag: Skatteförfarandelagen 39 kap</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-white rounded border-l-4 border-red-600">
+              <input
+                type="checkbox"
+                checked={complianceChecks.vinstmarginal}
+                onChange={(e) => setComplianceChecks({...complianceChecks, vinstmarginal: e.target.checked})}
+                className="mt-1 w-5 h-5 text-red-600 rounded focus:ring-red-500"
+              />
+              <div className="flex-1">
+                <p className="font-semibold text-gray-900">Vinstmarginalbeskattning utan medgivande</p>
+                <p className="text-sm text-gray-700 mt-1">
+                  Det är <strong>OTILLÅTET att tillämpa vinstmarginalbeskattning</strong> (t.ex. vid begagnathandel) utan Skatteverkets medgivande.
+                </p>
+                <p className="text-xs text-red-700 mt-1 italic">Lag: Mervärdesskattelagen 9a kap</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-white rounded border-l-4 border-red-600">
+              <input
+                type="checkbox"
+                checked={complianceChecks.betalningUtanFaktura}
+                onChange={(e) => setComplianceChecks({...complianceChecks, betalningUtanFaktura: e.target.checked})}
+                className="mt-1 w-5 h-5 text-red-600 rounded focus:ring-red-500"
+              />
+              <div className="flex-1">
+                <p className="font-semibold text-gray-900">Ta emot betalning utan faktura</p>
+                <p className="text-sm text-gray-700 mt-1">
+                  Det är <strong>OTILLÅTET att ta emot betalning</strong> (kontant, Swish, bankgiro) <strong>utan att utfärda faktura</strong>. 
+                  Alla intäkter måste dokumenteras.
+                </p>
+                <p className="text-xs text-red-700 mt-1 italic">Lag: Bokföringslagen 5 kap, Brottsbalken 11 kap (ekonomiska brott)</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-white rounded border-l-4 border-red-600">
+              <input
+                type="checkbox"
+                checked={complianceChecks.fakturaSpecifikation}
+                onChange={(e) => setComplianceChecks({...complianceChecks, fakturaSpecifikation: e.target.checked})}
+                className="mt-1 w-5 h-5 text-red-600 rounded focus:ring-red-500"
+              />
+              <div className="flex-1">
+                <p className="font-semibold text-gray-900">Faktura utan fullständig specifikation</p>
+                <p className="text-sm text-gray-700 mt-1">
+                  Fakturor <strong>MÅSTE specificera</strong>: vad som gjorts, vad som levererats, antal, pris per enhet, timmar, moms.
+                  Vaga beskrivningar som "Diverse arbete" är <strong>inte godkända</strong>.
+                </p>
+                <p className="text-xs text-red-700 mt-1 italic">Lag: Mervärdesskattelagen 11 kap 1 §, Bokföringslagen 5 kap</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-white rounded border-l-4 border-red-600">
+              <input
+                type="checkbox"
+                checked={complianceChecks.agarlån}
+                onChange={(e) => setComplianceChecks({...complianceChecks, agarlån: e.target.checked})}
+                className="mt-1 w-5 h-5 text-red-600 rounded focus:ring-red-500"
+              />
+              <div className="flex-1">
+                <p className="font-semibold text-gray-900">Otillåtna lån från företaget</p>
+                <p className="text-sm text-gray-700 mt-1">
+                  Det är <strong>FÖRBJUDET</strong> för företaget att låna ut pengar till ägare, styrelseledamöter, VD eller närstående. 
+                  Privata uttag måste bokföras som lön/utdelning (med skatt) eller som återbetalning av tidigare aktieägartillskott.
+                </p>
+                <p className="text-xs text-red-700 mt-1 italic">Lag: Aktiebolagslagen 21 kap 1 § (straffbart med böter eller fängelse)</p>
+              </div>
+            </div>
+          </div>
+
+          {!allComplianceChecked && (
+            <div className="mt-4 p-3 bg-red-100 rounded-lg border border-red-300">
+              <p className="text-sm text-red-900 font-semibold text-center">
+                ⚠️ Du måste bekräfta alla punkter ovan för att kunna fortsätta
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Button: Custom Compliance Questions (from config.json) */}
+        <div className="mb-6">
+          <button
+            onClick={() => setShowComplianceModal(true)}
+            className="w-full flex items-center justify-between gap-3 p-4 bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-300 rounded-lg hover:from-purple-100 hover:to-purple-200 transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <div className="text-left">
+                <p className="font-semibold text-purple-900">Byråns egna kontrollfrågor</p>
+                <p className="text-sm text-purple-700">Klicka för att se branschspecifika regler och varningar</p>
+              </div>
+            </div>
+            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
         {/* Acknowledgement Checkbox */}
         <div className="mb-6 p-5 bg-gray-50 rounded-lg border border-gray-300">
           <label className="flex items-start gap-3 cursor-pointer">
@@ -165,7 +307,9 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
               className="mt-1 w-5 h-5 text-brand-600 rounded focus:ring-brand-500"
             />
             <span className="text-gray-800">
-              Jag har tagit del av och förstår mina skyldigheter som kund enligt uppdragsavtalet och gällande lagstiftning. Jag förbinder mig att uppfylla dessa krav under samarbetets gång.
+              Jag har tagit del av och förstår mina skyldigheter som kund enligt uppdragsavtalet och gällande lagstiftning. 
+              Jag har läst och förstått de <strong>kritiska förbuden</strong> ovan och förbinder mig att <strong>ALDRIG</strong> bryta mot dessa regler.
+              Jag är medveten om att brott mot dessa regler kan leda till uppsägning av avtal och juridiska konsekvenser.
             </span>
           </label>
         </div>
@@ -191,12 +335,13 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
 
           <button
             onClick={onNext}
-            disabled={!acknowledged}
+            disabled={!acknowledged || !allComplianceChecked}
             className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all font-semibold shadow-lg ${
-              acknowledged
+              acknowledged && allComplianceChecked
                 ? 'bg-brand-600 text-white hover:bg-brand-700'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
+            title={!allComplianceChecked ? "Du måste bekräfta alla kritiska förbud först" : ""}
           >
             Gå vidare till avtal
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -205,6 +350,103 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
           </button>
         </div>
       </div>
+
+      {/* Modal: Custom Compliance Questions */}
+      {showComplianceModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 sticky top-0 bg-white">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Byråns egna kontrollfrågor
+                </h2>
+                <button
+                  onClick={() => setShowComplianceModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {/* Info about config.json */}
+              <div className="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+                <p className="text-blue-900 font-semibold mb-2">💡 Funktionalitet under utveckling</p>
+                <p className="text-sm text-blue-800">
+                  Denna funktion låter redovisningsbyrån lägga till egna branschspecifika kontrollfrågor via <code className="bg-blue-100 px-1 rounded">config.json</code>.
+                  Kunden måste bekräfta alla frågor innan onboarding kan slutföras.
+                </p>
+              </div>
+
+              {/* Example questions (will be loaded from config.json later) */}
+              <div className="space-y-4">
+                <h3 className="font-bold text-gray-900 text-lg mb-3">Exempel på egna kontrollfrågor:</h3>
+                
+                <div className="p-4 bg-gray-50 border border-gray-300 rounded-lg">
+                  <p className="text-sm text-gray-600 italic">
+                    📋 <strong>Restaurangbranschen:</strong> "Har du kassaregister som uppfyller Skatteverkets krav? (Obligatoriskt sedan 2010)"
+                  </p>
+                </div>
+
+                <div className="p-4 bg-gray-50 border border-gray-300 rounded-lg">
+                  <p className="text-sm text-gray-600 italic">
+                    📋 <strong>Byggsektorn:</strong> "Är du medveten om F-skattsedel och RUT/ROT-regler vid arbete på privatbostäder?"
+                  </p>
+                </div>
+
+                <div className="p-4 bg-gray-50 border border-gray-300 rounded-lg">
+                  <p className="text-sm text-gray-600 italic">
+                    📋 <strong>E-handel:</strong> "Säljer du till andra EU-länder? (MOSS/OSS-registrering kan krävas)"
+                  </p>
+                </div>
+
+                <div className="p-4 bg-gray-50 border border-gray-300 rounded-lg">
+                  <p className="text-sm text-gray-600 italic">
+                    📋 <strong>Fordonshandel:</strong> "Tillämpar du vinstmarginalbeskattning vid begagnathandel? (Kräver Skatteverkets medgivande)"
+                  </p>
+                </div>
+              </div>
+
+              {/* Technical info */}
+              <div className="mt-6 p-4 bg-purple-50 border border-purple-300 rounded-lg">
+                <h4 className="font-semibold text-purple-900 mb-2">🛠️ Teknisk implementation (v2.0)</h4>
+                <p className="text-sm text-purple-800 mb-2">
+                  Redovisningsbyrån kan konfigurera egna frågor i <code className="bg-purple-100 px-1 rounded">config.json</code>:
+                </p>
+                <pre className="text-xs bg-purple-100 p-3 rounded overflow-x-auto">
+{`{
+  "customComplianceQuestions": [
+    {
+      "id": "cash-handling-2025",
+      "question": "Otillåtet hantera kontanter...",
+      "category": "payment-methods",
+      "severity": "critical",
+      "legalReference": "Skatteförfarandelagen 39 kap"
+    }
+  ]
+}`}
+                </pre>
+              </div>
+
+              {/* Close button */}
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setShowComplianceModal(false)}
+                  className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-semibold"
+                >
+                  Stäng
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

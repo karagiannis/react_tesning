@@ -141,6 +141,17 @@
 
   % CTA
   \beamerbutton{Börja onboarding nu} \hspace{0.5cm} \beamerbutton{Se demo}
+  
+  \vspace{1.5cm}
+  
+  % Cookie Banner (visas längst ner på skärmen)
+  \begin{block}{Cookie-meddelande (visas vid första besöket)}
+    \footnotesize
+    Vi använder cookies för att förbättra din upplevelse. Läs vår \textcolor{blue}{\underline{Cookie Policy}}.
+    
+    \vspace{0.3cm}
+    \beamerbutton{Tillåt alla cookies} \hspace{0.3cm} \beamerbutton{Tillåt endast nödvändiga cookies}
+  \end{block}
 \end{frame}
 
 % Herosektion fortsättning – mer lättläst
@@ -184,9 +195,15 @@
     \textbf{Bekräfta lösenord:} \underline{\hspace{6.5cm}} \\
 
     \vspace{0.8cm}
-    $\Box$ Jag bekräftar att jag är en människa (inte en bot).
+    \fbox{\parbox{6.5cm}{
+      \centering
+      \textcolor{gray}{\textbf{[Cloudflare Turnstile Widget]}} \\
+      \tiny Automatisk bot-verifiering (ingen manuell CAPTCHA)
+    }}
+    
+    \vspace{0.3cm}
     \footnotesize
-    \textit{(Vi använder automatiska skydd, t.ex. Cloudflare, för att förhindra missbruk och spam.)}
+    \textit{Vi använder Cloudflare Turnstile för att förhindra missbruk och spam.}
 
     \vspace{1.2cm}
     \centering
@@ -197,7 +214,7 @@
     
     \vspace{0.6cm}
     \colorbox{white}{%
-      \parbox{5cm}{\centering\footnotesize\textbf{Logga in med Google}}%
+      \parbox{5cm}{\centering\footnotesize\textbf{Fortsätt med Google}}%
     }
   \end{minipage}
   
@@ -251,6 +268,14 @@
     \footnotesize
     \hyperlink{forgotpassword}{\textcolor{terracotta}{Glömt lösenord?}}
 
+    \vspace{0.6cm}
+    \footnotesize
+    \fbox{\parbox{6.5cm}{
+      \centering
+      \textcolor{gray}{\textbf{[Cloudflare Turnstile Widget]}} \\
+      \tiny Automatisk bot-verifiering
+    }}
+
     \vspace{0.8cm}
     \centering
     \beamerbutton{Logga in}
@@ -260,7 +285,7 @@
 
     \vspace{0.6cm}
     \colorbox{white}{%
-      \parbox{5cm}{\centering\footnotesize\textbf{Logga in med Google}}%
+      \parbox{5cm}{\centering\footnotesize\textbf{Fortsätt med Google}}%
     }
   \end{minipage}
 
@@ -1249,10 +1274,16 @@
 \end{frame}
 
 % Slide 21: Kundens förväntade skyldigheter (SkyldigheterSlide i React, route: /skyldigheter)
+% 
+% VIKTIGT: Denna slide innehåller även ett MODALT FÖNSTER som inte har egen sidebar-ingång!
+% Modal öppnas via knapp "Byråns egna kontrollfrågor" och visar branschspecifika regler.
+% 
 \begin{frame}[label=skyldigheter]
   \frametitle{Kundens förväntade skyldigheter}
   \small
   Efter att kunden godkänts i riskbedömningen informeras om vilka skyldigheter som gäller under samarbetet:
+  
+  \textbf{Grundläggande skyldigheter (grid-layout):}
   \begin{itemize}
     \item Faktura och förenklad faktura - korrekt utseende enligt Skatteverkets regler.
     \item Arkivering av bokföringsmaterial i minst sju år.
@@ -1263,11 +1294,32 @@
     \item Förstå och följa grundläggande redovisningsskyldigheter.
     \item Vara medveten om att samarbetet kan avslutas vid avtalsbrott eller bristande efterlevnad.
   \end{itemize}
+  
+  \vspace{0.3cm}
+  \textbf{KRITISKA FÖRBUD (5 obligatoriska checkboxar - måste alla checkas):}
+  \begin{enumerate}
+    \item Kontanthantering utan Skatteverkets tillstånd (Skatteförfarandelagen 39 kap)
+    \item Vinstmarginalbeskattning utan Skatteverkets medgivande (ML 9a kap)
+    \item Ta emot betalning utan faktura (BFL 5 kap, Brottsbalken 11 kap)
+    \item Faktura utan fullständig specifikation (ML 11 kap 1§, BFL 5 kap)
+    \item Otillåtna lån från företaget till ägare/styrelse/VD (Aktiebolagslagen 21 kap 1§)
+  \end{enumerate}
+  
+  \vspace{0.3cm}
+  \textbf{Modal-fönster: "Byråns egna kontrollfrågor"}
+  \begin{itemize}
+    \item Öppnas via lila knapp (INTE egen slide i sidebar)
+    \item Visar branschspecifika exempel: restaurang (kassaregister), bygg (F-skatt/RUT/ROT), e-handel (MOSS/OSS), fordon (vinstmarginal)
+    \item Framtida funktion (v2.0): Läser från \texttt{config.json} med byråns egna frågor
+    \item Kunden måste bekräfta alla custom-frågor innan onboarding slutförs
+  \end{itemize}
+  
+  \vspace{0.3cm}
+  \textit{Navigation aktiveras först när alla 5 kritiska förbud + acknowledgement-box är checkade.}
+  
   \vspace{0.5cm}
-  \textit{Dessa skyldigheter regleras i uppdragsavtalet och enligt lag.}
-  \vspace{0.8cm}
   \begin{flushright}
-    \beamerbutton{Nästa}
+    \beamerbutton{Gå vidare till avtal}
   \end{flushright}
 \end{frame}
 

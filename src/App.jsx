@@ -164,7 +164,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HeroSlide onNext={() => navigate('/login')} onLogin={() => navigate('/login')} onRegister={() => navigate('/register')} onDemo={handleDemo} />} />
         <Route path="/login" element={<LoginSlide onNext={handleLogin} onRegister={() => navigate('/register')} />} />
-        <Route path="/register" element={<RegisterSlide onNext={() => navigate('/verify')} />} />
+        <Route path="/register" element={<RegisterSlide onNext={() => navigate('/verify')} onLogin={() => navigate('/login')} />} />
         <Route path="/verify" element={<VerifySlide onNext={handleLogin} />} />
         <Route path="/forgot-password" element={<ForgotPasswordSlide onNext={() => navigate('/reset-password')} onBack={() => navigate('/login')} />} />
         <Route path="/reset-password" element={<ResetPasswordSlide onNext={() => navigate('/login')} onResendCode={() => navigate('/forgot-password')} />} />
@@ -188,7 +188,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<HeroSlide onNext={() => navigate('/login')} onLogin={() => navigate('/login')} onRegister={() => navigate('/register')} onDemo={handleDemo} />} />
             <Route path="/login" element={<LoginSlide onNext={handleLogin} onRegister={() => navigate('/register')} />} />
-            <Route path="/register" element={<RegisterSlide onNext={() => navigate('/verify')} />} />
+            <Route path="/register" element={<RegisterSlide onNext={() => navigate('/verify')} onLogin={() => navigate('/login')} />} />
             <Route path="/verify" element={<VerifySlide onNext={handleLogin} />} />
             <Route path="/forgot-password" element={<ForgotPasswordSlide onNext={() => navigate('/reset-password')} onBack={() => navigate('/login')} />} />
             <Route path="/reset-password" element={<ResetPasswordSlide onNext={() => navigate('/login')} onResendCode={() => navigate('/forgot-password')} />} />
