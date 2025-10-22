@@ -1,0 +1,24 @@
+$ORIGIN celestial.se.
+$TTL 300
+@ SOA ns1.loopia.se. registry.loopia.se. (
+                                1760572800
+                                3H  ; Refresh after three hours
+                                1H  ; Retry after one hour
+                                1W  ; Expire after one week
+                                1D )    ; Minimum one day TTL
+
+@                               IN      3600    NS      ns1.loopia.se.
+@                               IN      3600    NS      ns2.loopia.se.
+
+@                               IN      3600    A       46.101.221.97
+
+*                               IN      3600    A       46.101.221.97
+
+56687795                        IN      3600    CNAME   sendgrid.net.
+_dmarc                          IN      3600    TXT     v=DMARC1; p=none;
+em1040                          IN      3600    CNAME   u56687795.wl046.sendgrid.net.
+s1._domainkey                   IN      3600    CNAME   s1.domainkey.u56687795.wl046.sendgrid.net.
+s2._domainkey                   IN      3600    CNAME   s2.domainkey.u56687795.wl046.sendgrid.net.
+url2891                         IN      3600    CNAME   sendgrid.net.
+www                             IN      3600    A       46.101.221.97
+

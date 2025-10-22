@@ -1,0 +1,1013 @@
+\documentclass[12pt,a4paper]{article}
+
+% Paket
+\usepackage[utf8]{inputenc}
+\usepackage[swedish]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{verbatim}
+
+% Färger
+\definecolor{brandgreen}{RGB}{0,112,74}
+\definecolor{lightgray}{RGB}{245,245,245}
+\definecolor{codegray}{RGB}{50,50,50}
+
+% Hyperref inställningar
+\hypersetup{
+  colorlinks=true,
+  linkcolor=brandgreen,
+  urlcolor=brandgreen,
+  citecolor=brandgreen
+}
+
+% Listings för kodexempel
+\lstset{
+  basicstyle=\small\ttfamily,
+  backgroundcolor=\color{lightgray},
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny\color{codegray}
+}
+
+% Titel
+\title{\textbf{API Endpoints Specifikation} \\ \large Komplett Backend-mappning för Onboarding-flödet}
+\author{Celestial AB - Roaring}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introduktion}
+
+Detta dokument beskriver \textbf{alla API endpoints} som behövs för att implementera den kompletta onboarding-processen enligt \texttt{Onboardin\_app\_ny.tex}.
+
+\subsection{Dokumentstruktur}
+
+Dokumentet är uppdelat i två huvuddelar:
+
+\textbf{Del 1: Autentiseringssidor (Utan Sidebar)} -- Sidor som visas innan användaren är inloggad, inklusive landing page, registrering, verifiering, inloggning och lösenordsåterställning. Dessa sidor har ingen sidebar.
+
+\textbf{Del 2: Onboarding Slides (Med Sidebar)} -- Slides som visas efter inloggning och utgör själva onboarding-processen. Dessa har sidebar med progressindikator och navigering.
+
+För varje slide/steg i onboarding-flödet dokumenteras:
+\begin{itemize}[noitemsep]
+  \item Vilka API endpoints som behövs
+  \item HTTP-metod (GET, POST, PUT, DELETE)
+  \item Request-format (JSON schema, multipart/form-data för filer)
+  \item Response-format (success och error cases)
+  \item Affärslogik och valideringar
+  \item Externa integrationer (Bolagsverket, Skatteverket, BankID, etc.)
+  \item Databastabeller som påverkas
+\end{itemize}
+
+\subsection{Teknisk Stack}
+\begin{itemize}[noitemsep]
+  \item \textbf{Backend:} FastAPI (Python 3.11+)
+  \item \textbf{Databas:} PostgreSQL 15+
+  \item \textbf{Authentication:} JWT tokens (access + refresh)
+  \item \textbf{File Storage:} AWS S3 eller lokal disk under utveckling
+  \item \textbf{OCR:} Google Cloud Vision API eller Tesseract
+  \item \textbf{Externa API:er:} Bolagsverket, Skatteverket, BankID, SendGrid
+\end{itemize}
+
+\subsection{Base URL}
+\begin{verbatim}
+Development: http://localhost:8000/api
+Production:  https://api.roaring.se/api
+\end{verbatim}
+
+\subsection{Autentisering}
+Alla endpoints (utom registrering, login, verify) kräver JWT token i header:
+\begin{verbatim}
+Authorization: Bearer <access_token>
+\end{verbatim}
+
+\newpage
+
+% ############################################################################
+% ############################################################################
+% DEL 1: AUTENTISERINGSSIDOR (UTAN SIDEBAR)
+% ############################################################################
+% ############################################################################
+
+% ============================================================================
+% SIDA 1: LANDING PAGE (Hero-sektion)
+% ============================================================================
+
+\section{Landing Page (Hero-sektion)}
+
+\subsection{API-endpoints Sammanfattning}
+\begin{itemize}[noitemsep]
+  \item \texttt{GET /api/auth/session} — Kontrollera om användaren är inloggad (körs automatiskt om JWT finns i localStorage)
+  \item \texttt{POST /api/auth/refresh} — Förnya access token om den har upphört
+  \item \textbf{Antal anrop vid sidladdning:} 0–2 (beroende på om tokens finns i localStorage)
+\end{itemize}
+
+\subsection{Översikt}
+Landing page är den första sidan användaren ser. Den innehåller statiskt innehåll (text, features-lista, CTA-knappar) och kräver \textbf{inga API-anrop vid laddning}.
+
+\subsection{Funktionalitet}
+\begin{itemize}[noitemsep]
+  \item Visa företagsinformation och värdeproposition
+  \item Knappar: "Logga in", "Registrera", "Börja onboarding nu", "Se demo"
+  \item Alla knappar gör frontend-routing (ingen backend-kommunikation)
+  \item \textbf{Kontrollera localStorage} för sparade JWT tokens vid sidladdning
+\end{itemize}
+
+\subsection{localStorage Check och Auth-flöde}
+När React-appen laddas (i \texttt{App.jsx} eller auth context) kontrolleras localStorage för JWT tokens:
+
+\textbf{Steg 1: Kolla localStorage}
+\begin{verbatim}
+const accessToken = localStorage.getItem('accessToken');
+const refreshToken = localStorage.getItem('refreshToken');
+\end{verbatim}
+
+\textbf{Steg 2: Om tokens finns}
+\begin{itemize}[noitemsep]
+  \item Anropa \texttt{GET /api/auth/session} med \texttt{Authorization: Bearer <accessToken>}
+  \item Om \texttt{200 OK} och \texttt{authenticated: true} → Användaren är inloggad
+  \item Om \texttt{401 Unauthorized} → Access token har upphört, försök refresh
+\end{itemize}
+
+\textbf{Steg 3: Om access token upphört}
+\begin{itemize}[noitemsep]
+  \item Anropa \texttt{POST /api/auth/refresh} med refresh token
+  \item Om \texttt{200 OK} → Spara ny access token, fortsätt som inloggad
+  \item Om \texttt{401} → Refresh token upphört, logga ut (rensa localStorage)
+\end{itemize}
+
+\textbf{Steg 4: Om inga tokens finns}
+\begin{itemize}[noitemsep]
+  \item Användaren är utloggad, visa "Logga in" + "Registrera" knappar
+\end{itemize}
+
+\textbf{Knappen "Börja onboarding nu":}
+\begin{itemize}[noitemsep]
+  \item Om användaren HAR giltiga tokens → Frontend-routing till \texttt{/inledning} (ingen API-anrop)
+  \item Om användaren INTE har tokens → Frontend-routing till \texttt{/login?redirect=/inledning}
+  \item Inget dedikerat API-endpoint behövs, bara conditional routing i React
+\end{itemize}
+
+\subsection{Endpoint 1: GET /api/auth/session}
+
+\subsubsection{Beskrivning}
+Kontrollera om användaren har en aktiv session för att visa rätt UI (inloggad vs utloggad). Anropas automatiskt om JWT token finns i localStorage.
+
+\subsubsection{Request}
+\begin{itemize}[noitemsep]
+  \item \textbf{Headers:} \texttt{Authorization: Bearer <token>} (optional)
+  \item \textbf{Body:} None
+\end{itemize}
+
+\subsubsection{Response - Success (200 OK - Authenticated)}
+\begin{lstlisting}
+{
+  "authenticated": true,
+  "user": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "chef@revisionstockholm.se",
+    "role": "byrachef",
+    "firm": {
+      "id": "660e8400-e29b-41d4-a716-446655440001",
+      "name": "Revision Stockholm AB",
+      "orgNr": "556123-4567"
+    }
+  }
+}
+\end{lstlisting}
+
+\subsubsection{Response - Not Authenticated (200 OK)}
+\begin{lstlisting}
+{
+  "authenticated": false
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes}
+\begin{itemize}[noitemsep]
+  \item Körs automatiskt om access token finns i localStorage
+  \item Token valideras mot JWT secret och expiry time
+  \item Om valid → Query databas för user + firm info
+  \item Om invalid → Returnera \texttt{authenticated: false} (ingen DB query)
+  \item Frontend uppdaterar UI baserat på response
+\end{itemize}
+
+\subsection{Endpoint 2: POST /api/auth/refresh}
+
+\subsubsection{Beskrivning}
+Förnya access token med refresh token om access token har upphört.
+
+\subsubsection{Request}
+\begin{lstlisting}
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+\end{lstlisting}
+
+\subsubsection{Response - Success (200 OK)}
+\begin{lstlisting}
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expiresIn": 3600
+}
+\end{lstlisting}
+
+\subsubsection{Response - Error (401 Unauthorized)}
+\begin{lstlisting}
+{
+  "error": "invalid_token",
+  "message": "Refresh token har upphort eller ar ogiltig"
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes}
+\begin{itemize}[noitemsep]
+  \item Refresh token valideras mot databas (tabell: \texttt{refresh\_tokens})
+  \item Kontrollera expiry time (vanligtvis 30 dagar)
+  \item Om valid → Generera ny access token (15 min expiry)
+  \item Om invalid → Användaren måste logga in igen
+  \item Frontend sparar ny access token i localStorage
+\end{itemize}
+
+\subsection{Sammanfattning}
+\begin{itemize}[noitemsep]
+  \item \textbf{localStorage undersöks} vid sidladdning efter JWT tokens
+  \item \textbf{Om tokens finns:} 1-2 API-anrop (session check + ev. refresh)
+  \item \textbf{Om inga tokens:} 0 API-anrop
+  \item \textbf{Endpoints:} \texttt{GET /api/auth/session} + \texttt{POST /api/auth/refresh}
+  \item Alla knappar gör frontend-routing (inga nya API-anrop)
+\end{itemize}
+
+\newpage
+
+
+
+
+% ============================================================================
+% SIDA 2: REGISTRERING (Autentiseringssida utan sidebar)
+% ============================================================================
+
+\section{Registrering (Sida 2)}
+
+\subsection{API-endpoints Sammanfattning}
+\begin{itemize}[noitemsep]
+  \item \texttt{POST /api/auth/register} — Skapa nytt konto med email/lösenord, skicka 6-siffrig kod
+  \item \texttt{POST /api/auth/google} — Registrera eller logga in via Google OAuth
+  \item \texttt{GET /api/auth/check-email} — Real-time validering om email redan är registrerad
+  \item \textbf{Externa integrationer:} Cloudflare Turnstile (bot-skydd), SendGrid (email), Google OAuth
+\end{itemize}
+
+\subsection{Översikt}
+Registreringssidan låter användaren skapa ett nytt konto med email + lösenord eller via Google OAuth. Ett bot-skydd (Cloudflare Turnstile) används för att förhindra automatiserad spam.
+
+\subsection{Funktionalitet}
+\begin{itemize}[noitemsep]
+  \item Formulär: Email, Lösenord, Bekräfta lösenord
+  \item Lösenordskrav: Minst 12 tecken, en siffra, en versal
+  \item Cloudflare Turnstile checkbox (bot-skydd)
+  \item Alternativ: "Logga in med Google" (OAuth)
+  \item Real-time validering av email (om redan registrerad)
+  \item Vid lyckad registrering → Redirect till \texttt{/verify} med email i state
+\end{itemize}
+
+\subsection{Endpoint 1: POST /api/auth/register}
+
+\subsubsection{Beskrivning}
+Skapa nytt användarkonto, generera 6-siffrig verifieringskod, skicka via email.
+
+\subsubsection{Request}
+\begin{lstlisting}
+{
+  "email": "chef@revisionstockholm.se",
+  "password": "SecurePass123!",
+  "passwordConfirm": "SecurePass123!",
+  "captchaToken": "cloudflare-turnstile-response-token"
+}
+\end{lstlisting}
+
+\subsubsection{Response - Success (201 Created)}
+\begin{lstlisting}
+{
+  "success": true,
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "message": "Konto skapat. En 6-siffrig verifieringskod har skickats till din e-post.",
+  "email": "chef@revisionstockholm.se"
+}
+\end{lstlisting}
+
+\subsubsection{Response - Error (400 Bad Request)}
+\textbf{Email redan registrerad:}
+\begin{lstlisting}
+{
+  "error": "email_exists",
+  "message": "Email-adressen ar redan registrerad"
+}
+\end{lstlisting}
+
+\textbf{Svagt lösenord:}
+\begin{lstlisting}
+{
+  "error": "weak_password",
+  "message": "Losenordet maste vara minst 12 tecken, innehalla en siffra och en versal"
+}
+\end{lstlisting}
+
+\textbf{Captcha misslyckades:}
+\begin{lstlisting}
+{
+  "error": "captcha_failed",
+  "message": "Bot-skyddet misslyckades. Forsom igen."
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes}
+\begin{itemize}[noitemsep]
+  \item Validera email format (regex)
+  \item Kontrollera att email inte finns i \texttt{users} tabell
+  \item Validera lösenord: minst 12 tecken, \texttt{/[A-Z]/}, \texttt{/[0-9]/}
+  \item Kontrollera \texttt{password === passwordConfirm}
+  \item Validera Cloudflare Turnstile token mot Cloudflare API
+  \item Hasha lösenord med bcrypt (cost factor 12)
+  \item Skapa user i databas med \texttt{verified: false}
+  \item Generera 6-siffrig kod (t.ex. \texttt{482916})
+  \item Spara kod i \texttt{verification\_codes} tabell med 15 min expiry
+  \item Skicka email via SendGrid: \textit{"Din verifieringskod är: 482916. Koden är giltig i 15 minuter."}
+  \item Redirect frontend till \texttt{/verify} med email i state
+\end{itemize}
+
+\subsubsection{Databastabeller}
+\begin{itemize}[noitemsep]
+  \item \texttt{users} (id, email, password\_hash, verified, created\_at, updated\_at)
+  \item \texttt{verification\_codes} (id, email, code, expires\_at, attempts, created\_at)
+\end{itemize}
+
+\subsection{Endpoint 2: POST /api/auth/google}
+
+\subsubsection{Beskrivning}
+Logga in eller registrera med Google OAuth. Ingen email-verifiering behövs (Google har redan verifierat).
+
+\subsubsection{Request}
+\begin{lstlisting}
+{
+  "code": "google-oauth-authorization-code",
+  "redirectUri": "http://localhost:5173/auth/callback"
+}
+\end{lstlisting}
+
+\subsubsection{Response - Success (200 OK för befintlig, 201 Created för ny användare)}
+\begin{lstlisting}
+{
+  "success": true,
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "chef@gmail.com",
+    "verified": true,
+    "authProvider": "google"
+  },
+  "isNewUser": false
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes}
+\begin{itemize}[noitemsep]
+  \item Validera OAuth code mot Google Token API
+  \item Hämta user info (email, name) från Google
+  \item Kontrollera om user finns i databas (sök på email)
+  \item Om finns: Logga in, generera JWT tokens, returnera \texttt{isNewUser: false}
+  \item Om ny: Skapa user med \texttt{verified: true}, \texttt{auth\_provider: 'google'}, \texttt{password\_hash: null}, returnera \texttt{isNewUser: true}
+  \item Generera access token (15 min expiry) och refresh token (30 dagar)
+  \item Spara refresh token i \texttt{refresh\_tokens} tabell
+  \item Frontend sparar tokens i localStorage och navigerar till \texttt{/inledning}
+\end{itemize}
+
+\subsection{Endpoint 3: GET /api/auth/check-email}
+
+\subsubsection{Beskrivning}
+Real-time validering om email redan är registrerad (när användare skriver i formuläret).
+
+\subsubsection{Request}
+\begin{verbatim}
+GET /api/auth/check-email?email=chef@revision.se
+\end{verbatim}
+
+\subsubsection{Response - Success (200 OK)}
+\textbf{Tillgänglig:}
+\begin{lstlisting}
+{
+  "available": true
+}
+\end{lstlisting}
+
+\textbf{Upptagen:}
+\begin{lstlisting}
+{
+  "available": false,
+  "message": "Email redan registrerad"
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes}
+\begin{itemize}[noitemsep]
+  \item Rate limit: 10 requests/minut per IP
+  \item Query \texttt{users} tabell: \texttt{SELECT id FROM users WHERE email = ?}
+  \item Om finns: \texttt{available: false}
+  \item Används för UX (visa rött meddelande under input-fältet)
+\end{itemize}
+
+\subsection{Cloudflare Turnstile Integration}
+
+\subsubsection{Frontend Implementation}
+\begin{enumerate}[noitemsep]
+  \item Ladda Cloudflare Turnstile script:
+\begin{verbatim}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" 
+        async defer></script>
+\end{verbatim}
+  \item Rendera widget i React:
+\begin{lstlisting}
+<div className="cf-turnstile" 
+     data-sitekey="din-site-key-har"
+     data-callback="onTurnstileSuccess"></div>
+\end{lstlisting}
+  \item Hantera callback:
+\begin{lstlisting}
+const onTurnstileSuccess = (token) => {
+  setCaptchaToken(token);
+};
+\end{lstlisting}
+  \item Skicka token i \texttt{POST /api/auth/register} request
+\end{enumerate}
+
+\subsubsection{Backend Validation}
+\begin{lstlisting}
+import requests
+
+def verify_turnstile(token: str, remote_ip: str) -> bool:
+    response = requests.post(
+        'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+        json={
+            'secret': 'din-secret-key',
+            'response': token,
+            'remoteip': remote_ip
+        }
+    )
+    result = response.json()
+    return result.get('success', False)
+\end{lstlisting}
+
+\subsection{Sammanfattning}
+\begin{itemize}[noitemsep]
+  \item \textbf{3 API endpoints:} register, google, check-email
+  \item \textbf{Bot-skydd:} Cloudflare Turnstile (gratis, proffsig UX)
+  \item \textbf{Verifiering:} 6-siffrig kod via email (inte lankbaserad)
+  \item \textbf{OAuth:} Google login/registrering (hoppar over email-verifiering)
+  \item \textbf{External integrations:} Cloudflare API, Google OAuth API, SendGrid
+\end{itemize}
+
+\newpage
+
+% ============================================================================
+% SIDA 3: EMAIL-VERIFIERING (Autentiseringssida utan sidebar)
+% ============================================================================
+
+\section{Email-verifiering (Sida 3)}
+
+\textit{TODO: Dokumentera verifierings-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SIDA 4: LOGIN (Autentiseringssida utan sidebar)
+% ============================================================================
+
+\section{Login (Sida 4)}
+
+\subsection{Översikt}
+Inloggningssidan låter användare logga in med e-post och lösenord, eller via Google OAuth. Sidan innehåller även länk till ``Glömt lösenord?'' som leder till lösenordsåterställning. Vid lyckad inloggning får användaren JWT-tokens som sparas i localStorage.
+
+\subsection{Funktionalitet}
+\begin{itemize}[noitemsep]
+  \item Användaren anger e-post och lösenord
+  \item Vid ``Logga in'' görs POST till \texttt{/api/auth/login}
+  \item Alternativt klickar användaren på ``Logga in med Google'' (OAuth-flöde)
+  \item Vid lyckad inloggning:
+  \begin{itemize}
+    \item Backend returnerar \texttt{accessToken} (15 min) och \texttt{refreshToken} (30 dagar)
+    \item Frontend sparar tokens i \texttt{localStorage}
+    \item Användaren navigeras till \texttt{/inledning} (första slide med sidebar)
+  \end{itemize}
+  \item Vid fel visas felmeddelande (``Fel e-post eller lösenord'', ``Kontot är inte verifierat'')
+  \item Länk ``Glömt lösenord?'' navigerar till \texttt{/forgot-password}
+\end{itemize}
+
+\subsection{API Endpoints}
+
+\subsubsection{POST /api/auth/login}
+\textbf{Beskrivning:} Loggar in användare med e-post och lösenord.
+
+\textbf{Request body (JSON):}
+\begin{lstlisting}[language=json]
+{
+  "email": "user@example.com",
+  "password": "MySecurePass123"
+}
+\end{lstlisting}
+
+\textbf{Validering:}
+\begin{itemize}[noitemsep]
+  \item E-post finns i databasen (annars 401 \texttt{invalid\_credentials})
+  \item Lösenord matchar bcrypt-hash (annars 401 \texttt{invalid\_credentials})
+  \item Användaren är verifierad (\texttt{verified = true}, annars 403 \texttt{unverified\_email})
+\end{itemize}
+
+\textbf{Success Response (200 OK):}
+\begin{lstlisting}[language=json]
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "uuid-123",
+    "email": "user@example.com",
+    "role": "user",
+    "firmId": "firm-uuid-456"
+  }
+}
+\end{lstlisting}
+
+\textbf{Error Responses:}
+\begin{itemize}[noitemsep]
+  \item \textbf{400 Bad Request:} \texttt{\{"error": "missing\_fields", "message": "Email and password required"\}}
+  \item \textbf{401 Unauthorized:} \texttt{\{"error": "invalid\_credentials", "message": "Incorrect email or password"\}}
+  \item \textbf{403 Forbidden:} \texttt{\{"error": "unverified\_email", "message": "Please verify your email first"\}}
+  \item \textbf{429 Too Many Requests:} Rate limit (5 req/min per IP)
+\end{itemize}
+
+\textbf{Implementation notes:}
+\begin{itemize}[noitemsep]
+  \item Använd \texttt{bcrypt.compare()} för lösenordskontroll
+  \item Generera JWT med \texttt{jwt.sign()} (HS256 algoritm)
+  \item Spara \texttt{refreshToken} i \texttt{refresh\_tokens} tabell med \texttt{expires\_at}
+  \item Rate limiting: 5 försök per minut per IP-adress (förhindra brute force)
+  \item Logga misslyckade inloggningsförsök för säkerhet
+\end{itemize}
+
+\textbf{Database queries:}
+\begin{verbatim}
+SELECT id, email, password_hash, verified, role, firm_id 
+FROM users 
+WHERE email = ?;
+
+INSERT INTO refresh_tokens (user_id, token, expires_at) 
+VALUES (?, ?, NOW() + INTERVAL '30 days');
+\end{verbatim}
+
+\subsubsection{POST /api/auth/google}
+\textbf{Beskrivning:} Loggar in eller registrerar användare via Google OAuth.
+
+\textbf{OBS:} Denna endpoint används även i Section 3 (Registrering). Samma implementation används för både login och registrering eftersom Google OAuth hanterar båda fallen automatiskt.
+
+\textbf{Request body (JSON):}
+\begin{lstlisting}[language=json]
+{
+  "code": "4/0AY0e-g7X...",
+  "redirectUri": "http://localhost:5173/login"
+}
+\end{lstlisting}
+
+\textbf{Flöde:}
+\begin{enumerate}[noitemsep]
+  \item Frontend öppnar Google OAuth popup med \texttt{client\_id}
+  \item Användaren loggar in och godkänner åtkomst
+  \item Google returnerar \texttt{code} till frontend
+  \item Frontend skickar \texttt{code} till backend
+  \item Backend byter \texttt{code} mot \texttt{access\_token} via Google API
+  \item Backend hämtar användarinfo från Google (email, name, picture)
+  \item Om användaren finns: Logga in (returnera JWT tokens)
+  \item Om användaren INTE finns: Skapa ny användare med \texttt{verified=true} och \texttt{auth\_provider='google'}
+\end{enumerate}
+
+\textbf{Success Response (200 OK för login, 201 Created för ny användare):}
+\begin{lstlisting}[language=json]
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "uuid-123",
+    "email": "user@gmail.com",
+    "name": "John Doe",
+    "verified": true,
+    "authProvider": "google"
+  },
+  "isNewUser": false
+}
+\end{lstlisting}
+
+\textbf{Error Responses:}
+\begin{itemize}[noitemsep]
+  \item \textbf{400 Bad Request:} \texttt{\{"error": "invalid\_code", "message": "Invalid or expired authorization code"\}}
+  \item \textbf{503 Service Unavailable:} \texttt{\{"error": "google\_api\_error", "message": "Google authentication temporarily unavailable"\}}
+\end{itemize}
+
+\textbf{External API call:}
+\begin{verbatim}
+POST https://oauth2.googleapis.com/token
+{
+  "code": "...",
+  "client_id": "...",
+  "client_secret": "...",
+  "redirect_uri": "...",
+  "grant_type": "authorization_code"
+}
+
+GET https://www.googleapis.com/oauth2/v2/userinfo
+Headers: { Authorization: "Bearer <access_token>" }
+\end{verbatim}
+
+\subsection{Frontend Implementation}
+
+\textbf{LoginSlide.jsx - Email/Password login:}
+\begin{lstlisting}[language=javascript]
+const handleLogin = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await fetch('http://localhost:8000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      if (error.error === 'unverified_email') {
+        setError('Verifiera din e-post forst');
+      } else {
+        setError('Fel e-post eller losenord');
+      }
+      return;
+    }
+    
+    const data = await response.json();
+    localStorage.setItem('accessToken', data.accessToken);
+    localStorage.setItem('refreshToken', data.refreshToken);
+    onNext(); // Navigate to /inledning
+  } catch (err) {
+    setError('Något gick fel. Försök igen.');
+  }
+};
+\end{lstlisting}
+
+\textbf{LoginSlide.jsx - Google OAuth login:}
+\begin{lstlisting}[language=javascript]
+const handleGoogleLogin = () => {
+  const clientId = 'YOUR_GOOGLE_CLIENT_ID';
+  const redirectUri = 'http://localhost:5173/login';
+  const scope = 'email profile';
+  
+  const authUrl = 
+    `https://accounts.google.com/o/oauth2/v2/auth?` +
+    `client_id=${clientId}&` +
+    `redirect_uri=${redirectUri}&` +
+    `response_type=code&` +
+    `scope=${scope}`;
+  
+  window.location.href = authUrl;
+};
+
+// Efter redirect tillbaka från Google:
+useEffect(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('code');
+  
+  if (code) {
+    fetch('http://localhost:8000/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, redirectUri: window.location.origin + '/login' })
+    })
+    .then(res => res.json())
+    .then(data => {
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      navigate('/inledning');
+    });
+  }
+}, []);
+\end{lstlisting}
+
+\subsection{Database Tables}
+
+\textbf{users:}
+\begin{verbatim}
+id              UUID PRIMARY KEY
+email           VARCHAR(255) UNIQUE NOT NULL
+password_hash   VARCHAR(255) -- NULL för Google OAuth-användare
+verified        BOOLEAN DEFAULT FALSE
+role            VARCHAR(50) DEFAULT 'user'
+firm_id         UUID REFERENCES firms(id)
+auth_provider   VARCHAR(50) DEFAULT 'email' -- 'email' eller 'google'
+created_at      TIMESTAMP DEFAULT NOW()
+\end{verbatim}
+
+\textbf{refresh\_tokens:}
+\begin{verbatim}
+id          UUID PRIMARY KEY
+user_id     UUID REFERENCES users(id)
+token       TEXT NOT NULL
+expires_at  TIMESTAMP NOT NULL
+created_at  TIMESTAMP DEFAULT NOW()
+\end{verbatim}
+
+\subsection{Sammanfattning - Login endpoints}
+\begin{itemize}[noitemsep]
+  \item \textbf{POST /api/auth/login} -- Logga in med email/password, returnera JWT tokens
+  \item \textbf{POST /api/auth/google} -- Google OAuth login/registrering (samma som Section 3)
+  \item \textbf{Glömt lösenord-länk} -- Navigerar till \texttt{/forgot-password} (se Section 4.5)
+  \item Rate limiting: 5 försök per minut per IP-adress
+  \item Tokens sparas i localStorage: \texttt{accessToken} (15 min), \texttt{refreshToken} (30 dagar)
+\end{itemize}
+
+\newpage
+
+% ############################################################################
+% ############################################################################
+% DEL 2: ONBOARDING SLIDES (MED SIDEBAR)
+% ############################################################################
+% ############################################################################
+
+% ============================================================================
+% SLIDE 1: INTRO (Första slide med sidebar)
+% ============================================================================
+
+\section{Intro (Slide 5)}
+
+\textit{TODO: Dokumentera intro-endpoints här (första slide med sidebar)...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 2: UPPDRAG
+% ============================================================================
+
+\section{Uppdrag (Slide 6)}
+
+\textit{TODO: Dokumentera uppdrag-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 3: VERKSAMHET
+% ============================================================================
+
+\section{Verksamhet (Slide 7)}
+
+\textit{TODO: Dokumentera verksamhet-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 4: RISKFRÅGOR
+% ============================================================================
+
+\section{Riskfrågor (Slide 8)}
+
+\textit{TODO: Dokumentera riskfrågor-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 5: IDENTITETSKONTROLL
+% ============================================================================
+
+\section{Identitetskontroll (Slide 9)}
+
+\textit{TODO: Dokumentera BankID-endpoints här...}
+
+\newpage
+
+\section{Kontrolltabell (Slide 10)}
+
+\textit{TODO: Dokumentera kontrolltabell-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 7: PEP-FÖRDJUPNING
+% ============================================================================
+
+\section{PEP-fördjupning (Slide 11)}
+
+\textit{TODO: Dokumentera PEP-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 8: VERKSAMHETSKOD
+% ============================================================================
+
+\section{Verksamhetskod (Slide 12)}
+
+\textit{TODO: Dokumentera SNI-kod-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 9: ÄGARSTRUKTUR
+% ============================================================================
+
+\section{Ägarstruktur (Slide 13)}
+
+\textit{TODO: Dokumentera Bolagsverket-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 10: STYRELSE
+% ============================================================================
+
+\section{Styrelse (Slide 14)}
+
+\textit{TODO: Dokumentera styrelse-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 11: FÖRETAGSDOKUMENTATION
+% ============================================================================
+
+\section{Företagsdokumentation (Slide 13.5)}
+
+\textit{TODO: Dokumentera PDF-upload och OCR-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 12: BOKFÖRINGSUNDERLAG
+% ============================================================================
+
+\section{Bokföringsunderlag (Slide 14.5)}
+
+\textit{TODO: Dokumentera file-upload och fraud-detection-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 13: BOKFÖRING
+% ============================================================================
+
+\section{Bokföring (Slide 15)}
+
+\textit{TODO: Dokumentera Skatteverket/SIE-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 14: LIKVIDITET
+% ============================================================================
+
+\section{Likviditet (Slide 16)}
+
+\textit{TODO: Dokumentera likviditets-analys-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 15: OMSÄTTNING
+% ============================================================================
+
+\section{Omsättning (Slide 17)}
+
+\textit{TODO: Dokumentera omsättnings-data-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 16: RESULTAT
+% ============================================================================
+
+\section{Resultat (Slide 18)}
+
+\textit{TODO: Dokumentera resultat-analys-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 17: BRANSCH
+% ============================================================================
+
+\section{Bransch (Slide 19)}
+
+\textit{TODO: Dokumentera bransch-jämförelse-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 18: BOKFÖRINGSANALYS
+% ============================================================================
+
+\section{Bokföringsanalys (Slide 20)}
+
+\textit{TODO: Dokumentera AI-analys-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 19: RISKBESKED
+% ============================================================================
+
+\section{Riskbesked (Slide 21)}
+
+\textit{TODO: Dokumentera risk-scoring-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 20: SKYLDIGHETER
+% ============================================================================
+
+\section{Skyldigheter (Slide 22)}
+
+\textit{TODO: Dokumentera avtal-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 21: FORTNOX-KOPPLING
+% ============================================================================
+
+\section{Fortnox-koppling (Slide 23)}
+
+\textit{TODO: Dokumentera Fortnox OAuth-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 22: BANKRÄTTIGHETER
+% ============================================================================
+
+\section{Bankrättigheter (Slide 24)}
+
+\textit{TODO: Dokumentera bank-OAuth-endpoints här...}
+
+\newpage
+
+% ############################################################################
+% ############################################################################
+% DEL 3: ADMIN DASHBOARD (Separat spec finns i Admin_Dashboard_Spec.tex)
+% ############################################################################
+% ############################################################################
+
+\section{AdminDashboard}
+
+\textit{TODO: Dokumentera admin-endpoints här (referera till Admin\_Dashboard\_Spec.tex)...}
+
+\newpage
+
+\section{Appendix}
+
+\subsection{Gemensamma Error Codes}
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Code} & \textbf{Status} & \textbf{Beskrivning} \\ \midrule
+400 & Bad Request & Ogiltig input data \\
+401 & Unauthorized & Saknar eller ogiltig JWT token \\
+403 & Forbidden & Saknar behörighet för resursen \\
+404 & Not Found & Resursen finns inte \\
+409 & Conflict & Resurs existerar redan (t.ex. email) \\
+422 & Unprocessable Entity & Valideringsfel \\
+429 & Too Many Requests & Rate limit överskriden \\
+500 & Internal Server Error & Oväntat serverfel \\
+503 & Service Unavailable & Extern tjänst ej tillgänglig \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Rate Limiting}
+\begin{itemize}[noitemsep]
+  \item \textbf{Auth endpoints:} 5 requests/minut per IP
+  \item \textbf{File uploads:} 10 requests/minut per user
+  \item \textbf{Övriga endpoints:} 100 requests/minut per user
+\end{itemize}
+
+\subsection{File Upload Limits}
+\begin{itemize}[noitemsep]
+  \item \textbf{Max filstorlek:} 10 MB per fil
+  \item \textbf{Max totalt per request:} 50 MB
+  \item \textbf{Tillåtna format:} PDF, PNG, JPG, JPEG, SIE, XML
+\end{itemize}
+
+\end{document}

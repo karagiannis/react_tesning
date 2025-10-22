@@ -1,0 +1,728 @@
+import React, { useState } from 'react';
+import Icon from '../Shared/Icon';
+
+// Mock data för demonstration
+const mockStats = {
+  totalUsers: 450,
+  activeOnboardings: 23,
+  flaggedCases: 127,
+  newApplications: 8,
+  fraudDetectionRate: 28.2, // procent
+};
+
+const mockFraudAlerts = [
+  {
+    id: 1,
+    company: 'Anonymiserat företag A',
+    orgNr: '559XXX-XXXX',
+    category: 'Verksamhetskongruens',
+    description: 'Cykelförsäljare köper fiskeredskap',
+    riskScore: 85,
+    date: '2025-10-15',
+    status: 'under_granskning',
+    byrå: 'Revision Stockholm AB',
+  },
+  {
+    id: 2,
+    company: 'Anonymiserat företag B',
+    orgNr: '556XXX-XXXX',
+    category: 'Privatkonsumtion',
+    description: 'ICA-inköp bokförda på företaget',
+    riskScore: 78,
+    date: '2025-10-18',
+    status: 'under_granskning',
+    byrå: 'Ekonomibyrån Väst',
+  },
+  {
+    id: 3,
+    company: 'Anonymiserat företag C',
+    orgNr: '559XXX-XXXX',
+    category: 'Cirkulära betalningar',
+    description: 'Betalningar mellan närstående företag',
+    riskScore: 92,
+    date: '2025-10-20',
+    status: 'ny',
+    byrå: 'Revision Stockholm AB',
+  },
+  {
+    id: 4,
+    company: 'Anonymiserat företag D',
+    orgNr: '556XXX-XXXX',
+    category: 'Konkurskontroll',
+    description: 'Betalning till avregistrerat företag',
+    riskScore: 65,
+    date: '2025-10-21',
+    status: 'avslutad',
+    byrå: 'Nordisk Revision',
+  },
+];
+
+const mockSupportTickets = [
+  {
+    id: 1,
+    company: 'Revision Stockholm AB',
+    contact: 'Anna Andersson',
+    email: 'anna@revisionstockholm.se',
+    subject: 'Fråga om fraud alert - företag A',
+    message: 'Vi behöver mer information om varför företag A flaggades...',
+    priority: 'hög',
+    status: 'ny',
+    created: '2025-10-22 09:15',
+  },
+  {
+    id: 2,
+    company: 'Ekonomibyrån Väst',
+    contact: 'Erik Eriksson',
+    email: 'erik@ekonomibyran.se',
+    subject: 'Problem med uppladdning av SIE-filer',
+    message: 'Får felmeddelande när jag försöker ladda upp SIE-fil...',
+    priority: 'medium',
+    status: 'under_behandling',
+    created: '2025-10-21 14:30',
+  },
+  {
+    id: 3,
+    company: 'Nordisk Revision',
+    contact: 'Maria Nilsson',
+    email: 'maria@nordiskrevision.se',
+    subject: 'Fakturafråga',
+    message: 'När kommer nästa faktura?',
+    priority: 'låg',
+    status: 'avslutad',
+    created: '2025-10-20 11:20',
+  },
+];
+
+const mockInvoices = [
+  {
+    id: 'INV-2025-001',
+    company: 'Revision Stockholm AB',
+    amount: 2950,
+    period: '2025-10',
+    users: 3,
+    status: 'betald',
+    dueDate: '2025-11-15',
+    paidDate: '2025-11-10',
+  },
+  {
+    id: 'INV-2025-002',
+    company: 'Ekonomibyrån Väst',
+    amount: 1950,
+    period: '2025-10',
+    users: 2,
+    status: 'betald',
+    dueDate: '2025-11-15',
+    paidDate: '2025-11-12',
+  },
+  {
+    id: 'INV-2025-003',
+    company: 'Nordisk Revision',
+    amount: 4950,
+    period: '2025-10',
+    users: 5,
+    status: 'obetald',
+    dueDate: '2025-11-15',
+    paidDate: null,
+  },
+];
+
+const fraudCategories = [
+  { name: 'Verksamhetskongruens', count: 38, percent: 30, color: 'bg-red-500' },
+  { name: 'Privatkonsumtion', count: 57, percent: 45, color: 'bg-orange-500' },
+  { name: 'Cirkulära betalningar', count: 19, percent: 15, color: 'bg-yellow-500' },
+  { name: 'Konkurskontroll', count: 8, percent: 6, color: 'bg-blue-500' },
+  { name: 'Leveransadress', count: 5, percent: 4, color: 'bg-purple-500' },
+];
+
+const AdminDashboard = () => {
+  const [activeTab, setActiveTab] = useState('overview'); // overview, fraud, support, invoices, email
+  const [emailForm, setEmailForm] = useState({
+    to: '',
+    subject: '',
+    message: '',
+    type: 'single', // single or mass
+  });
+
+  const getRiskColor = (score) => {
+    if (score >= 80) return 'text-red-600 bg-red-50';
+    if (score >= 60) return 'text-orange-600 bg-orange-50';
+    return 'text-yellow-600 bg-yellow-50';
+  };
+
+  const getStatusBadge = (status) => {
+    const styles = {
+      ny: 'bg-blue-100 text-blue-800',
+      under_granskning: 'bg-yellow-100 text-yellow-800',
+      under_behandling: 'bg-yellow-100 text-yellow-800',
+      avslutad: 'bg-green-100 text-green-800',
+      betald: 'bg-green-100 text-green-800',
+      obetald: 'bg-red-100 text-red-800',
+    };
+    const labels = {
+      ny: 'Ny',
+      under_granskning: 'Under granskning',
+      under_behandling: 'Under behandling',
+      avslutad: 'Avslutad',
+      betald: 'Betald',
+      obetald: 'Obetald',
+    };
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${styles[status]}`}>
+        {labels[status]}
+      </span>
+    );
+  };
+
+  const getPriorityBadge = (priority) => {
+    const styles = {
+      hög: 'bg-red-100 text-red-800',
+      medium: 'bg-yellow-100 text-yellow-800',
+      låg: 'bg-green-100 text-green-800',
+    };
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${styles[priority]}`}>
+        {priority.charAt(0).toUpperCase() + priority.slice(1)}
+      </span>
+    );
+  };
+
+  const handleSendEmail = (e) => {
+    e.preventDefault();
+    alert(`Email skickat till: ${emailForm.to}\nÄmne: ${emailForm.subject}`);
+    setEmailForm({ to: '', subject: '', message: '', type: 'single' });
+  };
+
+  const handleExportReport = () => {
+    alert('Genererar PDF-rapport för Finanspolisen...\n\nRapporten kommer att innehålla:\n- Aggregerad statistik\n- Anonymiserade case studies\n- Detektionskategorier\n- Trendanalys');
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-6">
+            <h1 className="text-3xl font-bold text-gray-900">Administratörspanel</h1>
+            <p className="mt-2 text-sm text-gray-600">
+              Övervaka användare, fraud detection, support och fakturering
+            </p>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex space-x-8 border-t border-gray-200">
+            {[
+              { id: 'overview', label: 'Översikt', icon: 'chart' },
+              { id: 'fraud', label: 'Fraud Detection', icon: 'alert' },
+              { id: 'support', label: 'Support', icon: 'help' },
+              { id: 'invoices', label: 'Fakturering', icon: 'document' },
+              { id: 'email', label: 'Email', icon: 'mail' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 py-4 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-brand-600 text-brand-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Icon name={tab.icon} className="w-5 h-5" />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Overview Tab */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Totalt Användare</p>
+                    <p className="text-3xl font-bold text-gray-900 mt-2">{mockStats.totalUsers}</p>
+                  </div>
+                  <div className="bg-brand-100 rounded-full p-3">
+                    <Icon name="users" className="w-6 h-6 text-brand-600" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Aktiva Onboardings</p>
+                    <p className="text-3xl font-bold text-gray-900 mt-2">{mockStats.activeOnboardings}</p>
+                  </div>
+                  <div className="bg-blue-100 rounded-full p-3">
+                    <Icon name="clock" className="w-6 h-6 text-blue-600" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Flaggade Ärenden</p>
+                    <p className="text-3xl font-bold text-gray-900 mt-2">{mockStats.flaggedCases}</p>
+                  </div>
+                  <div className="bg-red-100 rounded-full p-3">
+                    <Icon name="alert" className="w-6 h-6 text-red-600" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Nya Ansökningar</p>
+                    <p className="text-3xl font-bold text-gray-900 mt-2">{mockStats.newApplications}</p>
+                  </div>
+                  <div className="bg-green-100 rounded-full p-3">
+                    <Icon name="checkList" className="w-6 h-6 text-green-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Recent Fraud Alerts */}
+              <div className="bg-white rounded-lg shadow">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900">Senaste Fraud Alerts</h2>
+                </div>
+                <div className="p-6">
+                  <div className="space-y-4">
+                    {mockFraudAlerts.slice(0, 3).map((alert) => (
+                      <div key={alert.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="flex-shrink-0">
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${getRiskColor(alert.riskScore)}`}>
+                            {alert.riskScore}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900">{alert.company}</p>
+                          <p className="text-xs text-gray-600 mt-1">{alert.description}</p>
+                          <div className="flex items-center space-x-2 mt-2">
+                            <span className="text-xs text-gray-500">{alert.date}</span>
+                            {getStatusBadge(alert.status)}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('fraud')}
+                    className="mt-4 w-full text-center text-sm font-medium text-brand-600 hover:text-brand-700"
+                  >
+                    Visa alla fraud alerts →
+                  </button>
+                </div>
+              </div>
+
+              {/* Recent Support Tickets */}
+              <div className="bg-white rounded-lg shadow">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900">Senaste Support-ärenden</h2>
+                </div>
+                <div className="p-6">
+                  <div className="space-y-4">
+                    {mockSupportTickets.slice(0, 3).map((ticket) => (
+                      <div key={ticket.id} className="p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900">{ticket.subject}</p>
+                            <p className="text-xs text-gray-600 mt-1">{ticket.company} - {ticket.contact}</p>
+                          </div>
+                          {getPriorityBadge(ticket.priority)}
+                        </div>
+                        <div className="flex items-center space-x-2 mt-2">
+                          <span className="text-xs text-gray-500">{ticket.created}</span>
+                          {getStatusBadge(ticket.status)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('support')}
+                    className="mt-4 w-full text-center text-sm font-medium text-brand-600 hover:text-brand-700"
+                  >
+                    Visa alla support-ärenden →
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Fraud Detection Tab */}
+        {activeTab === 'fraud' && (
+          <div className="space-y-6">
+            {/* Fraud Stats */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Fraud Detection Översikt</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <p className="text-4xl font-bold text-gray-900">{mockStats.flaggedCases}</p>
+                  <p className="text-sm text-gray-600 mt-1">Totalt alerts (30 dagar)</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-4xl font-bold text-red-600">
+                    {mockFraudAlerts.filter(a => a.riskScore >= 80).length}
+                  </p>
+                  <p className="text-sm text-gray-600 mt-1">Hög risk (&gt;80)</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-4xl font-bold text-brand-600">{mockStats.fraudDetectionRate}%</p>
+                  <p className="text-sm text-gray-600 mt-1">Detektionsgrad</p>
+                </div>
+              </div>
+
+              {/* Categories Chart */}
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Detektionskategorier</h3>
+                <div className="space-y-3">
+                  {fraudCategories.map((cat) => (
+                    <div key={cat.name}>
+                      <div className="flex items-center justify-between text-sm mb-1">
+                        <span className="font-medium text-gray-700">{cat.name}</span>
+                        <span className="text-gray-600">{cat.count} ({cat.percent}%)</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`${cat.color} h-2 rounded-full`}
+                          style={{ width: `${cat.percent}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Export Button */}
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <button
+                  onClick={handleExportReport}
+                  className="w-full bg-brand-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-brand-700 transition-colors flex items-center justify-center space-x-2"
+                >
+                  <Icon name="document" className="w-5 h-5" />
+                  <span>Generera Rapport för Finanspolisen (PDF)</span>
+                </button>
+                <p className="text-xs text-gray-500 text-center mt-2">
+                  Rapporten innehåller anonymiserad statistik och case studies
+                </p>
+              </div>
+            </div>
+
+            {/* Fraud Alerts List */}
+            <div className="bg-white rounded-lg shadow">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Alla Fraud Alerts</h2>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Företag
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Kategori
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Beskrivning
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Risk
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Datum
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {mockFraudAlerts.map((alert) => (
+                      <tr key={alert.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{alert.company}</div>
+                            <div className="text-xs text-gray-500">{alert.orgNr}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="text-sm text-gray-900">{alert.category}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm text-gray-600">{alert.description}</span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full font-bold ${getRiskColor(alert.riskScore)}`}>
+                            {alert.riskScore}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {alert.date}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(alert.status)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Support Tab */}
+        {activeTab === 'support' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Support-ärenden</h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  {mockSupportTickets.map((ticket) => (
+                    <div key={ticket.id} className="border border-gray-200 rounded-lg p-4 hover:border-brand-300 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h3 className="text-sm font-semibold text-gray-900">{ticket.subject}</h3>
+                            {getPriorityBadge(ticket.priority)}
+                            {getStatusBadge(ticket.status)}
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3">{ticket.message}</p>
+                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                            <span>📧 {ticket.email}</span>
+                            <span>🏢 {ticket.company}</span>
+                            <span>👤 {ticket.contact}</span>
+                            <span>🕐 {ticket.created}</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setActiveTab('email')}
+                          className="ml-4 px-4 py-2 bg-brand-600 text-white text-sm rounded-lg hover:bg-brand-700 transition-colors"
+                        >
+                          Svara
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Invoices Tab */}
+        {activeTab === 'invoices' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Fakturering</h2>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Faktura-ID
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Företag
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Period
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Användare
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Belopp
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Förfallodatum
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {mockInvoices.map((invoice) => (
+                      <tr key={invoice.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {invoice.id}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {invoice.company}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {invoice.period}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {invoice.users}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                          {invoice.amount.toLocaleString('sv-SE')} kr
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {invoice.dueDate}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(invoice.status)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                <div className="flex justify-between items-center">
+                  <p className="text-sm text-gray-600">
+                    Totalt: <span className="font-semibold text-gray-900">
+                      {mockInvoices.reduce((sum, inv) => sum + inv.amount, 0).toLocaleString('sv-SE')} kr
+                    </span>
+                  </p>
+                  <button className="px-4 py-2 bg-brand-600 text-white text-sm rounded-lg hover:bg-brand-700 transition-colors">
+                    Exportera till Excel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Email Tab */}
+        {activeTab === 'email' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Skicka Email</h2>
+              </div>
+              <div className="p-6">
+                <form onSubmit={handleSendEmail} className="space-y-4">
+                  {/* Email Type */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email-typ
+                    </label>
+                    <div className="flex space-x-4">
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name="emailType"
+                          value="single"
+                          checked={emailForm.type === 'single'}
+                          onChange={(e) => setEmailForm({ ...emailForm, type: e.target.value })}
+                          className="mr-2"
+                        />
+                        <span className="text-sm text-gray-700">Enskild användare</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name="emailType"
+                          value="mass"
+                          checked={emailForm.type === 'mass'}
+                          onChange={(e) => setEmailForm({ ...emailForm, type: e.target.value })}
+                          className="mr-2"
+                        />
+                        <span className="text-sm text-gray-700">Massutskick (alla användare)</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* To Field */}
+                  {emailForm.type === 'single' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Till
+                      </label>
+                      <input
+                        type="email"
+                        value={emailForm.to}
+                        onChange={(e) => setEmailForm({ ...emailForm, to: e.target.value })}
+                        placeholder="mottagare@example.com"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+                  )}
+
+                  {/* Subject */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Ämne
+                    </label>
+                    <input
+                      type="text"
+                      value={emailForm.subject}
+                      onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
+                      placeholder="Email-ämne"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  {/* Message */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Meddelande
+                    </label>
+                    <textarea
+                      value={emailForm.message}
+                      onChange={(e) => setEmailForm({ ...emailForm, message: e.target.value })}
+                      placeholder="Skriv ditt meddelande här..."
+                      rows={8}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="flex space-x-4">
+                    <button
+                      type="submit"
+                      className="flex-1 bg-brand-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-brand-700 transition-colors"
+                    >
+                      Skicka Email
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEmailForm({ to: '', subject: '', message: '', type: 'single' })}
+                      className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                    >
+                      Rensa
+                    </button>
+                  </div>
+                </form>
+
+                {/* Info Box */}
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <strong>OBS:</strong> För produktionsmiljö kommer detta att integreras med SendGrid API.
+                    Massutskick skickas till alla {mockStats.totalUsers} användare.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default AdminDashboard;

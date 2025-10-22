@@ -1,0 +1,805 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[swedish]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{verbatim}
+
+\geometry{margin=2.5cm}
+
+% Define brand colors
+\definecolor{brand}{RGB}{16,185,129}
+\definecolor{brandlight}{RGB}{209,250,229}
+\definecolor{branddark}{RGB}{4,120,87}
+
+\title{\textbf{Administratörspanel}\\
+\large Teknisk Specifikation och UI/UX Design}
+\author{Roaring Analytics AB\\
+Utvecklad för LIA2-praktik och framtida produktionsmiljö}
+\date{Version 1.0 -- \today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+% ═══════════════════════════════════════════════════════════════════════
+\section{Översikt}
+% ═══════════════════════════════════════════════════════════════════════
+
+\subsection{Syfte}
+Administratörspanelen är en central plattform för Roaring Analytics AB:s personal att övervaka, hantera och analysera alla användare i systemet. Panelen ger insikt i:
+
+\begin{itemize}[leftmargin=2cm]
+  \item \textbf{Fraud Detection:} Aggregerad statistik över upptäckta bedrägerier för rapportering till Finanspolisen
+  \item \textbf{Support:} Hantera support-ärenden från revisionsbyråer
+  \item \textbf{Fakturering:} Månadsvis fakturering och betalningsstatus
+  \item \textbf{Email:} Kommunikation med användare (enskilt och massutskick)
+  \item \textbf{Användare:} Översikt över alla registrerade revisionsbyråer
+\end{itemize}
+
+\subsection{Målgrupp}
+\begin{itemize}
+  \item \textbf{Administratörer:} Anställda på Roaring Analytics AB
+  \item \textbf{Säljteam:} Använder fraud detection-rapporter för demos till Finanspolisen
+  \item \textbf{Support:} Customer success team som hjälper revisionsbyråer
+\end{itemize}
+
+\subsection{Teknisk Stack}
+\begin{itemize}
+  \item \textbf{Frontend:} React 18 + Tailwind CSS
+  \item \textbf{Backend:} FastAPI (Python) + PostgreSQL
+  \item \textbf{Email:} SendGrid API (production) / Mock (dev)
+  \item \textbf{Routing:} React Router v6 (\texttt{/admin})
+  \item \textbf{Framtida uppgradering:} Themesberg React/Tailwind Admin Template (\$89)
+\end{itemize}
+
+\subsection{Separation från Användar-UI}
+Administratörspanelen är \textbf{helt separerad} från byråchefernas onboarding-gränssnitt:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Byråchef (Användare)} & \textbf{Administrator (Roaring)} \\
+\hline
+Route: \texttt{/dokumentation, /underlag, /bokforing} & Route: \texttt{/admin} \\
+Sidebar: Onboarding-steg & Sidebar: Admin-funktioner \\
+Färgschema: Grön (brand) & Färgschema: Lila (admin) \\
+Behörighet: JWT token för egen byrå & Behörighet: Admin-roll i JWT \\
+\hline
+\end{tabular}
+\end{table}
+
+\vspace{1cm}
+\textbf{OBS:} I framtida version kommer AdminDashboard att ha sin egen layout med separat sidebar och header.
+
+% ═══════════════════════════════════════════════════════════════════════
+\section{Flik 1: Översikt (Overview)}
+% ═══════════════════════════════════════════════════════════════════════
+
+\subsection{Syfte}
+Ge en snabb överblick av systemets status med key metrics och senaste aktiviteter.
+
+\subsection{Komponenter}
+
+\subsubsection{Statistikkort (Stats Cards)}
+4 kort med centrala KPI:er:
+
+\begin{enumerate}
+  \item \textbf{Totalt Användare}
+  \begin{itemize}
+    \item Antal: 450
+    \item Ikon:  (brand-grön bakgrund)
+    \item Källa: \texttt{SELECT COUNT(*) FROM users}
+  \end{itemize}
+  
+  \item \textbf{Aktiva Onboardings}
+  \begin{itemize}
+    \item Antal: 23
+    \item Ikon: \texttt{Clock icon} (blå bakgrund)
+    \item Definition: Användare som startat men ej avslutat onboarding
+    \item Källa: \texttt{SELECT COUNT(*) FROM onboarding\_sessions WHERE status='active'}
+  \end{itemize}
+  
+  \item \textbf{Flaggade Ärenden}
+  \begin{itemize}
+    \item Antal: 127
+    \item Ikon: \texttt{Alert icon} (röd bakgrund)
+    \item Definition: Fraud alerts med risk score > 40
+    \item Källa: \texttt{SELECT COUNT(*) FROM fraud\_alerts WHERE created\_at > NOW() - INTERVAL '30 days'}
+  \end{itemize}
+  
+  \item \textbf{Nya Ansökningar}
+  \begin{itemize}
+    \item Antal: 8
+    \item Ikon: \texttt{Check icon} (grön bakgrund)
+    \item Definition: Nya registreringar senaste 7 dagarna
+    \item Källa: \texttt{SELECT COUNT(*) FROM users WHERE created\_at > NOW() - INTERVAL '7 days'}
+  \end{itemize}
+\end{enumerate}
+
+\subsubsection{Senaste Fraud Alerts}
+Panel med top 3 senaste fraud alerts:
+
+\begin{itemize}
+  \item \textbf{Layout:} Kort med risk score badge (cirkel), företagsnamn, beskrivning, datum, status
+  \item \textbf{Färgkodning:} 
+  \begin{itemize}
+    \item Risk > 80: Röd bakgrund
+    \item Risk 60-80: Orange bakgrund
+    \item Risk 40-60: Gul bakgrund
+  \end{itemize}
+  \item \textbf{Status badges:} Ny (blå), Under granskning (gul), Avslutad (grön)
+  \item \textbf{Interaktion:} Klick på "Visa alla fraud alerts →" navigerar till Fraud Detection-fliken
+\end{itemize}
+
+\subsubsection{Senaste Support-ärenden}
+Panel med top 3 senaste support-ärenden:
+
+\begin{itemize}
+  \item \textbf{Layout:} Kort med ämne, företag, kontaktperson, prioritet, status
+  \item \textbf{Prioritet badges:} Hög (röd), Medium (gul), Låg (grön)
+  \item \textbf{Status badges:} Ny (blå), Under behandling (gul), Avslutad (grön)
+  \item \textbf{Interaktion:} Klick på "Visa alla support-ärenden →" navigerar till Support-fliken
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════════════
+\section{Flik 2: Fraud Detection}
+% ═══════════════════════════════════════════════════════════════════════
+
+\subsection{Syfte}
+Central plats för att övervaka fraud detection-resultat och generera rapporter för Finanspolisen.
+
+\subsection{Key Metrics}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|r|p{6cm}|}
+\hline
+\textbf{Metric} & \textbf{Värde} & \textbf{Definition} \\
+\hline
+Total Alerts (30 dagar) & 127 & Alla fraud alerts senaste månaden \\
+Hög Risk (>80) & 23 & Alerts med risk score över 80 \\
+Detektionsgrad & 28.2\% & Andel användare med minst 1 alert \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Detektionskategorier}
+Stapeldiagram med 5 kategorier:
+
+\begin{enumerate}
+  \item \textbf{Privatkonsumtion:} 57 alerts (45\%)
+  \begin{itemize}
+    \item \textit{Exempel:} ICA, H\&M, Willys bokförda på företaget
+    \item \textit{Färg:} Orange (\texttt{bg-orange-500})
+  \end{itemize}
+  
+  \item \textbf{Verksamhetskongruens:} 38 alerts (30\%)
+  \begin{itemize}
+    \item \textit{Exempel:} Cykelförsäljare köper fiskeredskap
+    \item \textit{Färg:} Röd (\texttt{bg-red-500})
+  \end{itemize}
+  
+  \item \textbf{Cirkulära betalningar:} 19 alerts (15\%)
+  \begin{itemize}
+    \item \textit{Exempel:} Betalningar mellan närstående företag
+    \item \textit{Färg:} Gul (\texttt{bg-yellow-500})
+  \end{itemize}
+  
+  \item \textbf{Konkurskontroll:} 8 alerts (6\%)
+  \begin{itemize}
+    \item \textit{Exempel:} Betalning till avregistrerat företag
+    \item \textit{Färg:} Blå (\texttt{bg-blue-500})
+  \end{itemize}
+  
+  \item \textbf{Leveransadress:} 5 alerts (4\%)
+  \begin{itemize}
+    \item \textit{Exempel:} Leveransadress matchar ej företagsadress
+    \item \textit{Färg:} Lila (\texttt{bg-purple-500})
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Exportfunktion: Rapport för Finanspolisen}
+Stor grön knapp: \textbf{"Generera Rapport för Finanspolisen (PDF)"}
+
+\subsubsection{Rapportinnehåll}
+\begin{itemize}
+  \item \textbf{Aggregerad statistik:} Total antal alerts, detektionsgrad, fördelning per kategori
+  \item \textbf{Anonymiserade case studies:} 
+  \begin{itemize}
+    \item Case A: Cykelförsäljare - fiskeredskap (85/100)
+    \item Case B: Privata ICA-inköp (78/100)
+    \item Case C: Cirkulära betalningar (92/100)
+  \end{itemize}
+  \item \textbf{Trendanalys:} Utveckling över tid (senaste 12 månader)
+  \item \textbf{ROI för revisionsbyråer:} Sparad tid per månad tack vare automatisk detektion
+  \item \textbf{False positive rate:} Andel alerts som markerats som "falskt alarm"
+\end{itemize}
+
+\subsubsection{Anonymiseringsregler}
+\textbf{KRITISKT:} Rapporten får ALDRIG innehålla:
+\begin{itemize}
+  \item Verkliga företagsnamn
+  \item Organisationsnummer (endast maskerade: 559XXX-XXXX)
+  \item Personnummer
+  \item Exakta adresser
+\end{itemize}
+
+Använd istället:
+\begin{itemize}
+  \item "Anonymiserat företag A, B, C..."
+  \item "Case 001, 002, 003..."
+  \item "Verksamhetstyp: Cykelförsäljare" (ej företagsnamn)
+\end{itemize}
+
+\subsection{Tabell: Alla Fraud Alerts}
+Full tabell med kolumner:
+\begin{itemize}
+  \item Företag (anonymiserat)
+  \item Org.nr (maskerat)
+  \item Kategori
+  \item Beskrivning
+  \item Risk Score (färgkodad cirkel)
+  \item Datum
+  \item Status (badge)
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════════════
+\section{Flik 3: Support}
+% ═══════════════════════════════════════════════════════════════════════
+
+\subsection{Syfte}
+Hantera support-ärenden från revisionsbyråer som behöver hjälp med systemet.
+
+\subsection{Ärendekö}
+Lista på alla support-ärenden med följande information:
+
+\begin{itemize}
+  \item \textbf{Ämne:} Kort beskrivning av problemet
+  \item \textbf{Meddelande:} Fullständig text från användaren
+  \item \textbf{Företag:} Revisionsbyrån som skickat ärendet
+  \item \textbf{Kontaktperson:} Namn på byråchef
+  \item \textbf{Email:} Kontaktuppgifter
+  \item \textbf{Prioritet:} Hög / Medium / Låg
+  \item \textbf{Status:} Ny / Under behandling / Avslutad
+  \item \textbf{Skapad:} Datum och tid
+\end{itemize}
+
+\subsection{Interaktioner}
+\begin{enumerate}
+  \item \textbf{Svara-knapp:} Öppnar Email-fliken med förifylld mottagare
+  \item \textbf{Filtrera:} Efter status och prioritet
+  \item \textbf{Sortera:} Efter datum (nyast först som standard)
+  \item \textbf{Markera som behandlad:} Ändrar status till "Under behandling" eller "Avslutad"
+\end{enumerate}
+
+\subsection{Mock Data (Demo)}
+3 exempel-ärenden:
+
+\begin{enumerate}
+  \item \textbf{Revision Stockholm AB}
+  \begin{itemize}
+    \item Kontakt: Anna Andersson
+    \item Ämne: "Fråga om fraud alert - företag A"
+    \item Prioritet: Hög
+    \item Status: Ny
+  \end{itemize}
+  
+  \item \textbf{Ekonomibyrån Väst}
+  \begin{itemize}
+    \item Kontakt: Erik Eriksson
+    \item Ämne: "Problem med uppladdning av SIE-filer"
+    \item Prioritet: Medium
+    \item Status: Under behandling
+  \end{itemize}
+  
+  \item \textbf{Nordisk Revision}
+  \begin{itemize}
+    \item Kontakt: Maria Nilsson
+    \item Ämne: "Fakturafråga"
+    \item Prioritet: Låg
+    \item Status: Avslutad
+  \end{itemize}
+\end{enumerate}
+
+% ═══════════════════════════════════════════════════════════════════════
+\section{Flik 4: Fakturering}
+% ═══════════════════════════════════════════════════════════════════════
+
+\subsection{Syfte}
+Översikt över månadsvis fakturering till revisionsbyråer baserat på antal användare.
+
+\subsection{Prismodell}
+\begin{itemize}
+  \item \textbf{Bas:} 950 kr/månad per användare
+  \item \textbf{Volymrabatt:}
+  \begin{itemize}
+    \item 3-5 användare: -10\% (855 kr/användare)
+    \item 6-10 användare: -20\% (760 kr/användare)
+    \item 11+ användare: -30\% (665 kr/användare)
+  \end{itemize}
+  \item \textbf{Fakturering:} Månadsvis i efterskott
+  \item \textbf{Betalningsvillkor:} 30 dagar netto
+\end{itemize}
+
+\subsection{Fakturatabell}
+Kolumner:
+\begin{itemize}
+  \item \textbf{Faktura-ID:} INV-2025-001, INV-2025-002, etc.
+  \item \textbf{Företag:} Revisionsbyrån
+  \item \textbf{Period:} 2025-10 (oktober 2025)
+  \item \textbf{Användare:} Antal aktiva användare under perioden
+  \item \textbf{Belopp:} Total summa i SEK
+  \item \textbf{Förfallodatum:} Datum
+  \item \textbf{Status:} Betald (grön) / Obetald (röd)
+  \item \textbf{Betald datum:} Om betald
+\end{itemize}
+
+\subsection{Mock Data (Demo)}
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|l|l|c|c|r|l|}
+\hline
+\textbf{ID} & \textbf{Företag} & \textbf{Användare} & \textbf{Belopp} & \textbf{Status} & \textbf{Förfallodatum} \\
+\hline
+INV-2025-001 & Revision Stockholm AB & 3 & 2 950 kr & Betald & 2025-11-15 \\
+INV-2025-002 & Ekonomibyrån Väst & 2 & 1 950 kr & Betald & 2025-11-15 \\
+INV-2025-003 & Nordisk Revision & 5 & 4 950 kr & Obetald & 2025-11-15 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Exportfunktion}
+Knapp: \textbf{"Exportera till Excel"}
+\begin{itemize}
+  \item Genererar \texttt{.xlsx}-fil med alla fakturor
+  \item Inkluderar summeringsrad
+  \item Filnamn: \texttt{Fakturering\_2025-10.xlsx}
+\end{itemize}
+
+\subsection{Total Summa}
+Nederst i tabellen:
+\begin{itemize}
+  \item \textbf{Totalt belopp:} Summa av alla fakturor (9 850 kr i mock data)
+  \item \textbf{Betald:} 4 900 kr
+  \item \textbf{Obetald:} 4 950 kr
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════════════
+\section{Flik 5: Email}
+% ═══════════════════════════════════════════════════════════════════════
+
+\subsection{Syfte}
+Skicka email till användare, antingen enskilt eller som massutskick till alla 450 användare.
+
+\subsection{Användningsområden}
+\begin{itemize}
+  \item \textbf{Support-svar:} Svara på support-ärenden
+  \item \textbf{Notifikationer:} Påminnelser om ofullständiga onboardings
+  \item \textbf{Fraud alerts:} Automatiska varningar vid hög risk score
+  \item \textbf{Massutskick:} Nyhetsbrev, produktuppdateringar, systemunderhåll
+  \item \textbf{REMOTE\_ONBOARDING:} Skicka länk till extern uppladdning för stora datafiler
+\end{itemize}
+
+\subsection{Formulär}
+
+\subsubsection{Email-typ (Radio buttons)}
+\begin{itemize}
+  \item \textbf{Enskild användare:} Skicka till en specifik mottagare
+  \item \textbf{Massutskick:} Skicka till alla 450 användare
+\end{itemize}
+
+\subsubsection{Fält}
+\begin{enumerate}
+  \item \textbf{Till:} (endast för enskild användare)
+  \begin{itemize}
+    \item Input: Email-adress
+    \item Validering: Måste vara giltig email
+    \item Placeholder: "mottagare@example.com"
+  \end{itemize}
+  
+  \item \textbf{Ämne:}
+  \begin{itemize}
+    \item Input: Textsträng
+    \item Max 100 tecken
+    \item Obligatoriskt
+  \end{itemize}
+  
+  \item \textbf{Meddelande:}
+  \begin{itemize}
+    \item Textarea: 8 rader
+    \item Stöd för line breaks
+    \item Framtida version: Rich text editor (från Themesberg-template)
+  \end{itemize}
+\end{enumerate}
+
+\subsubsection{Knappar}
+\begin{itemize}
+  \item \textbf{Skicka Email:} Grön knapp, fullbredds
+  \item \textbf{Rensa:} Grå knapp, rensa formulär
+\end{itemize}
+
+\subsection{Integration: SendGrid API}
+
+\subsubsection{Production Environment}
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+import sendgrid
+from sendgrid.helpers.mail import Mail
+
+def send_email(to_email, subject, message):
+    sg = sendgrid.SendGridAPIClient(
+        api_key=os.environ.get('SENDGRID_API_KEY')
+    )
+    
+    mail = Mail(
+        from_email='admin@roaringanalytics.se',
+        to_emails=to_email,
+        subject=subject,
+        html_content=message
+    )
+    
+    response = sg.send(mail)
+    return response.status_code
+\end{lstlisting}
+
+\subsubsection{Development Environment}
+Mock-funktionalitet:
+\begin{itemize}
+  \item \texttt{alert()} med sammanfattning av email
+  \item Loggas till console
+  \item Ingen faktisk email skickas
+\end{itemize}
+
+\subsection{Säkerhet}
+\begin{itemize}
+  \item \textbf{Rate limiting:} Max 100 email/timme per admin
+  \item \textbf{Massutskick:} Kräver bekräftelse-dialog innan skickning
+  \item \textbf{HTML sanitization:} Alla användare-input saniteras för XSS
+  \item \textbf{Email validering:} Regex-check för giltiga email-adresser
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════════════
+\section{Teknisk Implementation}
+% ═══════════════════════════════════════════════════════════════════════
+
+\subsection{Filstruktur}
+\begin{verbatim}
+src/
+  components/
+    Admin/
+      AdminDashboard.jsx (huvudkomponent, 870+ rader)
+      AdminSidebar.jsx (framtida - separat sidebar)
+      AdminHeader.jsx (framtida - separat header)
+      components/
+        StatsCard.jsx
+        FraudAlertCard.jsx
+        SupportTicketCard.jsx
+        InvoiceTable.jsx
+        EmailForm.jsx
+  services/
+    adminApi.js (API-anrop för admin-funktioner)
+    emailService.js (SendGrid integration)
+\end{verbatim}
+
+\subsection{State Management}
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+const [activeTab, setActiveTab] = useState('overview');
+// 'overview', 'fraud', 'support', 'invoices', 'email'
+
+const [emailForm, setEmailForm] = useState({
+  to: '',
+  subject: '',
+  message: '',
+  type: 'single' // 'single' or 'mass'
+});
+\end{lstlisting}
+
+\subsection{API Endpoints}
+
+\subsubsection{Översikt}
+\begin{itemize}
+  \item \texttt{GET /api/admin/stats} - Hämta KPI-statistik
+  \item \texttt{GET /api/admin/recent-alerts} - Senaste fraud alerts (top 3)
+  \item \texttt{GET /api/admin/recent-tickets} - Senaste support-ärenden (top 3)
+\end{itemize}
+
+\subsubsection{Fraud Detection}
+\begin{itemize}
+  \item \texttt{GET /api/admin/fraud/overview} - Aggregerad statistik
+  \item \texttt{GET /api/admin/fraud/categories} - Kategorifördelning
+  \item \texttt{GET /api/admin/fraud/alerts} - Alla alerts med filtrering
+  \item \texttt{POST /api/admin/fraud/export-report} - Generera PDF-rapport
+\end{itemize}
+
+\subsubsection{Support}
+\begin{itemize}
+  \item \texttt{GET /api/admin/support/tickets} - Alla support-ärenden
+  \item \texttt{PATCH /api/admin/support/tickets/:id} - Uppdatera status
+  \item \texttt{POST /api/admin/support/reply} - Skicka svar via email
+\end{itemize}
+
+\subsubsection{Fakturering}
+\begin{itemize}
+  \item \texttt{GET /api/admin/invoices} - Alla fakturor
+  \item \texttt{GET /api/admin/invoices/export} - Exportera till Excel
+  \item \texttt{PATCH /api/admin/invoices/:id/status} - Markera som betald
+\end{itemize}
+
+\subsubsection{Email}
+\begin{itemize}
+  \item \texttt{POST /api/admin/email/send} - Skicka enskild email
+  \item \texttt{POST /api/admin/email/mass-send} - Massutskick till alla användare
+\end{itemize}
+
+\subsection{Autentisering \& Behörighet}
+\begin{itemize}
+  \item \textbf{JWT Token:} Måste innehålla \texttt{role: 'admin'}
+  \item \textbf{Middleware:} \texttt{@require\_admin} decorator på alla admin-endpoints
+  \item \textbf{Frontend:} Dölj admin-ikon i header för icke-admins
+  \item \textbf{Route Guard:} Redirect till \texttt{/unauthorized} om användare försöker nå \texttt{/admin}
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════════════
+\section{Framtida Uppgraderingar}
+% ═══════════════════════════════════════════════════════════════════════
+
+\subsection{Themesberg React/Tailwind Template}
+Efter köp av template (25:e november 2025):
+
+\subsubsection{Fördelar}
+\begin{itemize}
+  \item \textbf{Gmail-liknande email-interface:}
+  \begin{itemize}
+    \item Inkorgen med trådar
+    \item Rich text editor (WYSIWYG)
+    \item Bifogade filer
+    \item Mappar och etiketter
+  \end{itemize}
+  
+  \item \textbf{Professionella komponenter:}
+  \begin{itemize}
+    \item Chart.js/Recharts integration för avancerade grafer
+    \item Drag-and-drop kanban board för support-ärenden
+    \item Advanced data tables med sortering och filtrering
+    \item Dark mode support
+  \end{itemize}
+  
+  \item \textbf{Separat layout:}
+  \begin{itemize}
+    \item AdminSidebar med collapsible meny
+    \item AdminHeader med notifications bell
+    \item Breadcrumbs navigation
+    \item User profile dropdown
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{Migration Plan}
+\begin{enumerate}
+  \item Installera Themesberg-template i \texttt{src/templates/themesberg/}
+  \item Skapa \texttt{AdminLayout.jsx} som wrapper för admin-sidor
+  \item Migrera existerande komponenter till nya layout
+  \item Integrera Themesberg's EmailInbox-komponent
+  \item Anpassa färgschema till Roaring's brand colors
+  \item Testa responsiv design på mobil/tablet
+\end{enumerate}
+
+\subsection{Ytterligare Features}
+
+\subsubsection{Real-time Notifications}
+\begin{itemize}
+  \item WebSocket-anslutning för live updates
+  \item Toast notifications för nya support-ärenden
+  \item Desktop notifications (browser API)
+\end{itemize}
+
+\subsubsection{Användare-hantering}
+\begin{itemize}
+  \item Lista alla användare med sök och filtrering
+  \item Se användares onboarding-progress
+  \item Impersonate-funktion för felsökning
+  \item Skapa ny användare manuellt
+\end{itemize}
+
+\subsubsection{Avancerad Rapportering}
+\begin{itemize}
+  \item Custom datum-intervall för fraud detection
+  \item Exportera till Excel/CSV
+  \item Schemalagda rapporter (veckovis/månadsvis email)
+  \item Jämförelse mellan olika perioder
+\end{itemize}
+
+\subsubsection{Aktivitetslogg}
+\begin{itemize}
+  \item Audit trail för alla admin-åtgärder
+  \item Vem skickade vilken email och när
+  \item Ändringar i support-ärenden
+  \item Faktura-uppdateringar
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════════════
+\section{Mock Data för LIA-Demo}
+% ═══════════════════════════════════════════════════════════════════════
+
+\subsection{Fraud Alerts (Anonymiserade)}
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|l|l|c|l|}
+\hline
+\textbf{Företag} & \textbf{Kategori} & \textbf{Risk} & \textbf{Beskrivning} \\
+\hline
+Anonymiserat A & Verksamhetskongruens & 85 & Cykelförsäljare - fiskeredskap \\
+Anonymiserat B & Privatkonsumtion & 78 & ICA-inköp bokförda \\
+Anonymiserat C & Cirkulära betalningar & 92 & Närstående företag \\
+Anonymiserat D & Konkurskontroll & 65 & Avregistrerat leverantör \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Support-ärenden}
+\begin{enumerate}
+  \item \textbf{Revision Stockholm AB} - Anna Andersson
+  \begin{itemize}
+    \item Ämne: Fråga om fraud alert
+    \item Prioritet: Hög
+    \item Status: Ny
+  \end{itemize}
+  
+  \item \textbf{Ekonomibyrån Väst} - Erik Eriksson
+  \begin{itemize}
+    \item Ämne: Problem med SIE-uppladdning
+    \item Prioritet: Medium
+    \item Status: Under behandling
+  \end{itemize}
+  
+  \item \textbf{Nordisk Revision} - Maria Nilsson
+  \begin{itemize}
+    \item Ämne: Fakturafråga
+    \item Prioritet: Låg
+    \item Status: Avslutad
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Fakturor}
+\begin{itemize}
+  \item INV-2025-001: Revision Stockholm AB, 2 950 kr, Betald
+  \item INV-2025-002: Ekonomibyrån Väst, 1 950 kr, Betald
+  \item INV-2025-003: Nordisk Revision, 4 950 kr, Obetald
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════════════
+\section{Säkerhet \& GDPR}
+% ═══════════════════════════════════════════════════════════════════════
+
+\subsection{Dataskydd}
+\begin{itemize}
+  \item \textbf{Personuppgifter:} Admin-panelen innehåller känslig data
+  \item \textbf{Åtkomstloggning:} Alla admin-åtgärder loggas med timestamp och user\_id
+  \item \textbf{Kryptering:} All data krypteras i transit (HTTPS) och i vila (PostgreSQL encryption)
+  \item \textbf{Datalagring:} Fraud alerts sparas i 7 år (enligt Bokföringslagen)
+\end{itemize}
+
+\subsection{Anonymisering}
+\textbf{KRITISKT:} Vid export av rapporter till Finanspolisen:
+\begin{itemize}
+  \item Maskera alla företagsnamn: "Anonymiserat företag A, B, C..."
+  \item Maskera org.nr: 559XXX-XXXX (visa endast första 3 siffror)
+  \item Ta bort personnummer helt
+  \item Generalisera adresser: "Stockholm" istället för "Bangårdsgatan 26, Östersund"
+\end{itemize}
+
+\subsection{Rollbaserad Åtkomst}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Funktion} & \textbf{Admin} & \textbf{Support} & \textbf{Byråchef} \\
+\hline
+Översikt & \texttt{Check icon} & \texttt{Check icon} & Nej \\
+Fraud Detection & \texttt{Check icon} & \texttt{Check icon} (read-only) & Nej \\
+Support-ärenden & \texttt{Check icon} & \texttt{Check icon} & Nej \\
+Fakturering & \texttt{Check icon} & Nej & Nej \\
+Email (massutskick) & \texttt{Check icon} & Nej & Nej \\
+Email (enskild) & \texttt{Check icon} & \texttt{Check icon} & Nej \\
+\hline
+\end{tabular}
+\end{table}
+
+% ═══════════════════════════════════════════════════════════════════════
+\section{Testplan}
+% ═══════════════════════════════════════════════════════════════════════
+
+\subsection{Manuell Testning}
+\begin{enumerate}
+  \item \textbf{Navigering:}
+  \begin{itemize}
+    \item Klicka på lila admin-ikon i header → ska navigera till \texttt{/admin}
+    \item Testa alla 5 flikar (Översikt, Fraud Detection, Support, Fakturering, Email)
+    \item Verifiera att aktiv flik highlightas med brand-grön färg
+  \end{itemize}
+  
+  \item \textbf{Översikt:}
+  \begin{itemize}
+    \item Verifiera att alla 4 statistikkort visar rätt värden
+    \item Klicka "Visa alla fraud alerts" → ska navigera till Fraud Detection-fliken
+    \item Klicka "Visa alla support-ärenden" → ska navigera till Support-fliken
+  \end{itemize}
+  
+  \item \textbf{Fraud Detection:}
+  \begin{itemize}
+    \item Verifiera stapeldiagram med 5 kategorier
+    \item Klicka "Generera Rapport för Finanspolisen" → ska visa alert med rapportinnehåll
+    \item Kontrollera att alla företag är anonymiserade i tabellen
+  \end{itemize}
+  
+  \item \textbf{Support:}
+  \begin{itemize}
+    \item Verifiera att alla 3 support-ärenden visas
+    \item Klicka "Svara"-knapp → ska öppna Email-fliken med förifylld mottagare
+    \item Verifiera färgkodning av prioritet och status badges
+  \end{itemize}
+  
+  \item \textbf{Fakturering:}
+  \begin{itemize}
+    \item Kontrollera att total summa är korrekt (9 850 kr)
+    \item Verifiera status badges (grön för betald, röd för obetald)
+    \item Klicka "Exportera till Excel" → ska visa alert (mock)
+  \end{itemize}
+  
+  \item \textbf{Email:}
+  \begin{itemize}
+    \item Testa båda email-typer (enskild och massutskick)
+    \item Fyll i formulär och skicka → ska visa alert med sammanfattning
+    \item Klicka "Rensa" → ska nollställa formulär
+    \item Verifiera att "Till"-fält döljs för massutskick
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Responsiv Design}
+\begin{itemize}
+  \item \textbf{Desktop (>1280px):} Full bredd, alla kolumner synliga
+  \item \textbf{Tablet (768-1280px):} 2 kolumner för statistikkort, scroll för tabeller
+  \item \textbf{Mobil (<768px):} 1 kolumn, tabs ska vara scrollbara horisontellt
+\end{itemize}
+
+% ═══════════════════════════════════════════════════════════════════════
+\section{Sammanfattning}
+% ═══════════════════════════════════════════════════════════════════════
+
+AdminDashboard är en central komponent för Roaring Analytics AB att:
+
+\begin{enumerate}
+  \item \textbf{Övervaka} alla användare och deras onboarding-status
+  \item \textbf{Analysera} fraud detection-resultat för rapportering till Finanspolisen
+  \item \textbf{Hantera} support-ärenden från revisionsbyråer
+  \item \textbf{Fakturera} kunder baserat på antal användare
+  \item \textbf{Kommunicera} via email (enskilt och massutskick)
+\end{enumerate}
+
+\subsection{Nästa Steg}
+\begin{enumerate}
+  \item Testa AdminDashboard i browser (\texttt{http://localhost:5173/admin})
+  \item Implementera backend API-endpoints i FastAPI
+  \item Integrera SendGrid för produktion
+  \item Köp Themesberg-template (25:e november) och migrera till professionell layout
+  \item Skapa separerad AdminSidebar och AdminHeader
+\end{enumerate}
+
+\vspace{1cm}
+\noindent\textbf{Version:} 1.0\\
+\textbf{Datum:} \today\\
+\textbf{Författare:} Lasse Karagiannis \& Claude AI\\
+\textbf{Status:} Mock-version klar, produktion pending
+
+\end{document}

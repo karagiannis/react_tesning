@@ -1,0 +1,111 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Personal files and documentation
+kommandon-personliga.txt
+
+# KONFIDENTIELLA Demo-komponenter (innehåller verklig klientdata)
+# Får INTE pushas till GitHub eller deployas
+src/components/Demo/FraudDetectionDemo.jsx
+src/utils/fraudDetection.js
+
+# LaTeX
+*.toc
+*.vrb
+*.log
+*.aux
+*.nav
+
+# Bolagsverket credentials and sensitive files
+Bolagsverket/*.zip
+Bolagsverket/*_client_id.txt
+Bolagsverket/*_client_secret.txt
+Bolagsverket/client_credentials.txt
+Bolagsverket/credentials/
+Bolagsverket/*.pdf
+!Bolagsverket/README.md
+
+# API keys and credentials
+*.ini
+sendgrid.ini
+config.ini
+.env
+.env.local
+.env.*.local
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Private folder (credentials, personal notes, sensitive data)
+private/
+
+# Skatteverket sensitive files
+Skatteverket/*.p12
+Skatteverket/*.zip
+Skatteverket/*.pfx
+Skatteverket/*_credentials.txt
+Skatteverket/*Registrera*.txt
+Skatteverket/Testcertifikat*/
+
+# SIE files (sensitive accounting data)
+SIE/*.se
+SIE/*.si
+SIE/*.txt
+
+# Loopia sensitive
+Loopia/*_OLD.txt
+
+# Personal notes
+kommandon-personliga.txt
+bolagsverket_mail.txt
+fortnox_support_message.txt
+MAIL_TILL_FREDRIK.md
+
+# LaTeX auxiliary files (extended)
+*.aux
+*.log
+*.nav
+*.out
+*.toc
+*.vrb
+*.snm
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+
+# Temporary files
+db.json
+*.tmp
+*.bak
+*~
+
+Fraud_detection/

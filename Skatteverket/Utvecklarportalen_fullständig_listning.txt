@@ -1,0 +1,766 @@
+
+Skatteverkets startsida
+Du företräder: LEONIDA LASSE KARAGIANNIS 691202-0291
+
+    API:er och öppna data
+    Utvecklarportalen 
+
+Utvecklarportalen
+
+Välkommen till Skatteverkets utvecklarportal. Här hittar du hela vårt utbud av API:er och öppna data samt dokumentation och instruktioner som hjälper dig att använda våra dataresurser. 
+Sök och filtrera för att hitta rätt dataresurs
+Välj typ av dataresurs (inga valda)
+Välj kategori (inga valda)
+Välj format (inga valda)
+126 dataresurser
+Sortera efter:
+
+Det här API:et kan användas för att utveckla funktionalitet i programvara för att hämta information om arbetsgivardeklarationer samt att låsa och låsa upp redovisningsperioder. API:et finns som komplett testtjänst och driftsatt tjänst.
+Arbetsgivardeklaration - hantera redovisningsperiod 1.2
+Dataresurs: Partner-API (kräver avtal)
+Kategorier: Deklaration och redovisning, Löner och avdrag, Skatter och avgifter
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.2
+
+API:et riktar sig till svenska myndigheter och a-kassor. Det kan användas för att hämta relevant information från en specifik anställds individuppgifter för en eller flera redovisningsperioder.
+Arbetsgivardeklaration – individuppgifter 1.0
+Dataresurs: Riktat API (kräver lagstöd)
+Kategorier: Deklaration och redovisning, Löner och avdrag, Regler och kontroll
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.0
+
+API:et riktar sig till dig som utvecklar tjänster där slutanvändaren är arbetsgivare eller utbetalare. Med API:et kan du utveckla funktioner som gör att arbetsgivaren kan läsa in och skapa underlag för arbetsgivardeklarationer direkt via sina lönesystem.
+Arbetsgivardeklaration – inlämning 1.7
+Dataresurs: Partner-API (kräver avtal)
+Kategorier: Deklaration och redovisning, Löner och avdrag, Skatter och avgifter
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.7
+
+API:et Beskattningsengagemang kan användas av programvaruföretag för att visa uppgifter om F-skatt, arbetsgivarregistrering och momsregistrering när kunden legitimerat sig med e-legitimation.
+Beskattningsengagemang 1.0
+Dataresurs: Partner-API (kräver avtal)
+Kategorier: Deklaration och redovisning, Skatter och avgifter
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.0
+
+Beskattningssammandraget innehåller uppgifter om deklarerade inkomster samt avdrag i inkomstslagen tjänst, kapital och näringsverksamhet. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län, typ av skattebetalare (fysisk eller juridisk) samt genus.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningssammandraget innehåller uppgifter om deklarerade inkomster samt avdrag i inkomstslagen tjänst, kapital och näringsverksamhet. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län, typ av skattebetalare (fysisk eller juridisk) samt genus.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningssammandraget innehåller uppgifter om deklarerade inkomster samt avdrag i inkomstslagen tjänst, kapital och näringsverksamhet. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län, typ av skattebetalare (fysisk eller juridisk) samt genus.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningssammandraget innehåller uppgifter om deklarerade inkomster samt avdrag i inkomstslagen tjänst, kapital och näringsverksamhet. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län, typ av skattebetalare (fysisk eller juridisk) samt genus.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningssammandraget innehåller uppgifter om deklarerade inkomster samt avdrag i inkomstslagen tjänst, kapital och näringsverksamhet. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län, typ av skattebetalare (fysisk eller juridisk) samt genus.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningssammandraget innehåller uppgifter om deklarerade inkomster samt avdrag i inkomstslagen tjänst, kapital och näringsverksamhet. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län, typ av skattebetalare (fysisk eller juridisk) samt genus.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningssammandraget innehåller uppgifter om deklarerade inkomster samt avdrag i inkomstslagen tjänst, kapital och näringsverksamhet. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län, typ av skattebetalare (fysisk eller juridisk) samt genus.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningssammandraget innehåller uppgifter om deklarerade inkomster samt avdrag i inkomstslagen tjänst, kapital och näringsverksamhet. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län, typ av skattebetalare (fysisk eller juridisk) samt genus.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningssammandraget innehåller uppgifter om deklarerade inkomster samt avdrag i inkomstslagen tjänst, kapital och näringsverksamhet. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län, typ av skattebetalare (fysisk eller juridisk) samt genus.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Deklaration och redovisning, Skatter och avgifter, Statistik
+
+Med hjälp av API:et Beskattningsunderlag Fastighet får du underlag för fastighetsavgift och fastighetsskatt vid en förutbestämd tidpunkt per fastighetsägare.
+Beskattningsunderlag fastighet 1.0
+Dataresurs: Riktat API (kräver lagstöd)
+Kategorier: Bostad och fastighet, Deklaration och redovisning
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.0
+
+API:et riktar sig till svenska myndigheter och andra verksamheter som har rättsligt stöd att ta del av sammanställda underlag för beskattning av inkomstslaget tjänst.
+Beskattningsunderlag tjänsteinkomster 1.1
+Dataresurs: Riktat API (kräver lagstöd)
+Kategorier: Deklaration och redovisning, Skatter och avgifter
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.1
+
+Här hittar du sammanställningar av beskattningsutfall, beskattningssammandrag och debiteringsstatistik för inkomståren 2011 till 2015. Du kan också ta del av en sammanställning där du kan jämföra beskattningsutfall för inkomståren 2002 till 2015.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningsutfallet (tidigare taxeringsutfallet) innehåller uppgifter om kommunalt beskattningsbar förvärvsinkomst för fysiska personer. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län och kommun.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningsutfallet (tidigare taxeringsutfallet) innehåller uppgifter om kommunalt beskattningsbar förvärvsinkomst för fysiska personer. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län, kommun och församling.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningsutfallet (tidigare taxeringsutfallet) innehåller uppgifter om kommunalt beskattningsbar förvärvsinkomst för fysiska personer. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län och kommun.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningsutfallet (tidigare taxeringsutfallet) innehåller uppgifter om kommunalt beskattningsbar förvärvsinkomst för fysiska personer. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län och kommun.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningsutfallet (tidigare taxeringsutfallet) innehåller uppgifter om kommunalt beskattningsbar förvärvsinkomst för fysiska personer. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län och kommun.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningsutfallet (tidigare taxeringsutfallet) innehåller uppgifter om kommunalt beskattningsbar förvärvsinkomst för fysiska personer. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län och kommun.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningsutfallet (tidigare taxeringsutfallet) innehåller uppgifter om kommunalt beskattningsbar förvärvsinkomst för fysiska personer. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län och kommun.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningsutfallet (tidigare taxeringsutfallet) innehåller uppgifter om kommunalt beskattningsbar förvärvsinkomst för fysiska personer. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län och kommun.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Beskattningsutfallet (tidigare taxeringsutfallet) innehåller uppgifter om kommunalt beskattningsbar förvärvsinkomst för fysiska personer. Här redovisas uppgifter för hela riket. Du kan se uppgifterna fördelade på län och kommun.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Deklaration och redovisning, Skatter och avgifter, Statistik
+
+API:et Bilförmån gör det möjligt för programvaruföretag att ta fram tjänster där slutanvändare kan räkna ut förmånsvärdet på sin företagsbil. API:et finns tillgängligt som komplett testtjänst och driftsatt tjänst.
+Bilförmån 2.0
+Dataresurs: Partner-API (kräver avtal)
+Kategorier: Bil och trafik, Löner och avdrag
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 2.0
+
+Debiteringsstatistiken innehåller beskattningsuppgifter i form av en summering av debiterade skatter, avgifter och reduktioner. Beskattningsuppgifterna redovisas för hela riket. Du kan se dem fördelade på län och typ av skattebetalare (fysisk eller juridisk).
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Deklaration och redovisning, Skatter och avgifter, Statistik
+
+Debiteringsstatistiken innehåller beskattningsuppgifter i form av en summering av debiterade skatter, avgifter och reduktioner. Beskattningsuppgifterna redovisas för hela riket. Du kan se dem fördelade på län och typ av skattebetalare (fysisk eller juridisk).
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Deklaration och redovisning, Skatter och avgifter, Statistik
+
+Debiteringsstatistiken innehåller beskattningsuppgifter i form av en summering av debiterade skatter, avgifter och reduktioner. Beskattningsuppgifterna redovisas för hela riket. Du kan se dem fördelade på län och typ av skattebetalare (fysisk eller juridisk).
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Deklaration och redovisning, Skatter och avgifter, Statistik
+
+Debiteringsstatistiken innehåller beskattningsuppgifter i form av en summering av debiterade skatter, avgifter och reduktioner. Beskattningsuppgifterna redovisas för hela riket. Du kan se dem fördelade på län och typ av skattebetalare (fysisk eller juridisk).
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Deklaration och redovisning, Skatter och avgifter, Statistik
+
+Debiteringsstatistiken innehåller beskattningsuppgifter i form av en summering av debiterade skatter, avgifter och reduktioner. Beskattningsuppgifterna redovisas för hela riket. Du kan se dem fördelade på län och typ av skattebetalare (fysisk eller juridisk).
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Deklaration och redovisning, Skatter och avgifter, Statistik
+
+Debiteringsstatistiken innehåller beskattningsuppgifter i form av en summering av debiterade skatter, avgifter och reduktioner. Beskattningsuppgifterna redovisas för hela riket. Du kan se dem fördelade på län och typ av skattebetalare (fysisk eller juridisk).
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Deklaration och redovisning, Skatter och avgifter, Statistik
+
+Debiteringsstatistiken innehåller beskattningsuppgifter i form av en summering av debiterade skatter, avgifter och reduktioner. Beskattningsuppgifterna redovisas för hela riket. Du kan se dem fördelade på län och typ av skattebetalare (fysisk eller juridisk).
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Deklaration och redovisning, Skatter och avgifter, Statistik
+
+Debiteringsstatistiken innehåller beskattningsuppgifter i form av en summering av debiterade skatter, avgifter och reduktioner. Beskattningsuppgifterna redovisas för hela riket. Du kan se dem fördelade på län och typ av skattebetalare (fysisk eller juridisk).
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Deklaration och redovisning, Skatter och avgifter, Statistik
+
+Debiteringsstatistiken innehåller beskattningsuppgifter i form av en summering av debiterade skatter, avgifter och reduktioner. Beskattningsuppgifterna redovisas för hela riket. Du kan se dem fördelade på län och typ av skattebetalare (fysisk eller juridisk).
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Deklaration och redovisning, Skatter och avgifter, Statistik
+
+Med API:et Faderskapsutredning kan svenska kommuner skicka och ta emot uppgifter om faderskap och föräldraskap digitalt till Skatteverket.
+Faderskapsutredning 1.0
+Dataresurs: Riktat API (kräver lagstöd)
+Kategori: Folkbokföring
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.0
+
+API:et Fastighetstaxering - ägarförändringar gör det möjligt för myndigheter att hämta uppgifter om fastigheters ägarförändringar direkt i den egna programvaran. API:et finns tillgängligt som komplett testtjänst och driftsatt tjänst.
+Fastighetstaxering ägarförändringar 2.3
+Dataresurs: Riktat API (kräver lagstöd)
+Kategorier: Bostad och fastighet, Deklaration och redovisning
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 2.3
+
+API:et Fastighetstaxering - innehav gör det möjligt för myndigheter att hämta uppgifter om fastigheters innehav direkt i den egna programvaran.
+Fastighetstaxering innehav 2.2
+Dataresurs: Riktat API (kräver lagstöd)
+Kategorier: Bostad och fastighet, Deklaration och redovisning
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 2.2
+
+API:et Fastightetstaxering - taxeringsuppgifter riktar sig till myndigheter och kreditupplysningsföretag. Med hjälp av operationerna i API:et kan du utveckla funktioner som gör det möjligt att hämta taxeringsuppgifter direkt i den egna programvaran.
+Fastighetstaxering taxeringsuppgifter 2.8
+Dataresurs: Riktat API (kräver lagstöd)
+Kategorier: Bostad och fastighet, Deklaration och redovisning
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 2.8
+API:et Folkbokföringsuppgifter för offentliga aktörer 3.0
+
+API:et Folkbokföringsuppgifter för offentliga aktörer gör det möjligt för myndigheter, kommuner, regioner, trossamfund och deras distributörer att hämta olika folkbokföringsuppgifter. API:et är avgiftsbelagt för alla utom myndigheter.
+Folkbokföringsuppgifter för offentliga aktörer 3.0
+Dataresurs: Riktat API (kräver lagstöd)
+Kategori: Folkbokföring
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 3.0
+API:et Folkbokföringsuppgifter för offentliga aktörer 2.0
+
+API:et Folkbokföringsuppgifter för offentliga aktörer gör det möjligt för myndigheter, kommuner, regioner, trossamfund och deras distributörer att hämta olika folkbokföringsuppgifter. API:et är avgiftsbelagt för alla utom myndigheter.
+Folkbokföringsuppgifter för offentliga aktörer 2.0
+Dataresurs: Riktat API (kräver lagstöd)
+Kategori: Folkbokföring
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 2.0
+
+Det här API:et gör det möjligt för dig som bygger lösningar för arbetsgivare eller utbetalare som ska hämta anställdas preliminärskatteuppgifter. API:et finns som komplett testtjänst och driftsatt tjänst.
+Fråga om skatteavdrag 2.0
+Dataresurs: Partner-API (kräver avtal)
+Kategorier: Deklaration och redovisning, Löner och avdrag, Skatter och avgifter
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 2.0
+
+Det här API:et är till för dig som utvecklar lösningar för arbetsgivare och andra utbetalare av lön. Operationerna ger stöd till uträkningar av skatteavdraget i kronor. API:et finns som komplett testtjänst och driftsatt tjänst.
+Fråga om skatteavdrag i kronor 1.0
+Dataresurs: Partner-API (kräver avtal)
+Kategorier: Deklaration och redovisning, Löner och avdrag, Skatter och avgifter
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.0
+
+Här kan du ta del av genomsnittshyror för butiker 2025 till 2027. Genomsnittshyrorna fungerar som vägledande hyresnivåer när du ska beräkna byggnadsvärde och saknar faktisk utgående hyra eller om hyran av annan anledning inte kan ligga till grund för beräkningen.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategori: Kategori saknas
+
+Här kan du ta del av genomsnittshyror för bostäder 2016 till 2018. Genomsnittshyrorna fungerar som vägledande hyresnivåer när du ska beräkna byggnadsvärde och saknar faktisk utgående hyra eller om hyran av annan anledning inte kan ligga till grund för beräkningen.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Bostad och fastighet, Statistik
+
+Här kan du ta del av genomsnittshyror för bostäder 2019 till 2021. Genomsnittshyrorna fungerar som vägledande hyresnivåer när du ska beräkna byggnadsvärde och saknar faktisk utgående hyra eller om hyran av annan anledning inte kan ligga till grund för beräkningen.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Bostad och fastighet, Statistik
+
+Här kan du ta del av genomsnittshyror för bostäder 2022 till 2024. Genomsnittshyrorna fungerar som vägledande hyresnivåer när du ska beräkna byggnadsvärde och saknar faktisk utgående hyra eller om hyran av annan anledning inte kan ligga till grund för beräkningen.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Bostad och fastighet, Statistik
+
+Här kan du ta del av genomsnittshyror för bostäder 2025 till 2027. Genomsnittshyrorna fungerar som vägledande hyresnivåer när du ska beräkna byggnadsvärde och saknar faktisk utgående hyra eller om hyran av annan anledning inte kan ligga till grund för beräkningen.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategori: Kategori saknas
+
+Här kan du ta del av genomsnittshyror för butiker 2016 till 2018. Genomsnittshyrorna fungerar som vägledande hyresnivåer när du ska beräkna byggnadsvärde och saknar faktisk utgående hyra eller om hyran av annan anledning inte kan ligga till grund för beräkningen.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Bostad och fastighet, Statistik
+
+Här kan du ta del av genomsnittshyror för butiker 2019 till 2021. Genomsnittshyrorna fungerar som vägledande hyresnivåer när du ska beräkna byggnadsvärde och saknar faktisk utgående hyra eller om hyran av annan anledning inte kan ligga till grund för beräkningen.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Bostad och fastighet, Statistik
+
+Här kan du ta del av genomsnittshyror för butiker 2022 till 2024. Genomsnittshyrorna fungerar som vägledande hyresnivåer när du ska beräkna byggnadsvärde och saknar faktisk utgående hyra eller om hyran av annan anledning inte kan ligga till grund för beräkningen.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Bostad och fastighet, Statistik
+
+Här kan du ta del av genomsnittshyror för lokaler 2016 till 2018. Genomsnittshyrorna fungerar som vägledande hyresnivåer när du ska beräkna byggnadsvärde och saknar faktisk utgående hyra eller om hyran av annan anledning inte kan ligga till grund för beräkningen.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Bostad och fastighet, Statistik
+
+Här kan du ta del av genomsnittshyror för lokaler 2019 till 2021. Genomsnittshyrorna fungerar som vägledande hyresnivåer när du ska beräkna byggnadsvärde och saknar faktisk utgående hyra eller om hyran av annan anledning inte kan ligga till grund för beräkningen.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Bostad och fastighet, Statistik
+
+Här kan du ta del av genomsnittshyror för lokaler 2022 till 2024. Genomsnittshyrorna fungerar som vägledande hyresnivåer när du ska beräkna byggnadsvärde och saknar faktisk utgående hyra eller om hyran av annan anledning inte kan ligga till grund för beräkningen.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Bostad och fastighet, Statistik
+
+Här kan du ta del av genomsnittshyror för lokaler 2025 till 2027. Genomsnittshyrorna fungerar som vägledande hyresnivåer när du ska beräkna byggnadsvärde och saknar faktisk utgående hyra eller om hyran av annan anledning inte kan ligga till grund för beräkningen.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Bostad och fastighet, Statistik
+
+Grundavdraget är ett avdrag som görs från dina inkomster på lön, arvode eller liknande ersättningar. Om du har en näringsverksamhet beräknas grundavdraget även på inkomster från den verksamheten.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Löner och avdrag, Skatter och avgifter
+
+Grundavdraget är ett avdrag som görs från dina inkomster på lön, arvode eller liknande ersättningar. Om du har en näringsverksamhet beräknas grundavdraget även på inkomster från den verksamheten.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Löner och avdrag, Skatter och avgifter
+
+Avtal med Skatteverket krävs. Uppgifter om fysiska personer som endast är avsedda för myndigheter, kommuner och regioner är bland annat namn, personnummer/samordningsnummer, skyddade personuppgifter, kön, adress, födelse, civilstånd, familjerelationer, medborgarskap, avregistrering. Grunddatadomän Person ingår i ramverket för nationella grunddata.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategori: Folkbokföring
+
+API:et riktar sig till programvaruföretag som tar fram tjänster för de som hämtar Inkomstdeklaration 2. API:et möjliggör att hämta och visa upp Skatteverkets förifyllda deklarationsuppgifter i PDF- eller SRU-format direkt i programvaran.
+Inkomstdeklaration 2 – hämta 1.0
+Dataresurs: Partner-API (kräver avtal)
+Kategori: Deklaration och redovisning
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.0
+
+API:et riktar sig till dig som utvecklar tjänster där slutanvändaren är företag som lämnar Inkomstdeklaration 2. Med API:et kan du skapa funktionalitet för att lämna in inkomstdeklarationen till bolagets egna utrymme hos Skatteverket i XBRL-format.
+Inkomstdeklaration 2 – inlämning 1.0
+Dataresurs: Partner-API (kräver avtal)
+Kategori: Deklaration och redovisning
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.0
+
+API:et kan användas för företag som lämnar Inkomstdeklaration 2, 3 och 4. Med API Inkomstdeklaration 2-4 kan du bland annat hämta och visa upp förifyllda deklarationsuppgifter direkt i programvaran.
+Inkomstdeklaration 2-4 1.0
+Dataresurs: Partner-API (kräver avtal)
+Kategori: Deklaration och redovisning
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.0
+
+Med detta beskattningsutfall kan du göra jämförelser mellan nuvarande och föregående inkomstår. Du kan ta del av ökningen av beskattningsbar förvärvsinkomst i både belopp och i procent. Jämförelsen gäller bara deklarationer som lämnats in.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Här hittar du en sammanställning över Skatteverkets slutavräkningar av skattemedel till kommuner och regioner. Slutavräkningen är skillnaden mellan de preliminära skattemedlen och de faktiska skattemedlen som beslutas i region- och kommuninvånarnas inkomstdeklarationer. Skatteverket gör slutavräkningen två år efter att kommuner och regioner fått de preliminära skattemedlen.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategori: Kategori saknas
+
+Kremering och gravsättning är ett API för programvaruföretag som har begravningshuvudmän som slutanvändare. Med API:et kan dessa skicka in uppgifter till Skatteverket om när och var kremering eller gravsättning har skett.
+Kremering och gravsättning 1.0
+Dataresurs: Riktat API (kräver lagstöd)
+Kategori: Folkbokföring
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.0
+API:et Kundhändelser 4.0
+
+API:et Kundhändelser ger programvaruföretag möjlighet att hämta information om ärenden (kundhändelser) till företag och deras ombud.
+Kundhändelser 4.0
+Dataresurs: Partner-API (kräver avtal)
+Kategorier: Deklaration och redovisning, Löner och avdrag, Skatter och avgifter
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 4.0
+API:et Kundhändelser 3.0
+
+API:et Kundhändelser ger programvaruföretag möjlighet att hämta information om ärenden (kundhändelser) till företag och deras ombud.
+Kundhändelser 3.0
+Dataresurs: Partner-API (kräver avtal)
+Kategorier: Deklaration och redovisning, Löner och avdrag, Skatter och avgifter
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 3.0
+
+API:et riktar sig endast mot svenska myndigheter och gör det möjligt att skicka in uppgifter om felaktig folkbokföringsadress till Skatteverket och folkbokföringen.
+Meddela felaktig folkbokföringsadress 1.0
+Dataresurs: Riktat API (kräver lagstöd)
+Kategori: Folkbokföring
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.0
+
+Mina ärendens dokumentation har flyttat. Du hittar nu senaste versionen under Specifikationer på Sveriges dataportal.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategori: Kategori saknas
+
+Här hittar du den dokumentation som utgjort tidigare versioner av den standard för ärendeåterkoppling som tas fram av byggblocket Mina ärenden. Aktuell version finns länkad under resurser.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategori: Kategori saknas
+
+API Momsdeklaration gör det möjligt att skapa och hantera underlag för momsdeklarationen direkt i egen programvara. Du kan även hämta information om inlämnade momsdeklarationer och beslutade uppgifter.
+Momsdeklaration 1.0
+Dataresurs: Partner-API (kräver avtal)
+Kategorier: Deklaration och redovisning, Skatter och avgifter
+Miljö: Komplett testtjänst
+Version: 1.0
+
+Här hittar du uppgifter om den tillfälliga nedsättningen av de avgifter som ingår i en enskild näringsverksamhets egenavgifter. Du kan ta del av fördelningen av avgifter både före och efter den tillfälliga nedsättningen. Uppgifterna redovisas för hela riket och är fördelade på avgiftstyp.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Löner och avdrag, Skatter och avgifter
+
+Beslutad debiterad preliminärskatt den 1 februari inkomståret för fysiska personer.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Här hittar du uppgifter om förändringar av de avgifter som ingår i egenavgifterna för en enskild näringsidkare.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Skatter och avgifter, Statistik
+
+Här hittar du uppgifter om reduktion av de avgifter som ingår i en enskild näringsverksamhets egenavgifter. Du kan ta del av fördelningen av avgifter både före och efter den regionala nedsättningen. Uppgifterna redovisas för hela riket och är fördelade på avgiftstyp. Du kan också ta del av det totala antalet som fått nedsättning av respektive avgift.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Deklaration och redovisning, Skatter och avgifter, Statistik
+
+Här hittar du uppgifter om nedsättningar av de avgifter som ingår i en aktiv enskild näringsverksamhet egenavgifter. Du kan ta del av fördelningen av egenavgifter både före och efter nedsättning. Uppgifterna redovisas för hela riket och är fördelade på avgiftstyp. Du kan också ta del av det totala antalet som fått nedsättning av respektive avgift.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Deklaration och redovisning, Skatter och avgifter, Statistik
+
+Sammanställning av nybilspriser för bilar med tillverkningsår mellan 2008 och 2025. Nybilspriserna används vid värdering av bilförmån som bygger på Skatteverkets föreskrifter. De finns som CSV- och XML-filer samt även som API.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Bil och trafik, Löner och avdrag, Skatter och avgifter
+
+API:et Ombudshantering ger programvaruföretag möjlighet att utveckla tjänster så att huvudmän och deras ombud kan hämta information om vilka behörigheter som finns registrerade i Skatteverkets behörighetsregister.
+Ombudshantering 2.0
+Dataresurs: Partner-API (kräver avtal)
+Kategorier: Deklaration och redovisning, Regler och kontroll
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 2.0
+
+Här hittar du filer med Skatteverkets tolkning av skatteregler inom olika områden, versionshanterade och i json-format som kan förstås av en dator. Regelfilerna hör ihop med API:et Rättsliga regler.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategori: Regler och kontroll
+
+API:et riktar sig till dig som utvecklar programvara som hanterar skatteregler. Bland annat kan du hämta Skatteverkets maskinläsbara regelfiler. API:et finns som komplett testtjänst och driftsatt tjänst.
+Rättsliga regler 1.0
+Dataresurs: Partner-API (kräver avtal)
+Kategori:
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.0
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade hyreshus- och ägarlägenhetsfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategori: Kategori saknas
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade industrifastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade industrifastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade industrifastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategori: Kategori saknas
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade lantbruksfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade lantbruksfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade lantbruksfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade lantbruksfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade lantbruksfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade lantbruksfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade lantbruksfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade lantbruksfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade lantbruksfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade lantbruksfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade lantbruksfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade lantbruksfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade småhusfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Bostad och fastighet
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade småhusfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Bostad och fastighet
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade småhusfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategori: Bostad och fastighet
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade småhusfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Bostad och fastighet
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade lantbruksfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Bostad och fastighet, Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade lantbruksfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Bostad och fastighet, Industri, skog och lantbruk
+
+Riktvärdeangivelser är faktorer som representerar det genomsnittliga prisläget för likartade lantbruksfastigheter inom ett geografiskt område (värdeområde).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Bostad och fastighet, Industri, skog och lantbruk
+
+Traktamente är en ersättning som en arbetsgivare kan betala ut till en anställd som reser i tjänsten. Här hittar du en sammanställning av schablonbelopp för traktamenten för inkomståren 2016 och 2017.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Löner och avdrag
+
+Traktamente är en ersättning som en arbetsgivare kan betala ut till en anställd som reser i tjänsten. Här hittar du en sammanställning av schablonbelopp för traktamenten för inkomstår 2018 och framåt.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Löner och avdrag
+
+Schablonvärde (inkomstår 2018 och framåt) för fri eller subventionerad bostad (för annan bostad än semesterbostad). Värdena som arbetsgivare ska använda avser omöblerade bostäder inklusive värme men exklusive hushållsel. Den anställda ska redovisa förmånens marknadsvärde i sin inkomstdeklaration.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Bostad och fastighet
+
+Arbetsgivare som tillhandahåller kost till anställda ska göra skatteavdrag och betala arbetsgivaravgifter på förmånen. Här hittar du en sammanställning av schablonvärden för olika kosttyper för år 2017.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Löner och avdrag
+
+Arbetsgivare som tillhandahåller kost till anställda ska göra skatteavdrag och betala arbetsgivaravgifter på förmånen. Här hittar du en sammanställning av schablonvärden för olika kosttyper för inkomstår 2018 och framåt.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Löner och avdrag
+
+Tabellen kan användas för att på ett enkelt sätt se hur mycket skatteavdrag (preliminär A-skatt) i procent som ska göra på årsinkomster upp till 400 000 kronor för lön, arvode och liknande ersättningar för en person som inte är pensionär. Samtliga kommunala skattesatser finns i tabellen, dvs 29-42.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Löner och avdrag, Skatter och avgifter
+
+Sammanställning av preliminära skatteavdrag på engångsbelopp för bland annat löne- och pensionsinkomst. Skatteavdragen gäller för de allmänna skattetabellerna kolumn 1 till 6 (år 2023 även kolumn 7) och anges i procent av engångsbeloppet.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Löner och avdrag, Skatter och avgifter
+
+Sammanställning av preliminära skatteavdrag på engångsbelopp för sjömän i fjärrfart. Skatteavdragen anges i procent av engångsbeloppet. För sjömän under 66 år används kolumn 1, för sjömän som är 66 år och äldre används kolumn 2. För sjömän som vid årets ingång fyllt 65 år men inte 66 år används kolumn 3 (endast 2023).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Löner och avdrag, Skatter och avgifter
+
+Sammanställning av preliminära skatteavdrag på engångsbelopp för sjömän i närfart. Skatteavdragen anges i procent av engångsbeloppet. För sjömän under 66 år används kolumn 1, för sjömän som är 66 år och äldre används kolumn 2. För sjömän som vid årets ingång fyllt 65 år men inte 66 år används kolumn 3 (endast 2023).
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Kategori saknas
+
+Sammanställning av preliminära skatteavdrag på engångsbelopp där den huvudsakliga årsinkomsten är löneinkomst. Skatteavdragen gäller inkomståren 2017 till och med 2019 och anges i procent av engångsbeloppet.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Löner och avdrag, Skatter och avgifter
+
+Sammanställning av preliminära skatteavdrag på engångsbelopp där den huvudsakliga årsinkomsten är pensionsinkomst. Skatteavdragen gäller inkomståren 2017 till och med 2019 och anges i procent av engångsbeloppet.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Löner och avdrag, Skatter och avgifter
+
+Med Skattekonto via API kan programvaruföretag utveckla tjänster som gör att företag och dess ombud kan hämta information om beslutade skatter och avgifter direkt i bokförings- eller lönesystemet. API:et finns som komplett testtjänst och driftsatt tjänst.
+Skattekonto 2.1
+Dataresurs: Partner-API (kräver avtal)
+Kategorier: Deklaration och redovisning, Skatter och avgifter
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 2.1
+
+API:et ger programvaruföretag möjlighet att utveckla tjänster där ombud kan få information om deras huvudmäns skattekontouppgifter direkt i bokförings- och lönesystem.
+Skattekonto - hämta huvudmäns saldo och transaktioner 1.0
+Dataresurs: Partner-API (kräver avtal)
+Kategorier: Deklaration och redovisning, Skatter och avgifter
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.0
+
+Här hittar du Skatteverkets sammanställning av totalt överskott och underskott på skattekontot. Uppgifterna sammanställs i början av varje månad efter skattekontots avstämning och belopp redovisas separat för fysiska personer, juridiska personer och offentliga myndigheter. Du kan också ta del av uppgifter fördelat per olika branscher.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategori: Deklaration och redovisning
+
+API:et Skatteregistrera privatpersoner bosatta utomlands riktar sig till de som ska ansöka om särskild inkomstskatt (SINK). API:et möjliggör för arbetsgivare och revisionsbyråer att skicka ansökningar direkt från ekonomi- eller lönesystemet.
+Skatteregistrera utomlands bosatta 1.0
+Dataresurs: Partner-API (kräver avtal)
+Kategori: Skatter och avgifter
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.0
+
+Här hittar du uppgifter om regionskatt (tidigare landstingsskatt), kommunalskatt, begravningsavgift och kyrkoavgift till Svenska kyrkan. Du kan ta del av information om filen och de förändringar som har gjorts under rubriken dokumentation.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Skatter och avgifter
+
+Skattetabeller för beräkning av preliminär A-skatt gällande dagpenning för personer som är 66 år och äldre.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Löner och avdrag, Skatter och avgifter
+
+Skattetabeller för beräkning av preliminär A-skatt gällande dagpenning för personer under 66 år.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Skatter och avgifter
+
+Skattetabeller för beräkning av preliminär A‑skatt för månadslön. Denna datamängd innehåller tabeller för år 2016-2025. Vi lägger till nästkommande års tabeller i mitten av december varje år.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Löner och avdrag, Skatter och avgifter
+
+Skattetabeller för att beräkna preliminär A‑skatt för sjöinkomst i fjärrfart.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Löner och avdrag, Skatter och avgifter
+
+Skattetabeller för att beräkna preliminär A‑skatt för sjöinkomst i närfart.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Löner och avdrag, Skatter och avgifter
+
+Skattetabeller för beräkning av preliminär A‑skatt för tvåveckorslön. Datamängden innehåller tabeller för år 2016-2025. I mitten av december lägger vi in nästkommande års tabeller.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategorier: Löner och avdrag, Skatter och avgifter
+
+Testpersonnummer med sekelsiffror för åren 1890-2025. Nya testnummer för kommande år läggs ut i december varje år. Testpersonnummer får bara användas i testmiljöer.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Folkbokföring
+
+Testsamordningsnummer med sekelsiffror för åren 1914-2025. Testsamordningsnummer får bara användas i testmiljöer.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Folkbokföring
+
+Sammanställning av utlandstraktamenten för inkomståren från och med 2020. Normalbeloppet för respektive land och inkomstår är exklusive logi per dag och avser ökade levnadskostnader i utlandet vid tjänsteresa, tillfälligt arbete och dubbel bosättning.
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategori: Löner och avdrag
+
+Sammanställning av utlandstraktamenten för inkomståren från och med 2020. Normalbeloppet för respektive land och inkomstår är exklusive logi per dag och avser ökade levnadskostnader i utlandet vid tjänsteresa, tillfälligt arbete och dubbel bosättning. Nu finns även landskoder tillagda i filerna från och med inkomstår 2021.
+Till dataresurs
+Dataresurs: Öppet data som API
+Kategori: Löner och avdrag
+Hitta snabbt
+Begär tillgång till våra API:er
+Börja använda API:er
+Anslutning och support
+Driftmeddelanden
+Samarbeta med oss
+Nyheter om digitala samarbeten
+Viktiga datum
+
+    Hämta dina datum
+
+Kontakt
+
+    0771-567 567
+    Kontakta oss och öppettider
+    Mejla oss
+    Besök servicekontor
+
+Språk
+
+    In English
+    Other languages
+    Teckenspråk
+
+Hitta snabbt
+
+    E-tjänster
+    Blanketter
+    Rättslig vägledning
+    Webbseminarier
+    API:er och öppna data
+
+Om Skatteverket
+
+    Om oss
+    Jobba hos oss
+    Press
+    Om webbplatsen
+    Tillgänglighetsredogörelse
+    Kakor (cookies)
+    Behandling av personuppgifter
+
+Följ oss på
+Instagram
+Facebook
+X
+LinkedIn
+Skatteverket - till startsidan
+Tillsammans gör vi samhället möjligt
+

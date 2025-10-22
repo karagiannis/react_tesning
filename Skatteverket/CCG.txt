@@ -1,0 +1,395 @@
+     Om oss  » Digitala samarbeten  » Börja använda API:er  » Client Credentials Grant (CCG) 
+
+Lyssna
+Client Credentials Grant (CCG)
+
+Client Credentials Grant är ett av de OAuth2-flöden som Skatteverket använder för att du ska få tillgång till våra partner-API:er. Våra steg för steg-guider förklarar hur flödet fungerar med antingen API-nycklar eller kombinationen API-nycklar och organisationslegitimation.
+Alla API-anrop kräver korrelations-id
+
+Din programvara måste kunna generera ett unikt värde för varje enskilt anrop till ett API, ett så kallat korrelations-id. Med hjälp av korrelations-id kan vi följa anropet i loggar och därmed felsöka lättare. Ett korrelations-id ska vara en max 36 tecken lång textsträng. Du skickar med värdet när du anropar API:et.
+Så här använder du flödet CCG
+
+CCG innebär i korthet att din programvara autentiserar sig mot Skatteverkets auktorisationsserver med API-nycklar. I vissa fall behövs också en organisationslegitimation från Expisoft för att få ut en så kallad access token. Med hjälp av access token får din programvara sedan åtkomst till API:et.
+
+Varje partner-API är knutet till ett eller flera specifika säkerhetsflöden och autentiseringsmetoder, du kan alltså inte välja fritt. Inom CCG-flödet finns det tre olika autentiseringsmetoder:
+
+    Autentisering med client ID och client secret (API-nycklar)
+    Autentisering med client ID, client secret och valfri organisationslegitimation
+    Autentisering med client ID och en utpekad organisationslegitimation (som ersätter client secret)
+
+Vad som gäller för respektive API kan du läsa om här:
+
+    Säkerhet och API:er
+    Auktorisationsflöden per API
+
+För dig som använder client ID och client secret
+Steg 1. Begär en access token
+
+För att begära en access token gör du ett POST-anrop till token-ändpunkten hos Skatteverkets auktorisationsserver. Se ändpunkt för access-token för respektive miljö nedan.
+
+Anropet ska innehålla:
+
+OAuth2 client ID
+	
+
+Ena delen av dina API-nycklar. Den är märkt med OAuth2.
+
+OAuth2 client secret
+	
+
+Andra delen av dina API-nycklar. Den är märkt med OAuth2.
+
+Scope
+	
+
+Välj det scope som står i API-beskrivningen på Utvecklarportalen.
+Så här gör du anropet
+
+Ändpunkt för access token i testmiljö: POST https://sysoauth2.test.skatteverket.se/oauth2/v1/sys/token 
+Ändpunkt för access token i produktionsmiljö: POST https://sysoauth2.skatteverket.se/oauth2/v1/sys/token
+HTTP-header: Content-Type: application/x-www-form-urlencoded;charset=UTF-8
+Body: grant_type=client_credentials&client_id=<OAUTH2 CLIENT ID>&client_secret=<OAUTH2 CLIENT SECRET>&scope=<API SCOPE>
+
+TIPS! Du kan använda din access token till flera tjänster genom att inkludera flera scope i bodyn.
+Testa att hämta access token med curl
+
+Du kan hämta en access token med hjälp av ett curl-anrop. På så sätt kan du kontrollera att anslutningen till API:et fungerar. Ersätt bara orden inom vinkelparenteserna med dina uppgifter:
+
+# curl --request POST --header "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" --data "grant_type=client_credentials&scope=<API-SCOPE>&client_id=<OAUTH2-CLIENT-ID>&client_secret=<OAUTH2-CLIENT-SECRET>" "<ÄNDPUNKT-FÖR-ACCESS-TOKEN>"
+
+Förklaring av vinkelparentes:
+
+    ÄNDPUNKT-FÖR-ACCESS-TOKEN: Adress till ändpunkt för att hämta token (anpassa för anrop till test- eller produktionsmiljö).
+
+Här under ser du hur anropet kan se ut i testmiljö. Observera att värden på parametrar för pinkod, client id och client secret är ofullständiga i exemplet.
+
+# curl --request POST --header "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" --data "grant_type=client_credentials&scope=agd&client_id=a59d...c5c&client_secret=9361...c5c" "https://sysoauth2.test.skatteverket.se/oauth2/v1/sys/token"
+Steg 2. Ta emot en access token
+
+Efter att auktorisationsservern kontrollerat uppgifterna du skickade i anropet får du ett svar i form av en JSON-body. Bodyn innehåller din access token. Svaret innehåller också det eller de scope du har begärt. Kontrollera att scope i svar och begäran är samma.
+
+Exempelsvar efter lyckat anrop
+
+200 OK
+
+Content-Type: application/json; charset=UTF-8
+{
+"access_token": <Access token>,
+"expires_in": 3600,
+"token_type": "Bearer",
+"scope": <Scope>
+}
+
+Här är ett exempel med riktiga värden:
+
+{
+"access_token": "79ab042fc076a755b58cf649458efffad2868caeb2f978a3d1ec19b2405295a6",
+"expires_in": 3600,
+"token_type": "Bearer",
+"scope": "foo"
+}
+
+Du kan bara använda en access token under den tid som anges i svaret. Det är angett i sekunder på raden "expires in" i exemplet ovan. När tiden har gått ut måste du hämta en ny access token. Det är viktigt att du utnyttjar hela giltighetstiden och inte hämtar nya access tokens för varje anrop.
+
+VIKTIGT! Tänk på att din access token är en värdehandling.
+Steg 3. Anropa API:et
+
+Nu när du har access token kan du anropa API:et. Du använder den som värde i en HTTP-header som du skickar med i anropet. API:et kontrollerar vid varje anrop att uppgifterna i access token stämmer.
+
+Anropet ska innehålla:
+
+Access token
+	
+
+Den du precis fått. Tänk på att du bara kan använda samma access token under den tid som anges i svaret.
+
+APIgw client ID
+	
+
+Den andra delen av dina API-nycklar, som är märkt med APIgw.
+
+APIgw client secret
+	
+
+Den andra delen av dina API-nycklar, som är märkt med APIgw.
+
+
+Korrelations-id
+
+
+	
+
+Din programvara måste kunna generera ett unikt värde för varje enskilt anrop till API:et, ett så kallat korrelations-id. Ett korrelations-id ska vara en max 36 tecken lång textsträng.
+
+
+Så ska dina HTTP-headers se ut 
+
+Authorization: Bearer <Access token>
+Client_Id: <APIgw client ID>
+Client_Secret: <APIgw client secret>
+skv_client_correlation_id: <Korrelations-id>
+
+Här ser du bara de parametrar som är gemensamma för alla Skatteverkets API:er. För specifika API:er kan det krävas fler parametrar. Du hittar dem i tjänstebeskrivningen för respektive API. I tjänstebeskrivningen kan du också kontrollera parametern för korrelations-id, eftersom den finns i flera versioner.
+
+VIKTIGT! Skicka endast med de header-parametrar som är angivna för respektive tjänst, annars kan anropet blockeras.
+
+Här är ett exempel på hur HTTP-headers för anropet kan se ut. Observera att värden på parametrar för client id och client secret är ofullständiga i exemplet.
+
+...
+authorization: Bearer 79ab042fc076a755b58cf649458efffad2868caeb2f978a3d1ec19b2405295a6
+client_id: b175a...g14c
+client_secret: c0122...bcaed
+skv_client_correlation_id: 5d93e201-ba43-40ff-ae52-c95d9f21d4e1
+...
+Dölj text
+
+För dig som använder client ID, client secret och valfri organisationslegitimation
+Steg 1. Begär en access token
+
+För att begära en access token gör du ett POST-anrop till token-ändpunkten hos Skatteverkets auktorisationsserver. Vid anropet ska du också använda en organisationslegitimation från Expisoft för att autentisera programvaran.
+
+Anropet ska innehålla:
+
+OAuth2 client ID
+	
+
+Ena delen av dina API-nycklar. Den är märkt med OAuth2.
+
+OAuth2 client secret
+	
+
+Andra delen av dina API-nycklar. Den är märkt med OAuth2.
+
+Scope
+	
+
+Välj det scope som står i API-beskrivningen på Utvecklarportalen.
+Så här gör du anropet
+
+Ändpunkt för access token i testmiljö: POST https://sysorgoauth2.test.skatteverket.se/oauth2/v1/sysorg/token
+Ändpunkt för access token i produktionsmiljö: POST https://sysorgoauth2.skatteverket.se/oauth2/v1/sysorg/token
+HTTP-header: application/x-www-form-urlencoded;charset=UTF-8
+
+Body: grant_type=client_credentials&client_id=<OAUTH2 CLIENT ID>&client_secret=<OAUTH2 CLIENT SECRET>&scope=<API SCOPE>
+
+TIPS! Du kan använda din access token till flera tjänster genom att inkludera flera scope i bodyn.
+Testa att hämta access token med curl
+
+Du kan hämta en access token med ett curl-anrop. På så sätt kan du kontrollera att anslutningen till API:et fungerar. Ersätt bara orden inom vinkelparenteserna med dina uppgifter:
+
+# curl --request POST --cert <SÖKVÄG-TILL-ORGCERT>:<PINKOD-FÖR-ORGCERT> --cert-type P12 --header "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" --data "grant_type=client_credentials&scope=<API-SCOPE>&client_id=<OAUTH2-CLIENT-ID>&client_secret=<OAUTH2-CLIENT-SECRET>" "<ÄNDPUNKT-FÖR-ACCESS-TOKEN>"
+
+Förklaring av vinkelparenteserna:
+
+    SÖKVÄG-TILL-ORGCERT: Sökväg till giltig organisationslegitimation
+    PINKOD-FÖR-ORGCERT: Pinkoden till organisationslegitimationen.
+    ÄNDPUNKT-FÖR-ACCESS-TOKEN: Adress till ändpunkt för att hämta token (anpassa för anrop till test- eller produktionsmiljö).
+
+Här under ser du hur anropet kan se ut i testmiljö. Observera att värden på parametrar för pinkod, client id och client secret är ofullständiga i exemplet.
+
+# curl --request POST --cert ./bolagA/6489...f69.p12:8433...335 --cert-type P12 --header "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" --data "grant_type=client_credentials&scope=foo&client_id=6dba...75a&client_secret=6c9e...75a'" "https://sysorgoauth2.test.skatteverket.se/oauth2/v1/sysorg/token"
+Om du använder curl på Windowsdator
+
+Observera! Den version av curl som följer med Windows kan ge felmeddelandet "schannel: AcquireCredentialsHandle failed: SEC_E_NO_CREDENTIALS (0x8009030E) - No credentials are available in the security package". Det enklaste sättet att lösa problemet är att ladda ner en standardversion av curl.
+
+    Curl for Windows Länk till annan webbplats.
+
+Steg 2. Ta emot en access token
+
+Du får svar från auktorisationsservern i form av en JSON-body med bland annat den access token du behöver för att kunna anropa API:et. Svaret innehåller också det eller de scope du har begärt. Det är bra om du verifierar att det stämmer med anropet du skickade.
+
+Exempelsvar efter lyckat anrop:
+
+Content-Type: application/json; charset=UTF-8
+{
+"access_token": <Access token>,
+"expires_in": 3600,
+"token_type": "Bearer",
+"scope": <SCOPE>
+
+}
+
+Nedan är ett exempel med verkliga värden:
+
+{
+"access_token":"373a61d2787005a2afbe277272560af8527d3a6d1e4dbcf33a68d30a945bcbba",
+"expires_in":3600,
+"token_type":"Bearer",
+"scope":"foo"
+}
+
+Tänk på att du bara kan använda en access token under den tid som anges i svaret (expires in), efter detta måste du hämta en ny access token. Det är viktigt att du utnyttjar den här tiden och inte hämtar nya access tokens för varje anrop. Det är viktigt att du utnyttjar hela giltighetstiden och inte hämtar nya access tokens för varje anrop.
+
+VIKTIGT! Tänk på att din access token är en värdehandling.
+Steg 3. Anropa API:et
+
+Nu när du har access token kan du anropa API:et. Du använder den som värde i en HTTP-header som du skickar med i anropet. API:et kontrollerar vid varje anrop att uppgifterna i access token stämmer.
+
+Anropet ska innehålla:
+
+Access token
+	
+
+Den du precis fått. Tänk på att du bara kan använda samma access token under den tid som anges i svaret.
+
+APIgw client ID
+	
+
+Den andra delen av dina API-nycklar, som är märkt med APIgw.
+
+APIgw client secret
+	
+
+Den andra delen av dina API-nycklar, som är märkt med APIgw.
+
+Korrelations-id
+
+
+	
+
+Din programvara måste kunna generera ett unikt värde för varje enskilt anrop till API:et, ett så kallat korrelations-id. Ett korrelations-id ska vara en max 36 tecken lång textsträng.
+Så ska dina HTTP-headers se ut
+
+Authorization: Bearer <Access token> 
+Client_Id: <APIgw client ID>
+Client_Secret: <APIgw client secret>
+skv_client_correlation_id: <Korrelations-id>
+
+Här ser du bara de parametrar som är gemensamma för alla Skatteverkets API:er. För specifika API:er kan det krävas fler parametrar. Du hittar dem i tjänstebeskrivningen för respektive API. I tjänstebeskrivningen kan du också kontrollera parametern för korrelations-id, eftersom den finns i flera versioner.
+
+VIKTIGT! Skicka endast med de header-parametrar som är angivna för respektive tjänst, annars kan anropet blockeras.
+
+Här är ett exempel på hur HTTP-headers för anropet kan se ut. Observera att värden på parametrar för client id och client secret är ofullständiga i exemplet.
+
+...
+authorization: Bearer 79ab042fc076a755b58cf649458efffad2868caeb2f978a3d1ec19b2405295a6
+client_id: b175a...g14c
+client_secret: c0122...bcaed
+skv_client_correlation_id: 5d93e201-ba43-40ff-ae52-c95d9f21d4e1
+...
+Dölj text
+
+För dig som använder client ID och utpekad organisationslegitimation
+Steg 1. Begär en access token
+
+Du behöver koppla er organisationslegitimation till ditt OAuth client ID om du ska använda den här lösningen. Det gör du genom att fylla i fältet "Uppgift om er organisationslegitimation" när du ansöker om att ansluta till API:et.
+
+För att begära en access token gör du ett POST-anrop till token-ändpunkten hos Skatteverkets auktorisationsserver. Auktorisationsservern begär sedan att programvaran autentiserar sig enligt standarden TLS/SSL och programvaran autentiserar sig då med er organisationslegitimation. Användningen av organisationslegitimation i den här lösningen gör att du inte ska använda något OAuth2 client secret i anropet.
+
+Anropet ska innehålla:
+
+OAuth2 client ID
+	
+
+Ena delen av dina API-nycklar. Den är märkt med OAuth2.
+
+Scope
+	
+
+Välj det scope som står i API-beskrivningen på Utvecklarportalen.
+
+Så här gör du anropet
+Ändpunkt för access token i testmiljö: POST https://sysorgoauth2.test.skatteverket.se/oauth2/v1/sysorg/token
+Ändpunkt för access token i produktionsmiljö: POST https://sysorgoauth2.skatteverket.se/oauth2/v1/sysorg/token
+HTTP-header: Content-Type: application/x-www-form-urlencoded;charset=UTF-8
+Body: grant_type=client_credentials&client_id=<OAUTH2 CLIENT ID>&scope=<API SCOPE>
+
+TIPS! Du kan använda din access token till flera tjänster genom att inkludera flera scope i bodyn.
+Testa att hämta access token med curl
+
+Du kan hämta en access token med ett curl-anrop. På så sätt kan du kontrollera att anslutningen till API:et fungerar. Ersätt bara orden inom vinkelparenteserna med dina uppgifter:
+
+# curl --request POST --cert <SÖKVÄG-TILL-ORGCERT>:<PINKOD-FÖR-ORGCERT> --cert-type P12 --header "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" --data "grant_type=client_credentials&scope=<API-SCOPE>&client_id=<OAUTH2-CLIENT-ID>" "<ÄNDPUNKT-FÖR-ACCESS-TOKEN>"
+
+Förklaring av vinkelparenteserna:
+
+    SÖKVÄG-TILL-ORGCERT: Sökväg till giltig organisationslegitimation
+    PINKOD-FÖR-ORGCERT: Pinkoden till organisationslegitimationen.
+    ÄNDPUNKT-FÖR-ACCESS-TOKEN: Adress till ändpunkt för att hämta token (anpassa för anrop till test- eller produktionsmiljö).
+
+Här under ser du hur anropet kan se ut i testmiljö. Observera att värden på parametrar för pinkod, client id och client secret är ofullständiga i exemplet.
+
+# curl --request POST --cert ./bolagA/6489...f69.p12:8433...335 --cert-type P12 --header "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" --data "grant_type=client_credentials&scope=ska&client_id=9178...360'" "https://sysorgoauth2.test.skatteverket.se/oauth2/v1/sysorg/token"
+Om du använder curl på Windowsdator
+
+Observera! Den version av curl som följer med Windows kan ge felmeddelandet "schannel: AcquireCredentialsHandle failed: SEC_E_NO_CREDENTIALS (0x8009030E) - No credentials are available in the security package". Det enklaste sättet att lösa problemet är att ladda ner en standardversion av curl.
+
+    Curl for Windows Länk till annan webbplats.
+
+Steg 2. Ta emot en access token
+
+Du får svar från auktorisationsservern i form av en JSON-body med bland annat den access token du behöver för att kunna anropa API:et. Svaret innehåller också det eller de scope du har begärt. Kontrollera att scope i svar och begäran är samma.
+
+Exempelsvar efter lyckat anrop:
+
+Content-Type: application/json; charset=UTF-8
+{
+"access_token": <Access token>,
+"expires_in": 3600,
+"token_type": "Bearer",
+"scope": <Scope>
+
+}
+
+Nedan visas ett exempel med verkliga värden
+{
+"access_token":"cdea6bc4900a6ed0a59153184f681ec990997ab854125d9e626532b980954a02",
+"expires_in":3600,
+"token_type":"Bearer",
+"scope":"ska"
+}
+
+Tänk på att du bara kan använda en access token under den tid som anges i svaret (expires in), efter detta måste du hämta en ny. Det är viktigt att du utnyttjar den här tiden och inte hämtar nya access tokens för varje anrop.
+
+VIKTIGT! Tänk på att din access token är en värdehandling.
+Steg 3. Anropa API:et
+
+Nu när du har access token kan du anropa API:et. Du använder den som värde i en HTTP-header som du skickar med i anropet. API:et kontrollerar vid varje anrop att uppgifterna i access token stämmer.
+
+Anropet ska innehålla:
+
+Access token
+	
+
+Den du precis fått. Tänk på att du bara kan använda samma access token under den tid som anges i svaret.
+
+APIgw client ID
+	
+
+Den andra delen av dina API-nycklar, som är märkt med APIgw.
+
+APIgw client secret
+	
+
+Den andra delen av dina API-nycklar, som är märkt med APIgw.
+
+Korrelations-id
+	
+
+Din programvara måste kunna generera ett unikt värde för varje enskilt anrop till API:et, ett så kallat korrelations-id. Ett korrelations-id ska vara en max 36 tecken lång textsträng.
+Så här ska dina HTTP-headers se ut
+
+Authorization: Bearer <Access token> 
+Client_Id: <APIgw client ID>
+Client_Secret: <APIgw client secret>
+skv_client_correlation_id: <Korrelations-id>
+
+Här ser du bara de parametrar som är gemensamma för alla Skatteverkets API:er. För specifika API:er kan det krävas fler parametrar. Du hittar dem i tjänstebeskrivningen för respektive API. Där kan du också kontrollera parametern för korrelations-id, eftersom den finns i flera versioner och det inte är säkert att exemplet här stämmer med det API du vill använda.
+
+VIKTIGT! Skicka endast med de header-parametrar som är angivna för respektive tjänst, annars kan anropet blockeras.
+
+Här är ett exempel på hur HTTP-headers för anropet kan se ut. Observera att värden på parametrar för client id och client secret är ofullständiga i exemplet.
+
+...
+authorization: Bearer 79ab042fc076a755b58cf649458efffad2868caeb2f978a3d1ec19b2405295a6
+client_id: b175a...g14c
+client_secret: c0122...bcaed
+skv_client_correlation_id: 5d93e201-ba43-40ff-ae52-c95d9f21d4e1
+...
+Dölj text
+Vi hjälper dig gärna vid frågor
+
+Våra kunniga utvecklare på supporten hjälper dig gärna om du har frågor. Du kan även höra av dig till oss om du vill ha de gamla säkerhetsdokumenten som tidigare hittades på Utvecklarportalen i pdf-format.
+
+    Ställ en fråga
+

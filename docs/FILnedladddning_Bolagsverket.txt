@@ -1,0 +1,789 @@
+Nedladdningsbara filer
+
+Här hittar du filer som du kan ladda ner, som värdefulla datamängder och statistik om företag och företagande.
+
+Värdefulla datamängder ger dig tillgång till data som hämtas från oss på Bolagsverket. Du kan själv ladda ner våra filer för att få tillgång till datat. Det kostar ingenting och det krävs inga avtal. Våra filer uppdateras veckovis.
+
+Värdefulla datamängder finns också att hämta i form av API. Det hittar du på sidan API för värdefulla datamängder.
+
+Vi hoppas att det gör stor nytta för dig och din verksamhet! Läs mer om värdefulla datamängder.
+Digitalt inkomna årsredovisningar 
+
+Klicka på länken för att komma till mappstrukturen för inkomna årsredovisningar.
+
+Mappstruktur för inkomna årsredovisningar: arsredovisningar Länk till annan webbplats.
+Beskrivning: Årsredovisningar som en del av Värdefulla datamängder, enligt EU-kommissionens definition, om företag och föreningar. Varje vecka skapas en ny fil för föregående veckas digitalt inkomna årsredovisningar. Observera att datat avser digitalt inkomna årsredovisningar från 2020 och framåt.
+Format: zip packas upp till formatet iXBRL
+Grunddata om företag från Bolagsverket
+
+Klicka på länken för att starta nedladdning av filen.
+
+Filnamn: bolagsverket_bulkfil.zip Länk till annan webbplats.
+Beskrivning: Grunddata om företag en del av Värdefulla datamängder, enligt EU-kommissionens definition, om företag och föreningar från Bolagsverket.
+Format: zip som packas upp till formatet .txt
+Tabellen visar informationsmängder och beskrivningar för dessa.
+
+Informationsmängd
+	
+
+Beskrivning
+
+organisationsidentitet
+	
+
+Fältet består av identitetsbeteckning och identitetsbeteckningtyp åtskilt med tecknet $.
+
+ 
+
+Organisationsidentitet är det nummer som representerar organisationen. Olika typer av organisationsidentiteter: Organisationsnummer (10 siffror), Personnummer (12 siffror Samordningsnummer (12 siffror) och GD-nummer (10 siffror). Se även kodlistan rubrik 5 för identitetsbeteckningstyp som tydliggör om en identitet är ett personnummer, samordningsnummer eller GD-nummer.
+
+namnskyddslopnummer
+	
+
+Namnskyddslöpnummer används när flera organisationer finns registrerade till samma organisationsnummer. Exempelvis för enskilda näringsverksamheter.
+
+registreringsland
+	
+
+Land där organisationen är registrerad. I detta API är detta alltid SE (Sverige).
+
+organisationsnamn
+	
+
+Fältet består av organisationsnamn, organisationsnamnstyp (se kodlista avsnitt 4), registreringsdatum och verksamhetsbeskrivning för särskilt företagsnamn åtskilt med tecknet $.
+
+ 
+
+Organisationens samtliga namn inklusive särskilt företagsnamn och namn på andra språk. För särskilda företagsnamn kan även verksamhetsbeskrivning för detta namn inkluderas. När det finns flera namn för en organisation är dessa rader åtskilda med tecknet |. Se kodlista avsnitt 4.
+
+organisationsform
+	
+
+Anger i vilken administrativ form en organisation bedriver sin verksamhet. Se kodlista avsnitt 1.
+
+avregistreringsdatum
+	
+
+Datum för när organisationen blivit avregistrerad.
+
+avregistreringsorsak
+	
+
+Text och kod som beskriver orsaken till att en organisation har blivit avregistrerad. Se kodlista avsnitt 2.
+
+pagandeAvvecklingsEllerOmstruktureringsforfarande
+	
+
+Fältet består av kod, text och från och med datum som beskriver orsak till avveckling eller omstrukturerings-förfarande. Fälten åtskilda med tecknet $. Exempelvis att konkurs inletts 2024-01-03. Se kodlista avsnitt 3. När det finns flera statuskoder för en organisation är dessa rader åtskilda med tecknet |.
+
+registreringsdatum
+	
+
+Anger datumet då en organisation registrerades
+
+verksamhetsbeskrivning
+	
+
+Organisationens verksamhetsbeskrivning, är ett fritextfält och kan innehålla tecknen | och $ även om de inte bör göra det.
+
+postadress
+	
+
+Fältet innehåller registrerad postadress och består av utdelningsadress, C/O-adress, postnummer, postort och land, åtskilda med tecknet $. Om t.ex. C/O-adress saknas kommer två tecken efter varandra: $$
+1. Organisationsformer
+Tabellen visar kodlista och beskrivningar för organisationsformer.
+
+Kodlista
+	
+
+Beskrivning
+
+AB-ORGFO
+	
+
+Aktiebolag
+
+BAB-ORGFO
+	
+
+Bankaktiebolag
+
+BF-ORGFO
+	
+
+Bostadsförening
+
+BFL-ORGFO
+	
+
+Utländsk banks filial
+
+BRF-ORGFO
+	
+
+Bostadsrättsförening
+
+E-ORGFO
+	
+
+Enskild näringsverksamhet
+
+EB-ORGFO
+	
+
+Enkla bolag
+
+EEIG-ORGFO
+	
+
+Europeisk ekonomisk intressegruppering
+
+EGTS-ORGFO
+	
+
+Europeisk gruppering för territoriellt samarbete
+
+EK-ORGFO
+	
+
+Ekonomisk förening
+
+FAB-ORGFO
+	
+
+Försäkringsaktiebolag
+
+FF-ORGFO
+	
+
+Försäkringsförmedlare
+
+FL-ORGFO
+	
+
+Filial
+
+FOF-ORGFO
+	
+
+Försäkringsförening
+
+HB-ORGFO
+	
+
+Handelsbolag
+
+I-ORGFO
+	
+
+Ideell förening som bedriver näringsverksamhet
+
+KB-ORGFO
+	
+
+Kommanditbolag
+
+KHF-ORGFO
+	
+
+Kooperativ hyresrättsförening
+
+MB-ORGFO
+	
+
+Medlemsbank
+
+OFB-ORGFO
+	
+
+Ömsesidigt försäkringsbolag
+
+OTPB-ORGFO
+	
+
+Ömsesidigt tjänstepensionsbolag
+
+S-ORGFO
+	
+
+Stiftelse som bedriver näringsverksamhet
+
+SB-ORGFO
+	
+
+Sparbank
+
+SCE-ORGFO
+	
+
+Europakooperativ
+
+SE-ORGFO
+	
+
+Europabolag
+
+SF-ORGFO
+	
+
+Sambruksförening
+
+TPAB-ORGFO
+	
+
+Tjänstepensionsaktiebolag
+
+TPF-ORGFO
+	
+
+Tjänstepensionsförening
+
+TSF-ORGFO
+	
+
+Trossamfund som bedriver näringsverksamhet
+2. Avregistreringsorsak
+Tabellen visar kodlista och beskrivningar för organisationsformer.
+
+Kodlista
+	
+
+Beskrivning
+
+AKEJH-AVORG
+	
+
+Aktiekapitalet inte höjts
+
+ARSEED-AVORG
+	
+
+Årsredovisning saknas
+
+AVREG-AVORG
+	
+
+Avregistrerad
+
+BABAKEJH-AVORG
+	
+
+Ombildat till bankaktiebolag eller aktiekapitalet inte höjts
+
+DELAV-AVORG
+	
+
+Delning
+
+DOM-AVORG
+	
+
+Beslut av instans
+
+FUAV-AVORG
+	
+
+Fusion
+
+GROMAV-AVORG
+	
+
+Gränsöverskridande ombildning
+
+KKAV-AVORG
+	
+
+Konkurs
+
+LIAV-AVORG
+	
+
+Likvidation
+
+NYINN-AVORG
+	
+
+Ny innehavare
+
+OMAV-AVORG
+	
+
+Ombildning
+
+OMBAB-AVORG
+	
+
+Ombildat till bankaktiebolag
+
+OVERK-AVORG
+	
+
+Overksamhet
+
+UTLKKLI-AVORG
+	
+
+Det utländska företagets likvidation eller konkurs
+
+VDSAK-AVORG
+	
+
+Verkställande direktör saknas
+
+VERKUPP-AVORG
+	
+
+Verksamheten har upphört
+3. Pågående avvecklings- eller omstruktureringsförfarande
+Tabellen visar kodlista och beskrivningar för organisationsformer.
+
+Kodlista
+	
+
+Beskrivning
+
+AC-AVOMFO
+	
+
+Ackordsförhandling
+
+DEOL-AVOMFO
+	
+
+Överlåtande vid delning
+
+DEOT-AVOMFO
+	
+
+Övertagande vid delning
+
+FR-AVOMFO
+	
+
+Företagsrekonstruktion
+
+FUOL-AVOMFO
+	
+
+Överlåtande i fusion
+
+FUOT-AVOMFO
+	
+
+Övertagande i fusion
+
+GROM-AVOMFO
+	
+
+Gränsöverskridande ombildning
+
+KK-AVOMFO
+	
+
+Konkurs
+
+LI-AVOMFO
+	
+
+Likvidation
+
+OM-AVOMFO
+	
+
+Ombildning
+
+RES-AVOMFO
+	
+
+Resolution
+4. Organisationsnamn
+Tabellen visar kodlista och beskrivningar för organisationsformer.
+
+Kodlista
+	
+
+Beskrivning
+
+FORETAGSNAMN-ORGNAM
+	
+
+Företagsnamn
+
+NAMN-ORGNAM
+	
+
+Namn
+
+FORNAMN_FRSPRAK-ORGNAM
+	
+
+Företagsnamn på främmande språk
+
+SARS_FORNAMN-ORGNAM
+	
+
+Särskilt företagsnamn
+5. Övriga koder
+Tabellen visar kodlista och beskrivningar för organisationsformer.
+
+Kodlista
+	
+
+Beskrivning
+
+SE-LAND
+	
+
+Sverige
+
+ORGNR-IDORG
+	
+
+Organisationsnummer
+
+PERSON-IDORG
+	
+
+Identitetsbeteckning person
+Grunddata om företag från SCB
+
+Klicka på länken för att starta nedladdning av filen.
+
+Filnamn: scb_bulkfil.zip Länk till annan webbplats.
+Beskrivning: Grunddata om företag en del av värdefulla datamängder, enligt EU-kommissionens definition, om företag och föreningar från SCB.
+Format: zip som packas upp till formatet .txt
+Personnummer, organisationsnummer (PeOrgNr)
+
+PeOrgNr är identitetsbeteckningen för den juridiska enheten, företaget. PeOrgNr är en sammanslagning av orden personnummer och organisationsnummer då det kan vara identifikation på både fysiska och juridiska personer.
+
+PeOrgNr består av 12 siffror. För fysiska personer, enskilda näringsidkare, motsvaras PeOrgNr av personnumret, det vill säga det inleds med 19 eller 20. För juridiska personer börjar PeOrgNr med 16 följt av det 10-ställiga organisationsnumret.
+
+Det finns flera myndigheter som tilldelar organisationsnummer, olika myndigheter ansvarar för olika juridiska former.
+Namn
+
+Det namn som är registrerat på den juridiska personen (JE). 
+För en fysisk person, enskild näringsidkare, är det ett personnamn.
+Nya namn och namnändringar registreras av den myndighet som tilldelar en juridisk person dess organisationsnummer.
+Företagsnamn
+
+I de fall en enskild näringsidkare har ett inregistrerat företagsnamn hos Bolagsverket. Om flera företagsnamn finns registrerade visas det senast registrerade om inte personen meddelat annat till SCB.
+Företagsstatus (Ftgstat)
+
+Anger om ett företag är verksamt. I SCB:s företagsregister betraktas ett företag som verksamt om det är registrerat för moms eller gruppmoms och/eller F-skatt och/eller som arbetsgivare. Variabeln Företagsstatus kan anta dessa värden:
+Tabellen visar koder och beskrivningar för dessa.Kod	
+
+Beskrivning
+
+0
+	
+
+Har aldrig varit verksam
+
+1
+	
+
+Är verksam enligt företagsregistrets kriterier
+
+9
+	
+
+Ej verksam, enligt företagsregistrets kriterier
+Status för juridisk enhet (Jestat)
+
+Beskriver om den juridiska enheten finns registrerad hos Skatteverkets centrala organisationsnummerregister samt ingår i populationen för SCB:s företagsregister. Variabeln kan anta följande värden:
+Tabellen visar koder och beskrivningar för dessa.Kod	
+
+Beskrivning
+
+1
+	
+
+Ingår i populationen och är registrerad i Skatteverkets organisationsnummerregister
+
+2
+	
+
+Ingår i populationen och är registrerad på annat sätt
+
+9
+	
+
+Ingår inte längre i populationen (Företaget ligger kvar i SCB:s företagsregister som avregistrerat och rensas bort efter 6 månader.)
+
+Koden 2 får de objekt som ingår i populationen för SCB:s företagsregister men inte ingår i Skatteverkets organisationsnummerregister. Det är alla fysiska personer, enskilda näringsidkare, som är registrerade för moms och/eller arbetsgivare och/eller F-skatt eller har ett inregistrerat företagsnamn. Dödsbon som inte finns i organisationsnummerregistret men är registrerade för moms och/eller F-skatt och/eller arbetsgivare. Även Värdepappersfonder som inte finns i organisationsnummer-registret, men inte heller är avregistrerade, får JEstat 2.
+Registreringsdatum (RegDatKtid)
+
+RegDatKtid anger det datum då företaget registrerades i SCB:s Företagsregister.
+Juridisk form (jurform)
+
+Indelning efter juridisk form. Koden består av två siffror.
+
+Skatteverkets indelning efter juridisk form specificerar de i Sverige vanligast förekommande juridiska organisationsformerna. Indelning efter juridisk form uppdateras löpande från Skatteverket i samband med förändrade organisationsformer i de fall organisationen behåller samma organisationsnummer. Vid övriga ombildningar genereras ett nytt företag i registret.
+Tabellen visar koder och beskrivningar för dessa.Kod	
+
+Juridisk form
+
+10
+	
+
+Fysiska personer
+
+21
+	
+
+Enkla bolag
+
+22
+	
+
+Partrederier
+
+23
+	
+
+Värdepappersfonder
+
+31
+	
+
+Handelsbolag, kommanditbolag
+
+32
+	
+
+Gruvbolag
+
+41
+	
+
+Bankaktiebolag
+
+42
+	
+
+Försäkringsaktiebolag
+
+43
+	
+
+Europabolag
+
+49
+	
+
+Övriga aktiebolag
+
+51
+	
+
+Ekonomiska föreningar
+
+53
+	
+
+Bostadsrättsföreningar
+
+54
+	
+
+Kooperativa hyresrättsföreningar
+
+61
+	
+
+Ideella föreningar
+
+62
+	
+
+Samfälligheter
+
+63
+	
+
+Registrerade trossamfund
+
+71
+	
+
+Familjestiftelser
+
+72
+	
+
+Övriga stiftelser och fonder
+
+81
+	
+
+Statliga enheter
+
+82
+	
+
+Kommuner
+
+83
+	
+
+Kommunalförbund
+
+84
+	
+
+Regioner
+
+85
+	
+
+Allmänna försäkringskassor
+
+87
+	
+
+Offentliga korporationer och anstalter
+
+88
+	
+
+Hypoteksföreningar
+
+89
+	
+
+Regionala statliga myndigheter
+
+91
+	
+
+Oskiftade dödsbon
+
+92
+	
+
+Ömsesidiga försäkringsbolag
+
+93
+	
+
+Sparbanker
+
+94
+	
+
+Understödsföreningar, försäkringsföreningar
+
+95
+	
+
+Arbetslöshetskassor
+
+96
+	
+
+Utländska juridiska personer
+
+98
+	
+
+Övriga svenska juridiska personer bildade enligt särskild lagstiftning
+
+99
+	
+
+Juridisk form ej utredd
+SNI-kod (Ng1-Ng5)
+
+Klassificering av företagets näringsgrenar/branscher enligt Svensk näringsgrensindelning, SNI2007. Ng är en femsiffrig kod (SNI-kod) och där Ng1 är huvudnäringsgren och sedan i fallande ordning. I SCB:s allmänna företagsregister finns max 5 SNI-koder för varje företag.
+
+Information om de olika SNI-koderna finns här SNI-sök Länk till annan webbplats..
+
+SNI-koderna på företagsnivå är aggregerade från företagets arbetsställen. För företag med endast ett arbetsställe blir SNI-koderna desamma på företaget som på arbetsstället. För flerarbetsställeföretag så används antal anställda som nyckel när aggregeringen av SNI-koder ska ske till företagsnivån.
+
+SNI-koderna rangordnas utifrån den procentuella fördelningen som har satts på respektive kod. Den kod som har högst procent får rangordning 1 och blir Ng1, huvudnäringsgren.
+
+Om flera SNI-koder har samma %-sats sorteras de i nummerordning, där den lägsta koden kommer först. Till exempel om ett företag två olika koder och de fördelas med 50 % på SNI 29.101 Tillverkning av personbilar och andra lätta motorfordon och 50 % på SNI 45.110 Handel med personbilar och andra lätta motorfordon, då sätts 29.101 som näringsgren 1 och 45.110 som näringsgren 2.
+
+Om företag har tre eller flera SNI-koder så sker rangordningen utifrån en top-down-metod, där %-satserna först summeras upp till SNI avdelningsnivå för att se vilken avdelning som är störst och sedan går man neråt igen för att se vilken kod inom den avdelningen som är har den högsta %-satsen och då blir den näringsgren 1.
+
+Mer information om och exempel på detta kan du hitta här SNI 2007 Standard för svensk näringsgrensindelning 2007 Länk till annan webbplats..
+
+För att fördela verksamheten på de olika SNI-koderna och kunna sätta den procentuella fördelningen så används oftast omsättning per SNI. För nystartade företag brukar det göras en schablonmässig fördelning.
+Gatuadress
+
+Variabeln är sammansatt av de ingående delarna Gatunamn, Gatunummer, Gatulittera (bokstav) och Gaturest (exempelvis antal trappor).
+
+Gatuadressen anger företagets postadress, det vill säga den adress där företaget kan nås per post. Postadress registreras och ändras hos den myndighet som tilldelat företaget dess organisationsnummer, för enskilda näringsidkare görs ändringen hos Skatteverket. För företag med flera arbetsställen underhålls postadress även med hjälp av SCB:s enkäter.
+COadress
+
+COadress beskriver eventuell c/o-adressen i postadressen.
+Postnummer
+
+Postnummer beskriver postnumret i postadressen.
+PostOrt
+
+PostOrt beskriver orten i postadressen.
+Reklamspärr (Reklam)
+
+Beskriver om företaget är spärrat för reklamutskick eller inte.
+Tabellen visar koder och beskrivningar för dessa.
+
+Kod
+	
+
+Beskrivning
+
+1
+	
+
+Företag har inte frånsagt sig mottagande av reklam
+
+2
+	
+
+Företag har frånsagt sig mottagande av reklam
+Statistik om företag och föreningar
+
+Här finns all aktuell statistik om företag och föreningar i Sverige, både nyregistrerade och avslutade. Statistiken uppdateras första vardagen varje månad.
+
+Filnamn: ftgstat_oppna.csv Länk till annan webbplats.
+Beskrivning: Statistik om företag och föreningar
+Villkor: Licens CC BY 2.5 SE
+Format: CSV
+
+Beskrivning av hur du utläser csv-filen ftgstat_oppna.csv (17 kB) Excel, 16 kB.
+Statistik om företrädare
+
+Här finns aktuell statistik om företrädare i företag och föreningar, alltså exempelvis ledamöter, suppleanter och verkställande direktörer. Du kan bland annat se statistik över ålder och kön. Statistiken uppdateras första vardagen varje månad.
+
+Filnamn: foretradare_historik.csv Länk till annan webbplats.
+Beskrivning: Statistik om företrädare och företagsform
+Villkor: Licens CC BY 2.5 SE
+Format: CSV
+
+Beskrivning av hur du utläser csv-filen foretradare_historik-csv (16 kB) Excel, 15 kB.
+Statistik om revisorsförbehåll
+
+Här finns aktuell statistik om antal nyregistrerade aktiebolag med och utan revisorsförbehåll för vald tidsperiod. Observera att statistiken för 2010 gäller fr.o.m. den 1 november.
+
+Filnamn: rev_forbehall.csv Länk till annan webbplats.
+Beskrivning: Statistik om revisorsförbehåll
+Villkor: Licens CC BY 2.5 SE
+Format: CSV
+
+Beskrivning av hur du utläser csv-filen rev_forbehall.csv (14 kB) Excel, 14 kB.
+Statistik om räkenskapsår och förseningsavgifter 
+
+Här finns aktuell statistik om antal inkomna årsredovisningar per räkenskapsperiod för valt län samt hur stor andel som fått förseningsavgift.
+
+Filnamn: rakenskaps_forsening.csv Länk till annan webbplats.
+Beskrivning: Statistik om räkenskapsår och förseningsavgifter
+Villkor: Licens CC BY 2.5 SE
+Format: CSV
+
+Beskrivning av hur du utläser csv-filen rakenskaps_forsening.csv (14 kB) Excel, 14 kB.
+Kontakt
+
+Har du förslag på vad vi kan publicera som öppna data? Kontakta oss!
+Uppdaterad: 2025-10-09
+Tyck till om den här sidan

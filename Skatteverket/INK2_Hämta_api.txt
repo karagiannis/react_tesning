@@ -1,0 +1,267 @@
+
+    Inkomstdeklaration 2 – hämta 1.0 
+
+Inkomstdeklaration 2 – hämta 1.0
+
+API:et riktar sig till programvaruföretag som tar fram tjänster för de som hämtar Inkomstdeklaration 2. API:et möjliggör att hämta och visa upp Skatteverkets förifyllda deklarationsuppgifter i PDF- eller SRU-format direkt i programvaran.
+
+Översikt
+
+API:et Inkomstdeklaration 2 hämta - riktar sig till dig som skapar programvara för företag som hämtar Inkomstdeklaration 2. API:et gör det möjligt att skapa funktionalitet för att hämta och visa upp Skatteverkets förifyllda deklarationsuppgifter i PDF- eller SRU-format direkt i programvaran. Du kan också hämta status för deklarationer. Här får du översiktlig information om API:ets operationer, målgrupp och teknik.
+Fördelar med att använda API:et
+
+API:et Inkomstdeklaration 2 - Hämta via API låter dig som programföretag hämta de uppgifter som Skatteverket redan förifyllt på inkomstdeklarationen. Du får därmed in uppgifterna direkt i programmet och underlättar för kunden genom att de uppgifter som Skatteverket redan har förifyllt finns tillgängliga i programmet. API:et ger dig även enkelt tillgång att se status för deklarationer, vilket gör att du enkelt kan se t ex om deklarationen skrivits under och tagits emot av Skatteverket.
+
+Med hjälp av API:et kan du
+
+    minska risken för manuella fel
+    få tillgång till förifyllda deklarationsuppgifter direkt i programvaran
+    se om deklarationen signerats
+
+Välj en av guiderna för att komma igång med API:et:
+Kom igång med komplett testtjänst
+Kom igång med driftsatt tjänst
+
+Skatteverket tillhandahåller även API:et Inkomstdeklaration 2 - inlämning in via API. För att få ut störst nytta av det här API:et rekommenderas att du även använder dig av Inkomstdeklaration 2 inlämning via API.
+Operationer
+
+I API:et finns två operationer:
+
+    Hämta förifyllda uppgifter
+    Hämta status
+
+Målgrupp
+
+API:et riktar sig till dig som arbetar med utveckling av programvaror för deklarationsinlämning, antingen för bolag som lämnar in sin egna deklaration eller redovisningsbyråer och deklarationsombud.
+Avgränsningar
+
+    Tjänsten gäller enbart Inkomstdeklaration 2 och inga andra deklarationskategorier.
+    Status garanteras enbart för senaste aktuella Inkomstdeklaration 2
+
+Teknik
+
+API:et finns tillgängligt som driftsatt tjänst och komplett testtjänst. Tjänsten kräver behörig företrädare exempelvis VD eller ombudsbehörighet, dvs en ombudsroll som ger tillgång till denna tjänst. Anrop mot tjänsten sker med en krypterad anslutning och auktiorisation sker med OAuth2.
+Tjänstebeskrivning
+
+Tjänstebeskrivningen ger en komplett beskrivning av API:et. Den beskriver verksamhetssammanhang, hur tjänsten är byggd och teknisk information.
+
+Tjänstebeskrivning (pdf)
+Öppettider och support
+
+API:et är öppet dygnet runt utom vid servicefönster. Servicefönster och planerade driftstopp publiceras löpande på sidan Driftmeddelanden.
+
+Driftmeddelanden
+
+Vi svarar på dina frågor helgfria vardagar mellan kl. 08.00-17.00. Du kan ställa frågor eller rapportera tekniska och innehållsliga fel genom att fylla i något av våra formulär.
+Anslutning och support för våra API:er och öppna data
+Felanmäl API:er
+För dig som vill lära dig mer
+
+Så använder du våra API-miljöer
+
+Vanliga begrepp
+
+Vad är ett API?
+Hitta snabbt
+Begär tillgång till våra API:er
+Börja använda API:er
+Anslutning och support
+Driftmeddelanden
+Samarbeta med oss
+Nyheter om digitala samarbeten
+Viktiga datum
+
+    Hämta dina datum
+
+Kontakt
+
+    0771-567 567
+    Kontakta oss och öppettider
+    Mejla oss
+    Besök servicekontor
+
+Språk
+
+    In English
+    Other languages
+    Teckenspråk
+
+Hitta snabbt
+
+    E-tjänster
+    Blanketter
+    Rättslig vägledning
+    Webbseminarier
+    API:er och öppna data
+
+Om Skatteverket
+
+    Om oss
+    Jobba hos oss
+    Press
+    Om webbplatsen
+    Tillgänglighetsredogörelse
+    Kakor (cookies)
+    Behandling av personuppgifter
+
+Följ oss på
+Instagram
+Facebook
+X
+LinkedIn
+
+
+Skatteverket - till startsidan
+Tillsammans gör vi samhället möjligt
+attningsuppgifterna redovisas för hela riket. Du kan se dem fördelade på län och typ av skattebetalare (fysisk eller juridisk).
+Till dataresurs
+Dataresurs: Öppet data som fil
+Kategorier: Deklaration och redovisning, Skatter och avgifter, Statistik
+
+API:et riktar sig till programvaruföretag som tar fram tjänster för de som hämtar Inkomstdeklaration 2. API:et möjliggör att hämta och visa upp Skatteverkets förifyllda deklarationsuppgifter i PDF- eller SRU-format direkt i programvaran.
+Inkomstdeklaration 2 – hämta 1.0
+Dataresurs: Partner-API (kräver avtal)
+Kategori: Deklaration och redovisning
+Miljö: Komplett testtjänst, Driftsatt tjänst
+Version: 1.0
+
+
+###################   FLIK:   EXEMPEL
+
+
+Skatteverkets startsida
+Du företräder: LEONIDA LASSE KARAGIANNIS 691202-0291
+
+    API:er och öppna data
+    Utvecklarportalen
+    Inkomstdeklaration 2 – hämta 1.0 
+
+Inkomstdeklaration 2 – hämta 1.0
+
+API:et riktar sig till programvaruföretag som tar fram tjänster för de som hämtar Inkomstdeklaration 2. API:et möjliggör att hämta och visa upp Skatteverkets förifyllda deklarationsuppgifter i PDF- eller SRU-format direkt i programvaran.
+
+Exempel
+
+Med API:et kan du hämta förifyllda deklarationsuppgifter som PDF (med SRU), PDF (utan SRU) eller som SRU-fil samt hämta status för inlämnade deklarationer. Ta hjälp av kodexemplen för att enklare förstå hur du ska använda operationerna.
+Befintliga operationer
+
+I API:et finns två operationer:
+
+    Hämta förifyllda uppgifter
+    Hämta status
+
+Testdata
+
+I testtjänsten finns endast uppgifter för bolag 165128000402 med bokslutsdatum 12-31. Alla kalenderår kan användas.
+Testfall för operationen Hämta förifyllda uppgifter
+Hämta förifyllda uppgifter - PDF returneras
+
+Skicka: /165128000402/perioder/2021-12-31/fortryckt
+Returneras: Http-response 200 (Lyckad förfrågan). Content-Type: application/pdf
+Hämta förifyllda uppgifter - PDF saknas
+
+För det här testfallet behöver du justera bokslutsdatumet till ett datum som testtjänsten inte tillåter, t ex ÅÅ-09-30.
+Skicka: /165128000402/perioder/2021-09-30/fortryckt
+Returneras: Http-response 404 (Not found)
+Hämta förifyllda uppgifter - SRU finns
+
+Skicka: /165128000402/perioder/2021-12-31/fortryckt
+Returneras: Http-response 200 (Lyckad förfrågan). Content-Type: application/x-skv269-sru
+
+Exempel på innehåll i SRU-fil:
+
+        #BLANKETT INK2-2021P4
+        #IDENTITET 165128000402 20220117 104733
+        #UPPGIFT 96 1510000
+        #BLANKETTSLUT
+
+Testfall för operationen Hämta status
+Hämta perioder - svar finns för tre perioder
+
+Skicka: /165128000402/perioder
+
+Returneras: Http-response 200 (Lyckad förfrågan). Content-Type: application/json
+
+        Exempel på svar perioder (json):
+
+        [
+
+        {
+        "raTom" : "2019-12-31",
+        "deklarationstyp" : "INK2",
+        "status" : "Slutlig skatt fastställd"
+        },
+
+        {
+        "raTom" : "2020-12-31",
+        "deklarationstyp" : "INK2",
+        "status" : "Deklaration inlämnad"
+        },
+
+        {
+        "raTom" : "2021-12-31",
+        "deklarationstyp" : "INK2",
+        "status" : "Deklaration utskickad"
+        }
+        ]
+
+Hämta perioder - perioder saknas
+
+Skicka: /165660250134/perioder
+
+Returneras: Http-response 200 (Lyckad förfrågan). Content-Type: application/json
+
+        Exempel på svar perioder (json):
+
+        [ ]
+
+Hitta snabbt
+Begär tillgång till våra API:er
+Börja använda API:er
+Anslutning och support
+Driftmeddelanden
+Samarbeta med oss
+Nyheter om digitala samarbeten
+Viktiga datum
+
+    Hämta dina datum
+
+Kontakt
+
+    0771-567 567
+    Kontakta oss och öppettider
+    Mejla oss
+    Besök servicekontor
+
+Språk
+
+    In English
+    Other languages
+    Teckenspråk
+
+Hitta snabbt
+
+    E-tjänster
+    Blanketter
+    Rättslig vägledning
+    Webbseminarier
+    API:er och öppna data
+
+Om Skatteverket
+
+    Om oss
+    Jobba hos oss
+    Press
+    Om webbplatsen
+    Tillgänglighetsredogörelse
+    Kakor (cookies)
+    Behandling av personuppgifter
+
+Följ oss på
+Instagram
+Facebook
+X
+LinkedIn
+Skatteverket - till startsidan
+Tillsammans gör vi samhället möjligt
+

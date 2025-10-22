@@ -1,0 +1,367 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+  margin: 20px;
+  padding: 0;
+}
+
+h1 {
+  margin-top: 0;
+  font-size: 22px;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 20px;
+}
+
+h3 {
+  margin-top: 0;
+  font-size: 18px;
+}
+
+h4 {
+  margin-top: 0;
+  font-size: 16px;
+}
+
+h5 {
+  margin-top: 0;
+  font-size: 14px;
+}
+
+h6 {
+  margin-top: 0;
+  font-size: 12px;
+}
+
+code {
+  font-size: 1.2em;
+}
+
+ul {
+  padding-inline-start: 20px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+  margin: 20px;
+  padding: 0;
+}
+
+.square {
+  background: #fff;
+  border: 1px solid #999;
+  float: left;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 34px;
+  height: 34px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 34px;
+}
+
+.board-row::after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+.status {
+  margin-bottom: 10px;
+}
+.game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.game-info {
+  margin-left: 20px;
+}
+
+.current-move-badge {
+  background-color: #007bff;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin: 0 0 0 25px; /* ingen marginal upp/ned, 25px till vänster */
+}
+.move-indicator-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 10px 0;
+}
+
+.square.winning {
+  background-color: #aaffaa; /* eller någon annan färg */
+}
+
+/* src/index.css eller src/LoginForm.css */
+
+.login-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Fyll hela skärmen vertikalt */
+  background-color: #f0f2f5; /* Ljusgrå bakgrund */
+  padding: 20px; /* Marginal runt innehållet */
+}
+
+.login-form {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Lätt skugga */
+  width: 100%;
+  max-width: 400px; /* Maxbredd för formuläret */
+}
+
+.login-form h2 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #333;
+}
+
+.error-message {
+  color: #e53e3e; /* Röd färg för fel */
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+/* src/index.css */
+
+/* --- Basstilar för hela sidan --- */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f0f2f5; /* Ljusgrå bakgrund */
+}
+
+/* --- Stilar för inloggnings och registerformulär --- */
+
+/* Container för både login och register formulär */
+.login-form-container,
+.register-form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Centrerar vertikalt om det finns utrymme */
+  min-height: 100vh; /* Fyller hela skärmens höjd */
+  padding: 2rem;
+  box-sizing: border-box;
+  position: relative; /* Viktigt för att absolutpositionera knappen */
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px; /* Maxbredd för formuläret */
+  margin: 0 auto; /* Centrerar formuläret horisontellt */
+}
+
+/* Stil för själva formuläret */
+.login-form,
+.register-form {
+  width: 100%;
+  padding: 0; /* Inre marginaler hanteras av containern */
+  margin: 0; /* Yttre marginaler hanteras av containern */
+}
+
+/* Rubrik i formulären */
+.login-form h2,
+.register-form h2 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #333;
+}
+
+/* Grupp av label + input */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-weight: bold;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box; /* Inkludera padding i bredden */
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #007bff; /* Blå kant vid fokus */
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* Ljusblå gloria vid fokus */
+}
+
+/* Knappar i formulären */
+.login-form button,
+.register-form button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #007bff; /* Blå knapp */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s; /* Mjuk övergång för bakgrundsfärg */
+}
+
+.login-form button:hover:not(:disabled),
+.register-form button:hover:not(:disabled) {
+  background-color: #0056b3; /* Mörkare blå vid hover */
+}
+
+.login-form button:disabled,
+.register-form button:disabled {
+  background-color: #cccccc; /* Grå knapp vid laddning */
+  cursor: not-allowed; /* Visa att knappen inte kan klickas */
+}
+
+/* --- Stilar för "Switch Form" knappen --- */
+
+/* Container för knappen (endast för login-form-container) */
+.login-form-container .switch-form-container {
+  position: absolute; /* Placera den absolut inom containern */
+  top: 10px;          /* 10px från toppen */
+  right: 10px;        /* 10px från högerkanten */
+  /* Ingen marginal behövs längre */
+}
+
+/* Stil för själva "Register"-knappen */
+.switch-form-button {
+  padding: 5px 10px;      /* Liten padding */
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-decoration: none;  /* Ta bort understrykning om det är en <a> */
+}
+
+.switch-form-button:hover {
+  background-color: #e0e0e0;
+}
+
+/* --- Stilar för felmeddelanden --- */
+.error-message {
+  color: #e53e3e; /* Röd färg för fel */
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+/* --- Stilar för lyckosmeddelanden --- */
+.success-message {
+  color: #28a745; /* Grön färg för lyckomeddelande */
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+/* --- Stilar för Appens lyckosmeddelande --- */
+.app-success-message {
+  color: #28a745; /* Grön färg */
+  margin: 1rem 0; /* Marginal ovanför och under */
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+
+
+
+.logout-button-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 10px 0;
+}
+
+
+.logout-button {
+  padding: 10px 20px;
+  background-color: #ff4d4d; /* Röd bakgrund för logout */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s; /* Mjuk övergång för bakgrundsfärg */
+}
+.logout-button:hover {
+  background-color: #cc0000; /* Mörkare röd vid hover */
+}
+.logout-button:disabled {
+  background-color: #cccccc; /* Grå knapp vid laddning */
+  cursor: not-allowed; /* Visa att knappen inte kan klickas */
+}
+
+
+
+/* Stilar från React boiler plate  */
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+.card {
+  padding: 2em;
+}
+.read-the-docs {
+  color: #888;
+} 
+
