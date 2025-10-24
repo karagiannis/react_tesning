@@ -1,0 +1,1389 @@
+{
+  "records": [
+    {
+      "name": "Nordea",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Nordea/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "MTA",
+          "title": "Nordea website",
+          "approach": "REDIRECT",
+          "hidden_method": false
+        },
+        {
+          "name": "BANKID_SE",
+          "title": "Bank ID",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "Social security number (Personnummer)",
+              "required": true,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "DECOUPLED",
+          "hidden_method": true
+        }
+      ]
+    },
+    {
+      "name": "Bergslagens Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Bergslagens%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Bjursås Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Bjurs%C3%A5s%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Dalslands Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Dalslands%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Ekeby Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Ekeby%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Falkenbergs Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Falkenbergs%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Fryksdalens Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Fryksdalens%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Hälsinglands Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/H%C3%A4lsinglands%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Häradssparbanken Mönsterås",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/H%C3%A4radssparbanken%20M%C3%B6nster%C3%A5s/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Högsby Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/H%C3%B6gsby%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Ivetofta Sparbank i Bromölla",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Ivetofta%20Sparbank%20i%20Brom%C3%B6lla/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Kinda-Ydre Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Kinda-Ydre%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Laholms Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Laholms%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Lekebergs Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Lekebergs%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Leksands Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Leksands%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Lönneberga-Tuna-Vena Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/L%C3%B6nneberga-Tuna-Vena%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Markaryds Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Markaryds%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Mjöbäcks Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Mj%C3%B6b%C3%A4cks%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Norrbärke Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Norrb%C3%A4rke%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Orusts Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Orusts%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Roslagens Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Roslagens%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sala Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sala%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sidensjö Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sidensj%C3%B6%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Skurups Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Skurups%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Snapphanebygdens Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Snapphanebygdens%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sparbanken Alingsås",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sparbanken%20Alings%C3%A5s/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sparbanken Boken",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sparbanken%20Boken/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sparbanken Eken",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sparbanken%20Eken/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sparbanken Göinge",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sparbanken%20G%C3%B6inge/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sparbanken i Enköping",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sparbanken%20i%20Enk%C3%B6ping/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sparbanken i Karlshamn",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sparbanken%20i%20Karlshamn/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sparbanken Lidköping",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sparbanken%20Lidk%C3%B6ping/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sparbanken Nord",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sparbanken%20Nord/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sparbanken Rekarne",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sparbanken%20Rekarne/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sparbanken Sjuhärad",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sparbanken%20Sjuh%C3%A4rad/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sparbanken Skaraborg",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sparbanken%20Skaraborg/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sparbanken Skåne",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sparbanken%20Sk%C3%A5ne/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sparbanken Tanum",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sparbanken%20Tanum/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sparbanken Tranemo",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sparbanken%20Tranemo/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sparbanken Västra Mälardalen",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Sparbanken%20V%C3%A4stra%20M%C3%A4lardalen/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Swedbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Swedbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Södra Hestra Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/S%C3%B6dra%20Hestra%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sölvesborg-Mjällby Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/S%C3%B6lvesborg-Mj%C3%A4llby%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Sörmlands Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/S%C3%B6rmlands%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Tidaholms Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Tidaholms%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Tjustbygdens Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Tjustbygdens%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Tjörns Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Tj%C3%B6rns%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Ulricehamns Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Ulricehamns%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Vadstena Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Vadstena%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Valdemarsviks Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Valdemarsviks%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Varbergs Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Varbergs%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Vimmerby Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Vimmerby%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Virserums Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Virserums%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Westra Wermlands Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Westra%20Wermlands%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Ålems Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/%C3%85lems%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Åse Viste Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/%C3%85se%20Viste%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Åtvidabergs Sparbank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/%C3%85tvidabergs%20Sparbank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Ölands Bank",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/%C3%96lands%20Bank/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Handelsbanken",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Handelsbanken/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "name": "BANKID",
+          "title": "Bank ID",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": false,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            }
+          ],
+          "approach": "DECOUPLED",
+          "hidden_method": true
+        },
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Mock ASPSP",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Mock%20ASPSP/",
+      "type": "personal",
+      "authMethods": [
+        {
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    }
+  ],
+  "status": {
+    "code": 0,
+    "text": "Available banks found"
+  }
+}

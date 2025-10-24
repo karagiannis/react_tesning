@@ -1,0 +1,34 @@
+{
+  "records": [
+    {
+      "addressInformation": {
+        "address": "Testvägen 1",
+        "city": "Danderyd",
+        "zipCode": "18230"
+      },
+      "changeDate": "2024-01-29",
+      "courtCode": "400",
+      "dataSourcing": {
+        "caseNumber": "00000002"
+      },
+      "decisionDate": "2023-01-31",
+      "decisionTypeCode": "D",
+      "exemptionFromDate": "2022-02-02",
+      "exemptionToDate": "2022-03-02",
+      "freeText": "Jan Efternamn2584 berättigas att under en tid av 1 månad från tingsrättens dom, utan att den vunnit laga kraft, vidta åtgärder för att avveckla näringsverksamheten avseende sina kvarvarande kunder på så sätt som åklagaren medgivit. Göteborgs tingsrätt har den 2 februari 2022 beslutat att bevilja Jan Efternamn2584 undantag från henne meddelat näringsförbud för att verka som styrelseledamot i Stora Bananberget Aktiebolag. Undantagen gäller från och med 2022-02-02 till och med 2022-03-02.",
+      "name": {
+        "firstName": "Jan",
+        "fullName": "Efternamn2584, Jan",
+        "surName": "Efternamn2584"
+      },
+      "personId": "198001139297",
+      "temporaryProhibitionDecisionDate": "2022-02-02",
+      "validFromDate": "2023-03-22",
+      "validToDate": "2025-02-01"
+    }
+  ],
+  "status": {
+    "code": 0,
+    "text": "records found"
+  }
+}

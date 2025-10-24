@@ -19,6 +19,19 @@ export default {
           700: '#005c3d',  // Mörkare grön (hover på knappar)
           800: '#004d32',  // Mörk skogsgrön (header/primär)
           900: '#1a3a2e',  // Mörkaste (text/rubriker)
+        },
+        // Terracotta accent color (för länkar och sekundära actions)
+        terracotta: {
+          50: '#fef6f4',   // Mycket ljus terracotta
+          100: '#fce8e1',  // Ljus terracotta
+          200: '#f9c9bb',  // Mellanljus
+          300: '#f4a58e',  // Mellanterracotta
+          400: '#ee7d5f',  // Klarare terracotta
+          500: '#e65a33',  // Primär terracotta (bas)
+          600: '#d4421f',  // Mörkare terracotta (hover)
+          700: '#b0351a',  // Mörk terracotta
+          800: '#8c2a15',  // Mycket mörk
+          900: '#6b1f10',  // Mörkast terracotta
         }
       },
     },

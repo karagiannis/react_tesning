@@ -1,0 +1,8 @@
+{
+  "access_token": "d8ce667a-a0a5-49f6-8df0-b048eba5de6a",
+  "session_id": "e0558f06-78cc-4768-b7bf-7c8799475f04",
+  "state": "ac0665df-708b-4e41-b012-da93a2d77c5b",
+  "auth_url": "https://tilisy-sandbox.enablebanking.com/ais/start?sessionid=e0558f06-78cc-4768-b7bf-7c8799475f04&locale=SV",
+  "redirect_url": "https://app.test.roaring.io/v2/open-banking/authorization",
+  "timestamp": "2025-10-23T05:15:46Z"
+}

@@ -399,99 +399,325 @@
   \end{flushright}
 \end{frame}
 
-% Slide 2: Riskfrågor - Uppdragets syfte och art (RiskfragorSlide i React, route: /riskfragor)
-\begin{frame}[label=uppdrag]
-  \frametitle{Uppdragets syfte och art}
+% ========================================================================
+% SLIDE 2: RISKFRÅGOR - MULTI-STEP WIZARD (5 steg)
+% ========================================================================
+% RiskfragorSlide i React (route: /riskfragor)
+% Implementerad som multi-step wizard för bättre UX och progressiv datainsamling
+% ========================================================================
 
-  \small
-  Vad exakt är det kunden vill ha hjälp med?
+% STEG 1/5: Företagsidentifikation & API-trigger
+\begin{frame}[label=riskfragor-steg1]
+  \frametitle{Riskfrågor – Steg 1 av 5: Företagsidentifikation}
+
+  \begin{center}
+    \textbf{Progress:} [●○○○○] Steg 1/5
+  \end{center}
 
   \vspace{0.5cm}
-  \textbf{Typ av uppdrag:}
-  \begin{itemize}
-    \item[$\Box$] Bokföring
-    \item[$\Box$] Lönehantering
-    \item[$\Box$] Rådgivning
-    \item[$\Box$] Deklaration
-    \item[$\Box$] Annat
-  \end{itemize}
 
-  \vspace{0.3cm}
-  \textbf{Frekvens:}
-  \begin{itemize}
-    \item[$\Box$] Löpande
-    \item[$\Box$] Engångsuppdrag
-    \item[$\Box$] Periodiskt
-  \end{itemize}
+  \small
+  \textbf{Bakgrund:}\\
+  Penningtvättslagen (PTL) kräver att redovisningsbyråer fastställer varje kunds riskprofil. Tillsynsmyndigheten Länsstyrelsen Stockholm ställer tydliga krav på att byrån ska kunna visa att man förstått kundens affärsidé, verksamhetshistorik samt kund- och leverantörsstruktur.
 
-  \vspace{0.3cm}
-  \textbf{Eventuella särskilda omständigheter:}
-  \begin{block}{Textfält}
-    \underline{\hspace{10cm}}
+  \vspace{0.5cm}
+
+  \textbf{Organisationsnummer:}* \underline{\hspace{6cm}}
+  \begin{block}{Format}
+    \footnotesize XXXXXX-XXXX (t.ex. 556789-1234)
   \end{block}
 
-  \vspace{1cm}
+  \vspace{0.3cm}
+
+  \textbf{Personnummer (VD/Firmatecknare):}* \underline{\hspace{6cm}}
+  \begin{block}{Format}
+    \footnotesize YYYYMMDD-XXXX (t.ex. 19850315-1234)
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \textbf{Företagets registrerade namn:}* \underline{\hspace{6cm}}
+  \begin{block}{Auto}
+    \footnotesize Autofylls från Bolagsverket när org.nr är giltigt
+  \end{block}
+
+  \vspace{0.5cm}
+
+  \begin{alertblock}{Vad händer när båda fält är ifyllda?}
+    \footnotesize
+    ⏳ Spinner visas: "Hämtar företagsinformation från Bolagsverket och Roaring.io..."\\
+    📡 Backend anropar: \texttt{POST /api/onboarding/verify-identity}\\
+    ✅ När klar: Autofyll av företagsnamn + aktivera "Nästa"-knapp
+  \end{alertblock}
+
+  \vspace{0.5cm}
   \begin{flushright}
-    \hyperlink{verksamhet}{\beamerbutton{Nästa}}
+    \hyperlink{riskfragor-steg2}{\beamerbutton{Nästa}} \hspace{0.3cm} \beamerbutton{Avbryt}
   \end{flushright}
 \end{frame}
 
+% STEG 2/5: Verksamhetsbeskrivning
+\begin{frame}[label=riskfragor-steg2]
+  \frametitle{Riskfrågor – Steg 2 av 5: Verksamhetsbeskrivning}
 
-% Slide 2 (fortsättning): Kundens verksamhetsart - ingår i RiskfragorSlide
-\begin{frame}[label=verksamhet]
-  \frametitle{Kundens verksamhetsart}
+  \begin{center}
+    \textbf{Progress:} [●●○○○] Steg 2/5
+  \end{center}
 
-  \small
-  Penningtvättslagen (PTL) kräver att redovisningsbyråer fastställer varje kunds riskprofil.\\
-  Tillsynsmyndigheten Länsstyrelsen Stockholm ställer tydliga krav på att byrån ska kunna visa att man förstått kundens affärsidé, verksamhetshistorik samt kund- och leverantörsstruktur.\\
-  Det är viktigt att kunna bevisa detta vid en eventuell granskning. Om byrån inte kan styrka att man tydligt övertygat sig om att kundens affärer är rena, kan stora sanktionsavgifter tillfogas – även om kunden själv är helt felfri. Detta kallas "klandervärt risktagande" och innebär ansvar för byrån utan att brottspengar behöver vara inblandade.\\
-  Se gärna mer information och exempel på faktiska sanktionsbeslut hos 
-  \href{https://www.lansstyrelsen.se/stockholm/samhalle/betalning-ekonomi-och-pengar/forhindra-penningtvatt-och-finansiering-av-terrorism/ingripanden-och-sanktioner-penningtvatt.html}{Länsstyrelsen Stockholm}.
+  \vspace{0.5cm}
 
-  \vspace{1cm}
-  \begin{block}{Syfte}
-    Vi ställer dessa frågor för att följa lagkrav och skydda både dig och byrån – inte av nyfikenhet.
+  \footnotesize
+
+  \textbf{1. Beskriv företagets huvudsakliga verksamhet:}*
+  \begin{block}{Textarea}
+    \tiny Placeholder: "Vad gör företaget? Vilka produkter/tjänster säljs?"
   \end{block}
 
-  \vspace{0.8cm}
+  \vspace{0.3cm}
+
+  \textbf{2. SNI-kod (branschkod):}* \underline{\hspace{7cm}}
+  \begin{block}{Auto + Validering}
+    \tiny Autofylls från Bolagsverket | Dropdown med sök | Kan ändras av användare\\
+    ⚠️ \textbf{Varning visas vid avvikelse:} "Registrerad SNI hos Bolagsverket är '43.22 VVS-arbeten'. Du har valt '45.11 Bilhandel'. Detta kan indikera felaktig registrering."
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \textbf{3. Har verksamheten ändrats de senaste 12 månaderna?}\\
+  ◯ Ja \hspace{0.5cm} ◯ Nej\\
+  Om Ja → \underline{\hspace{6cm}} (Beskriv ändringen)
+  \begin{block}{Risk}
+    \tiny Plötslig verksamhetsändring = högrisk för penningtvätt
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \textbf{4. Bedriver företaget verksamhet från fast driftställe?}\\
+  ◯ Ja \hspace{0.3cm} ◯ Nej \hspace{0.3cm} ◯ Hemmakontor\\
+  Om Nej → \underline{\hspace{6cm}} (Beskriv var verksamheten bedrivs)
+  \begin{block}{Risk}
+    \tiny Ingen fast adress = svårare att kontrollera
+  \end{block}
+
+  \vspace{0.5cm}
   \begin{flushright}
-    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+    \hyperlink{riskfragor-steg1}{\beamerbutton{Tillbaka}} \hspace{0.3cm} \hyperlink{riskfragor-steg3}{\beamerbutton{Nästa}}
   \end{flushright}
 \end{frame}
 
-% Slide 2 (fortsättning): Frågor som stödjer riskbedömning - ingår i RiskfragorSlide
-\begin{frame}[label=riskfragor]
-  \frametitle{Frågor som stödjer riskbedömning}
+% STEG 3/5: Kunder & Affärspartners
+\begin{frame}[label=riskfragor-steg3]
+  \frametitle{Riskfrågor – Steg 3 av 5: Kunder \& Affärspartners}
 
-  \small
-  Flera av dessa frågor har lagstöd och hjälper oss att bedöma risken:
-  \begin{itemize}
-    \item Vad är företagets huvudsakliga affärsidé?
-    \item Vilka typer av kunder har företaget? (Privatpersoner / Företag / Offentlig sektor)
-    \item Har företaget återkommande utländska affärspartners?
-    \item Vilka är de största leverantörerna, och var är de etablerade?
-    \item Har verksamheten ändrats på senare tid?
-    \item Är du eller någon i företaget en PEP (person i politiskt utsatt ställning)?
-  \end{itemize}
+  \begin{center}
+    \textbf{Progress:} [●●●○○] Steg 3/5
+  \end{center}
 
-  \vspace{0.5cm}
-  	\textbf{Organisationsnummer:} \underline{\hspace{5cm}}
+  \vspace{0.3cm}
+
   \footnotesize
-  \begin{block}{Info}
-    Organisationsnumret används för att hämta officiell information från Bolagsverket eller Roaring.io.
+
+  \textbf{1. Vilka typer av kunder har företaget?}*\\
+  ☐ Privatpersoner (konsumenter) \hspace{0.5cm} ☐ Företag (B2B)\\
+  ☐ Offentlig sektor \hspace{0.5cm} ☐ Välgörenhetsorganisationer/föreningar
+
+  \vspace{0.3cm}
+
+  \textbf{2. Geografisk marknad:}*\\
+  ☐ Endast Sverige \hspace{0.5cm} ☐ Norden \hspace{0.5cm} ☐ EU \hspace{0.5cm} ☐ Utanför EU\\
+  Om utanför EU → \underline{\hspace{6cm}} (Vilka länder?)
+  \begin{block}{Risk}
+    \tiny Högriskländer (FATF-listan) flaggas automatiskt av systemet
   \end{block}
 
-  \vspace{0.5cm}
-  	\textbf{Personnummer:} \underline{\hspace{5cm}}
-  \footnotesize
-  \begin{block}{Info}
-    Personnumret används för att hämta officiell information från Bolagsverket eller Roaring.io.
+  \vspace{0.3cm}
+
+  \textbf{3. Har företaget återkommande affärspartners utanför Sverige?}\\
+  ◯ Ja \hspace{0.5cm} ◯ Nej\\
+  Om Ja → Beskriv: \underline{\hspace{6cm}}\\
+  \tiny (Vilka länder? Typ av samarbete? Ungefär hur stor andel av omsättningen?)
+
+  \vspace{0.3cm}
+
+  \textbf{4. Vilka är företagets tre största leverantörer?}\\
+  1. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
+  2. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
+  3. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}
+  \begin{block}{Risk}
+    \tiny Leverantörer från högriskländer flaggas
   \end{block}
 
-  \vspace{0.8cm}
+  \vspace{0.3cm}
+
+  \textbf{5. Vilka är företagets tre största kunder?} (om B2B)\\
+  1. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
+  2. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
+  3. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}
+
+  \vspace{0.5cm}
   \begin{flushright}
-    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+    \hyperlink{riskfragor-steg2}{\beamerbutton{Tillbaka}} \hspace{0.3cm} \hyperlink{riskfragor-steg4}{\beamerbutton{Nästa}}
   \end{flushright}
+\end{frame}
+
+% STEG 4/5: Betalningar & Transaktioner
+\begin{frame}[label=riskfragor-steg4]
+  \frametitle{Riskfrågor – Steg 4 av 5: Betalningar \& Transaktioner}
+
+  \begin{center}
+    \textbf{Progress:} [●●●●○] Steg 4/5
+  \end{center}
+
+  \vspace{0.3cm}
+
+  \footnotesize
+
+  \textbf{1. Hur tar företaget betalt från kunder?}*\\
+  ☐ Banköverföring/Swish \hspace{0.3cm} ☐ Kortbetalning \hspace{0.3cm} ☐ Faktura\\
+  ☐ Kontanter \hspace{0.3cm} ☐ Kryptovaluta
+  \begin{block}{Risk}
+    \tiny Kontanter + Kryptovaluta = hög risk för penningtvätt
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \textbf{2. Om kontanter: Ungefär hur stor andel av omsättningen?}\\
+  Dropdown: [< 5\% / 5-20\% / 20-50\% / > 50\%]
+  \begin{alertblock}{Lagkrav}
+    \tiny ⚠️ Kontanthantering över 20\% kräver tillstånd enligt Kontanthanteringslagen.\\
+    Har företaget tillstånd från Skatteverket?
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{3. Förekommer transaktioner över 150 000 kr?}\\
+  ◯ Ja \hspace{0.3cm} ◯ Nej \hspace{0.3cm} ◯ Ibland
+  \begin{block}{Varför}
+    \tiny PTL kräver förstärkt kundkännedom vid stora transaktioner
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \textbf{4. Tar företaget emot betalningar från tredje part?}\\
+  ◯ Ja \hspace{0.5cm} ◯ Nej\\
+  \tiny Exempel: Kund A betalar för Kund B:s tjänst
+  \begin{block}{Risk}
+    \tiny Högrisk för penningtvätt
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \textbf{5. Förekommer överföringar till/från utländska bankkonton?}\\
+  ◯ Ja, regelbundet \hspace{0.3cm} ◯ Ja, ibland \hspace{0.3cm} ◯ Nej\\
+  Om Ja → Vilka länder? \underline{\hspace{5cm}}
+
+  \vspace{0.5cm}
+  \begin{flushright}
+    \hyperlink{riskfragor-steg3}{\beamerbutton{Tillbaka}} \hspace{0.3cm} \hyperlink{riskfragor-steg5}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% STEG 5/5: PEP & Ägande
+\begin{frame}[label=riskfragor-steg5]
+  \frametitle{Riskfrågor – Steg 5 av 5: PEP \& Ägande}
+
+  \begin{center}
+    \textbf{Progress:} [●●●●●] Steg 5/5
+  \end{center}
+
+  \vspace{0.3cm}
+
+  \footnotesize
+
+  \textbf{1. Vem/vilka är verkliga huvudmän (äger >25\%)?}*\\
+  Ägare 1: \underline{\hspace{4cm}} Personnr: \underline{\hspace{3cm}} Andel: \underline{\hspace{1.5cm}}\\
+  Ägare 2: \underline{\hspace{4cm}} Personnr: \underline{\hspace{3cm}} Andel: \underline{\hspace{1.5cm}}\\
+  [+ Lägg till ägare]
+  \begin{block}{Validering}
+    \tiny Jämförs automatiskt med Roaring.io → Avvikelse flaggas
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \textbf{2. Är någon av följande personer en PEP?}*\\
+  \tiny (Politiskt utsatt person = Personer i höga offentliga ämbeten: minister, riksdagsledamot, domare, generaldirektör, militär ledning, eller deras familjemedlemmar/nära medarbetare)\\
+  \vspace{0.2cm}
+  ☐ Ägare 1 \hspace{0.5cm} ☐ Ägare 2 \hspace{0.5cm} ☐ VD \hspace{0.5cm} ☐ Ingen\\
+  Om Ja → Beskriv position och land: \underline{\hspace{5cm}}
+
+  \vspace{0.3cm}
+
+  \textbf{3. Har företaget kopplingar till sanktionerade länder eller personer?}\\
+  ◯ Ja \hspace{0.3cm} ◯ Nej \hspace{0.3cm} ◯ Vet ej
+  \begin{block}{Automatisk kontroll}
+    \tiny Systemet kontrollerar automatiskt mot: EU-sanktionslistor, FN-sanktionslistor, OFAC (USA)
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \textbf{4. Finns det juridiska personer i ägarkedjan?}\\
+  ◯ Ja \hspace{0.5cm} ◯ Nej\\
+  Om Ja → Lista org.nr: \underline{\hspace{6cm}}
+  \begin{block}{Risk}
+    \tiny Komplexa ägarstrukturer = svårare att identifiera verkliga huvudmän
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \textbf{5. Är företaget noterat på börs?}\\
+  ◯ Ja \hspace{0.5cm} ◯ Nej \hspace{0.5cm} Om Ja → Vilken börs? \underline{\hspace{3cm}}
+  \begin{block}{Risk}
+    \tiny Lägre risk om publikt bolag (redan granskat av Finansinspektionen)
+  \end{block}
+
+  \vspace{0.5cm}
+  \begin{flushright}
+    \hyperlink{riskfragor-steg4}{\beamerbutton{Tillbaka}} \hspace{0.3cm} \hyperlink{identitetskontroll}{\beamerbutton{Slutför \& Nästa}}
+  \end{flushright}
+\end{frame}
+
+% SAMMANFATTNINGSSIDA: Backend-endpoints för Riskfrågor
+\begin{frame}[label=riskfragor-api]
+  \frametitle{Backend API-endpoints för Riskfrågor}
+
+  \footnotesize
+
+  \textbf{Steg 1:} POST /api/onboarding/verify-identity\\
+  \tiny → Anropar Roaring.io + Bolagsverket → Returnerar företagsnamn, SNI-kod, ägare
+
+  \vspace{0.3cm}
+
+  \textbf{Steg 2:} POST /api/onboarding/business-description\\
+  \tiny → Sparar verksamhetsbeskrivning → Jämför SNI-kod med Bolagsverket → Flaggar avvikelser
+
+  \vspace{0.3cm}
+
+  \textbf{Steg 3:} POST /api/onboarding/business-relationships\\
+  \tiny → Sparar kunder/leverantörer → Kontrollerar högriskländer (FATF-listan)
+
+  \vspace{0.3cm}
+
+  \textbf{Steg 4:} POST /api/onboarding/payment-methods\\
+  \tiny → Sparar betalningsmetoder → Flaggar högrisk (kontanter >20\%, kryptovaluta)
+
+  \vspace{0.3cm}
+
+  \textbf{Steg 5:} POST /api/onboarding/ownership-pep\\
+  \tiny → Sparar ägarstruktur → Jämför med Roaring.io → PEP-kontroll → Sanktionslistkontroll
+
+  \vspace{0.5cm}
+
+  \begin{alertblock}{Databas}
+    \tiny All data sparas i \texttt{client\_onboarding\_data.csv} (eller PostgreSQL i production)\\
+    Externa API-svar sparas i \texttt{roaring\_data.csv} och \texttt{bolagsverket\_data.csv}
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \begin{block}{Korsvalidering}
+    \tiny Backend jämför automatiskt klientens svar med officiell data från Roaring.io/Bolagsverket.\\
+    Avvikelser sparas i \texttt{risk\_flags.csv} och visas senare i Riskbedömning-sliden.
+  \end{block}
 \end{frame}
 
 

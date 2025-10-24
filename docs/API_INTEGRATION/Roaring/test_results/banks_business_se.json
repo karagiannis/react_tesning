@@ -1,0 +1,99 @@
+{
+  "records": [
+    {
+      "name": "Nordea Corporate",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Nordea%20Corporate/",
+      "type": "business",
+      "authMethods": [
+        {
+          "name": "MTA",
+          "title": "Nordea website",
+          "credentials": [
+            {
+              "name": "companyId",
+              "title": "Agreement number",
+              "required": true,
+              "description": "Agreement number for Nordea Corporate Netbank"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Handelsbanken",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Handelsbanken/",
+      "type": "business",
+      "authMethods": [
+        {
+          "name": "BANKID",
+          "title": "Bank ID",
+          "credentials": [
+            {
+              "name": "userId",
+              "title": "User ID",
+              "required": true,
+              "description": "Swedish social security number in the format YYYYMMDDXXXX",
+              "template": "^(19|20)\\d{2}[01]\\d[0-3]\\d\\d{4}$"
+            },
+            {
+              "name": "companyId",
+              "title": "Company ID",
+              "required": true,
+              "description": "For Swedish Corporates, this is their Organisation number or SHB number, and for Sole Traders (Enskild firma), it is their Personal number, all of which are 10 digits.",
+              "template": "^\\d{10}$"
+            }
+          ],
+          "approach": "DECOUPLED",
+          "hidden_method": true
+        },
+        {
+          "name": "REDIRECT",
+          "title": "Redirect",
+          "credentials": [
+            {
+              "name": "companyId",
+              "title": "Company ID",
+              "required": true,
+              "description": "For Swedish Corporates, this is their Organisation number or SHB number, and for Sole Traders (Enskild firma), it is their Personal number, all of which are 10 digits.",
+              "template": "^\\d{10}$"
+            }
+          ],
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Mock ASPSP",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Mock%20ASPSP/",
+      "type": "business",
+      "authMethods": [
+        {
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    },
+    {
+      "name": "Nordea First Card",
+      "countryCode": "SE",
+      "bankLogo": "https://enablebanking.com/brands/SE/Nordea%20First%20Card/",
+      "type": "business",
+      "authMethods": [
+        {
+          "approach": "REDIRECT",
+          "hidden_method": false
+        }
+      ]
+    }
+  ],
+  "status": {
+    "code": 0,
+    "text": "Available banks found"
+  }
+}

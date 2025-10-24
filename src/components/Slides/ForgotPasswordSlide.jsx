@@ -5,6 +5,12 @@ export default function ForgotPasswordSlide({ onNext, onBack }) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // Email validation
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -63,7 +69,7 @@ export default function ForgotPasswordSlide({ onNext, onBack }) {
 
             <button
               type="submit"
-              disabled={loading || !email}
+              disabled={loading || !isValidEmail(email)}
               className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold transition-all"
             >
               {loading ? 'Skickar...' : 'Skicka återställningskod'}

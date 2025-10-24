@@ -1,0 +1,80 @@
+{
+  "status": {
+    "responseMode": 1,
+    "code": 0,
+    "text": "records found"
+  },
+  "records": [
+    {
+      "personId": "198001139297",
+      "personIdType": "PERSONNUMMER",
+      "secrecy": {
+        "secrecy": false
+      },
+      "protectedRegistration": false,
+      "nationalRegistryChangeDate": "2021-09-25",
+      "name": [
+        {
+          "dateFrom": "2021-09-25",
+          "dateTo": "9999-12-31",
+          "firstName": "Jan",
+          "surName": "Efternamn2584"
+        }
+      ],
+      "details": [
+        {
+          "dateFrom": "2021-09-25",
+          "dateTo": "9999-12-31",
+          "secrecy": {
+            "secrecy": false
+          },
+          "protectedRegistration": false,
+          "birth": {
+            "birthDate": "1980-01-13"
+          },
+          "gender": "MALE"
+        }
+      ],
+      "populationRegistration": [
+        {
+          "dateFrom": "2021-09-25",
+          "dateTo": "9999-12-31",
+          "countyCode": "24",
+          "municipalityCode": "80",
+          "residenceStatusCode": "RESIDENTIAL",
+          "populationRegistrationDate": "1979-05-01",
+          "districtCode": "323002"
+        },
+        {
+          "dateFrom": "2010-02-02",
+          "dateTo": "2021-09-25",
+          "countyCode": "24",
+          "municipalityCode": "80",
+          "residenceStatusCode": "RESIDENTIAL",
+          "populationRegistrationDate": "1979-05-01"
+        }
+      ],
+      "populationRegistrationAddress": [
+        {
+          "dateFrom": "2021-09-25",
+          "dateTo": "9999-12-31",
+          "swedishAddress": {
+            "deliveryAddress2": "Gatan366 45 LGH 1104",
+            "zipCode": "13241",
+            "city": "SALTSJÖ-BOO"
+          }
+        }
+      ],
+      "relation": [
+        {
+          "dateFrom": "2010-02-02",
+          "dateTo": "9999-12-31",
+          "relationType": "SPOUSE_OR_PARTNER",
+          "firstName": "Förnamn93",
+          "surName": "Ej folkbokförd",
+          "birthDate": "1978-01-01"
+        }
+      ]
+    }
+  ]
+}

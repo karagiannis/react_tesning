@@ -329,7 +329,7 @@ export default function LoginSlide({ onNext, onRegister }) {
             <div className="mt-2 text-right">
               <a 
                 href="/forgot-password" 
-                className="text-sm text-terracotta-600 hover:text-terracotta-700 font-medium"
+                className="text-sm text-terracotta-600 hover:text-terracotta-700 font-semibold"
               >
                 Glömt lösenord?
               </a>
