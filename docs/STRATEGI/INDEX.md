@@ -2,7 +2,7 @@
 
 **Princip:** Det som inte finns i detta index FINNS INTE!
 **Skapad:** 2025-10-26
-**Senast uppdaterad:** 2025-10-26 02:48
+**Senast uppdaterad:** 2025-10-27 00:05
 
 ---
 
@@ -39,7 +39,7 @@ Denna mapp innehåller strategiska dokument för Celestial Onboarding App - lån
 
 ---
 
-### 2. DATAKÄLLOR_STRATEGI.md
+### 2. DATAKÄLLOR_STRATEGI.md (23K)
 
 **Skapad:** 2025-10-21
 **Status:** REFERENSDOKUMENT - Vissa delar föråldrade efter beslut om betallösning
@@ -71,6 +71,128 @@ Denna mapp innehåller strategiska dokument för Celestial Onboarding App - lån
 - Referens för tekniska implementationer
 - Bakgrund till strategiska beslut
 - Kostnadsanalys för framtida förhandlingar
+
+---
+
+### 3. LIVE_TEST_STRATEGIC_INSIGHTS.md (31K)
+
+**Flyttad från:** docs/API_INTEGRATION/Roaring/ (2025-10-26)
+**Skapad:** 2025-10-23
+**Status:** AKTIV STRATEGI - Påverkar frontend UI-design
+
+**Innehåll:**
+- Strategiska insikter från live endpoint-testing av Roaring.io
+- Vilka endpoints som fungerar vs ger empty responses
+- **Multi-stage wizard discovery** - Behövs för UBO-kedjor
+- API cost optimization - Vilka endpoints är nödvändiga
+- Frontend UI-impact - Dynamic form fields baserat på API-svar
+
+**Varför kritisk:**
+- Endpoint-tester avgör UI-design (därför låg tester i frontend-mappen)
+- Upptäckt att UBO-kedjor kan vara 5+ nivåer djupa → Dynamic multi-stage wizard
+- Vissa företag saknas i Roaring.io test-data → Error handling i UI
+
+**Användning:**
+- Referens för frontend-utveckling
+- Guide för vilka Roaring.io endpoints som behövs
+- Grund för multi-stage wizard implementation
+
+---
+
+### 4. KYC_COST_OPTIMIZATION.md (32K)
+
+**Flyttad från:** docs/API_INTEGRATION/Roaring/ (2025-10-26)
+**Skapad:** 2025-10-23
+**Status:** AKTIV STRATEGI - Prismodell för användare
+
+**Innehåll:**
+- Kostnadsoptimering för KYC-data-hämtning från Roaring.io
+- **Pay-per-use strategi:**
+  - RAR 0: Endast direkt motpart (billigast, Bolagsverket)
+  - RAR -1: Ett steg bakåt (medel kostnad, Roaring.io)
+  - RAR -2: Två steg bakåt (dyrast, full UBO-kedja)
+- Vilka endpoints kostar vs är gratis
+- Batch vs single requests
+- Cache-strategier
+- Kostnadskalkyl per onboarding
+
+**Prisexempel:**
+- RAR 0: ~0 kr (endast Bolagsverket gratis API)
+- RAR -1: ~5-7 kr (Roaring.io grunddata)
+- RAR -2: ~15-25 kr (full UBO-kedja + sanctions)
+
+**Användning:**
+- Prisberäkning i frontend (visa kostnad innan analys)
+- Backend API-selection logik
+- Användare väljer själv analysdjup
+
+**Relation:** Se även DATAKÄLLOR_STRATEGI.md för API-jämförelser
+
+---
+
+### 5. RISK_INDICATORS_ANALYSIS.md (147K!)
+
+**Flyttad från:** docs/API_INTEGRATION/Roaring/ (2025-10-26)
+**Skapad:** 2025-10-23
+**Status:** KÄRNVIKTIG - Grund för risk score-algoritm
+
+**Innehåll:**
+- **MASSIV ANALYS** av risk indicators från Roaring.io (4450 rader!)
+- PEP (Politically Exposed Person) checks
+- Sanktionslistor (terrorism, penningtvätt)
+- Business prohibition checks (näringsförbud)
+- Ägarstruktur red flags (komplexitet, offshore-bolag)
+- Geografisk risk (högriskländer)
+- Circular transaction indicators (penningtvätt)
+- Integration med metod_riskbedömning_kund_v3.tex
+
+**Risk-faktorer från Roaring.io:**
+- SNI-kod kongruens (SCB vs verklig verksamhet)
+- Ägarstruktur komplexitet
+- PEP/sanktionslistor
+- Offshore-bolag i ägarkedjan
+- Circular ownership detection
+
+**Användning:**
+- Input till risk score-algoritm (metod_riskbedömning_kund_v3.tex)
+- Fraud detection-modul
+- AML compliance checks
+
+**Relation:**
+- [../PENGATVÄTTS_KURSEN/metod_riskbedömning_kund_v3.tex](../PENGATVÄTTS_KURSEN/metod_riskbedömning_kund_v3.tex) - Risk score-algoritm
+- [../../tic-tac-toe-server/fraud_detection/](../../tic-tac-toe-server/fraud_detection/) - Implementation
+
+---
+
+### 6. BENEFICIAL_OWNER.md (15K)
+
+**Flyttad från:** docs/API_INTEGRATION/Roaring/ (2025-10-26)
+**Skapad:** 2025-10-24
+**Status:** AKTIV STRATEGI - UBO implementation
+
+**Innehåll:**
+- UBO (Ultimate Beneficial Owner) implementation-strategi
+- UBO-chain discovery (rekursiv ägarsökning)
+- Circular ownership detection (penningtvätt-indikator)
+- PML-krav för UBO (25% ägande-tröskel)
+- **Multi-stage wizard strategy** - Dynamisk UI baserat på kedjans längd
+
+**Varför multi-stage wizard:**
+- UBO-kedjor kan vara 1-5+ nivåer djupa
+- Okänt vid start hur många steg som behövs
+- Progress indicator måste uppdateras dynamiskt
+- Användare ser endast relevanta frågor
+
+**Frontend impact:**
+- Dynamic form generation
+- Progress indicator (5 steg vs 10 steg)
+- Real-time cost preview (djupare kedja = högre kostnad)
+- Error handling (företag saknas i Roaring.io)
+
+**Användning:**
+- Frontend multi-stage wizard implementation
+- Backend UBO-chain traversal algoritm
+- Circular ownership detection
 
 ---
 

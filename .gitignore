@@ -47,6 +47,10 @@ Bolagsverket/credentials/
 Bolagsverket/*.pdf
 !Bolagsverket/README.md
 
+# External APIs - Bulkfiler (stora datafiler, ej för Git)
+external_apis/Bolagsverket/Värdefulladatamängder/*.zip
+external_apis/SCB/Värdefulladatamängder/*.zip
+
 # API keys and credentials
 *.ini
 sendgrid.ini
