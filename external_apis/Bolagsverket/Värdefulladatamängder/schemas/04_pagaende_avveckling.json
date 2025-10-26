@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Bolagsverket - Kodlista: Pågående avvecklings- eller omstruktureringsförfarande",
+  "description": "Status för företag under avveckling eller omstrukturering",
+  "type": "object",
+  "definitions": {
+    "avvecklingsforfaranden": {
+      "AC-AVOMFO": {
+        "kod": "AC-AVOMFO",
+        "beskrivning": "Ackordsförhandling"
+      },
+      "DEOL-AVOMFO": {
+        "kod": "DEOL-AVOMFO",
+        "beskrivning": "Överlåtande vid delning"
+      },
+      "DEOT-AVOMFO": {
+        "kod": "DEOT-AVOMFO",
+        "beskrivning": "Övertagande vid delning"
+      },
+      "FR-AVOMFO": {
+        "kod": "FR-AVOMFO",
+        "beskrivning": "Företagsrekonstruktion"
+      },
+      "FUOL-AVOMFO": {
+        "kod": "FUOL-AVOMFO",
+        "beskrivning": "Överlåtande i fusion"
+      },
+      "FUOT-AVOMFO": {
+        "kod": "FUOT-AVOMFO",
+        "beskrivning": "Övertagande i fusion"
+      },
+      "GROM-AVOMFO": {
+        "kod": "GROM-AVOMFO",
+        "beskrivning": "Gränsöverskridande ombildning"
+      },
+      "KK-AVOMFO": {
+        "kod": "KK-AVOMFO",
+        "beskrivning": "Konkurs"
+      },
+      "LI-AVOMFO": {
+        "kod": "LI-AVOMFO",
+        "beskrivning": "Likvidation"
+      },
+      "OM-AVOMFO": {
+        "kod": "OM-AVOMFO",
+        "beskrivning": "Ombildning"
+      },
+      "RES-AVOMFO": {
+        "kod": "RES-AVOMFO",
+        "beskrivning": "Resolution"
+      }
+    }
+  },
+  "metadata": {
+    "source": "Bolagsverket Värdefulladatamängder (GRATIS) - Kodlista 3",
+    "total": 11,
+    "usage": "Fältet 'pagandeAvvecklingsEllerOmstruktureringsforfarande' i grunddata. Format: [kod]$[text]$[datum]. Flera förfaranden separerade med |"
+  }
+}

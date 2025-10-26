@@ -1,0 +1,346 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "KYC Questions and Answers",
+    "title": "KYC Questions and Answers",
+    "version": "1.0"
+  },
+  "host": "api.roaring.io",
+  "basePath": "/global/kyc/1.0",
+  "paths": {
+    "/person/templates": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Language",
+            "in": "query",
+            "name": "language",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK, successful response",
+            "schema": {
+              "$ref": "#/definitions/KycTemplatesResult"
+            }
+          },
+          "400": {
+            "description": "Returned when something is wrong in the request, e.g. too many entities are requested or arguments are missing",
+            "schema": {
+              "$ref": "#/definitions/BadRequest"
+            }
+          },
+          "404": {
+            "description": "Requested resource could not be found",
+            "schema": {
+              "$ref": "#/definitions/NotFound"
+            }
+          },
+          "500": {
+            "description": "An internal server error occurred, please contact the system administrator with information on the error",
+            "schema": {
+              "$ref": "#/definitions/ServerError"
+            }
+          }
+        },
+        "summary": "Get person templates"
+      }
+    },
+    "/company/questions": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Language",
+            "in": "query",
+            "name": "language",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "KYC Question template id",
+            "in": "query",
+            "name": "template",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK, successful response",
+            "schema": {
+              "$ref": "#/definitions/KycQuestionsResult"
+            }
+          },
+          "400": {
+            "description": "Returned when something is wrong in the request, e.g. too many entities are requested or arguments are missing",
+            "schema": {
+              "$ref": "#/definitions/BadRequest"
+            }
+          },
+          "404": {
+            "description": "Requested resource could not be found",
+            "schema": {
+              "$ref": "#/definitions/NotFound"
+            }
+          },
+          "500": {
+            "description": "An internal server error occurred, please contact the system administrator with information on the error",
+            "schema": {
+              "$ref": "#/definitions/ServerError"
+            }
+          }
+        },
+        "summary": "Get company questions"
+      }
+    },
+    "/company/templates": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Language",
+            "in": "query",
+            "name": "language",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Country",
+            "in": "query",
+            "name": "country",
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK, successful response",
+            "schema": {
+              "$ref": "#/definitions/KycTemplatesResult"
+            }
+          },
+          "400": {
+            "description": "Returned when something is wrong in the request, e.g. too many entities are requested or arguments are missing",
+            "schema": {
+              "$ref": "#/definitions/BadRequest"
+            }
+          },
+          "404": {
+            "description": "Requested resource could not be found",
+            "schema": {
+              "$ref": "#/definitions/NotFound"
+            }
+          },
+          "500": {
+            "description": "An internal server error occurred, please contact the system administrator with information on the error",
+            "schema": {
+              "$ref": "#/definitions/ServerError"
+            }
+          }
+        },
+        "summary": "Get company templates"
+      }
+    },
+    "/person/questions": {
+      "get": {
+        "parameters": [
+          {
+            "description": "Language",
+            "in": "query",
+            "name": "language",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "KYC Question template id",
+            "in": "query",
+            "name": "template",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK, successful response",
+            "schema": {
+              "$ref": "#/definitions/KycQuestionsResult"
+            }
+          },
+          "400": {
+            "description": "Returned when something is wrong in the request, e.g. too many entities are requested or arguments are missing",
+            "schema": {
+              "$ref": "#/definitions/BadRequest"
+            }
+          },
+          "404": {
+            "description": "Requested resource could not be found",
+            "schema": {
+              "$ref": "#/definitions/NotFound"
+            }
+          },
+          "500": {
+            "description": "An internal server error occurred, please contact the system administrator with information on the error",
+            "schema": {
+              "$ref": "#/definitions/ServerError"
+            }
+          }
+        },
+        "summary": "Get person questions"
+      }
+    }
+  },
+  "definitions": {
+    "BadRequest": {
+      "description": "Returned when something is wrong in the request, e.g. too many entities are requested or arguments are missing",
+      "properties": {
+        "error": {
+          "default": "BadRequest",
+          "type": "string"
+        },
+        "message": {
+          "default": "Required arguments are missing in the request",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "KycQuestionsResult": {
+      "description": "List of questions with corresponding answer options",
+      "properties": {
+        "questions": {
+          "description": "Array of questions",
+          "items": {
+            "properties": {
+              "answerOptions": {
+                "description": "Answer options",
+                "items": {
+                  "properties": {
+                    "answerOption": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "selected": {
+                      "type": "boolean"
+                    },
+                    "type": {
+                      "enum": [
+                        "COUNTRY",
+                        "DEFAULT",
+                        "FREE_TEXT"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "description": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              },
+              "index": {
+                "type": "integer"
+              },
+              "multiple": {
+                "description": "Whether the question can satisfy multiple answer options or not",
+                "type": "boolean"
+              },
+              "parentAnswerOption": {
+                "type": "string"
+              },
+              "question": {
+                "type": "string"
+              },
+              "required": {
+                "description": "Whether the question is required to be answered or not",
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "KycTemplatesResult": {
+      "description": "List of templates",
+      "properties": {
+        "questions": {
+          "description": "Array of templates",
+          "items": {
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "NotFound": {
+      "description": "Requested resource could not be found",
+      "properties": {
+        "error": {
+          "default": "NotFound",
+          "type": "string"
+        },
+        "message": {
+          "default": "Requested resource could not be found",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ServerError": {
+      "description": "Internal server error",
+      "properties": {
+        "error": {
+          "default": "InternalServerError",
+          "type": "string"
+        },
+        "message": {
+          "default": "An internal server error occurred, please contact the system administrator with information on the error",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "securityDefinitions": {
+    "Authentication": {
+      "flow": "application",
+      "tokenUrl": "https://api.roaring.io/token",
+      "type": "oauth2"
+    }
+  },
+  "schemes": [
+    "https"
+  ]
+}

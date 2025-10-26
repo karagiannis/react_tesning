@@ -1,0 +1,4250 @@
+\documentclass[12pt,a4paper]{article}
+
+% Paket
+\usepackage[utf8]{inputenc}
+\usepackage[swedish]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{verbatim}
+
+% Färger
+\definecolor{brandgreen}{RGB}{0,112,74}
+\definecolor{lightgray}{RGB}{245,245,245}
+\definecolor{codegray}{RGB}{50,50,50}
+
+% Hyperref inställningar
+\hypersetup{
+  colorlinks=true,
+  linkcolor=brandgreen,
+  urlcolor=brandgreen,
+  citecolor=brandgreen
+}
+
+% Listings för kodexempel
+\lstset{
+  basicstyle=\small\ttfamily,
+  backgroundcolor=\color{lightgray},
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny\color{codegray},
+  literate=%
+    {å}{{\aa}}1
+    {ä}{{\"a}}1
+    {ö}{{\"o}}1
+    {Å}{{\AA}}1
+    {Ä}{{\"A}}1
+    {Ö}{{\"O}}1
+    {é}{{\'e}}1
+    {≥}{$\geq$}1
+}
+
+% Definiera JSON och JavaScript för listings
+\lstdefinelanguage{json}{
+  morestring=[b]",
+  morestring=[d]'
+}
+
+\lstdefinelanguage{javascript}{
+  keywords={const, let, var, function, if, else, return, await, async, try, catch, fetch},
+  morecomment=[l]{//},
+  morestring=[b]",
+  morestring=[d]'
+}
+
+% Titel
+\title{\textbf{API Endpoints Specifikation: Autentiseringssidor} \\ \large Backend-mappning för Login, Registrering och Lösenordsåterställning}
+\author{Celestial AB}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introduktion}
+
+Detta dokument beskriver \textbf{alla API endpoints} som behövs för autentiseringssidorna (utan sidebar) enligt \texttt{Onboardin\_app\_ny.tex}.
+
+Dessa sidor visas \textbf{innan användaren är inloggad} och inkluderar:
+\begin{itemize}[noitemsep]
+  \item Hero/Landing page (/)
+  \item Registrering (/register)
+  \item E-postverifiering (/verify)
+  \item Inloggning (/login)
+  \item Lösenordsåterställning (/forgot-password, /reset-password)
+\end{itemize}
+
+\subsection{Dokumentstruktur}
+
+Dokumentet är uppdelat i huvudsektioner per autentiseringsflöde:
+
+\textbf{Del 1: Autentiseringssidor (Utan Sidebar)} -- Sidor som visas innan användaren är inloggad, inklusive landing page, registrering, verifiering, inloggning och lösenordsåterställning. Dessa sidor har ingen sidebar.
+
+\textbf{Del 2: Onboarding Slides (Med Sidebar)} -- Slides som visas efter inloggning och utgör själva onboarding-processen. Dessa har sidebar med progressindikator och navigering.
+
+För varje slide/steg i onboarding-flödet dokumenteras:
+\begin{itemize}[noitemsep]
+  \item Vilka API endpoints som behövs
+  \item HTTP-metod (GET, POST, PUT, DELETE)
+  \item Request-format (JSON schema, multipart/form-data för filer)
+  \item Response-format (success och error cases)
+  \item Affärslogik och valideringar
+  \item Externa integrationer (Bolagsverket, Skatteverket, BankID, etc.)
+  \item Databastabeller som påverkas
+\end{itemize}
+
+\subsection{Teknisk Stack}
+\begin{itemize}[noitemsep]
+  \item \textbf{Backend:} FastAPI (Python 3.11+)
+  \item \textbf{Databas:} PostgreSQL 15+
+  \item \textbf{Authentication:} JWT tokens (access + refresh)
+  \item \textbf{File Storage:} AWS S3 eller lokal disk under utveckling
+  \item \textbf{OCR:} Google Cloud Vision API eller Tesseract
+  \item \textbf{Externa API:er:} Bolagsverket, Skatteverket, BankID, SendGrid
+\end{itemize}
+
+\subsection{Base URL}
+\begin{verbatim}
+Development: http://localhost:8000/api
+Production:  https://api.roaring.se/api
+\end{verbatim}
+
+\subsection{Autentisering}
+Alla endpoints (utom registrering, login, verify) kräver JWT token i header:
+\begin{verbatim}
+Authorization: Bearer <access_token>
+\end{verbatim}
+
+\subsection{Autentisering och Session Management - Teori}
+
+\subsubsection{Översikt: JWT-baserad Autentisering}
+
+Vår applikation använder \textbf{JWT (JSON Web Tokens)} för autentisering, INTE traditionella session cookies.
+Detta innebär att backend är \textbf{stateless} -- servern behöver inte hålla reda på vilka 
+användare som är inloggade i en sessions-tabell.
+
+\textbf{Varför JWT istället för session cookies?}
+\begin{itemize}[noitemsep]
+  \item \textbf{Skalbarhet:} Ingen server-side session storage behövs (viktigt för mikroservices)
+  \item \textbf{Cross-domain:} Fungerar mellan olika domäner/subdomäner
+  \item \textbf{Mobile-friendly:} Enklare för mobilappar (ingen cookie-hantering)
+  \item \textbf{Decentraliserad:} Tokens kan verifieras av vilken server som helst med samma secret
+\end{itemize}
+
+\subsubsection{Token-typer i vårt system}
+
+\textbf{1. Access Token (JWT)}
+
+\textbf{Syfte:} Bevisar att användaren är autentiserad och får göra API-requests.
+
+\textbf{Livslängd:} 15 minuter
+
+\textbf{Lagring:} \texttt{localStorage.accessToken} (frontend)
+
+\textbf{Innehåll (JWT payload):}
+\begin{verbatim}
+{
+  "sub": "user_12345",           // User ID
+  "email": "lasse@example.com",
+  "role": "byrå_admin",
+  "firm_id": "firm_67890",
+  "iat": 1729600000,             // Issued at (Unix timestamp)
+  "exp": 1729600900              // Expires at (15 min senare)
+}
+\end{verbatim}
+
+\textbf{Användning:}
+\begin{itemize}[noitemsep]
+  \item Skickas med VARJE API-request i header: \texttt{Authorization: Bearer <token>}
+  \item Backend verifierar JWT signature och \texttt{exp} (expiration time)
+  \item Om giltig: Request godkänns, annars: 401 Unauthorized
+\end{itemize}
+
+\textbf{Säkerhet:}
+\begin{itemize}[noitemsep]
+  \item Kort livslängd (15 min) begränsar skada om token stjäls
+  \item Signerad med \texttt{JWT\_SECRET} (backend environment variable)
+  \item Kan INTE ändras av klient utan att signaturen blir ogiltig
+\end{itemize}
+
+\textbf{2. Refresh Token (JWT)}
+
+\textbf{Syfte:} Används för att få nya access tokens utan att användaren måste logga in igen.
+
+\textbf{Livslängd:} 30 dagar
+
+\textbf{Lagring:}
+\begin{itemize}[noitemsep]
+  \item Frontend: \texttt{localStorage.refreshToken}
+  \item Backend: \texttt{refresh\_tokens.csv} (eller PostgreSQL-tabell) -- token hash + user\_id + expires\_at
+\end{itemize}
+
+\textbf{Innehåll (JWT payload):}
+\begin{verbatim}
+{
+  "sub": "user_12345",
+  "type": "refresh",
+  "iat": 1729600000,
+  "exp": 1732192000             // 30 dagar senare
+}
+\end{verbatim}
+
+\textbf{Användning:}
+\begin{itemize}[noitemsep]
+  \item När access token går ut (efter 15 min) → Frontend skickar refresh token till \texttt{POST /api/auth/refresh}
+  \item Backend verifierar refresh token (signature + finns i \texttt{refresh\_tokens.csv}?)
+  \item Om giltig: Generera ny access token (15 min) + ny refresh token (30 dagar)
+  \item Returnera båda till frontend → Frontend uppdaterar localStorage
+\end{itemize}
+
+\textbf{Säkerhet:}
+\begin{itemize}[noitemsep]
+  \item Lagras BÅDE i frontend OCH backend (kan revokeas om behövs)
+  \item Vid lösenordsändring eller logout: Ta bort alla refresh tokens för användaren från backend
+  \item Rotation: Varje gång refresh token används genereras en NY refresh token (gamla invalideras)
+\end{itemize}
+
+\textbf{3. Session Cookies (sessionId) -- ANVÄNDS INTE I VÅR APP!}
+
+\textbf{OBS:} Även om du kan se cookies med namn som \texttt{sessionId} eller liknande i 
+Chrome DevTools, är dessa INTE en del av vår autentiseringslogik.
+
+\textbf{Varför du kan se sessionId cookies ändå:}
+\begin{itemize}[noitemsep]
+  \item \textbf{Vite Dev Server:} Skapar ibland egna cookies för HMR (Hot Module Replacement)
+  \item \textbf{Cloudflare:} Om du använder Cloudflare framför din app sätter de cookies (t.ex. \texttt{\_\_cf\_bm}, \texttt{cf\_clearance})
+  \item \textbf{Andra libraries:} Analytics (Matomo), crash reporting, etc. kan sätta cookies
+  \item \textbf{Browser extensions:} Kan injektera cookies
+\end{itemize}
+
+\textbf{Hur traditionella session cookies fungerar (för jämförelse):}
+
+I ett session-baserat system (som vi INTE använder):
+\begin{enumerate}[noitemsep]
+  \item Användaren loggar in → Backend genererar random \texttt{sessionId} (t.ex. "abc123xyz")
+  \item Backend sparar i sessions-tabell: \texttt{sessionId → userId, expires\_at}
+  \item Backend skickar cookie: \texttt{Set-Cookie: sessionId=abc123xyz; HttpOnly; Secure}
+  \item Vid varje request: Browser skickar cookie automatiskt → Backend kollar sessions-tabell
+  \item Vid logout: Backend raderar session från tabell
+\end{enumerate}
+
+\textbf{Varför vi inte använder detta:}
+\begin{itemize}[noitemsep]
+  \item Kräver server-side session storage (databas eller Redis)
+  \item Svårare att skala horisontellt (olika servrar måste dela session-state)
+  \item Mer komplext för SPA (Single Page Applications) som vår React-app
+\end{itemize}
+
+\textbf{4. Cookie Consent Cookie (cookie\_consent)}
+
+\textbf{Syfte:} Sparar användarens val om cookie-godkännande (GDPR-krav).
+
+\textbf{Livslängd:} 365 dagar
+
+\textbf{Lagring:} Cookie (INTE HttpOnly, JavaScript måste kunna läsa den)
+
+\textbf{Innehåll:} \texttt{"all"} (alla cookies) eller \texttt{"necessary"} (endast nödvändiga)
+
+\textbf{Användning:}
+\begin{itemize}[noitemsep]
+  \item Sätts när användaren klickar "Tillåt alla cookies" eller "Endast nödvändiga cookies"
+  \item Frontend kollar denna cookie vid varje sidladdning
+  \item Om \texttt{null}: Visa cookie banner
+  \item Om \texttt{"necessary"}: Ladda INTE analytics/marketing scripts
+  \item Om \texttt{"all"}: Ladda alla scripts (Matomo, Facebook Pixel, etc.)
+\end{itemize}
+
+\textbf{OBS:} Denna cookie är EN AV DE FÅ COOKIES vi faktiskt använder (tillsammans med Cloudflare Turnstile \texttt{cf\_clearance}).
+
+\subsubsection{Token-flöde: Komplett Livscykel}
+
+\textbf{Scenario 1: Registrering och första inloggning}
+
+\begin{enumerate}[noitemsep]
+  \item Användaren registrerar sig (\texttt{POST /api/auth/register}) → Sparas i \texttt{aspiring\_users.csv} med \texttt{verified=false}
+  \item Backend skickar 6-siffrig kod via SendGrid
+  \item Användaren matar in kod (\texttt{POST /api/auth/verify-code})
+  \item Backend:
+    \begin{itemize}[noitemsep]
+      \item Verifierar kod är korrekt och inte utgången
+      \item KOPIERAR användare från \texttt{aspiring\_users.csv} → \texttt{users.csv} (med \texttt{verified=true})
+      \item RADERAR användare från \texttt{aspiring\_users.csv}
+      \item Genererar \texttt{accessToken} (15 min) + \texttt{refreshToken} (30 dagar)
+      \item Sparar refresh token hash i \texttt{refresh\_tokens.csv}
+    \end{itemize}
+  \item Backend returnerar: \texttt{\{"accessToken": "...", "refreshToken": "...", "user": \{...\}\}}
+  \item Frontend:
+    \begin{itemize}[noitemsep]
+      \item Sparar i localStorage: \texttt{localStorage.setItem("accessToken", ...)}
+      \item Sparar i localStorage: \texttt{localStorage.setItem("refreshToken", ...)}
+      \item Navigerar till \texttt{/inledning} (första onboarding-slide)
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Scenario 2: Återkommande besökare (Landing Page)}
+
+\begin{enumerate}[noitemsep]
+  \item Användaren besöker landing page (\texttt{/})
+  \item Frontend kollar: Finns \texttt{localStorage.accessToken}?
+  \item Om JA:
+    \begin{itemize}[noitemsep]
+      \item Skicka till backend: \texttt{GET /api/auth/session} med \texttt{Authorization: Bearer <accessToken>}
+      \item Backend verifierar JWT signature + \texttt{exp}
+      \item Om giltig: Returnera \texttt{\{"authenticated": true, "user": \{...\}\}}
+      \item Frontend: Navigera till \texttt{/dashboard} (användaren är inloggad)
+    \end{itemize}
+  \item Om access token utgången (efter 15 min):
+    \begin{itemize}[noitemsep]
+      \item Backend returnerar 401 Unauthorized
+      \item Frontend skickar \texttt{POST /api/auth/refresh} med \texttt{refreshToken} i body
+      \item Backend verifierar refresh token, genererar NY access token + NY refresh token
+      \item Frontend uppdaterar localStorage och försöker igen
+    \end{itemize}
+  \item Om refresh token också utgången (efter 30 dagar):
+    \begin{itemize}[noitemsep]
+      \item Backend returnerar 401 Unauthorized
+      \item Frontend raderar tokens från localStorage
+      \item Visa landing page (användaren måste logga in igen)
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Scenario 3: API Request med utgången Access Token}
+
+\begin{enumerate}[noitemsep]
+  \item Frontend gör request: \texttt{GET /api/firms/12345} med access token (som är utgången)
+  \item Backend returnerar: \texttt{401 Unauthorized \{"error": "token\_expired"\}}
+  \item Frontend interceptor (axios/fetch middleware) fångar 401:
+    \begin{itemize}[noitemsep]
+      \item Pausa ursprungliga requesten
+      \item Skicka \texttt{POST /api/auth/refresh} med refresh token
+      \item Om lyckat: Uppdatera localStorage med nya tokens
+      \item Försök ursprungliga requesten igen med ny access token
+    \end{itemize}
+  \item Om refresh också misslyckas:
+    \begin{itemize}[noitemsep]
+      \item Radera tokens från localStorage
+      \item Redirect till \texttt{/login}
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Scenario 4: Logout}
+
+\begin{enumerate}[noitemsep]
+  \item Användaren klickar "Logga ut"
+  \item Frontend skickar: \texttt{POST /api/auth/logout} med refresh token i body
+  \item Backend:
+    \begin{itemize}[noitemsep]
+      \item Tar bort refresh token från \texttt{refresh\_tokens.csv}
+      \item Loggar händelse i \texttt{audit\_log.csv}
+    \end{itemize}
+  \item Frontend:
+    \begin{itemize}[noitemsep]
+      \item Raderar \texttt{localStorage.removeItem("accessToken")}
+      \item Raderar \texttt{localStorage.removeItem("refreshToken")}
+      \item Navigerar till \texttt{/}
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Säkerhetsaspekter}
+
+\textbf{XSS (Cross-Site Scripting) Skydd:}
+\begin{itemize}[noitemsep]
+  \item JWT tokens i localStorage kan läsas av JavaScript (både din kod OCH injected scripts)
+  \item Skydd: Content Security Policy (CSP) headers, sanitize all user input
+  \item Alternativ: Lagra tokens i HttpOnly cookies (men svårare för SPA:er)
+\end{itemize}
+
+\textbf{CSRF (Cross-Site Request Forgery) Skydd:}
+\begin{itemize}[noitemsep]
+  \item JWT i localStorage är INTE sårbart för CSRF (skickas manuellt i header, inte automatiskt av browser)
+  \item Session cookies ÄR sårbara (skickas automatiskt) → Kräver CSRF-tokens
+\end{itemize}
+
+\textbf{Token Rotation:}
+\begin{itemize}[noitemsep]
+  \item Varje gång refresh token används → Generera NY refresh token
+  \item Gamla refresh token invalideras (tas bort från backend)
+  \item Förhindrar "replay attacks" (någon stjäl gammal refresh token)
+\end{itemize}
+
+\textbf{HTTPS:}
+\begin{itemize}[noitemsep]
+  \item \textbf{ALLTID} använd HTTPS i produktion
+  \item HTTP skickar tokens i klartext → Lätt att sno med Wireshark
+\end{itemize}
+
+\subsubsection{Sammanfattning: Vad lagras var?}
+
+\begin{center}
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Data} & \textbf{Lagringsplats} & \textbf{Livslängd} & \textbf{Syfte} \\
+\hline
+Access Token (JWT) & localStorage (frontend) & 15 min & API-autentisering \\
+\hline
+Refresh Token (JWT) & localStorage (frontend) & 30 dagar & Förnya access token \\
+\hline
+Refresh Token Hash & refresh\_tokens.csv (backend) & 30 dagar & Verifiering + revokation \\
+\hline
+cookie\_consent & Cookie & 365 dagar & GDPR cookie-val \\
+\hline
+cf\_clearance & Cookie (Cloudflare) & 30 min & Bot-skydd (Turnstile) \\
+\hline
+sessionId & ANVÄNDS INTE & N/A & (Traditionell metod) \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Viktigt:} Om du ser cookies med namn som \texttt{sessionId}, \texttt{\_\_cf\_bm}, eller liknande i Chrome DevTools -- dessa är INTE en del av vår autentiseringslogik. De kan komma från Vite dev server, Cloudflare, analytics, eller browser extensions.
+
+\newpage
+
+% ############################################################################
+% ############################################################################
+% DEL 1: AUTENTISERINGSSIDOR (UTAN SIDEBAR)
+% ############################################################################
+% ############################################################################
+
+% ============================================================================
+% SIDA 1: LANDING PAGE (Hero-sektion)
+% ============================================================================
+
+\section{Landing Page (Hero-sektion)}
+
+\subsection{API-endpoints Sammanfattning}
+\begin{itemize}[noitemsep]
+  \item \texttt{GET /api/auth/session} — Kontrollera om användaren är inloggad (körs automatiskt om JWT finns i localStorage)
+  \item \texttt{POST /api/auth/refresh} — Förnya access token om den har upphört
+  \item \textbf{Antal anrop vid sidladdning:} 0–2 (beroende på om tokens finns i localStorage)
+\end{itemize}
+
+\subsection{Översikt}
+Landing page är den första sidan användaren ser. Den innehåller statiskt innehåll (text, features-lista, CTA-knappar) och kräver \textbf{inga API-anrop vid laddning}.
+
+\subsection{Funktionalitet}
+\begin{itemize}[noitemsep]
+  \item Visa företagsinformation och värdeproposition
+  \item Knappar: "Logga in", "Registrera", "Börja onboarding nu", "Se demo"
+  \item Alla knappar gör frontend-routing (ingen backend-kommunikation)
+  \item \textbf{Kontrollera localStorage} för sparade JWT tokens vid sidladdning
+\end{itemize}
+
+\subsection{localStorage Check och Auth-flöde}
+När React-appen laddas (i \texttt{App.jsx} eller auth context) kontrolleras localStorage för JWT tokens:
+
+\textbf{Steg 1: Kolla localStorage}
+\begin{verbatim}
+const accessToken = localStorage.getItem('accessToken');
+const refreshToken = localStorage.getItem('refreshToken');
+\end{verbatim}
+
+\textbf{Steg 2: Om tokens finns}
+\begin{itemize}[noitemsep]
+  \item Anropa \texttt{GET /api/auth/session} med \texttt{Authorization: Bearer <accessToken>}
+  \item Om \texttt{200 OK} och \texttt{authenticated: true} → Användaren är inloggad
+  \item Om \texttt{401 Unauthorized} → Access token har upphört, försök refresh
+\end{itemize}
+
+\textbf{Steg 3: Om access token upphört}
+\begin{itemize}[noitemsep]
+  \item Anropa \texttt{POST /api/auth/refresh} med refresh token
+  \item Om \texttt{200 OK} → Spara ny access token, fortsätt som inloggad
+  \item Om \texttt{401} → Refresh token upphört, logga ut (rensa localStorage)
+\end{itemize}
+
+\textbf{Steg 4: Om inga tokens finns}
+\begin{itemize}[noitemsep]
+  \item Användaren är utloggad, visa "Logga in" + "Registrera" knappar
+\end{itemize}
+
+\textbf{Knappen "Börja onboarding nu":}
+\begin{itemize}[noitemsep]
+  \item Om användaren HAR giltiga tokens → Frontend-routing till \texttt{/inledning} (ingen API-anrop)
+  \item Om användaren INTE har tokens → Frontend-routing till \texttt{/login?redirect=/inledning}
+  \item Inget dedikerat API-endpoint behövs, bara conditional routing i React
+\end{itemize}
+
+\subsection{Endpoint 1: GET /api/auth/session}
+
+\subsubsection{Beskrivning}
+Kontrollera om användaren har en aktiv session för att visa rätt UI (inloggad vs utloggad). Anropas automatiskt om JWT token finns i localStorage.
+
+\subsubsection{Request}
+\begin{itemize}[noitemsep]
+  \item \textbf{Headers:} \texttt{Authorization: Bearer <token>} (optional)
+  \item \textbf{Body:} None
+\end{itemize}
+
+\subsubsection{Response - Success (200 OK - Authenticated)}
+\begin{lstlisting}
+{
+  "authenticated": true,
+  "user": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "chef@revisionstockholm.se",
+    "role": "byrachef",
+    "firm": {
+      "id": "660e8400-e29b-41d4-a716-446655440001",
+      "name": "Revision Stockholm AB",
+      "orgNr": "556123-4567"
+    }
+  }
+}
+\end{lstlisting}
+
+\subsubsection{Response - Not Authenticated (200 OK)}
+\begin{lstlisting}
+{
+  "authenticated": false
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes}
+\begin{itemize}[noitemsep]
+  \item Körs automatiskt om access token finns i localStorage
+  \item Token valideras mot JWT secret och expiry time
+  \item Om valid → Query databas för user + firm info
+  \item Om invalid → Returnera \texttt{authenticated: false} (ingen DB query)
+  \item Frontend uppdaterar UI baserat på response
+\end{itemize}
+
+\subsection{Endpoint 2: POST /api/auth/refresh}
+
+\subsubsection{Beskrivning}
+Förnya access token med refresh token om access token har upphört.
+
+\subsubsection{Request}
+\begin{lstlisting}
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+\end{lstlisting}
+
+\subsubsection{Response - Success (200 OK)}
+\begin{lstlisting}
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expiresIn": 3600
+}
+\end{lstlisting}
+
+\subsubsection{Response - Error (401 Unauthorized)}
+\begin{lstlisting}
+{
+  "error": "invalid_token",
+  "message": "Refresh token har upphört eller är ogiltig"
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes}
+\begin{itemize}[noitemsep]
+  \item Refresh token valideras mot databas (tabell: \texttt{refresh\_tokens})
+  \item Kontrollera expiry time (vanligtvis 30 dagar)
+  \item Om valid → Generera ny access token (15 min expiry)
+  \item Om invalid → Användaren måste logga in igen
+  \item Frontend sparar ny access token i localStorage
+\end{itemize}
+
+\subsection{Frontend - Datalagring i Browser}
+
+\subsubsection{LocalStorage}
+Landing Page kontrollerar localStorage vid laddning för att avgöra om användaren är inloggad:
+
+\textbf{Nycklar som läses:}
+\begin{itemize}[noitemsep]
+  \item \texttt{accessToken} — JWT access token (15 min expiry)
+  \item \texttt{refreshToken} — JWT refresh token (30 dagar expiry)
+\end{itemize}
+
+\textbf{Logik:}
+\begin{itemize}[noitemsep]
+  \item Om båda finns → Anropa \texttt{GET /api/auth/session} för validering
+  \item Om access token upphört → Anropa \texttt{POST /api/auth/refresh}
+  \item Om inga tokens → Visa "Logga in" + "Registrera" knappar
+\end{itemize}
+
+\textbf{Ingen data skrivs} till localStorage på denna sida (endast läsning).
+
+\subsubsection{Cookies}
+Landing Page visar en \textbf{Cookie Banner} vid första besöket (längst ner på skärmen) för GDPR-compliance.
+
+\textbf{Cookie Banner (CookieBanner.jsx):}
+\begin{itemize}[noitemsep]
+  \item Visas automatiskt om \texttt{localStorage.getItem('cookieConsent')} är \texttt{null}
+  \item Position: Fixed bottom, full bredd, z-index 9999
+  \item Text: "Vi använder cookies för att förbättra din upplevelse. Läs vår \href{/cookie-policy}{Cookie Policy}."
+  \item Knappar:
+  \begin{itemize}[noitemsep]
+    \item \textbf{"Tillåt alla cookies"} → Sätter \texttt{localStorage.setItem('cookieConsent', 'all')}
+    \item \textbf{"Tillåt endast nödvändiga cookies"} → Sätter \texttt{localStorage.setItem('cookieConsent', 'necessary')}
+  \end{itemize}
+  \item Efter val: Banner försvinner och kommer inte tillbaka
+\end{itemize}
+
+\textbf{Nödvändiga Cookies (sätts utan samtycke):}
+\begin{itemize}[noitemsep]
+  \item \textbf{INGA} — Vi använder JWT tokens i localStorage istället för session cookies
+  \item Samtycke-valet sparas i \texttt{localStorage.cookieConsent}, inte i en cookie
+\end{itemize}
+
+\textbf{Valfria Cookies (kräver samtycke = "Tillåt alla cookies"):}
+\begin{itemize}[noitemsep]
+  \item \textbf{Analytics:} Matomo/Piwik PRO (om implementerat) — \_pk\_id, \_pk\_ses
+  \item \textbf{Cloudflare Turnstile:} cf\_clearance (sätts vid CAPTCHA-validering)
+  \item \textbf{Marketing:} INGA i nuvarande version (framtida: LinkedIn, Google Ads)
+\end{itemize}
+
+\textbf{OBS:} JWT tokens (\texttt{accessToken}, \texttt{refreshToken}) sparas i \textbf{localStorage}, inte cookies, så de omfattas EJ av GDPR cookie-regler.
+
+\subsection{Backend - Behandlingshistorik och GDPR-loggning}
+
+\subsubsection{Loggade händelser}
+Landing Page själv genererar \textbf{inga loggposter} då den är statisk. Däremot loggas följande:
+
+\textbf{1. Cookie-samtycke (när användaren klickar på banner):}
+\begin{verbatim}
+Datum: 2025-10-22 18:25:10
+Användare: Anonym (ID: NULL)
+Program: GDPR Compliance
+Rubrik: Cookie Consent
+Händelse: Användaren valde "Tillåt alla cookies"
+- IP-adress: 81.224.233.137
+- User-Agent: Mozilla/5.0 (X11; Linux x86_64)...
+- Samtycke: all
+- Endpoint: POST /api/gdpr/cookie-consent (frontend-only, inget API-anrop)
+\end{verbatim}
+
+\textbf{OBS:} Cookie-samtycke sparas ENDAST i localStorage (frontend), inte på servern. Loggning sker bara om vi senare implementerar server-side tracking av GDPR-samtycken för statistik.
+
+\textbf{2. Vid GET /api/auth/session (om token finns):}
+\begin{verbatim}
+Datum: 2025-10-22 18:30:28
+Användare: Anders Svensson (ID: 42)
+Program: Authentication
+Rubrik: Session Check
+Händelse: Session validerad
+- IP-adress: 81.224.233.137
+- User-Agent: Mozilla/5.0 (X11; Linux x86_64)...
+- Endpoint: GET /api/auth/session
+- Status: 200 OK
+\end{verbatim}
+
+\textbf{3. Vid POST /api/auth/refresh (om access token upphört):}
+\begin{verbatim}
+Datum: 2025-10-22 18:31:15
+Användare: Anders Svensson (ID: 42)
+Program: Authentication
+Rubrik: Token Refresh
+Händelse: Access token förnyad
+- IP-adress: 81.224.233.137
+- Refresh token ID: rt_8f9a7b6c...
+- Ny access token expiry: 2025-10-22 18:46:15
+\end{verbatim}
+
+\subsubsection{CSV-filer (Mock Database)}
+Landing Page interagerar med följande CSV-filer:
+
+\textbf{data/audit\_log.csv:}
+\begin{verbatim}
+timestamp,user_id,user_name,program,event_type,event_details,ip_address,user_agent
+2025-10-22 18:30:28,42,"Anders Svensson",Authentication,"Session Check",
+  "Session validerad - GET /api/auth/session - 200 OK",81.224.233.137,
+  "Mozilla/5.0 (X11; Linux x86_64)..."
+\end{verbatim}
+
+\textbf{data/users.csv} (läses vid session check):
+\begin{verbatim}
+id,email,password_hash,role,firm_id,verified,created_at
+42,anders@revisionstockholm.se,$2b$12$...,byrachef,7,true,2025-10-15 14:23:10
+\end{verbatim}
+
+\textbf{data/refresh\_tokens.csv} (läses vid token refresh):
+\begin{verbatim}
+id,user_id,token_hash,expires_at,created_at
+rt_8f9a7b6c...,42,$2b$12$...,2025-11-21 18:30:28,2025-10-22 18:30:28
+\end{verbatim}
+
+\subsection{Databastabeller (Framtida PostgreSQL)}
+När vi migrerar från CSV till PostgreSQL kommer följande tabeller användas:
+
+\textbf{audit\_log:}
+\begin{lstlisting}
+CREATE TABLE audit_log (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
+  user_id UUID REFERENCES users(id),
+  user_name VARCHAR(255),
+  program VARCHAR(100),  -- 'Authentication', 'Onboarding', etc.
+  event_type VARCHAR(100),  -- 'Session Check', 'Token Refresh', etc.
+  event_details TEXT,
+  ip_address INET,
+  user_agent TEXT,
+  INDEX idx_user_id (user_id),
+  INDEX idx_timestamp (timestamp),
+  INDEX idx_event_type (event_type)
+);
+\end{lstlisting}
+
+\textbf{users} och \textbf{refresh\_tokens} (se Login Sida 4 för fullständiga scheman).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%SAMMANFATTNING SIDA 1%%%%%%%%%%%%%%%%%
+\subsection{Sammanfattning}
+
+\subsubsection{Scenario 1: Ny besökare (okänd användare)}
+En potentiell kund besöker hemsidan för första gången. Webbläsaren har inga sparade tokens i localStorage. Landing Page visar därför standardvyn med knappar för "Logga in" och "Registrera dig". 
+
+\textbf{Cookie Banner visas:} Om \texttt{localStorage.getItem('cookieConsent')} är null, visas CookieBanner.jsx längst ner på skärmen med två knappar:
+\begin{itemize}[noitemsep]
+  \item "Tillåt alla cookies" → Sparar \texttt{cookieConsent: 'all'} i localStorage
+  \item "Tillåt endast nödvändiga cookies" → Sparar \texttt{cookieConsent: 'necessary'} i localStorage
+\end{itemize}
+
+\textbf{Inga API-anrop} görs till servern - sidan är helt statisk. Om besökaren klickar "Börja onboarding nu" dirigeras hen till inloggningssidan med en redirect-parameter som pekar tillbaka till onboarding-flödet.
+
+\textbf{Backend-loggning:} Ingen. Servern vet inte om att besökaren existerar. (Cookie-samtycke sparas endast i localStorage, ingen server-kommunikation.)
+
+\subsubsection{Scenario 2: Återkommande kund (sessionen har gått ut)}
+En befintlig kund, Anders Svensson på Revision Stockholm AB, besöker hemsidan efter 2 veckor. Hans \texttt{accessToken} (15 min expiry) har naturligtvis gått ut, men hans \texttt{refreshToken} (30 dagar expiry) finns fortfarande kvar i localStorage.
+
+\textbf{Vad händer:}
+\begin{enumerate}[noitemsep]
+  \item Landing Page läser localStorage och hittar båda tokens
+  \item Anropar \texttt{GET /api/auth/session} med den utgångna access token
+  \item Servern svarar \texttt{401 Unauthorized} ("Token har upphört")
+  \item Frontend anropar automatiskt \texttt{POST /api/auth/refresh} med refresh token
+  \item Servern validerar refresh token mot \texttt{refresh\_tokens.csv}, genererar ny access token
+  \item Frontend sparar nya access token i localStorage
+  \item Landing Page visar nu personlig vy: "Välkommen tillbaka, Anders!" med knapp "Fortsätt onboarding"
+\end{enumerate}
+
+\textbf{Backend-loggning:} Två poster i \texttt{audit\_log.csv}:
+\begin{itemize}[noitemsep]
+  \item Session Check (401 - Token expired)
+  \item Token Refresh (200 - Ny access token utfärdad)
+\end{itemize}
+
+\subsubsection{Scenario 3: Inloggad kund (aktiv session)}
+Samma Anders Svensson besöker hemsidan 5 minuter efter att ha loggat in (access token fortfarande giltig).
+
+\textbf{Vad händer:}
+\begin{enumerate}[noitemsep]
+  \item Landing Page läser localStorage och hittar giltig access token
+  \item Anropar \texttt{GET /api/auth/session} 
+  \item Servern validerar token, läser \texttt{users.csv} och returnerar användarinfo
+  \item Landing Page visar personlig vy direkt: "Välkommen tillbaka, Anders!"
+\end{enumerate}
+
+\textbf{Backend-loggning:} En post i \texttt{audit\_log.csv}:
+\begin{itemize}[noitemsep]
+  \item Session Check (200 - Session validerad) med IP-adress och User-Agent
+\end{itemize}
+
+\subsubsection{Teknisk sammanfattning}
+\begin{itemize}[noitemsep]
+  \item \textbf{API-endpoints:} \texttt{GET /api/auth/session}, \texttt{POST /api/auth/refresh}
+  \item \textbf{Antal API-anrop:} 0 (ny besökare), 1 (aktiv session), 2 (utgången session)
+  \item \textbf{CSV-filer:} audit\_log.csv, users.csv, refresh\_tokens.csv
+  \item \textbf{Frontend-knappar:} Alla gör routing (inga API-anrop)
+\end{itemize}
+
+\newpage
+
+
+
+
+% ============================================================================
+% SIDA 2: REGISTRERING (Autentiseringssida utan sidebar)
+% ============================================================================
+
+\section{Registrering (Sida 2)}
+
+\subsection{API-endpoints Sammanfattning}
+\begin{itemize}[noitemsep]
+  \item \texttt{POST /api/auth/register} — Skapa nytt konto med email/lösenord, skicka 6-siffrig kod
+  \item \texttt{POST /api/auth/google} — Registrera eller logga in via Google OAuth
+  \item \texttt{GET /api/auth/check-email} — Real-time validering om email redan är registrerad
+  \item \textbf{Externa integrationer:} Cloudflare Turnstile (bot-skydd), SendGrid (email), Google OAuth
+\end{itemize}
+
+\subsection{Översikt}
+Registreringssidan låter användaren skapa ett nytt konto med email + lösenord eller via Google OAuth. Ett bot-skydd (Cloudflare Turnstile) används för att förhindra automatiserad spam.
+
+\subsection{Funktionalitet}
+\begin{itemize}[noitemsep]
+  \item Formulär: Email, Lösenord, Bekräfta lösenord
+  \item Lösenordskrav: Minst 12 tecken, en siffra, en versal
+  \item Cloudflare Turnstile checkbox (bot-skydd)
+  \item Alternativ: "Fortsätt med Google" (OAuth)
+  \item Real-time validering av email (om redan registrerad)
+  \item Vid lyckad registrering → Redirect till \texttt{/verify} med email i state
+\end{itemize}
+
+\subsection{Endpoint 1: POST /api/auth/register}
+
+\subsubsection{Beskrivning}
+Skapa nytt användarkonto, generera 6-siffrig verifieringskod, skicka via email.
+
+\subsubsection{Request}
+\begin{lstlisting}
+{
+  "email": "chef@revisionstockholm.se",
+  "password": "SecurePass123!",
+  "passwordConfirm": "SecurePass123!",
+  "captchaToken": "cloudflare-turnstile-response-token"
+}
+\end{lstlisting}
+
+\subsubsection{Response - Success (201 Created)}
+\begin{lstlisting}
+{
+  "success": true,
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "message": "Konto skapat. En 6-siffrig verifieringskod har skickats till din e-post.",
+  "email": "chef@revisionstockholm.se"
+}
+\end{lstlisting}
+
+\subsubsection{Response - Error (400 Bad Request)}
+\textbf{Email redan registrerad:}
+\begin{lstlisting}
+{
+  "error": "email_exists",
+  "message": "Email-adressen ar redan registrerad"
+}
+\end{lstlisting}
+
+\textbf{Svagt lösenord:}
+\begin{lstlisting}
+{
+  "error": "weak_password",
+  "message": "Lösenordet måste vara minst 12 tecken, innehålla en siffra och en versal"
+}
+\end{lstlisting}
+
+\textbf{Captcha misslyckades:}
+\begin{lstlisting}
+{
+  "error": "captcha_failed",
+  "message": "Bot-skyddet misslyckades. Försök igen."
+}
+\end{lstlisting}
+
+\subsubsection{Response - Success (200 OK - Dubblettregistrering)}
+\textbf{Email finns redan i aspiring\_users.csv (mindre än 24h):}
+\begin{lstlisting}
+{
+  "success": true,
+  "userId": "au_abc123",
+  "message": "Ett konto med denna e-post vantar redan pa verifiering. En ny verifieringskod har skickats till din e-post.",
+  "email": "chef@revisionstockholm.se",
+  "isResend": true
+}
+\end{lstlisting}
+
+\textbf{OBS:} Detta är INTE ett fel - användaren får ny kod utan att skapa duplicat i aspiring\_users.csv.
+
+\subsubsection{Implementation Notes}
+\begin{itemize}[noitemsep]
+  \item Validera email format (regex)
+  \item \textbf{Dubbletthantering - Steg 1:} Kontrollera om email finns i \texttt{users.csv}
+  \begin{itemize}[noitemsep]
+    \item Om JA → Returnera 400 "Email redan registrerad" (avvisa)
+  \end{itemize}
+  \item \textbf{Dubbletthantering - Steg 2:} Kontrollera om email finns i \texttt{aspiring\_users.csv}
+  \begin{itemize}[noitemsep]
+    \item Om JA och \texttt{created\_at} mindre än 24h sedan:
+    \begin{itemize}[noitemsep]
+      \item Generera NY verifieringskod, spara i \texttt{verification\_codes.csv}
+      \item Skicka email med ny kod via SendGrid
+      \item Returnera 200 "En ny verifieringskod har skickats" (INGEN ny rad i aspiring\_users!)
+      \item Logga "Dubblettregistrering - Ny kod skickad" till audit\_log.csv
+      \item EXIT (hoppa över steg nedan)
+    \end{itemize}
+    \item Om JA och \texttt{created\_at} äldre än 24h:
+    \begin{itemize}[noitemsep]
+      \item Radera gamla raden från \texttt{aspiring\_users.csv}
+      \item Radera gamla verifieringskoder från \texttt{verification\_codes.csv}
+      \item Fortsätt till normal registrering nedan
+    \end{itemize}
+  \end{itemize}
+  \item Validera lösenord: minst 12 tecken, \texttt{/[A-Z]/}, \texttt{/[0-9]/}
+  \item Kontrollera \texttt{password === passwordConfirm}
+  \item Validera Cloudflare Turnstile token mot Cloudflare API
+  \item Hasha lösenord med bcrypt (cost factor 12)
+  \item Skapa rad i \texttt{aspiring\_users.csv} med \texttt{expires\_at} = nu + 7 dagar
+  \item Generera 6-siffrig kod (t.ex. \texttt{482916})
+  \item Spara kod i \texttt{verification\_codes.csv} med 15 min expiry
+  \item Skicka email via SendGrid: \textit{"Din verifieringskod är: 482916. Koden är giltig i 15 minuter."}
+  \item Logga till audit\_log.csv
+  \item Returnera 201 Created
+  \item Frontend navigerar till \texttt{/verify} med email i state
+\end{itemize}
+
+\subsubsection{Databastabeller}
+\begin{itemize}[noitemsep]
+  \item \texttt{users} (id, email, password\_hash, verified, created\_at, updated\_at)
+  \item \texttt{verification\_codes} (id, email, code, expires\_at, attempts, created\_at)
+\end{itemize}
+
+\subsection{Endpoint 2: POST /api/auth/google}
+
+\subsubsection{Beskrivning}
+Logga in eller registrera med Google OAuth (knapptext: "Fortsätt med Google"). Ingen email-verifiering behövs (Google har redan verifierat).
+
+\subsubsection{Request}
+\begin{lstlisting}
+{
+  "code": "google-oauth-authorization-code",
+  "redirectUri": "http://localhost:5173/auth/callback"
+}
+\end{lstlisting}
+
+\subsubsection{Response - Success (200 OK för befintlig, 201 Created för ny användare)}
+\begin{lstlisting}
+{
+  "success": true,
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "chef@gmail.com",
+    "verified": true,
+    "authProvider": "google"
+  },
+  "isNewUser": false
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes}
+\begin{itemize}[noitemsep]
+  \item Validera OAuth code mot Google Token API
+  \item Hämta user info (email, name) från Google
+  \item Kontrollera om user finns i databas (sök på email)
+  \item Om finns: Logga in, generera JWT tokens, returnera \texttt{isNewUser: false}
+  \item Om ny: Skapa user med \texttt{verified: true}, \texttt{auth\_provider: 'google'}, \texttt{password\_hash: null}, returnera \texttt{isNewUser: true}
+  \item Generera access token (15 min expiry) och refresh token (30 dagar)
+  \item Spara refresh token i \texttt{refresh\_tokens} tabell
+  \item Frontend sparar tokens i localStorage och navigerar till \texttt{/inledning}
+\end{itemize}
+
+\subsection{Endpoint 3: GET /api/auth/check-email}
+
+\subsubsection{Beskrivning}
+Real-time validering om email redan är registrerad (när användare skriver i formuläret).
+
+\subsubsection{Request}
+\begin{verbatim}
+GET /api/auth/check-email?email=chef@revision.se
+\end{verbatim}
+
+\subsubsection{Response - Success (200 OK)}
+\textbf{Tillgänglig:}
+\begin{lstlisting}
+{
+  "available": true
+}
+\end{lstlisting}
+
+\textbf{Upptagen:}
+\begin{lstlisting}
+{
+  "available": false,
+  "message": "Email redan registrerad"
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes}
+\begin{itemize}[noitemsep]
+  \item Rate limit: 10 requests/minut per IP
+  \item Query \texttt{users} tabell: \texttt{SELECT id FROM users WHERE email = ?}
+  \item Om finns: \texttt{available: false}
+  \item Används för UX (visa rött meddelande under input-fältet)
+\end{itemize}
+
+\subsection{Cloudflare Turnstile Integration}
+
+\subsubsection{Frontend Implementation}
+\begin{enumerate}[noitemsep]
+  \item Ladda Cloudflare Turnstile script:
+\begin{verbatim}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" 
+        async defer></script>
+\end{verbatim}
+  \item Rendera widget i React:
+\begin{lstlisting}
+<div className="cf-turnstile" 
+     data-sitekey="din-site-key-har"
+     data-callback="onTurnstileSuccess"></div>
+\end{lstlisting}
+  \item Hantera callback:
+\begin{lstlisting}
+const onTurnstileSuccess = (token) => {
+  setCaptchaToken(token);
+};
+\end{lstlisting}
+  \item Skicka token i \texttt{POST /api/auth/register} request
+\end{enumerate}
+
+\subsubsection{Backend Validation}
+\begin{lstlisting}
+import requests
+
+def verify_turnstile(token: str, remote_ip: str) -> bool:
+    response = requests.post(
+        'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+        json={
+            'secret': 'din-secret-key',
+            'response': token,
+            'remoteip': remote_ip
+        }
+    )
+    result = response.json()
+    return result.get('success', False)
+\end{lstlisting}
+
+\subsection{Frontend - Datalagring i Browser}
+
+\subsubsection{LocalStorage}
+Registreringssidan \textbf{skriver INTE} till localStorage vid registrering. Efter lyckad registrering navigeras användaren till \texttt{/verify} där email-adress skickas som route state (inte sparad i localStorage).
+
+\textbf{Vid Google OAuth-registrering:}
+\begin{itemize}[noitemsep]
+  \item \texttt{accessToken} — JWT access token (15 min expiry)
+  \item \texttt{refreshToken} — JWT refresh token (30 dagar expiry)
+  \item Google OAuth ger omedelbar inloggning → tokens sparas direkt
+\end{itemize}
+
+\textbf{Ingen data skrivs} för email/password-registrering (användaren måste verifiera först).
+
+\subsubsection{Cookies}
+Registreringssidan sätter INGA egna cookies. Cloudflare Turnstile kan sätta:
+\begin{itemize}[noitemsep]
+  \item \texttt{cf\_clearance} — Cloudflare bot-skydd cookie (sätts automatiskt av Turnstile widget)
+  \item HttpOnly, Secure, SameSite=Strict
+  \item Expiry: 30 minuter (session-baserad)
+\end{itemize}
+
+\subsection{Backend - Behandlingshistorik och GDPR-loggning}
+
+\subsubsection{Loggade händelser}
+
+\textbf{1. Ny registrering (email/password):}
+\begin{verbatim}
+Datum: 2025-10-22 19:15:42
+Användare: chef@revisionstockholm.se (ID: NULL - ännu ej verifierad)
+Program: Authentication
+Rubrik: Registrering
+Händelse: Nytt konto skapat (overifierat)
+- IP-adress: 81.224.233.137
+- User-Agent: Mozilla/5.0 (X11; Linux x86_64)...
+- Endpoint: POST /api/auth/register
+- Status: 201 Created
+- Email: chef@revisionstockholm.se
+- Verifieringskod skickad: Ja (SendGrid)
+\end{verbatim}
+
+\textbf{2. Google OAuth-registrering/login:}
+\begin{verbatim}
+Datum: 2025-10-22 19:18:30
+Användare: anders@gmail.com (ID: 550e8400...)
+Program: Authentication
+Rubrik: Google OAuth
+Händelse: Ny användare via Google OAuth
+- IP-adress: 81.224.233.137
+- User-Agent: Mozilla/5.0 (X11; Linux x86_64)...
+- Endpoint: POST /api/auth/google
+- Status: 201 Created
+- Auth Provider: google
+- Verified: true (automatiskt)
+\end{verbatim}
+
+\textbf{3. Email-tillgänglighetskontroll:}
+\begin{verbatim}
+Datum: 2025-10-22 19:15:15
+Användare: Anonym (ID: NULL)
+Program: Authentication
+Rubrik: Email Check
+Händelse: Real-time validering
+- IP-adress: 81.224.233.137
+- Endpoint: GET /api/auth/check-email?email=chef@revision.se
+- Status: 200 OK
+- Resultat: available=false (email upptagen)
+\end{verbatim}
+
+\textbf{4. Cloudflare Turnstile-validering:}
+\begin{verbatim}
+Datum: 2025-10-22 19:15:40
+Användare: Anonym (ID: NULL)
+Program: Security
+Rubrik: Bot Protection
+Händelse: Cloudflare Turnstile validerad
+- IP-adress: 81.224.233.137
+- Turnstile Token: 0.XXXXXX...
+- Validering: success=true
+\end{verbatim}
+
+\subsubsection{CSV-filer (Mock Database)}
+Registrering interagerar med följande CSV-filer:
+
+\textbf{data/aspiring\_users.csv} (temporär - overifierade användare):
+\begin{verbatim}
+id,email,password_hash,created_at,expires_at
+au_8f9a7b6c,chef@revisionstockholm.se,$2b$12$...,2025-10-22 19:15:42,2025-10-29 19:15:42
+\end{verbatim}
+
+\textbf{OBS:} Överifierade användare raderas automatiskt efter 7 dagar för GDPR-compliance.
+
+\textbf{data/verification\_codes.csv:}
+\begin{verbatim}
+id,email,code,expires_at,attempts,created_at
+vc_482a91,chef@revisionstockholm.se,482916,2025-10-22 19:30:42,0,2025-10-22 19:15:42
+\end{verbatim}
+
+\textbf{data/users.csv} (permanent - endast verifierade):
+\begin{verbatim}
+id,email,password_hash,role,firm_id,verified,auth_provider,created_at
+550e8400,anders@gmail.com,NULL,byrachef,NULL,true,google,2025-10-22 19:18:30
+\end{verbatim}
+
+\textbf{data/audit\_log.csv:}
+\begin{verbatim}
+timestamp,user_id,user_name,program,event_type,event_details,ip_address,user_agent
+2025-10-22 19:15:42,NULL,"chef@revisionstockholm.se",Authentication,Registrering,
+  "Nytt konto skapat (overifierat) - POST /api/auth/register - 201",
+  81.224.233.137,"Mozilla/5.0..."
+\end{verbatim}
+
+\textbf{OBS - Förenklad CSV-strategi:}
+\begin{itemize}[noitemsep]
+  \item \texttt{aspiring\_users.csv} → Temporär lagring vid registrering (\texttt{verified: false})
+  \item \texttt{users.csv} → Permanent lagring efter email-verifiering (\texttt{verified: true})
+  \item Vid verifiering: Kopiera rad från aspiring\_users → users, radera från aspiring\_users
+  \item Ingen "UPDATE"-operation behövs i CSV → Enklare kod!
+\end{itemize}
+
+\subsection{Databastabeller (Framtida PostgreSQL)}
+När vi migrerar från CSV till PostgreSQL kommer följande tabeller användas:
+
+\textbf{aspiring\_users} (temporär tabell för overifierade):
+\begin{lstlisting}
+CREATE TABLE aspiring_users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  expires_at TIMESTAMP NOT NULL,  -- 7 dagar framat
+  INDEX idx_email (email),
+  INDEX idx_expires_at (expires_at)
+);
+\end{lstlisting}
+
+\textbf{verification\_codes:}
+\begin{lstlisting}
+CREATE TABLE verification_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) NOT NULL,
+  code CHAR(6) NOT NULL,  -- 6-siffrig kod
+  expires_at TIMESTAMP NOT NULL,  -- 15 min framåt
+  attempts INT DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  INDEX idx_email (email),
+  INDEX idx_expires_at (expires_at)
+);
+\end{lstlisting}
+
+\textbf{users} (permanent tabell):
+\begin{lstlisting}
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash TEXT,  -- NULL for Google OAuth users
+  role VARCHAR(50) DEFAULT 'byrachef',
+  firm_id UUID REFERENCES firms(id),
+  verified BOOLEAN DEFAULT false,
+  auth_provider VARCHAR(20),  -- 'email' or 'google'
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  INDEX idx_email (email),
+  INDEX idx_firm_id (firm_id)
+);
+\end{lstlisting}
+
+\textbf{audit\_log} (se Landing Page Sida 1 för fullständigt schema).
+
+%%%%%%%%%%%%%%%SAMMANFATTNING SIDA 2%%%%%%%%%%%%%%%%%
+
+\subsection{Sammanfattning}
+
+\subsubsection{Scenario 1: Email/Password-registrering (standard-flöde)}
+En ny redovisningsbyrå-chef, Anders Svensson, vill skapa konto. Han besöker \texttt{/register}, fyller i email (\texttt{anders@revisionstockholm.se}), lösenord (\texttt{SecurePass123!}), bekräftar lösenord, och klickar i Cloudflare Turnstile-boxen.
+
+\textbf{Vad händer:}
+\begin{enumerate}[noitemsep]
+  \item Frontend validerar formulär lokalt (lösenordskrav, matching)
+  \item Real-time check: \texttt{GET /api/auth/check-email} → \texttt{available: true}
+  \item Cloudflare Turnstile widget genererar token (bot-skydd)
+  \item Anders klickar "Skapa konto"
+  \item Frontend anropar \texttt{POST /api/auth/register}
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Validerar Turnstile token mot Cloudflare API → \texttt{success: true}
+    \item Hashar lösenord med bcrypt (cost factor 12)
+    \item Skapar rad i \texttt{aspiring\_users.csv} (INTE users.csv ännu!)
+    \item Genererar 6-siffrig kod (t.ex. 482916), sparar i \texttt{verification\_codes.csv}
+    \item Skickar email via SendGrid: \textit{"Din verifieringskod är: 482916. Giltig i 15 min."}
+    \item Loggar händelse till \texttt{audit\_log.csv}
+    \item Returnerar 201 Created
+  \end{itemize}
+  \item Frontend navigerar till \texttt{/verify} med email i route state
+\end{enumerate}
+
+\textbf{Backend-loggning:} 4 poster i audit\_log.csv (Email Check, Turnstile Validation, Registrering, Email Sent).
+
+\textbf{CSV-filer påverkade:}
+\begin{itemize}[noitemsep]
+  \item \texttt{aspiring\_users.csv} — +1 rad (overifierad användare)
+  \item \texttt{verification\_codes.csv} — +1 rad (6-siffrig kod, 15 min expiry)
+  \item \texttt{audit\_log.csv} — +4 rader
+\end{itemize}
+
+\subsubsection{Scenario 2: Google OAuth-registrering (snabbt flöde)}
+Samma Anders Svensson vill istället registrera sig snabbt via Google. Han klickar "Fortsätt med Google" på \texttt{/register}.
+
+\textbf{Vad händer:}
+\begin{enumerate}[noitemsep]
+  \item Frontend öppnar Google OAuth popup
+  \item Anders loggar in med sitt Gmail-konto, godkänner åtkomst
+  \item Google returnerar authorization code
+  \item Frontend anropar \texttt{POST /api/auth/google} med code
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Validerar code mot Google Token API → får access token
+    \item Hämtar user info från Google: email, name
+    \item Kontrollerar om email finns i \texttt{users.csv} → NEJ (ny användare)
+    \item Skapar rad DIREKT i \texttt{users.csv} (inte aspiring\_users!)
+    \item Sätter \texttt{verified: true}, \texttt{auth\_provider: 'google'}, \texttt{password\_hash: NULL}
+    \item Genererar JWT tokens (accessToken 15 min, refreshToken 30 dagar)
+    \item Sparar refreshToken i \texttt{refresh\_tokens.csv}
+    \item Loggar till audit\_log.csv
+    \item Returnerar 201 Created med tokens
+  \end{itemize}
+  \item Frontend sparar tokens i localStorage
+  \item Navigerar till \texttt{/inledning} (direktinloggad!)
+\end{enumerate}
+
+\textbf{Backend-loggning:} 2 poster (Google OAuth, Token Issued).
+
+\textbf{CSV-filer påverkade:}
+\begin{itemize}[noitemsep]
+  \item \texttt{users.csv} — +1 rad (direkt verifierad via Google)
+  \item \texttt{refresh\_tokens.csv} — +1 rad
+  \item \texttt{audit\_log.csv} — +2 rader
+\end{itemize}
+
+\textbf{OBS:} Ingen aspiring\_users.csv, ingen verification\_codes.csv → Google-användare hoppar över email-verifiering!
+
+
+\subsubsection{Scenario 3: Dubblettregistrering (edge case)}
+Anders Svensson registrerar sig Dag 1 kl 19:00 men glömmer verifiera. Dag 2 kl 10:00 tror han att han inte registrerade sig igår och försöker registrera sig **igen** med samma email.
+
+\textbf{Vad händer:}
+\begin{enumerate}[noitemsep]
+  \item \textbf{Dag 1, 19:00:} Anders registrerar \texttt{anders@revision.se}
+  \begin{itemize}[noitemsep]
+    \item Backend skapar rad i \texttt{aspiring\_users.csv} (id: au\_abc123, expires\_at: 2025-10-08 19:00)
+    \item Skickar verifieringskod 482916 via email (expires\_at: 19:15)
+  \end{itemize}
+  \item \textbf{Dag 1, 19:15:} Verifieringskod går ut (15 min expiry)
+  \item \textbf{Dag 1, 20:00:} Anders glömmer hela saken
+  \item \textbf{Dag 2, 10:00:} Anders försöker registrera sig igen (samma email!)
+  \item Backend logik i \texttt{POST /api/auth/register}:
+  \begin{itemize}[noitemsep]
+    \item Kontrollerar \texttt{users.csv} → Email finns EJ (OK, fortsätt)
+    \item Kontrollerar \texttt{aspiring\_users.csv} → Email FINNS redan! (au\_abc123)
+    \item Kontrollerar \texttt{created\_at}: 2025-10-01 19:00 → 15 timmar sedan (mindre än 24h)
+    \item \textbf{Beslut:} Skicka ny verifieringskod, SKAPA INTE ny rad
+    \item Genererar ny kod: 739284 (ny rad i \texttt{verification\_codes.csv})
+    \item Returnerar: \texttt{200 OK} med meddelande: \textit{"Ett konto med denna email väntar redan på verifiering. En ny kod har skickats till din e-post."}
+  \end{itemize}
+  \item Anders får ny email med kod 739284
+  \item Anders verifierar inom 15 min → Flyttas från \texttt{aspiring\_users.csv} till \texttt{users.csv}
+\end{enumerate}
+
+\textbf{Backend-loggning:} 3 poster (Dubblettregistrering-försök, Ny kod skickad, Verifiering lyckades).
+
+\textbf{CSV-filer påverkade:}
+\begin{itemize}[noitemsep]
+  \item \texttt{aspiring\_users.csv} — INGEN ny rad (duplicates förhindrade)
+  \item \texttt{verification\_codes.csv} — +1 rad (ny kod, gammal kod raderas eller expires)
+  \item \texttt{audit\_log.csv} — +3 rader
+\end{itemize}
+
+\textbf{Edge case: Om äldre än 24h}
+
+Om Anders väntar 25 timmar innan dubblettregistrering:
+\begin{itemize}[noitemsep]
+  \item Backend raderar gamla raden från \texttt{aspiring\_users.csv} (au\_abc123)
+  \item Raderar gamla verifieringskoder från \texttt{verification\_codes.csv}
+  \item Skapar NY rad i \texttt{aspiring\_users.csv} (au\_xyz789)
+  \item Skickar ny verifieringskod
+  \item Returnerar \texttt{201 Created} (nytt försök, gammal data rensad)
+\end{itemize}
+
+\textbf{Sammanfattning av dubbletthantering:}
+\begin{itemize}[noitemsep]
+  \item \textbf{Om email i users.csv:} → 400 "Email redan registrerad" (avvisa)
+  \item \textbf{Om email i aspiring\_users.csv (mindre än 24h):} → 200 "Ny kod skickad" (ingen ny rad)
+  \item \textbf{Om email i aspiring\_users.csv (äldre än 24h):} → Radera gammal, skapa ny rad, 201 Created
+  \item \textbf{Result:} Ingen risk för dubbletter i aspiring\_users.csv!
+\end{itemize}
+
+\subsubsection{Teknisk sammanfattning}
+\begin{itemize}[noitemsep]
+  \item \textbf{CSV-strategi:} aspiring\_users.csv (temp) → users.csv (permanent vid verifiering)
+  \item \textbf{Dubbletthantering:} Email-check i BÅDA users.csv OCH aspiring\_users.csv innan insert
+  \item \textbf{3 API endpoints:} register, google, check-email
+  \item \textbf{Bot-skydd:} Cloudflare Turnstile (validates before registration)
+  \item \textbf{Verifiering:} 6-siffrig kod via SendGrid (15 min expiry, max 5 attempts)
+  \item \textbf{OAuth:} Google login/registrering (hoppar över email-verifiering, direkt till users.csv)
+  \item \textbf{Externa integrationer:} Cloudflare API, Google OAuth API, SendGrid
+  \item \textbf{Loggning:} Alla registreringar loggas till audit\_log.csv (IP, User-Agent, timestamp)
+  \item \textbf{GDPR:} Overifierade aspiring\_users raderas efter 7 dagar automatiskt
+  \item \textbf{Cleanup-jobb:} Radera aspiring\_users äldre än 24h vid dubblettregistrering
+\end{itemize}
+
+\newpage
+
+% ============================================================================
+% SIDA 3: KODINMATNING EMAIL-VERIFIERING (Autentiseringssida utan sidebar)
+% ============================================================================
+
+\section{Kodinmatning Email-verifiering (Sida 3)}
+
+\subsection{API-endpoints Sammanfattning}
+\begin{itemize}[noitemsep]
+  \item \texttt{POST /api/auth/verify-code} — Verifiera 6-siffrig kod, flytta aspiring\_user → users.csv, returnera JWT tokens
+  \item \texttt{POST /api/auth/resend-code} — Skicka ny 6-siffrig kod om tidigare gått ut
+  \item \textbf{Antal anrop vid lyckad verifiering:} 1 (POST /api/auth/verify-code)
+  \item \textbf{Rate limiting:} Max 5 verifieringsförsök per kod, Max 3 resend-requests per 15 minuter
+  \item \textbf{Externa integrationer:} SendGrid (email för resend)
+\end{itemize}
+
+\subsection{Översikt}
+Email-verifieringssidan visas direkt efter registrering (Sida 2). Användaren ser 6 input-fält (en siffra i varje) där de matar in den 6-siffriga koden som skickades till deras email. Vid lyckad verifiering flyttas användaren från \texttt{aspiring\_users.csv} till \texttt{users.csv}, JWT tokens utfärdas, och användaren loggas in automatiskt.
+
+\subsection{Funktionalitet}
+\begin{itemize}[noitemsep]
+  \item 6 input-fält för kod (auto-fokus nästa fält vid inmatning)
+  \item Real-time validering (endast siffror 0-9)
+  \item Knapp: "Verifiera" → \texttt{POST /api/auth/verify-code}
+  \item Knapp: "Skicka ny kod" → \texttt{POST /api/auth/resend-code}
+  \item Timer: Visar återstående tid (15 min från kodgenerering)
+  \item Felmeddelanden: "Fel kod", "Koden har gått ut", "För många försök"
+  \item Vid lyckad verifiering:
+  \begin{itemize}[noitemsep]
+    \item Backend returnerar JWT tokens (accessToken, refreshToken)
+    \item Frontend sparar tokens i localStorage
+    \item Navigerar till \texttt{/inledning} (första onboarding-slide)
+  \end{itemize}
+\end{itemize}
+
+\subsection{Endpoint 1: POST /api/auth/verify-code}
+
+\subsubsection{Beskrivning}
+Verifiera 6-siffrig kod. Vid success flyttas användaren från \texttt{aspiring\_users.csv} till \texttt{users.csv} med \texttt{verified: true}, JWT tokens genereras, och användaren loggas in direkt.
+
+\subsubsection{Request}
+\begin{lstlisting}
+{
+  "email": "chef@revisionstockholm.se",
+  "code": "482916"
+}
+\end{lstlisting}
+
+\textbf{Validering:}
+\begin{itemize}[noitemsep]
+  \item Email finns i \texttt{aspiring\_users.csv} (annars 404 "User not found")
+  \item Kod finns i \texttt{verification\_codes.csv} för denna email
+  \item Kod har inte gått ut (\texttt{expires\_at} > NOW, annars 410 "Code expired")
+  \item Kod matchar (6 siffror exakt, annars 400 "Invalid code")
+  \item Max 5 attempts inte överskriden (annars 429 "Too many attempts")
+\end{itemize}
+
+\subsubsection{Response - Success (200 OK)}
+\begin{lstlisting}
+{
+  "success": true,
+  "message": "Email verifierad! Loggar in...",
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "chef@revisionstockholm.se",
+    "verified": true,
+    "role": "byrachef",
+    "firmId": null
+  }
+}
+\end{lstlisting}
+
+\subsubsection{Response - Error}
+
+\textbf{400 Bad Request - Fel kod:}
+\begin{lstlisting}
+{
+  "error": "invalid_code",
+  "message": "Fel verifieringskod. Försök igen.",
+  "attemptsRemaining": 3
+}
+\end{lstlisting}
+
+\textbf{404 Not Found - Email finns inte i aspiring\_users:}
+\begin{lstlisting}
+{
+  "error": "user_not_found",
+  "message": "Ingen overifierad användare med denna email."
+}
+\end{lstlisting}
+
+\textbf{410 Gone - Koden har gått ut:}
+\begin{lstlisting}
+{
+  "error": "code_expired",
+  "message": "Verifieringskoden har gått ut. Klicka 'Skicka ny kod'."
+}
+\end{lstlisting}
+
+\textbf{429 Too Many Requests - För många försök:}
+\begin{lstlisting}
+{
+  "error": "too_many_attempts",
+  "message": "Du har överskridit max antal försök (5). Begär en ny kod."
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes}
+\begin{itemize}[noitemsep]
+  \item Validera kod mot \texttt{verification\_codes.csv} (email, code, expires\_at)
+  \item Öka \texttt{attempts} counter i verification\_codes.csv vid varje försök
+  \item Om attempts $\geq$ 5 → Returnera 429 (användaren måste begära ny kod)
+  \item Om \texttt{expires\_at} < NOW → Returnera 410 (koden gått ut)
+  \item Om kod matchar:
+  \begin{itemize}[noitemsep]
+    \item \textbf{Steg 1:} Läs rad från \texttt{aspiring\_users.csv} (email, password\_hash, id)
+    \item \textbf{Steg 2:} Skapa rad i \texttt{users.csv} med samma data + \texttt{verified: true}
+    \item \textbf{Steg 3:} Radera rad från \texttt{aspiring\_users.csv}
+    \item \textbf{Steg 4:} Radera verifieringskod från \texttt{verification\_codes.csv}
+    \item \textbf{Steg 5:} Generera JWT tokens (accessToken 15 min, refreshToken 30 dagar)
+    \item \textbf{Steg 6:} Spara refreshToken i \texttt{refresh\_tokens.csv}
+    \item \textbf{Steg 7:} Logga händelse till \texttt{audit\_log.csv}
+    \item \textbf{Steg 8:} Returnera 200 OK med tokens och user info
+  \end{itemize}
+  \item Frontend sparar tokens i localStorage
+  \item Frontend navigerar till \texttt{/inledning}
+\end{itemize}
+
+\subsubsection{Databastabeller}
+\textbf{Läses:}
+\begin{itemize}[noitemsep]
+  \item \texttt{aspiring\_users.csv} (email, password\_hash, id, created\_at)
+  \item \texttt{verification\_codes.csv} (email, code, expires\_at, attempts)
+\end{itemize}
+
+\textbf{Skrivs:}
+\begin{itemize}[noitemsep]
+  \item \texttt{users.csv} — +1 rad (kopierad från aspiring\_users + verified: true)
+  \item \texttt{refresh\_tokens.csv} — +1 rad (ny refresh token)
+  \item \texttt{audit\_log.csv} — +1 rad (Email Verified)
+\end{itemize}
+
+\textbf{Raderas:}
+\begin{itemize}[noitemsep]
+  \item \texttt{aspiring\_users.csv} — -1 rad (användaren flyttad till users.csv)
+  \item \texttt{verification\_codes.csv} — -1 rad (koden använd)
+\end{itemize}
+
+\subsection{Endpoint 2: POST /api/auth/resend-code}
+
+\subsubsection{Beskrivning}
+Generera och skicka ny 6-siffrig verifieringskod om tidigare kod gått ut eller tappats bort.
+
+\subsubsection{Request}
+\begin{lstlisting}
+{
+  "email": "chef@revisionstockholm.se"
+}
+\end{lstlisting}
+
+\subsubsection{Response - Success (200 OK)}
+\begin{lstlisting}
+{
+  "success": true,
+  "message": "En ny verifieringskod har skickats till din e-post.",
+  "expiresIn": 900
+}
+\end{lstlisting}
+
+\textbf{OBS:} \texttt{expiresIn} är i sekunder (900 = 15 minuter).
+
+\subsubsection{Response - Error}
+
+\textbf{404 Not Found - Email finns inte i aspiring\_users:}
+\begin{lstlisting}
+{
+  "error": "user_not_found",
+  "message": "Ingen overifierad användare med denna email."
+}
+\end{lstlisting}
+
+\textbf{429 Too Many Requests - Rate limit:}
+\begin{lstlisting}
+{
+  "error": "rate_limit_exceeded",
+  "message": "Du kan bara begära ny kod 3 gånger per 15 minuter. Försök igen om 8 minuter.",
+  "retryAfter": 480
+}
+\end{lstlisting}
+
+\textbf{OBS:} \texttt{retryAfter} är i sekunder.
+
+\subsubsection{Implementation Notes}
+\begin{itemize}[noitemsep]
+  \item Kontrollera att email finns i \texttt{aspiring\_users.csv}
+  \item Rate limiting: Max 3 resend-requests per 15 minuter (per email)
+  \begin{itemize}[noitemsep]
+    \item Spåra i \texttt{resend\_log.csv} eller räkna rader i verification\_codes.csv
+    \item Om 3+ koder genererade senaste 15 min → 429 Too Many Requests
+  \end{itemize}
+  \item Radera gamla verifieringskoder för denna email från \texttt{verification\_codes.csv}
+  \item Generera ny 6-siffrig kod (t.ex. 739284)
+  \item Spara ny kod i \texttt{verification\_codes.csv} med \texttt{expires\_at} = NOW + 15 min
+  \item Skicka email via SendGrid: \textit{"Din nya verifieringskod är: 739284. Giltig i 15 minuter."}
+  \item Logga till \texttt{audit\_log.csv} ("Resend Code Request")
+  \item Returnera 200 OK
+\end{itemize}
+
+\subsection{Frontend - Datalagring i Browser}
+
+\subsubsection{LocalStorage}
+Email-verifieringssidan SKRIVER till localStorage VID LYCKAD VERIFIERING:
+
+\textbf{Efter POST /api/auth/verify-code (200 OK):}
+\begin{itemize}[noitemsep]
+  \item \texttt{accessToken} — JWT access token (15 min expiry)
+  \item \texttt{refreshToken} — JWT refresh token (30 dagar expiry)
+\end{itemize}
+
+\textbf{Före verifiering:}
+\begin{itemize}[noitemsep]
+  \item Email-adress skickas som route state från \texttt{/register} (inte sparad i localStorage)
+  \item Ingen data skrivs till localStorage under kodmatning
+\end{itemize}
+
+\subsubsection{Cookies}
+Inga cookies sätts på denna sida.
+
+\subsection{Backend - Behandlingshistorik och GDPR-loggning}
+
+\subsubsection{Loggade händelser}
+
+\textbf{1. Lyckad verifiering:}
+\begin{verbatim}
+Datum: 2025-10-22 19:20:15
+Användare: chef@revisionstockholm.se (ID: 550e8400...)
+Program: Authentication
+Rubrik: Email Verified
+Händelse: Email verifierad, användare aktiverad
+- IP-adress: 81.224.233.137
+- User-Agent: Mozilla/5.0 (X11; Linux x86_64)...
+- Endpoint: POST /api/auth/verify-code
+- Status: 200 OK
+- Kod: 482916 (matchad)
+- Flyttad från aspiring_users.csv → users.csv
+- JWT tokens utfärdade
+\end{verbatim}
+
+\textbf{2. Fel kod (attempt counter ökas):}
+\begin{verbatim}
+Datum: 2025-10-22 19:19:45
+Användare: chef@revisionstockholm.se (ID: NULL - ej verifierad ännu)
+Program: Authentication
+Rubrik: Verification Failed
+Händelse: Fel verifieringskod
+- IP-adress: 81.224.233.137
+- Endpoint: POST /api/auth/verify-code
+- Status: 400 Bad Request
+- Fel kod: 482915 (skulle vara 482916)
+- Attempts: 2/5
+\end{verbatim}
+
+\textbf{3. Ny kod begärd:}
+\begin{verbatim}
+Datum: 2025-10-22 19:18:00
+Användare: chef@revisionstockholm.se (ID: NULL)
+Program: Authentication
+Rubrik: Resend Code
+Händelse: Ny verifieringskod skickad
+- IP-adress: 81.224.233.137
+- Endpoint: POST /api/auth/resend-code
+- Status: 200 OK
+- Ny kod: 739284
+- Gamla koder raderade: 1
+- Resend count: 2/3 (senaste 15 min)
+\end{verbatim}
+
+\textbf{4. För många försök (rate limit):}
+\begin{verbatim}
+Datum: 2025-10-22 19:25:00
+Användare: chef@revisionstockholm.se (ID: NULL)
+Program: Security
+Rubrik: Rate Limit Exceeded
+Händelse: För många verifieringsförsök
+- IP-adress: 81.224.233.137
+- Endpoint: POST /api/auth/verify-code
+- Status: 429 Too Many Requests
+- Attempts: 6/5 (överskred gräns)
+- Action: Blockerad tills ny kod begärs
+\end{verbatim}
+
+\subsubsection{CSV-filer (Mock Database)}
+
+\textbf{data/aspiring\_users.csv} (före verifiering):
+\begin{verbatim}
+id,email,password_hash,created_at,expires_at
+au_abc123,chef@revisionstockholm.se,$2b$12$...,2025-10-22 19:00:00,2025-10-29 19:00:00
+\end{verbatim}
+
+\textbf{data/verification\_codes.csv:}
+\begin{verbatim}
+id,email,code,expires_at,attempts,created_at
+vc_482a91,chef@revisionstockholm.se,482916,2025-10-22 19:15:00,0,2025-10-22 19:00:00
+\end{verbatim}
+
+\textbf{Efter lyckad verifiering:}
+
+\textbf{data/users.csv} (+1 rad):
+\begin{verbatim}
+id,email,password_hash,role,firm_id,verified,auth_provider,created_at
+550e8400,chef@revisionstockholm.se,$2b$12$...,byrachef,NULL,true,email,2025-10-22 19:20:15
+\end{verbatim}
+
+\textbf{data/refresh\_tokens.csv} (+1 rad):
+\begin{verbatim}
+id,user_id,token_hash,expires_at,created_at
+rt_8f9a7b,550e8400,$2b$12$...,2025-11-21 19:20:15,2025-10-22 19:20:15
+\end{verbatim}
+
+\textbf{data/aspiring\_users.csv} (-1 rad, au\_abc123 raderad)
+
+\textbf{data/verification\_codes.csv} (-1 rad, vc\_482a91 raderad)
+
+\subsection{Databastabeller (Framtida PostgreSQL)}
+
+\textbf{verification\_codes} (se Registrering Sida 2 för schema).
+
+\textbf{resend\_log} (ny tabell för rate limiting):
+\begin{lstlisting}
+CREATE TABLE resend_log (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) NOT NULL,
+  requested_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  ip_address INET,
+  INDEX idx_email_time (email, requested_at)
+);
+\end{lstlisting}
+
+\textbf{OBS:} Cleanup-jobb raderar resend\_log äldre än 15 minuter varje timme.
+
+
+%%%%%S%%%%%%%%%%%%SAMMANFATTNING SIDA 3%%%%%%%%%%%%%%%%%
+\subsection{Sammanfattning}
+
+\subsubsection{Scenario 1: Lyckad verifiering (happy path)}
+Anders Svensson registrerade sig precis (Sida 2) och ser nu Email-verifieringssidan. Han öppnar sin inbox och hittar email med kod: 482916.
+
+\textbf{Vad händer:}
+\begin{enumerate}[noitemsep]
+  \item Anders matar in: \texttt{4 8 2 9 1 6} i de 6 input-fälten
+  \item Klickar "Verifiera"
+  \item Frontend anropar \texttt{POST /api/auth/verify-code}
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Validerar kod mot \texttt{verification\_codes.csv} → Matchning!
+    \item Kontrollerar \texttt{expires\_at}: 2025-10-22 19:15:00 > NOW (19:05:00) → OK
+    \item Kontrollerar \texttt{attempts}: 0 < 5 → OK
+    \item Läser rad från \texttt{aspiring\_users.csv} (email, password\_hash, id)
+    \item Skapar rad i \texttt{users.csv} med \texttt{verified: true}
+    \item Raderar rad från \texttt{aspiring\_users.csv}
+    \item Raderar kod från \texttt{verification\_codes.csv}
+    \item Genererar JWT tokens (accessToken 15 min, refreshToken 30 dagar)
+    \item Sparar refreshToken i \texttt{refresh\_tokens.csv}
+    \item Loggar till \texttt{audit\_log.csv}
+    \item Returnerar 200 OK med tokens
+  \end{itemize}
+  \item Frontend sparar tokens i localStorage
+  \item Navigerar till \texttt{/inledning} (Anders är nu inloggad!)
+\end{enumerate}
+
+\textbf{Backend-loggning:} 1 post (Email Verified).
+
+\textbf{CSV-filer påverkade:}
+\begin{itemize}[noitemsep]
+  \item \texttt{aspiring\_users.csv} — -1 rad (flyttad till users.csv)
+  \item \texttt{verification\_codes.csv} — -1 rad (kod använd och raderad)
+  \item \texttt{users.csv} — +1 rad (Anders är nu verified!)
+  \item \texttt{refresh\_tokens.csv} — +1 rad
+  \item \texttt{audit\_log.csv} — +1 rad
+\end{itemize}
+
+\subsubsection{Scenario 2: Koden gått ut, begär ny kod}
+Anders glömde verifiera och kommer tillbaka 20 minuter senare. Koden har gått ut (15 min expiry).
+
+\textbf{Vad händer:}
+\begin{enumerate}[noitemsep]
+  \item Anders matar in den gamla koden (482916)
+  \item Klickar "Verifiera"
+  \item Frontend anropar \texttt{POST /api/auth/verify-code}
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Validerar \texttt{expires\_at}: 2025-10-22 19:15:00 < NOW (19:25:00) → EXPIRED!
+    \item Returnerar 410 Gone: "Verifieringskoden har gått ut"
+  \end{itemize}
+  \item Frontend visar felmeddelande: "Koden har gått ut. Klicka 'Skicka ny kod'."
+  \item Anders klickar "Skicka ny kod"
+  \item Frontend anropar \texttt{POST /api/auth/resend-code}
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Kontrollerar rate limit: Räknar resend-requests senaste 15 min → 0 (OK)
+    \item Raderar gamla koder från \texttt{verification\_codes.csv}
+    \item Genererar ny kod: 739284
+    \item Sparar i \texttt{verification\_codes.csv} med \texttt{expires\_at} = NOW + 15 min
+    \item Skickar email via SendGrid: "Din nya kod är: 739284"
+    \item Loggar till \texttt{audit\_log.csv}
+    \item Returnerar 200 OK
+  \end{itemize}
+  \item Anders får email, matar in 739284, verifieras framgångsrikt!
+\end{enumerate}
+
+\textbf{Backend-loggning:} 3 poster (Code Expired, Resend Code, Email Verified).
+
+\textbf{CSV-filer påverkade:}
+\begin{itemize}[noitemsep]
+  \item \texttt{verification\_codes.csv} — -1 rad (gammal kod), +1 rad (ny kod), -1 rad (använd) = -1 total
+  \item \texttt{aspiring\_users.csv} — -1 rad (flyttad till users.csv efter success)
+  \item \texttt{users.csv} — +1 rad
+  \item \texttt{audit\_log.csv} — +3 rader
+\end{itemize}
+
+\subsubsection{Scenario 3: För många felaktiga försök}
+Anders minns fel och provar olika kombinationer av koden.
+
+\textbf{Vad händer:}
+\begin{enumerate}[noitemsep]
+  \item Försök 1: 482915 → 400 "Fel kod" (attempts: 1/5)
+  \item Försök 2: 482917 → 400 "Fel kod" (attempts: 2/5)
+  \item Försök 3: 482916 → 200 OK! (rätt kod)
+\end{enumerate}
+
+\textbf{Om Anders hade fortsatt gissa fel:}
+\begin{enumerate}[noitemsep]
+  \item Försök 4: 482918 → 400 (attempts: 4/5)
+  \item Försök 5: 482919 → 400 (attempts: 5/5)
+  \item Försök 6: 482920 → 429 "För många försök. Begär ny kod."
+  \item Anders måste klicka "Skicka ny kod" för att fortsätta
+\end{enumerate}
+
+\textbf{Backend-loggning:} 6 poster (5× Verification Failed, 1× Rate Limit Exceeded).
+
+\subsubsection{Teknisk sammanfattning}
+\begin{itemize}[noitemsep]
+  \item \textbf{CSV-operation:} KOPIERA aspiring\_users → users, RADERA från aspiring\_users
+  \item \textbf{2 API endpoints:} verify-code (verifierar), resend-code (ny kod)
+  \item \textbf{Rate limiting:} Max 5 försök per kod, Max 3 resend per 15 min
+  \item \textbf{Kod-expiry:} 15 minuter från generering
+  \item \textbf{JWT tokens:} Utfärdas direkt vid verifiering (auto-login)
+  \item \textbf{Loggning:} Alla försök (lyckade + misslyckade) loggas till audit\_log.csv
+  \item \textbf{Frontend navigation:} /verify → /inledning (vid success)
+  \item \textbf{CSV-cleanup:} Gamla verifieringskoder raderas vid resend eller success
+\end{itemize}
+
+\newpage
+
+% ============================================================================
+% SIDA 4: LOGIN (Autentiseringssida utan sidebar)
+% ============================================================================
+
+\section{Login (Sida 4)}
+
+\subsection{API-endpoints Sammanfattning}
+\begin{itemize}[noitemsep]
+  \item \texttt{POST /api/auth/login} — Logga in med email/lösenord, returnera JWT tokens
+  \item \texttt{POST /api/auth/google} — Google OAuth login/registrering (samma som Registrering)
+  \item \textbf{Antal anrop vid inloggning:} 1 (antingen /login eller /google)
+  \item \textbf{Rate limiting:} 5 försök per minut per IP-adress (brute force-skydd)
+  \item \textbf{Externa integrationer:} Google OAuth API
+\end{itemize}
+
+\subsection{Översikt}
+Inloggningssidan låter användare logga in med e-post och lösenord, eller via Google OAuth. Sidan innehåller även länk till ``Glömt lösenord?'' som leder till lösenordsåterställning. Vid lyckad inloggning får användaren JWT-tokens som sparas i localStorage.
+
+\subsection{Funktionalitet}
+\begin{itemize}[noitemsep]
+  \item Användaren anger e-post och lösenord
+  \item Vid ``Logga in'' görs POST till \texttt{/api/auth/login}
+  \item Alternativt klickar användaren på ``Fortsätt med Google'' (OAuth-flöde)
+  \item Vid lyckad inloggning:
+  \begin{itemize}
+    \item Backend returnerar \texttt{accessToken} (15 min) och \texttt{refreshToken} (30 dagar)
+    \item Frontend sparar tokens i \texttt{localStorage}
+    \item Användaren navigeras till \texttt{/inledning} (första slide med sidebar)
+  \end{itemize}
+  \item Vid fel visas felmeddelande (``Fel e-post eller lösenord'', ``Kontot är inte verifierat'')
+  \item Länk ``Glömt lösenord?'' navigerar till \texttt{/forgot-password}
+\end{itemize}
+
+\subsection{Endpoint 1: POST /api/auth/login}
+
+\subsubsection{Beskrivning}
+\subsubsection{Beskrivning}
+Loggar in användare med e-post och lösenord. Vid lyckad inloggning returneras JWT-tokens som ger åtkomst till onboarding-flödet.
+
+\subsubsection{Request}
+\begin{lstlisting}[language=json]
+{
+  "email": "user@example.com",
+  "password": "MySecurePass123"
+}
+\end{lstlisting}
+
+\textbf{Validering:}
+\begin{itemize}[noitemsep]
+  \item E-post finns i databasen (annars 401 \texttt{invalid\_credentials})
+  \item Lösenord matchar bcrypt-hash (annars 401 \texttt{invalid\_credentials})
+  \item Användaren är verifierad (\texttt{verified = true}, annars 403 \texttt{unverified\_email})
+\end{itemize}
+
+\subsubsection{Response - Success (200 OK)}
+\begin{lstlisting}[language=json]
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "uuid-123",
+    "email": "user@example.com",
+    "role": "user",
+    "firmId": "firm-uuid-456"
+  }
+}
+\end{lstlisting}
+
+\subsubsection{Response - Success (200 OK)}
+\begin{lstlisting}[language=json]
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "uuid-123",
+    "email": "user@example.com",
+    "role": "user",
+    "firmId": "firm-uuid-456"
+  }
+}
+\end{lstlisting}
+
+\subsubsection{Response - Error}
+\textbf{400 Bad Request - Saknade fält:}
+\begin{lstlisting}[language=json]
+{
+  "error": "missing_fields",
+  "message": "Email and password required"
+}
+\end{lstlisting}
+
+\textbf{401 Unauthorized - Felaktiga uppgifter:}
+\begin{lstlisting}[language=json]
+{
+  "error": "invalid_credentials",
+  "message": "Incorrect email or password"
+}
+\end{lstlisting}
+
+\textbf{403 Forbidden - Overifierad email:}
+\begin{lstlisting}[language=json]
+{
+  "error": "unverified_email",
+  "message": "Please verify your email first"
+}
+\end{lstlisting}
+
+\textbf{429 Too Many Requests - Rate limit:}
+\begin{lstlisting}[language=json]
+{
+  "error": "rate_limit_exceeded",
+  "message": "Too many login attempts. Try again in 1 minute"
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes}
+\subsubsection{Implementation Notes}
+\begin{itemize}[noitemsep]
+  \item Använd \texttt{bcrypt.compare()} för lösenordskontroll
+  \item Generera JWT med \texttt{jwt.sign()} (HS256 algoritm)
+  \item Spara \texttt{refreshToken} i \texttt{refresh\_tokens} tabell med \texttt{expires\_at}
+  \item Rate limiting: 5 försök per minut per IP-adress (förhindra brute force)
+  \item Logga misslyckade inloggningsförsök för säkerhet
+  \item Frontend sparar tokens i localStorage och navigerar till \texttt{/inledning}
+\end{itemize}
+
+\subsubsection{Databastabeller}
+\textbf{Query 1 - Hämta användare:}
+\begin{verbatim}
+SELECT id, email, password_hash, verified, role, firm_id 
+FROM users 
+WHERE email = ?;
+\end{verbatim}
+
+\textbf{Query 2 - Spara refresh token:}
+\begin{verbatim}
+INSERT INTO refresh_tokens (user_id, token, expires_at) 
+VALUES (?, ?, NOW() + INTERVAL '30 days');
+\end{verbatim}
+
+\subsection{Endpoint 2: POST /api/auth/google}
+
+\subsubsection{Beskrivning} \subsubsection{Beskrivning}
+Loggar in eller registrerar användare via Google OAuth. Denna endpoint används både vid registrering (Sida 2) och inloggning (Sida 4) eftersom Google OAuth hanterar båda fallen automatiskt.
+
+\textbf{OBS:} Samma implementation som i Registrering (Sida 2). Se den sektionen för fullständig dokumentation.
+
+\subsubsection{Request}
+\begin{lstlisting}[language=json]
+{
+  "code": "4/0AY0e-g7X...",
+  "redirectUri": "http://localhost:5173/login"
+}
+\end{lstlisting}
+
+\textbf{Flöde:}
+\begin{enumerate}[noitemsep]
+  \item Frontend öppnar Google OAuth popup med \texttt{client\_id}
+  \item Användaren loggar in och godkänner åtkomst
+  \item Google returnerar \texttt{code} till frontend
+  \item Frontend skickar \texttt{code} till backend
+  \item Backend byter \texttt{code} mot \texttt{access\_token} via Google API
+  \item Backend hämtar användarinfo från Google (email, name, picture)
+  \item Om användaren finns: Logga in (returnera JWT tokens)
+  \item Om användaren INTE finns: Skapa ny användare med \texttt{verified=true} och \texttt{auth\_provider='google'}
+\end{enumerate}
+
+\subsubsection{Response - Success (200 OK för login, 201 Created för ny användare)}
+\begin{lstlisting}[language=json]
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "uuid-123",
+    "email": "user@gmail.com",
+    "name": "John Doe",
+    "verified": true,
+    "authProvider": "google"
+  },
+  "isNewUser": false
+}
+\end{lstlisting}
+
+\subsubsection{Response - Success (200 OK för login, 201 Created för ny användare)}
+\begin{lstlisting}[language=json]
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "uuid-123",
+    "email": "user@gmail.com",
+    "name": "John Doe",
+    "verified": true,
+    "authProvider": "google"
+  },
+  "isNewUser": false
+}
+\end{lstlisting}
+
+\subsubsection{Response - Error}
+\textbf{400 Bad Request - Ogiltig kod:}
+\begin{lstlisting}[language=json]
+{
+  "error": "invalid_code",
+  "message": "Invalid or expired authorization code"
+}
+\end{lstlisting}
+
+\textbf{503 Service Unavailable - Google API-fel:}
+\begin{lstlisting}[language=json]
+{
+  "error": "google_api_error",
+  "message": "Google authentication temporarily unavailable"
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes}
+\begin{itemize}[noitemsep]
+  \item Validera OAuth code mot Google Token API
+  \item Hämta user info (email, name, picture) från Google
+  \item Kontrollera om user finns i databas (sök på email)
+  \item Om finns: Logga in, generera JWT tokens, returnera \texttt{isNewUser: false}
+  \item Om ny: Skapa user med \texttt{verified: true}, \texttt{auth\_provider: 'google'}, \texttt{password\_hash: null}
+  \item Generera access token (15 min) och refresh token (30 dagar)
+  \item Spara refresh token i \texttt{refresh\_tokens} tabell
+  \item Frontend sparar tokens i localStorage och navigerar till \texttt{/inledning}
+\end{itemize}
+
+\subsubsection{Externa API-anrop}
+\textbf{Google Token Exchange:}
+\begin{verbatim}
+POST https://oauth2.googleapis.com/token
+{
+  "code": "...",
+  "client_id": "...",
+  "client_secret": "...",
+  "redirect_uri": "...",
+  "grant_type": "authorization_code"
+}
+\end{verbatim}
+
+\textbf{Google User Info:}
+\begin{verbatim}
+GET https://www.googleapis.com/oauth2/v2/userinfo
+Headers: { Authorization: "Bearer <access_token>" }
+\end{verbatim}
+
+\subsection{Frontend - Datalagring i Browser}
+
+\subsubsection{LocalStorage}
+Login-sidan SKRIVER till localStorage VID LYCKAD INLOGGNING:
+
+\textbf{Efter POST /api/auth/login eller POST /api/auth/google (200 OK):}
+\begin{itemize}[noitemsep]
+  \item \texttt{accessToken} — JWT access token (15 min expiry)
+  \item \texttt{refreshToken} — JWT refresh token (30 dagar expiry)
+\end{itemize}
+
+\textbf{Före inloggning:}
+\begin{itemize}[noitemsep]
+  \item Email och lösenord sparas INTE i localStorage (endast temporärt i React state)
+  \item Ingen data skrivs förrän användaren har autentiserats
+\end{itemize}
+
+\textbf{Logik:}
+\begin{itemize}[noitemsep]
+  \item Vid lyckad inloggning: \texttt{localStorage.setItem('accessToken', data.accessToken)}
+  \item Vid lyckad inloggning: \texttt{localStorage.setItem('refreshToken', data.refreshToken)}
+  \item Vid fel: Ingen data skrivs, felmeddelande visas
+  \item Efter tokens sparats: Navigate till \texttt{/inledning} (första onboarding-slide)
+\end{itemize}
+
+\subsubsection{Cookies}
+Inga cookies sätts på denna sida. JWT tokens lagras i localStorage enligt vår JWT-only strategi (se Teori-sektionen).
+
+\subsection{Backend - Behandlingshistorik och GDPR-loggning}
+
+\subsubsection{Loggade händelser}
+
+\textbf{1. Lyckad inloggning (Email/Password):}
+\begin{verbatim}
+Datum: 2025-10-22 20:15:30
+Användare: Anders Svensson (ID: 550e8400-e29b-41d4-a716-446655440000)
+Program: Authentication
+Rubrik: Login Success
+Händelse: Användaren loggade in med email/password
+- IP-adress: 81.224.233.137
+- User-Agent: Mozilla/5.0 (X11; Linux x86_64)...
+- Endpoint: POST /api/auth/login
+- Status: 200 OK
+- JWT tokens utfärdade (access: 15 min, refresh: 30 dagar)
+\end{verbatim}
+
+\textbf{2. Lyckad inloggning (Google OAuth):}
+\begin{verbatim}
+Datum: 2025-10-22 20:18:45
+Användare: Lisa Karlsson (ID: 660e8400-e29b-41d4-a716-446655440001)
+Program: Authentication
+Rubrik: Google OAuth Login
+Händelse: Användaren loggade in via Google OAuth
+- IP-adress: 81.224.233.137
+- User-Agent: Mozilla/5.0 (X11; Linux x86_64)...
+- Endpoint: POST /api/auth/google
+- Status: 200 OK
+- Google email: lisa.karlsson@gmail.com
+- isNewUser: false (befintlig användare)
+- JWT tokens utfärdade
+\end{verbatim}
+
+\textbf{3. Misslyckad inloggning (Fel lösenord):}
+\begin{verbatim}
+Datum: 2025-10-22 20:10:12
+Användare: anders@revisionstockholm.se (ID: NULL - login misslyckades)
+Program: Authentication
+Rubrik: Login Failed
+Händelse: Misslyckad inloggning - Fel lösenord
+- IP-adress: 81.224.233.137
+- User-Agent: Mozilla/5.0 (X11; Linux x86_64)...
+- Endpoint: POST /api/auth/login
+- Status: 401 Unauthorized
+- Feltyp: invalid_credentials
+- Försök: 1/5 (rate limiting räknare)
+\end{verbatim}
+
+\textbf{4. Misslyckad inloggning (Overifierad email):}
+\begin{verbatim}
+Datum: 2025-10-22 20:12:30
+Användare: nyregistrerad@example.com (ID: 770e8400-... - ej verifierad)
+Program: Authentication
+Rubrik: Login Blocked
+Händelse: Inloggning nekad - Email inte verifierad
+- IP-adress: 81.224.233.137
+- Endpoint: POST /api/auth/login
+- Status: 403 Forbidden
+- Feltyp: unverified_email
+- verified: false
+\end{verbatim}
+
+\textbf{5. Rate Limit Exceeded:}
+\begin{verbatim}
+Datum: 2025-10-22 20:14:55
+Användare: Anonym (IP: 81.224.233.137)
+Program: Authentication
+Rubrik: Rate Limit Exceeded
+Händelse: För många inloggningsförsök från samma IP
+- IP-adress: 81.224.233.137
+- Endpoint: POST /api/auth/login
+- Status: 429 Too Many Requests
+- Försök: 6/5 (överskred gräns)
+- Retry after: 60 sekunder
+\end{verbatim}
+
+\textbf{OBS:} Misslyckade inloggningsförsök loggas för säkerhetsanalys. Detta hjälper upptäcka brute force-attacker och misstänkta inloggningsmönster.
+
+\subsubsection{CSV-filer (Mock Database)}
+
+\textbf{data/audit\_log.csv:}
+\begin{verbatim}
+timestamp,user_id,user_name,program,event_type,event_details,ip_address,user_agent
+2025-10-22 20:15:30,550e8400-e29b-41d4-a716-446655440000,"Anders Svensson",
+  Authentication,"Login Success","Användaren loggade in med email/password - 
+  POST /api/auth/login - 200 OK - JWT tokens utfärdade",81.224.233.137,
+  "Mozilla/5.0 (X11; Linux x86_64)..."
+2025-10-22 20:10:12,NULL,"anders@revisionstockholm.se",Authentication,
+  "Login Failed","Misslyckad inloggning - Fel lösenord - 401 Unauthorized - 
+  Försök 1/5",81.224.233.137,"Mozilla/5.0..."
+\end{verbatim}
+
+\textbf{data/users.csv} (läses vid login):
+\begin{verbatim}
+id,email,password_hash,role,firm_id,verified,auth_provider,created_at
+550e8400-e29b-41d4-a716-446655440000,anders@revisionstockholm.se,
+  $2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5NU7bxJ3vl2Oi,
+  byrachef,7,true,email,2025-10-15 14:23:10
+660e8400-e29b-41d4-a716-446655440001,lisa.karlsson@gmail.com,NULL,
+  byramedlem,7,true,google,2025-10-18 09:45:22
+\end{verbatim}
+
+\textbf{data/refresh\_tokens.csv} (skrivs vid login):
+\begin{verbatim}
+id,user_id,token_hash,expires_at,created_at
+rt_8f9a7b6c5d4e3f2a1,550e8400-e29b-41d4-a716-446655440000,
+  $2b$12$a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6,
+  2025-11-21 20:15:30,2025-10-22 20:15:30
+rt_9g0h1i2j3k4l5m6n7,660e8400-e29b-41d4-a716-446655440001,
+  $2b$12$b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8,
+  2025-11-21 20:18:45,2025-10-22 20:18:45
+\end{verbatim}
+
+\textbf{data/login\_attempts.csv} (rate limiting):
+\begin{verbatim}
+ip_address,timestamp,success
+81.224.233.137,2025-10-22 20:10:12,false
+81.224.233.137,2025-10-22 20:11:05,false
+81.224.233.137,2025-10-22 20:15:30,true
+\end{verbatim}
+
+\textbf{OBS:} Rate limiting implementeras genom att räkna rader i \texttt{login\_attempts.csv} för en given IP-adress inom senaste minuten. Om $\geq 5$ försök → 429 Too Many Requests.
+
+\subsection{Databastabeller (Framtida PostgreSQL)}
+När vi migrerar från CSV till PostgreSQL kommer följande tabeller användas:
+
+\textbf{users:}
+\begin{lstlisting}
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255),  -- NULL for Google OAuth users
+  role VARCHAR(50) DEFAULT 'user',
+  firm_id UUID REFERENCES firms(id),
+  verified BOOLEAN DEFAULT FALSE,
+  auth_provider VARCHAR(50) DEFAULT 'email',  -- 'email' or 'google'
+  created_at TIMESTAMP DEFAULT NOW(),
+  INDEX idx_email (email),
+  INDEX idx_firm_id (firm_id)
+);
+\end{lstlisting}
+
+\textbf{refresh\_tokens:}
+\begin{lstlisting}
+CREATE TABLE refresh_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  token_hash VARCHAR(255) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  INDEX idx_user_id (user_id),
+  INDEX idx_expires_at (expires_at)
+);
+\end{lstlisting}
+
+\textbf{audit\_log:}
+\begin{lstlisting}
+CREATE TABLE audit_log (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
+  user_id UUID REFERENCES users(id),
+  user_name VARCHAR(255),
+  program VARCHAR(100),  -- 'Authentication', 'Onboarding', etc.
+  event_type VARCHAR(100),  -- 'Login Success', 'Login Failed', etc.
+  event_details TEXT,
+  ip_address INET,
+  user_agent TEXT,
+  INDEX idx_user_id (user_id),
+  INDEX idx_timestamp (timestamp),
+  INDEX idx_event_type (event_type),
+  INDEX idx_ip_address (ip_address)
+);
+\end{lstlisting}
+
+\textbf{login\_attempts:}
+\begin{lstlisting}
+CREATE TABLE login_attempts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  ip_address INET NOT NULL,
+  email VARCHAR(255),
+  success BOOLEAN NOT NULL,
+  timestamp TIMESTAMP DEFAULT NOW(),
+  INDEX idx_ip_timestamp (ip_address, timestamp),
+  INDEX idx_email_timestamp (email, timestamp)
+);
+\end{lstlisting}
+
+\subsection{Frontend Implementation (LoginSlide.jsx)}
+
+\subsubsection{Email/Password Login}
+\begin{lstlisting}[language=javascript]
+const handleLogin = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await fetch('http://localhost:8000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+\subsubsection{Email/Password Login}
+\begin{lstlisting}[language=javascript]
+const handleLogin = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await fetch('http://localhost:8000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      if (error.error === 'unverified_email') {
+        setError('Verifiera din e-post först');
+      } else {
+        setError('Fel e-post eller lösenord');
+      }
+      return;
+    }
+    
+    const data = await response.json();
+    localStorage.setItem('accessToken', data.accessToken);
+    localStorage.setItem('refreshToken', data.refreshToken);
+    onNext(); // Navigate to /inledning
+  } catch (err) {
+    setError('Något gick fel. Försök igen.');
+  }
+};
+\end{lstlisting}
+
+\subsubsection{Google OAuth Login}
+\begin{lstlisting}[language=javascript]
+const handleGoogleLogin = () => {
+  const clientId = 'YOUR_GOOGLE_CLIENT_ID';
+  const redirectUri = 'http://localhost:5173/login';
+  const scope = 'email profile';
+  
+  const authUrl = 
+    `https://accounts.google.com/o/oauth2/v2/auth?` +
+    `client_id=${clientId}&` +
+    `redirect_uri=${redirectUri}&` +
+    `response_type=code&` +
+    `scope=${scope}`;
+  
+  window.location.href = authUrl;
+};
+
+// Efter redirect tillbaka från Google:
+useEffect(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('code');
+  
+  if (code) {
+    fetch('http://localhost:8000/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, redirectUri: window.location.origin + '/login' })
+    })
+    .then(res => res.json())
+    .then(data => {
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      navigate('/inledning');
+    });
+  }
+\subsubsection{Google OAuth Login}
+\begin{lstlisting}[language=javascript]
+const handleGoogleLogin = () => {
+  const clientId = 'YOUR_GOOGLE_CLIENT_ID';
+  const redirectUri = 'http://localhost:5173/login';
+  const scope = 'email profile';
+  
+  const authUrl = 
+    `https://accounts.google.com/o/oauth2/v2/auth?` +
+    `client_id=${clientId}&` +
+    `redirect_uri=${redirectUri}&` +
+    `response_type=code&` +
+    `scope=${scope}`;
+  
+  window.location.href = authUrl;
+};
+
+// Efter redirect tillbaka från Google:
+useEffect(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('code');
+  
+  if (code) {
+    fetch('http://localhost:8000/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, redirectUri: window.location.origin + '/login' })
+    })
+    .then(res => res.json())
+    .then(data => {
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      navigate('/inledning');
+    });
+  }
+}, []);
+\end{lstlisting}
+
+\subsection{Sammanfattning}
+
+\subsubsection{Scenario 1: Lyckad inloggning med Email/Password}
+
+Anders Svensson, byråchef på Revision Stockholm AB, har tidigare registrerat sig och verifierat sin e-post. Han besöker login-sidan och matar in sitt email (\texttt{anders@revisionstockholm.se}) och lösenord.
+
+\textbf{Steg-för-steg:}
+\begin{enumerate}[noitemsep]
+  \item Anders klickar "Logga in" → Frontend skickar \texttt{POST /api/auth/login} med email + lösenord
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Läser \texttt{users.csv}, hittar Anders användare med \texttt{verified=true}
+    \item Verifierar lösenord med bcrypt (\texttt{bcrypt.compare()})
+    \item Lösenord matchar → Generera JWT tokens (access 15 min, refresh 30 dagar)
+    \item Spara refresh token hash i \texttt{refresh\_tokens.csv}
+    \item Logga händelse till \texttt{audit\_log.csv}: "Login Success"
+  \end{itemize}
+  \item Backend returnerar: \texttt{200 OK} med \texttt{accessToken}, \texttt{refreshToken}, \texttt{user} object
+  \item Frontend:
+  \begin{itemize}[noitemsep]
+    \item Sparar tokens: \texttt{localStorage.setItem('accessToken', ...)}
+    \item Sparar tokens: \texttt{localStorage.setItem('refreshToken', ...)}
+    \item Navigerar till \texttt{/inledning} (första onboarding-slide med sidebar)
+  \end{itemize}
+\end{enumerate}
+
+\textbf{Resultat:} Anders är nu inloggad och kan fortsätta med onboarding-flödet. Hans session är aktiv i 15 minuter (access token), därefter förnyas automatiskt via refresh token (giltigt i 30 dagar).
+
+\subsubsection{Scenario 2: Lyckad inloggning med Google OAuth}
+
+Lisa Karlsson är ny användare som vill registrera sig via Google. Hon klickar "Fortsätt med Google" på login-sidan.
+
+\textbf{Steg-för-steg:}
+\begin{enumerate}[noitemsep]
+  \item Lisa klickar "Fortsätt med Google" → Redirectas till Google OAuth consent screen
+  \item Lisa godkänner åtkomst → Google returnerar \texttt{code} till frontend
+  \item Frontend skickar \texttt{POST /api/auth/google} med \texttt{code} + \texttt{redirectUri}
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Byter \texttt{code} mot \texttt{access\_token} via Google Token API
+    \item Hämtar Lisa's email från Google User Info API: \texttt{lisa.karlsson@gmail.com}
+    \item Kollar \texttt{users.csv} → Lisa finns INTE (ny användare)
+    \item Skapar ny rad i \texttt{users.csv}: \texttt{verified=true}, \texttt{auth\_provider='google'}, \texttt{password\_hash=NULL}
+    \item Genererar JWT tokens (access 15 min, refresh 30 dagar)
+    \item Sparar refresh token hash i \texttt{refresh\_tokens.csv}
+    \item Loggar händelse: "Google OAuth Login - isNewUser: true"
+  \end{itemize}
+  \item Backend returnerar: \texttt{201 Created} med tokens + \texttt{isNewUser: true}
+  \item Frontend:
+  \begin{itemize}[noitemsep]
+    \item Sparar tokens i localStorage
+    \item Navigerar till \texttt{/inledning} (hoppar över email-verifiering, Google-användare är auto-verifierade)
+  \end{itemize}
+\end{enumerate}
+
+\textbf{Resultat:} Lisa skapas som ny användare OCH loggas in i samma steg. Hon behöver inte verifiera email eftersom Google redan garanterat ägandeskap av emailadressen.
+
+\subsubsection{Scenario 3: Misslyckad inloggning (Fel lösenord)}
+
+Anders försöker logga in men skriver fel lösenord.
+
+\textbf{Steg-för-steg:}
+\begin{enumerate}[noitemsep]
+  \item Anders matar in email + FEL lösenord → Klickar "Logga in"
+  \item Frontend skickar \texttt{POST /api/auth/login}
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Läser \texttt{users.csv}, hittar Anders användare
+    \item Verifierar lösenord med bcrypt → MATCHAR INTE
+    \item Loggar händelse till \texttt{audit\_log.csv}: "Login Failed - Fel lösenord - Försök 1/5"
+    \item Skriver rad till \texttt{login\_attempts.csv}: \texttt{ip\_address, timestamp, success=false}
+    \item Kollar rate limiting: Antal misslyckade försök senaste minuten = 1 (OK, < 5)
+  \end{itemize}
+  \item Backend returnerar: \texttt{401 Unauthorized \{"error": "invalid\_credentials"\}}
+  \item Frontend:
+  \begin{itemize}[noitemsep]
+    \item Visar felmeddelande: "Fel e-post eller lösenord"
+    \item Anders kan försöka igen (har 4 försök kvar innan rate limit)
+  \end{itemize}
+\end{enumerate}
+
+\textbf{OBS:} Om Anders gör 5 misslyckade försök inom 1 minut → \texttt{429 Too Many Requests}, måste vänta 60 sekunder.
+
+\subsubsection{Scenario 4: Inloggning nekad (Overifierad email)}
+
+En ny användare (Lisa) registrerade sig igår men verifierade aldrig sin email. Hon försöker nu logga in.
+
+\textbf{Steg-för-steg:}
+\begin{enumerate}[noitemsep]
+  \item Lisa matar in email + lösenord → Klickar "Logga in"
+  \item Frontend skickar \texttt{POST /api/auth/login}
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Läser \texttt{users.csv}, hittar Lisa's användare med \texttt{verified=false}
+    \item Lösenord matchar, MEN användaren är inte verifierad
+    \item Loggar händelse: "Login Blocked - Email inte verifierad"
+  \end{itemize}
+  \item Backend returnerar: \texttt{403 Forbidden \{"error": "unverified\_email"\}}
+  \item Frontend:
+  \begin{itemize}[noitemsep]
+    \item Visar meddelande: "Verifiera din e-post först. Kolla din inkorg för verifieringskoden."
+    \item Länk till \texttt{/verify} för att mata in kod
+  \end{itemize}
+\end{enumerate}
+
+\textbf{Resultat:} Lisa måste slutföra email-verifieringen innan hon kan logga in.
+
+\subsubsection{Teknisk sammanfattning}
+\begin{itemize}[noitemsep]
+  \item \textbf{2 API endpoints:} POST /api/auth/login (email/password), POST /api/auth/google (OAuth)
+  \item \textbf{Rate limiting:} 5 försök per minut per IP-adress (brute force-skydd via \texttt{login\_attempts.csv})
+  \item \textbf{JWT tokens:} accessToken (15 min), refreshToken (30 dagar) sparas i \textbf{localStorage} (INTE cookies)
+  \item \textbf{CSV-filer:} Läser \texttt{users.csv}, skriver till \texttt{refresh\_tokens.csv}, \texttt{audit\_log.csv}, \texttt{login\_attempts.csv}
+  \item \textbf{Google OAuth:} Auto-verifierade användare (\texttt{verified=true}), ingen email-verifiering behövs, \texttt{password\_hash=NULL}
+  \item \textbf{Säkerhet:} bcrypt password hashing, JWT signature verification, rate limiting, audit logging
+  \item \textbf{Navigation:} Lyckad login → \texttt{/inledning} (första slide med sidebar)
+  \item \textbf{Error handling:} 3 error types (invalid\_credentials, unverified\_email, rate\_limit\_exceeded)
+  \item \textbf{Glömt lösenord:} Länk till \texttt{/forgot-password} (dokumenteras i Sida 5)
+  \item \textbf{GDPR logging:} Alla login-försök loggas med IP-adress, timestamp, user-agent (Fortnox format)
+\end{itemize}
+
+\newpage
+
+
+
+% ============================================================================
+% SIDA 4.5: GLÖMT LÖSENORD (Forgot Password)
+% ============================================================================
+
+\section{Glömt lösenord (Sida 4.5)}
+
+\subsection{API-endpoints Sammanfattning}
+\begin{itemize}[noitemsep]
+  \item \texttt{POST /api/auth/forgot-password} — Skicka 6-siffrig återställningskod via email
+  \item \textbf{Antal anrop vid sidladdning:} 0 (endast vid formulär-submit)
+  \item \textbf{Rate limiting:} 3 försök per timme per email-adress (spam-skydd)
+  \item \textbf{Externa integrationer:} SendGrid (email-leverans)
+\end{itemize}
+
+\subsection{Översikt}
+Sidan ``Glömt lösenord'' (route: \texttt{/forgot-password}) låter användare begära en 6-siffrig återställningskod som skickas till deras registrerade e-postadress. Sidan är en del av autentiseringsflödet och visas UTAN sidebar. Efter att koden skickats navigeras användaren automatiskt till sidan ``Ange nytt lösenord'' (Sida 4.6).
+
+\subsection{Funktionalitet}
+\begin{itemize}[noitemsep]
+  \item \textbf{Input-fält:} E-postadress (required, email-validering)
+  \item \textbf{Knapp:} ``Skicka återställningskod'' (disabled tills giltig email)
+  \item \textbf{Info-box:} ``En 6-siffrig kod kommer skickas till din e-post. Koden är giltig i 15 minuter.''
+  \item \textbf{Länk:} ``← Tillbaka till login'' (navigerar till \texttt{/login})
+  \item \textbf{Success-meddelande:} Grön box som visas efter lyckad request med texten: ``✓ En 6-siffrig kod har skickats till din e-post! Vidarebefordrar om ett ögonblick...''
+  \item \textbf{Auto-navigation:} Efter 2 sekunder navigeras användaren till \texttt{/reset-password}
+  \item \textbf{Email-validering:} Knappen aktiveras endast när email-format är giltigt (regex: \texttt{/\^{}[^\textbackslash{}s@]+@[^\textbackslash{}s@]+\textbackslash{}.[^\textbackslash{}s@]+\$/})
+\end{itemize}
+
+\subsection{Endpoint 1: POST /api/auth/forgot-password}
+
+\subsubsection{Beskrivning}
+Begär återställning av lösenord genom att skicka en 6-siffrig verifieringskod till användarens registrerade e-postadress. Koden är giltig i 15 minuter och kan endast användas en gång.
+
+\subsubsection{Request}
+\begin{lstlisting}[language=json]
+{
+  "email": "chef@revisionstockholm.se"
+}
+\end{lstlisting}
+
+\textbf{Valideringar (Frontend innan request):}
+\begin{itemize}[noitemsep]
+  \item Email-format korrekt: \texttt{/\^{}[^\textbackslash{}s@]+@[^\textbackslash{}s@]+\textbackslash{}.[^\textbackslash{}s@]+\$/}
+  \item Inte tom sträng
+\end{itemize}
+
+\subsubsection{Response - Success (200 OK)}
+\begin{lstlisting}[language=json]
+{
+  "success": true,
+  "message": "Om e-postadressen finns i systemet har en aterstallningskod skickats.",
+  "email": "chef@revisionstockholm.se"
+}
+\end{lstlisting}
+
+\textbf{OBS - Säkerhetsaspekt (Email Enumeration Protection):}
+
+För att FÖRHINDRA att angripare kan gissa vilka e-postadresser som finns registrerade returnerar 
+backend \textbf{alltid 200 OK} med samma meddelande, oavsett om emailen finns eller inte.
+
+\textbf{Exempel:}
+\begin{itemize}[noitemsep]
+  \item Email \texttt{chef@revision.se} finns i \texttt{users.csv} → Kod skickas, returnera 200 OK
+  \item Email \texttt{hackertest@evil.com} finns INTE i \texttt{users.csv} → Ingen kod skickas, men returnera SAMMA 200 OK-meddelande
+\end{itemize}
+
+Detta skyddar användarnas integritet och förhindrar att obehöriga kan bygga listor över registrerade konton (``email enumeration attack'').
+
+\subsubsection{Response - Error (429 Too Many Requests)}
+\textbf{Rate limit överskriden:}
+\begin{lstlisting}[language=json]
+{
+  "error": "rate_limit_exceeded",
+  "message": "För många försök. Försök igen om 60 minuter.",
+  "retryAfter": 3600
+}
+\end{lstlisting}
+
+\textbf{När detta händer:}
+\begin{itemize}[noitemsep]
+  \item Samma email-adress har begärt återställningskod mer än 3 gånger den senaste timmen
+  \item Samma IP-adress har gjort mer än 10 requests den senaste timmen (oberoende av email)
+\end{itemize}
+
+\subsubsection{Response - Error (500 Internal Server Error)}
+\textbf{Email-leverans misslyckades:}
+\begin{lstlisting}[language=json]
+{
+  "error": "email_delivery_failed",
+  "message": "Kunde inte skicka e-post. Försök igen senare."
+}
+\end{lstlisting}
+
+\textbf{Orsaker:}
+\begin{itemize}[noitemsep]
+  \item SendGrid API nere eller timeout
+  \item Ogiltig SendGrid API-nyckel
+  \item Mottagarens mailserver blockerar email (bounce)
+\end{itemize}
+
+\subsubsection{Implementation Notes}
+
+\textbf{Steg 1: Validera request}
+\begin{itemize}[noitemsep]
+  \item Kontrollera att \texttt{email} finns i request body
+  \item Validera email-format (backend gör INTE trust på frontend-validering)
+\end{itemize}
+
+\textbf{Steg 2: Rate limiting check}
+\begin{itemize}[noitemsep]
+  \item Query \texttt{password\_reset\_codes.csv}: Räkna antal requests från samma email senaste timmen
+  \item Om \textgreater 3 → Returnera 429 Too Many Requests
+  \item Query rate\_limit-cache (Redis/in-memory): Räkna requests från samma IP
+  \item Om \textgreater 10 per timme → Returnera 429
+\end{itemize}
+
+\textbf{Steg 3: Kontrollera om email finns}
+\begin{itemize}[noitemsep]
+  \item Query \texttt{users.csv}: \texttt{SELECT id, email FROM users WHERE email = ? AND verified = true}
+  \item \textbf{Om email INTE finns:}
+  \begin{itemize}[noitemsep]
+    \item Logga försök till \texttt{audit\_log.csv} med event: ``Password reset attempt - email not found''
+    \item Vänta 500ms (simulera email-sending för att undvika timing attacks)
+    \item Returnera 200 OK med SAMMA success-meddelande (email enumeration protection)
+    \item EXIT (gör INTE de steg nedan)
+  \end{itemize}
+  \item \textbf{Om email finns:} Fortsätt till steg 4
+\end{itemize}
+
+\textbf{Steg 4: Generera återställningskod}
+\begin{itemize}[noitemsep]
+  \item Generera 6-siffrig slumpmässig kod: \texttt{Math.floor(100000 + Math.random() * 900000)} (Python: \texttt{random.randint(100000, 999999)})
+  \item Exempel: \texttt{482916}, \texttt{703821}
+\end{itemize}
+
+\textbf{Steg 5: Spara kod i databas}
+\begin{itemize}[noitemsep]
+  \item Radera gamla koder för samma email från \texttt{password\_reset\_codes.csv} (cleanup)
+  \item Skapa ny rad i \texttt{password\_reset\_codes.csv}:
+  \begin{verbatim}
+id,user_id,email,code_hash,expires_at,used,created_at
+prc_8f9a7b,42,chef@revision.se,$2b$12$...,2025-10-22 19:15:00,false,2025-10-22 19:00:00
+  \end{verbatim}
+  \item \textbf{OBS:} Koden hashas med bcrypt (samma som lösenord) för säkerhet
+  \item \texttt{expires\_at} = nu + 15 minuter
+  \item \texttt{used} = false (sätts till true när koden används)
+\end{itemize}
+
+\textbf{Steg 6: Skicka email via SendGrid}
+\begin{itemize}[noitemsep]
+  \item Template: ``password-reset.html''
+  \item Ämne: ``Återställ ditt lösenord - Celestial Redovisning''
+  \item Innehåll:
+  \begin{verbatim}
+Hej!
+
+Du har begärt att återställa ditt lösenord. 
+Använd följande kod för att skapa ett nytt lösenord:
+
+482916
+
+Koden är giltig i 15 minuter.
+
+Om du inte begärt denna återställning, ignorera detta meddelande.
+
+Med vänlig hälsning,
+Celestial Redovisning
+  \end{verbatim}
+  \item Skicka via SendGrid API
+  \item Om email-sending misslyckas → Kasta exception, returnera 500 (koden finns i DB men email nådde inte användaren)
+\end{itemize}
+
+\textbf{Steg 7: Logga händelse}
+\begin{itemize}[noitemsep]
+  \item Lägg till rad i \texttt{audit\_log.csv}:
+  \begin{verbatim}
+timestamp,user_id,user_name,program,event_type,event_details,ip_address
+2025-10-22 19:00:00,42,"Anders Svensson",Authentication,
+  "Password Reset Requested","6-digit code sent to chef@revision.se - 
+  Expires: 2025-10-22 19:15:00",81.224.233.137
+  \end{verbatim}
+\end{itemize}
+
+\textbf{Steg 8: Returnera response}
+\begin{itemize}[noitemsep]
+  \item Returnera 200 OK med success-meddelande
+  \item Frontend visar grön success-box
+  \item Efter 2 sekunder: Auto-navigate till \texttt{/reset-password}
+\end{itemize}
+
+\subsubsection{Databastabeller}
+
+\textbf{password\_reset\_codes.csv (Mock database):}
+\begin{verbatim}
+id,user_id,email,code_hash,expires_at,used,created_at,ip_address
+prc_8f9a7b,42,chef@revision.se,$2b$12$Xy4z...,2025-10-22 19:15:00,false,
+  2025-10-22 19:00:00,81.224.233.137
+\end{verbatim}
+
+\textbf{Kolumner:}
+\begin{itemize}[noitemsep]
+  \item \texttt{id} — Unique identifier (prefix: prc\_)
+  \item \texttt{user\_id} — Foreign key till users.csv
+  \item \texttt{email} — Email-adress (för snabb lookup)
+  \item \texttt{code\_hash} — Bcrypt-hashad 6-siffrig kod (\texttt{\$2b\$12\$...})
+  \item \texttt{expires\_at} — Timestamp när koden upphör (15 min efter created\_at)
+  \item \texttt{used} — Boolean (false vid skapande, true efter användning)
+  \item \texttt{created\_at} — Timestamp när koden genererades
+  \item \texttt{ip\_address} — IP-adress för rate limiting och säkerhetsloggning
+\end{itemize}
+
+\textbf{PostgreSQL-schema (framtida):}
+\begin{lstlisting}[language=sql]
+CREATE TABLE password_reset_codes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  email VARCHAR(255) NOT NULL,
+  code_hash VARCHAR(255) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  used BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT NOW(),
+  ip_address INET,
+  INDEX idx_email (email),
+  INDEX idx_expires_at (expires_at),
+  INDEX idx_used (used)
+);
+\end{lstlisting}
+
+\subsection{Frontend - Datalagring i Browser}
+
+\subsubsection{LocalStorage}
+\textbf{Inga data sparas i localStorage på denna sida.}
+
+Email-adressen som användaren matar in skickas direkt till backend och glöms bort efter navigation till \texttt{/reset-password}. Ingen känslig information lagras lokalt.
+
+\subsubsection{React State (Tillfälligt)}
+Under sidvisningen håller React-komponenten följande state:
+\begin{itemize}[noitemsep]
+  \item \texttt{email} — Den e-postadress användaren skriver in
+  \item \texttt{loading} — Boolean som visar laddnings-spinner under API-request
+  \item \texttt{success} — Boolean som triggar grön success-box efter lyckad request
+\end{itemize}
+
+\textbf{State rensas automatiskt} när användaren navigerar till nästa sida (\texttt{/reset-password}).
+
+\subsubsection{Navigation State (React Router)}
+När användaren navigeras till \texttt{/reset-password} kan emailen skickas med i navigation state för att pre-fylla eventuellt ``Skicka ny kod till: \{email\}'' meddelande:
+
+\begin{lstlisting}[language=javascript]
+navigate('/reset-password', { 
+  state: { email: 'chef@revision.se' } 
+});
+\end{lstlisting}
+
+Detta är INTE nödvändigt för funktionaliteten men förbättrar UX.
+
+\subsection{Backend - Behandlingshistorik och GDPR-loggning}
+
+\subsubsection{Loggade händelser}
+
+\textbf{1. Lyckad begäran (email finns):}
+\begin{verbatim}
+Datum: 2025-10-22 19:00:00
+Användare: Anders Svensson (ID: 42)
+Program: Authentication
+Rubrik: Password Reset Requested
+Händelse: 6-digit code sent to chef@revision.se
+- Code ID: prc_8f9a7b
+- Expires: 2025-10-22 19:15:00 (15 min)
+- IP-adress: 81.224.233.137
+- User-Agent: Mozilla/5.0 (X11; Linux x86_64)...
+\end{verbatim}
+
+\textbf{2. Misslyckad begäran (email finns inte):}
+\begin{verbatim}
+Datum: 2025-10-22 19:05:00
+Användare: Unknown (ID: NULL)
+Program: Authentication
+Rubrik: Password Reset Attempt - Email Not Found
+Händelse: Attempted password reset for non-existent email: hacker@evil.com
+- IP-adress: 45.67.89.123
+- Response: 200 OK (enumeration protection)
+\end{verbatim}
+
+\textbf{OBS:} Även misslyckade försök loggas för säkerhetsövervakning (detektera scanning/brute force), men användaren får SAMMA 200 OK-response.
+
+\textbf{3. Rate limit överskriden:}
+\begin{verbatim}
+Datum: 2025-10-22 19:10:00
+Användare: Unknown (ID: NULL)
+Program: Security
+Rubrik: Rate Limit Exceeded - Password Reset
+Händelse: Too many password reset attempts
+- Email: chef@revision.se
+- Attempts in last hour: 4
+- IP-adress: 81.224.233.137
+- Response: 429 Too Many Requests
+\end{verbatim}
+
+\subsubsection{CSV-filer (Mock Database)}
+
+\textbf{data/password\_reset\_codes.csv:}
+\begin{verbatim}
+id,user_id,email,code_hash,expires_at,used,created_at,ip_address
+prc_8f9a7b,42,chef@revision.se,$2b$12$Xy4z...,2025-10-22 19:15:00,
+  false,2025-10-22 19:00:00,81.224.233.137
+\end{verbatim}
+
+\textbf{data/audit\_log.csv:}
+\begin{verbatim}
+timestamp,user_id,user_name,program,event_type,event_details,ip_address
+2025-10-22 19:00:00,42,"Anders Svensson",Authentication,
+  "Password Reset Requested","6-digit code sent - Expires: 19:15",
+  81.224.233.137
+\end{verbatim}
+
+\subsubsection{Automatisk Cleanup}
+Backend kör en \textbf{scheduled job} (cron/celery) varje timme som raderar utgångna koder:
+
+\begin{lstlisting}[language=python]
+# Radera alla koder där expires_at < NOW()
+DELETE FROM password_reset_codes 
+WHERE expires_at < NOW();
+
+# Eller i CSV: Skriv om filen utan utgångna rader
+\end{lstlisting}
+
+Detta håller databasen ren och förhindrar att gamla koder ackumuleras.
+
+\subsection{Databastabeller (Framtida PostgreSQL)}
+
+Se \textit{Endpoint 1: Implementation Notes - Databastabeller} ovan för PostgreSQL-schema.
+
+\textbf{Relationer:}
+\begin{itemize}[noitemsep]
+  \item \texttt{password\_reset\_codes.user\_id} → \texttt{users.id} (Foreign Key, ON DELETE CASCADE)
+\end{itemize}
+
+\textbf{Indexes för prestanda:}
+\begin{itemize}[noitemsep]
+  \item \texttt{idx\_email} — Snabb lookup vid request
+  \item \texttt{idx\_expires\_at} — Effektiv cleanup av utgångna koder
+  \item \texttt{idx\_used} — Snabb check om kod redan använts
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%SAMMANFATTNING SIDA 4.5%%%%%%%%%%%%%%%%%
+\subsection{Sammanfattning}
+
+\subsubsection{Scenario 1: Användare glömmer lösenord (lyckad återställning)}
+
+Anna Svensson, byråchef på Revision Stockholm AB, försöker logga in men har glömt sitt lösenord. Hon klickar på länken ``Glömt lösenord?'' på login-sidan och kommer till \texttt{/forgot-password}.
+
+\textbf{Steg-för-steg:}
+\begin{enumerate}[noitemsep]
+  \item Anna skriver sin email: \texttt{anna@revisionstockholm.se}
+  \item Frontend validerar email-format → Knappen ``Skicka återställningskod'' aktiveras
+  \item Anna klickar på knappen
+  \item Frontend skickar \texttt{POST /api/auth/forgot-password} med \texttt{\{``email'': ``anna@...''\}}
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Kollar rate limit → OK (första försöket idag)
+    \item Söker i \texttt{users.csv} → Email finns (user\_id: 42)
+    \item Genererar 6-siffrig kod: \texttt{482916}
+    \item Hashar kod med bcrypt, sparar i \texttt{password\_reset\_codes.csv} med 15 min expiry
+    \item Skickar email via SendGrid med koden
+    \item Loggar händelse i \texttt{audit\_log.csv}
+    \item Returnerar 200 OK
+  \end{itemize}
+  \item Frontend:
+  \begin{itemize}[noitemsep]
+    \item Visar grön success-box: ``✓ En 6-siffrig kod har skickats till din e-post!''
+    \item Väntar 2 sekunder
+    \item Navigerar automatiskt till \texttt{/reset-password}
+  \end{itemize}
+  \item Anna öppnar sitt mailprogram och ser mailet med koden \texttt{482916}
+  \item Hon matar in koden på nästa sida (Sida 4.6) och skapar nytt lösenord
+\end{enumerate}
+
+\textbf{Resultat:} Anna kan nu logga in med sitt nya lösenord.
+
+\subsubsection{Scenario 2: Email finns inte i systemet (säkerhetsskydd)}
+
+En obehörig person försöker gissa vilka email-adresser som finns registrerade genom att testa olika adresser på ``Glömt lösenord''-sidan.
+
+\textbf{Vad händer:}
+\begin{enumerate}[noitemsep]
+  \item Angriparen skriver: \texttt{hacker@evil.com}
+  \item Frontend validerar format → Knappen aktiveras
+  \item Angriparen klickar ``Skicka återställningskod''
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Söker i \texttt{users.csv} → Email finns INTE
+    \item Loggar försöket till \texttt{audit\_log.csv} (säkerhetslogg)
+    \item Väntar 500ms (simulera email-sending för att undvika timing attacks)
+    \item Returnerar SAMMA 200 OK-meddelande som om emailen hade funnits
+  \end{itemize}
+  \item Frontend visar success-meddelande och navigerar till \texttt{/reset-password}
+  \item Angriparen kan INTE avgöra om emailen finns eller inte (ingen kod skickas förstås)
+\end{enumerate}
+
+\textbf{Säkerhetsvinst:} Angriparen kan inte bygga en lista över registrerade användare (``email enumeration protection'').
+
+\subsubsection{Scenario 3: Rate limit nådd (spam-skydd)}
+
+En angripare (eller en användare som har glömt vilken email de registrerade sig med) försöker skicka återställningskoder till samma email upprepade gånger.
+
+\textbf{Vad händer:}
+\begin{enumerate}[noitemsep]
+  \item Försök 1 kl 18:00 → 200 OK, kod skickad
+  \item Försök 2 kl 18:15 → 200 OK, ny kod skickad (gamla koden invalideras)
+  \item Försök 3 kl 18:30 → 200 OK, ny kod skickad
+  \item Försök 4 kl 18:45 → \textbf{429 Too Many Requests}
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Räknar försök från samma email senaste 60 min → 4 st
+    \item Rate limit är 3/timme → Blockerad
+    \item Loggar till \texttt{audit\_log.csv}: ``Rate limit exceeded''
+    \item Returnerar 429 med \texttt{retryAfter: 3600} (sekunder)
+  \end{itemize}
+  \item Frontend:
+  \begin{itemize}[noitemsep]
+    \item Visar rött felmeddelande: ``För många försök. Försök igen om 60 minuter.''
+    \item Knappen förblir disabled
+  \end{itemize}
+  \item Användaren måste vänta tills klockan är 19:00 innan nästa försök
+\end{enumerate}
+
+\textbf{Säkerhetsvinst:} Förhindrar spam av email-systemet och brute force-attacker.
+
+\subsubsection{Scenario 4: SendGrid API nere (email-leverans misslyckades)}
+
+Backend lyckas generera kod och spara i databasen, men SendGrid API är temporärt nere eller returnerar ett fel.
+
+\textbf{Vad händer:}
+\begin{enumerate}[noitemsep]
+  \item Användaren klickar ``Skicka återställningskod''
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Genererar kod, sparar i \texttt{password\_reset\_codes.csv}
+    \item Försöker skicka email via SendGrid → Timeout eller 500 error
+    \item Kastar exception
+    \item Loggar fel till \texttt{audit\_log.csv}: ``Email delivery failed - SendGrid timeout''
+    \item Returnerar 500 Internal Server Error
+  \end{itemize}
+  \item Frontend:
+  \begin{itemize}[noitemsep]
+    \item Visar rött felmeddelande: ``Kunde inte skicka e-post. Försök igen senare.''
+    \item Knappen blir klickbar igen (användaren kan försöka igen)
+  \end{itemize}
+  \item Användaren försöker igen om 1 minut → Lyckas (SendGrid är uppe igen)
+\end{enumerate}
+
+\textbf{OBS:} Koden finns kvar i databasen från första försöket men har inte skickats. Om användaren lyckas andra gången genereras en NY kod (gamla koden raderas/invalideras).
+
+\newpage
+
+% ============================================================================
+% SIDA 4.6: ANGE NYTT LÖSENORD (Reset Password)
+% ============================================================================
+
+\section{Ange nytt lösenord (Sida 4.6)}
+
+\subsection{API-endpoints Sammanfattning}
+\begin{itemize}[noitemsep]
+  \item \texttt{POST /api/auth/reset-password} — Återställ lösenord med 6-siffrig kod + nytt lösenord
+  \item \texttt{POST /api/auth/resend-reset-code} — Skicka ny återställningskod (om användaren inte fått första)
+  \item \textbf{Antal anrop vid sidladdning:} 0 (endast vid formulär-submit eller "Skicka ny kod")
+  \item \textbf{Rate limiting:} 5 försök per 15 minuter per email (kod-gissning-skydd)
+  \item \textbf{Externa integrationer:} SendGrid (för "Skicka ny kod"-funktionen)
+\end{itemize}
+
+\subsection{Översikt}
+Sidan ``Ange nytt lösenord'' (route: \texttt{/reset-password}) låter användare slutföra 
+lösenordsåterställningen genom att ange den 6-siffriga kod de fick via email, 
+samt välja ett nytt lösenord. Sidan är en del av autentiseringsflödet och visas UTAN sidebar.
+Efter lyckad återställning navigeras användaren till \texttt{/login}.
+
+\textbf{Viktigt:} Denna sida använder INTE session cookies eller JWT tokens. 
+Istället valideras användaren genom att:
+\begin{enumerate}[noitemsep]
+  \item Frontend skickar 6-siffrig kod + email + nytt lösenord till backend
+  \item Backend verifierar att koden är giltig och inte utgången (15 min expiry)
+  \item Backend hashar nya lösenordet och uppdaterar \texttt{users.csv}
+  \item Backend invaliderar koden (sätter \texttt{used=true})
+  \item Användaren måste sedan logga in med nya lösenordet
+\end{enumerate}
+
+\textbf{Ingen session skapas} — Detta är en stateless operation.
+
+\subsection{Funktionalitet}
+\begin{itemize}[noitemsep]
+  \item \textbf{Input-fält 1:} Verifieringskod (6 siffror, monospace, stor text, 
+  auto-filtrering av icke-siffror)
+  \item \textbf{Input-fält 2:} Nytt lösenord (minst 12 tecken, en siffra, en versal)
+  \item \textbf{Input-fält 3:} Bekräfta lösenord (måste matcha fält 2)
+  \item \textbf{Knapp:} ``Återställ lösenord'' (disabled tills alla fält är ifyllda)
+  \item \textbf{Länk:} ``Fick du inte koden? Skicka ny kod'' (navigerar tillbaka till 
+  \texttt{/forgot-password} där användaren kan begära en ny kod via samma formulär)
+  \item \textbf{Validering (Frontend):}
+  \begin{itemize}[noitemsep]
+    \item Kod: Exakt 6 siffror, endast numeriska tecken
+    \item Lösenord: Minst 12 tecken, minst en siffra (\texttt{/\textbackslash{}d/}), minst en versal (\texttt{/[A-Z]/})
+    \item Bekräfta lösenord: Måste matcha ``Nytt lösenord''
+  \end{itemize}
+  \item \textbf{Felmeddelanden:} Röd box ovanför formuläret med specifikt felmeddelande
+  \item \textbf{Success:} Navigera till \texttt{/login} med success-meddelande: ``Lösenord återställt! Du kan nu logga in med ditt nya lösenord.''
+\end{itemize}
+
+\subsection{Endpoint 1: POST /api/auth/reset-password}
+
+\subsubsection{Beskrivning}
+Återställ användarens lösenord genom att validera 6-siffrig kod och sätta nytt lösenord. Koden måste vara giltig, inte utgången (15 min), och inte redan använd.
+
+\subsubsection{Request}
+\begin{lstlisting}[language=json]
+{
+  "email": "chef@revisionstockholm.se",
+  "code": "482916",
+  "newPassword": "SecurePass123!"
+}
+\end{lstlisting}
+
+\textbf{OBS:} Email skickas med eftersom koden inte är unik globalt 
+(flera användare kan ha koder samtidigt). Backend verifierar att
+ \texttt{email + code} matchar i \texttt{password\_reset\_codes.csv}.
+
+\textbf{Valideringar (Frontend innan request):}
+\begin{itemize}[noitemsep]
+  \item \texttt{code}: Exakt 6 siffror, endast 0-9
+  \item \texttt{newPassword}: Minst 12 tecken, en siffra, en versal
+  \item \texttt{newPassword === confirmPassword}
+\end{itemize}
+
+\subsubsection{Response - Success (200 OK)}
+\begin{lstlisting}[language=json]
+{
+  "success": true,
+  "message": "Lösenord återställdes framgångsrikt. Du kan nu logga in med ditt nya lösenord."
+}
+\end{lstlisting}
+
+\textbf{OBS:} Inga JWT tokens returneras! Användaren måste logga in igen via \texttt{/login}.
+
+\subsubsection{Response - Error (400 Bad Request)}
+\textbf{Ogiltig eller utgången kod:}
+\begin{lstlisting}[language=json]
+{
+  "error": "invalid_code",
+  "message": "Verifieringskoden är ogiltig eller har upphört. Begär en ny kod."
+}
+\end{lstlisting}
+
+\textbf{Svagt lösenord:}
+\begin{lstlisting}[language=json]
+{
+  "error": "weak_password",
+  "message": "Lösenordet måste vara minst 12 tecken, innehålla en siffra och en versal"
+}
+\end{lstlisting}
+
+\textbf{Kod redan använd:}
+\begin{lstlisting}[language=json]
+{
+  "error": "code_already_used",
+  "message": "Denna verifieringskod har redan använts. Begär en ny kod."
+}
+\end{lstlisting>
+
+\subsubsection{Response - Error (404 Not Found)}
+\textbf{Email finns inte:}
+\begin{lstlisting}[language=json]
+{
+  "error": "user_not_found",
+  "message": "Email-adressen finns inte i systemet."
+}
+\end{lstlisting}
+
+\subsubsection{Response - Error (429 Too Many Requests)}
+\textbf{För många försök:}
+\begin{lstlisting}[language=json]
+{
+  "error": "rate_limit_exceeded",
+  "message": "För många försök. Försök igen om 15 minuter.",
+  "retryAfter": 900
+}
+\end{lstlisting}
+
+\textbf{När detta händer:}
+\begin{itemize}[noitemsep]
+  \item Samma email har försökt återställa lösenord mer än 5 gånger de senaste 15 minuterna
+  \item Förhindrar brute-force av 6-siffriga koder (1 000 000 kombinationer)
+\end{itemize}
+
+\subsubsection{Implementation Notes}
+
+\textbf{Steg 1: Validera request}
+\begin{itemize}[noitemsep]
+  \item Kontrollera att \texttt{email}, \texttt{code}, och \texttt{newPassword} finns i request body
+  \item Validera email-format
+  \item Validera kod-format: 6 siffror (\texttt{/\^{}\textbackslash{}d\{6\}\$/})
+  \item Validera lösenordsstyrka: minst 12 tecken, \texttt{/[A-Z]/}, \texttt{/[0-9]/}
+\end{itemize}
+
+\textbf{Steg 2: Rate limiting check}
+\begin{itemize}[noitemsep]
+  \item Query \texttt{audit\_log.csv}: Räkna antal ``Password reset attempts'' från samma email senaste 15 min
+  \item Om \textgreater 5 → Returnera 429 Too Many Requests
+  \item Detta förhindrar brute-force attacker på 6-siffriga koder
+\end{itemize}
+
+\textbf{Steg 3: Kontrollera om user finns}
+\begin{itemize}[noitemsep]
+  \item Query \texttt{users.csv}: \texttt{SELECT id FROM users WHERE email = ? AND verified = true}
+  \item Om email INTE finns → Returnera 404 Not Found
+  \item Om finns → Fortsätt till steg 4
+\end{itemize}
+
+\textbf{Steg 4: Hämta och validera återställningskod}
+\begin{itemize}[noitemsep]
+  \item Query \texttt{password\_reset\_codes.csv}:
+  \begin{verbatim}
+SELECT * FROM password_reset_codes 
+WHERE email = ? AND used = false 
+ORDER BY created_at DESC LIMIT 1
+  \end{verbatim}
+  \item Om ingen kod finns → Returnera 400 ``Ogiltig kod''
+  \item Om kod finns → Verifiera bcrypt hash: \texttt{bcrypt.compare(code, code\_hash)}
+  \item Om hash INTE matchar → Returnera 400 ``Ogiltig kod''
+  \item Om \texttt{expires\_at \textless NOW()} → Returnera 400 ``Kod har upphört''
+  \item Om \texttt{used = true} → Returnera 400 ``Kod redan använd''
+  \item Om alla checks OK → Fortsätt till steg 5
+\end{itemize}
+
+\textbf{Steg 5: Uppdatera lösenord}
+\begin{itemize}[noitemsep]
+  \item Hasha nytt lösenord med bcrypt (cost factor 12):
+  \begin{verbatim}
+password_hash = bcrypt.hash(newPassword, rounds=12)
+  \end{verbatim}
+  \item Uppdatera \texttt{users.csv}:
+  \begin{verbatim}
+UPDATE users SET password_hash = ?, updated_at = NOW() 
+WHERE email = ?
+  \end{verbatim}
+\end{itemize}
+
+\textbf{Steg 6: Invalidera återställningskod}
+\begin{itemize}[noitemsep]
+  \item Uppdatera \texttt{password\_reset\_codes.csv}:
+  \begin{verbatim}
+UPDATE password_reset_codes SET used = true 
+WHERE id = ?
+  \end{verbatim}
+  \item Detta förhindrar att samma kod används flera gånger
+\end{itemize}
+
+\textbf{Steg 7: Invalidera alla refresh tokens (Force logout)}
+\begin{itemize}[noitemsep]
+  \item Radera alla refresh tokens för användaren från \texttt{refresh\_tokens.csv}:
+  \begin{verbatim}
+DELETE FROM refresh_tokens WHERE user_id = ?
+  \end{verbatim}
+  \item Detta tvingar användaren att logga in igen på ALLA enheter (säkerhetsskydd)
+  \item Om någon har stulit användarens tidigare lösenord och är inloggad → De blir utloggade
+\end{itemize}
+
+\textbf{Steg 8: Logga händelse}
+\begin{itemize}[noitemsep]
+  \item Lägg till rad i \texttt{audit\_log.csv}:
+  \begin{verbatim}
+timestamp,user_id,user_name,program,event_type,event_details,ip_address
+2025-10-22 19:20:00,42,"Anders Svensson",Authentication,
+  "Password Reset Successful","Password changed via reset code - 
+  All refresh tokens invalidated",81.224.233.137
+  \end{verbatim}
+\end{itemize}
+
+\textbf{Steg 9: Skicka bekräftelse-email (Optional men rekommenderat)}
+\begin{itemize}[noitemsep]
+  \item Skicka email via SendGrid:
+  \begin{verbatim}
+Ämne: Ditt lösenord har ändrats
+
+Hej!
+
+Ditt lösenord har nyss ändrats via vår lösenordsåterställning.
+
+Om du INTE gjorde detta, kontakta oss omedelbart på support@celestial.se
+
+Med vänlig hälsning,
+Celestial Redovisning
+  \end{verbatim}
+  \item Detta är ett säkerhetslager — om någon obehörig återställer lösenordet får riktiga ägaren veta det
+\end{itemize}
+
+\textbf{Steg 10: Returnera success}
+\begin{itemize}[noitemsep]
+  \item Returnera 200 OK med success-meddelande
+  \item Frontend navigerar till \texttt{/login} med success-banner
+\end{itemize}
+
+\subsubsection{Databastabeller}
+
+\textbf{users.csv:}
+\begin{verbatim}
+id,email,password_hash,verified,created_at,updated_at
+42,chef@revision.se,$2b$12$NEWpasswordHASH...,true,2025-10-15 14:23:10,
+  2025-10-22 19:20:00
+\end{verbatim}
+
+\textbf{password\_reset\_codes.csv:}
+\begin{verbatim}
+id,user_id,email,code_hash,expires_at,used,created_at,ip_address
+prc_8f9a7b,42,chef@revision.se,$2b$12$...,2025-10-22 19:15:00,true,
+  2025-10-22 19:00:00,81.224.233.137
+\end{verbatim}
+
+\textbf{refresh\_tokens.csv (FÖRE återställning):}
+\begin{verbatim}
+id,user_id,token_hash,expires_at,created_at
+rt_abc123,42,$2b$12$...,2025-11-21 18:30:00,2025-10-22 18:30:00
+rt_xyz789,42,$2b$12$...,2025-11-20 10:15:00,2025-10-21 10:15:00
+\end{verbatim}
+
+\textbf{refresh\_tokens.csv (EFTER återställning):}
+\begin{verbatim}
+(Tom för user_id=42 - alla tokens raderade)
+\end{verbatim}
+
+\subsection{Endpoint 2: POST /api/auth/resend-reset-code}
+
+\subsubsection{Beskrivning}
+Skicka ny 6-siffrig återställningskod till användarens email om de inte fick den första koden (t.ex. spam-filter, fel email-adress, timeout).
+
+\subsubsection{Request}
+\begin{lstlisting}[language=json]
+{
+  "email": "chef@revisionstockholm.se"
+}
+\end{lstlisting}
+
+\textbf{OBS:} Detta är identiskt med \texttt{POST /api/auth/forgot-password} — De kan dela samma endpoint ELLER ha separata (vi väljer separat för tydlighet i loggning).
+
+\subsubsection{Response - Success (200 OK)}
+\begin{lstlisting}[language=json]
+{
+  "success": true,
+  "message": "En ny verifieringskod har skickats till din e-post."
+}
+\end{lstlisting}
+
+\subsubsection{Response - Error (429 Too Many Requests)}
+\begin{lstlisting}[language=json]
+{
+  "error": "rate_limit_exceeded",
+  "message": "For manga forsok. Forsok igen om 60 minuter.",
+  "retryAfter": 3600
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes}
+\begin{itemize}[noitemsep]
+  \item Samma logik som \texttt{POST /api/auth/forgot-password} (Se Sida 4.5)
+  \item Skillnad: Event-typ i \texttt{audit\_log.csv} är ``Password Reset Code Resent'' istället för ``Password Reset Requested''
+  \item Rate limit: 3 försök per timme (samma som forgot-password)
+  \item Tidigare kod invalideras INTE — Båda koder kan användas (sista skapade kod har företräde om flera finns)
+\end{itemize}
+
+\subsection{Frontend - Datalagring i Browser}
+
+\subsubsection{LocalStorage}
+\textbf{Inga data sparas i localStorage på denna sida.}
+
+All state (kod, lösenord, bekräfta lösenord) hålls tillfälligt i React state och rensas när användaren navigerar bort.
+
+\textbf{Säkerhetsaspekt:} Lösenord och verifieringskod sparas ALDRIG lokalt — de skickas endast till backend vid submit.
+
+%========================================
+% SIDA 5: INLEDNING (IntroSlide.jsx)
+%========================================
+\newpage
+\section{Sida 5: Inledning och bakgrund}
+
+\subsection{API-endpoints - Sammanfattning}
+
+\textbf{Inga API-endpoints används på denna sida.}
+
+Denna sida är en ren informationssida som förklarar bakgrunden till onboarding-processen och de rättsliga kraven enligt Penningtvättslagen (PTL). Inga användaruppgifter samlas in och inga API-anrop görs.
+
+\subsection{Översikt - Sida 5: Inledning}
+
+\subsubsection{Syfte}
+Informera användaren (redovisningsbyrån) om:
+\begin{itemize}[noitemsep]
+  \item \textbf{Penningtvättslagstiftningen} och varför denna onboarding krävs
+  \item \textbf{Länsstyrelsens tillsynsansvar} och konsekvenser vid bristande efterlevnad
+  \item \textbf{Sanktionsavgifter} på hundratusentals kronor vid regelbrott
+  \item \textbf{Dokumentationskrav} — all information måste sparas i minst 5 år
+  \item \textbf{Syfte med processen} — förebygga penningtvätt och ekonomisk brottslighet
+\end{itemize}
+
+\subsubsection{Funktionalitet}
+\begin{itemize}[noitemsep]
+  \item Visa informationstext med rättslig bakgrund
+  \item Förklara myndighetskrav och byrårns skyldigheter
+  \item Navigera till nästa sida: \texttt{/riskfragor} (Sida 6)
+\end{itemize}
+
+\subsubsection{UI-komponenter}
+\begin{itemize}[noitemsep]
+  \item \textbf{Rubrik:} ``Inledning och bakgrund''
+  \item \textbf{Huvudtext:} Förklaring av Penningtvättslagen och tillsynskrav
+  \item \textbf{Info-box:} ``Varför måste vi ställa dessa frågor?'' (checklistformat)
+  \item \textbf{Nästa-knapp:} Navigerar till \texttt{/riskfragor}
+  \item \textbf{Footer:} Referens till Länsstyrelsens författningssamling 01FS 2024-20
+\end{itemize}
+
+\subsection{Frontend - Datalagring i Browser}
+
+\subsubsection{LocalStorage}
+\textbf{Inga data sparas i localStorage på denna sida.}
+
+Sidan är read-only och innehåller ingen interaktiv datainsamling.
+
+\subsubsection{SessionStorage}
+\textbf{Inga data sparas i sessionStorage.}
+
+\subsubsection{React State}
+Ingen state hanteras på denna sida. Komponenten är stateless och tar endast emot en \texttt{onNext}-callback för navigation.
+
+\subsection{Backend - Datalagring på Server}
+
+\subsubsection{Databastabeller}
+\textbf{Inga databastabeller uppdateras på denna sida.}
+
+\subsubsection{API-anrop}
+\textbf{Inga API-anrop görs från denna sida.}
+
+\subsubsection{Logging}
+\textbf{Optional:} Navigation till denna sida KAN loggas för användaranalys:
+
+\texttt{audit\_log.csv:}
+\begin{verbatim}
+timestamp,user_id,user_name,program,event_type,event_details,ip_address
+2025-10-23 10:15:00,42,"Anders Svensson",Onboarding,
+  "Page View","Viewed Inledning page (/inledning)",81.224.233.137
+\end{verbatim}
+
+\textbf{OBS:} Detta är inte nödvändigt för funktionaliteten men kan vara användbart för:
+\begin{itemize}[noitemsep]
+  \item Spåra hur långt användare kommer i onboarding-processen
+  \item Identifiera var användare hoppar av
+  \item Mäta tid per steg
+\end{itemize}
+
+\subsection{Prosaiska beskrivningar av användarscenarier}
+
+\subsubsection{Scenario 1: Användare läser information och går vidare (Happy Path)}
+
+\textbf{Användarens perspektiv:}
+Anders har nyss loggat in och hamnar på inledningssidan. Han läser texten om Penningtvättslagen och förstår att byrån är skyldig att genomföra denna process för att uppfylla Länsstyrelsens krav. Han noterar att sanktionsavgifter kan bli hundratusentals kronor vid bristande efterlevnad. Efter att ha läst informationen klickar han på ``Nästa''-knappen och navigeras vidare till Riskfrågor-sidan.
+
+\textbf{Systemets perspektiv:}
+\begin{itemize}[noitemsep]
+  \item Användaren är autentiserad (har giltigt JWT access token i localStorage)
+  \item \texttt{IntroSlide.jsx} renderas med statisk text
+  \item Ingen data hämtas från backend
+  \item När användaren klickar ``Nästa'' anropas \texttt{onNext()}-callback
+  \item React Router navigerar till \texttt{/riskfragor}
+  \item Inga data sparas i frontend eller backend
+\end{itemize}
+
+\textbf{Teknisk implementation:}
+\begin{lstlisting}[language=javascript]
+// IntroSlide.jsx
+export default function IntroSlide({ onNext }) {
+  return (
+    <div className="max-w-4xl mx-auto p-8">
+      <h1 className="text-3xl font-bold text-brand-900 mb-6">
+        Inledning och bakgrund
+      </h1>
+      
+      {/* Statisk informationstext */}
+      <div className="bg-white rounded-lg shadow-sm border border-brand-200 p-6 mb-8">
+        <div className="space-y-4 text-gray-700 leading-relaxed">
+          <p>
+            Denna onboarding sakerst‰ller att byran uppfyller 
+            <strong>penningtv‰ttslagstiftningens krav</strong> vid 
+            antagandet av nya kunder...
+          </p>
+          {/* ...mer text... */}
+        </div>
+      </div>
+      
+      {/* Navigation */}
+      <div className="flex justify-end">
+        <button
+          onClick={onNext}
+          className="px-6 py-3 bg-brand-600 hover:bg-brand-700 
+                     text-white font-medium rounded-lg shadow-md 
+                     transition-colors"
+        >
+          Nästa →
+        </button>
+      </div>
+    </div>
+  );
+}
+\end{lstlisting}
+
+\textbf{App.jsx routing:}
+\begin{lstlisting}[language=javascript]
+<Route 
+  path="/inledning" 
+  element={<IntroSlide onNext={() => navigate('/riskfragor')} />} 
+/>
+\end{lstlisting}
+
+\subsubsection{Scenario 2: Användare läser informationen flera gånger}
+
+\textbf{Användarens perspektiv:}
+Maria är osäker på vad som krävs och navigerar tillbaka till inledningssidan via sidebaren för att läsa om kraven. Hon läser texten igen och ser särskilt på info-boxen som förklarar varför frågorna ställs. Efter att ha fått klarhet klickar hon på ``Nästa'' igen.
+
+\textbf{Systemets perspektiv:}
+\begin{itemize}[noitemsep]
+  \item Användaren klickar på ``Inledning'' i sidebaren
+  \item React Router navigerar tillbaka till \texttt{/inledning}
+  \item \texttt{IntroSlide.jsx} renderas på nytt (samma statiska innehåll)
+  \item Ingen data hämtas från backend (ingen API-anrop)
+  \item Användaren kan läsa sidan obegränsat antal gånger utan kostnad eller bieffekter
+\end{itemize}
+
+\subsubsection{Scenario 3: Användare hoppar över sidan via sidebar}
+
+\textbf{Användarens perspektiv:}
+Johan har redan läst inledningen tidigare och vill gå direkt till Riskfrågor-sidan. Han klickar på ``Riskfrågor'' i sidebaren och hoppar över inledningssidan helt.
+
+\textbf{Systemets perspektiv:}
+\begin{itemize}[noitemsep]
+  \item Sidebaren är alltid tillgänglig för autentiserade användare
+  \item Användaren kan navigera fritt mellan sidor (ingen linjär progression krävs)
+  \item React Router navigerar direkt till \texttt{/riskfragor}
+  \item Inledningssidan behöver inte besökas för att gå vidare
+  \item Detta är OK eftersom sidan är rent informativ (ingen datainsamling)
+\end{itemize}
+
+\subsubsection{Scenario 4: Oautentiserad användare försöker nå sidan}
+
+\textbf{Användarens perspektiv:}
+En obehörig person försöker nå \texttt{https://celestial.se/inledning} direkt via URL utan att logga in först. De ser inte inledningssidan utan omdirigeras till login-sidan.
+
+\textbf{Systemets perspektiv:}
+\begin{itemize}[noitemsep]
+  \item \texttt{App.jsx} kontrollerar om användaren är inloggad via:
+  \begin{verbatim}
+const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  \end{verbatim}
+  \item Om \texttt{isLoggedIn === false} → Ingen sidebar renderas
+  \item React Router omdirigerar automatiskt till \texttt{/} (HeroSlide)
+  \item Användaren måste logga in innan de kan se onboarding-sidor
+\end{itemize}
+
+\textbf{Teknisk implementation:}
+\begin{lstlisting}[language=javascript]
+// App.jsx
+const authPages = ['/', '/login', '/register', '/verify'];
+const isAuthPage = authPages.includes(location.pathname);
+
+if (isAuthPage || (!isLoggedIn && !isDemoMode)) {
+  return (
+    <Routes>
+      {/* Auth routes - no sidebar */}
+      <Route path="/" element={<HeroSlide ... />} />
+      <Route path="/login" element={<LoginSlide ... />} />
+      {/* Redirect any other route to home if not logged in */}
+      <Route path="*" element={<HeroSlide ... />} />
+    </Routes>
+  );
+}
+\end{lstlisting}
+
+\subsubsection{Scenario 5: Demo-användare når sidan direkt}
+
+\textbf{Användarens perspektiv:}
+En demo-användare klickar på ``Prova Demo'' på landningssidan och hamnar direkt på inledningssidan utan att registrera sig eller logga in. De kan läsa informationen och gå vidare till nästa steg.
+
+\textbf{Systemets perspektiv:}
+\begin{itemize}[noitemsep]
+  \item Användaren klickar ``Prova Demo'' på HeroSlide
+  \item \texttt{handleDemo()} körs:
+  \begin{verbatim}
+setIsDemoMode(true);
+localStorage.setItem('isDemoMode', 'true');
+navigate('/inledning');
+  \end{verbatim}
+  \item \texttt{isDemoMode === true} → Sidebar och content-slides renderas
+  \item Demo-användare har tillgång till alla sidor (men använder mock data)
+  \item Ingen backend-autentisering krävs i demo-läge
+  \item Detta gör det möjligt att demonstrera applikationen utan registrering
+\end{itemize}
+
+\textbf{Användningsfall:}
+\begin{itemize}[noitemsep]
+  \item \textbf{Försäljningsdemo:} Visa potentiella kunder hur systemet fungerar
+  \item \textbf{Utbildning:} Träna personal på processen innan riktiga klienter onboardas
+  \item \textbf{Utveckling:} Testa UI/UX utan att behöva skapa riktiga användarkonton
+\end{itemize}
+
+\subsection{Designbeslut och rättslig kontext}
+
+\subsubsection{Varför denna sida existerar}
+\begin{itemize}[noitemsep]
+  \item \textbf{Transparens:} Användaren (redovisningsbyrån) måste förstå VARFÖR onboarding krävs
+  \item \textbf{Rättslig grund:} Penningtvättslagen (2017:630) och Länsstyrelsens tillsyn
+  \item \textbf{Compliance:} Byrån måste kunna visa tillsynsmyndigheten att klienter informerats
+  \item \textbf{Riskreducering:} Förhindra att byrån omedvetet tar emot klienter med hög penningtvättrisk
+\end{itemize}
+
+\subsubsection{Länsstyrelsens författningssamling 01FS 2024-20}
+Länsstyrelsen Stockholm publicerar riktlinjer för hur redovisningsbyråer ska genomföra kundkännedom. Denna inledningssida refererar till dessa riktlinjer för att:
+\begin{itemize}[noitemsep]
+  \item Visa att processen följer myndighetskrav (inte byråns påhitt)
+  \item Legitimera de frågor som ställs i kommande steg
+  \item Skydda byrån juridiskt vid eventuell granskning
+\end{itemize}
+
+\subsubsection{Dokumentationskrav - 5 år}
+Enligt PTL § 4 kap 6 § måste verksamhetsutövaren spara all dokumentation i minst 5 år efter att affärsförhållandet upphört. Detta inkluderar:
+\begin{itemize}[noitemsep]
+  \item Kopior av identitetshandlingar
+  \item Svar på riskfrågor
+  \item Kundkännedomsformulär
+  \item Riskbedömningar
+  \item Beslut om att anta eller avvisa klient
+\end{itemize}
+
+\textbf{Teknisk konsekvens:}
+All data som samlas in i denna onboarding-process måste:
+\begin{itemize}[noitemsep]
+  \item Sparas säkert i databas (eller CSV-filer under utveckling)
+  \item Vara sökbar för tillsynsmyndigheten vid granskning
+  \item Kunna exporteras till PDF för arkivering
+  \item Skyddas mot obehörig åtkomst (GDPR)
+\end{itemize}
+
+\subsection{Tekniska implementation notes}
+
+\subsubsection{Stateless komponent}
+\texttt{IntroSlide.jsx} är en ren presentationskomponent:
+\begin{itemize}[noitemsep]
+  \item Ingen React state
+  \item Ingen useEffect
+  \item Ingen API-anrop
+  \item Tar endast emot \texttt{onNext}-callback som prop
+\end{itemize}
+
+\textbf{Fördelar:}
+\begin{itemize}[noitemsep]
+  \item Snabb rendering (ingen async operation)
+  \item Lätt att testa (inga side effects)
+  \item Kan pre-renderas för snabbare laddning
+  \item Ingen risk för race conditions eller data-inkonsistens
+\end{itemize}
+
+\subsubsection{Responsiv design}
+Tailwind CSS-klasser används för att anpassa layouten:
+\begin{itemize}[noitemsep]
+  \item \texttt{max-w-4xl mx-auto} — Centrerad layout med max bredd
+  \item \texttt{p-8} — Padding på mobil
+  \item \texttt{space-y-4} — Vertikal spacing mellan stycken
+  \item \texttt{rounded-lg shadow-sm} — Moderna UI-element
+\end{itemize}
+
+\subsubsection{Tillgänglighet (a11y)}
+\begin{itemize}[noitemsep]
+  \item Semantisk HTML (\texttt{<h1>}, \texttt{<p>}, \texttt{<button>})
+  \item Läsbar text (minst 16px font size)
+  \item Hög kontrast (text-gray-700 på vit bakgrund)
+  \item Keyboard navigation (button är focusable med Tab)
+\end{itemize}
+
+\subsubsection{React State (Tillfälligt)}
+Under sidvisningen håller React-komponenten följande state:
+\begin{itemize}[noitemsep]
+  \item \texttt{code} — 6-siffrig verifieringskod (string, endast siffror)
+  \item \texttt{password} — Nytt lösenord (string, dolt med \texttt{type="password"})
+  \item \texttt{confirmPassword} — Bekräfta lösenord (string, dolt)
+  \item \texttt{loading} — Boolean som visar laddnings-spinner under API-request
+  \item \texttt{error} — String med felmeddelande (visas i röd box om not null)
+\end{itemize}
+
+\textbf{State rensas automatiskt} när användaren navigerar till nästa sida (\texttt{/login}).
+
+\subsubsection{Navigation State (React Router)}
+Om användaren kommer från \texttt{/forgot-password} kan emailen skickas med i navigation state:
+
+\begin{lstlisting}[language=javascript]
+navigate('/reset-password', { 
+  state: { email: 'chef@revision.se' } 
+});
+\end{lstlisting}
+
+Detta används för att:
+\begin{itemize}[noitemsep]
+  \item Pre-fylla email-fält om vi implementerar "Skicka ny kod"-funktionen på samma sida
+  \item Skicka email automatiskt till \texttt{POST /api/auth/reset-password} utan att användaren behöver mata in det igen
+\end{itemize}
+
+\textbf{OBS:} Email finns INTE i URL (ingen \texttt{?email=...} query parameter) för säkerhet.
+
+\subsection{Backend - Behandlingshistorik och GDPR-loggning}
+
+\subsubsection{Loggade händelser}
+
+\textbf{1. Lyckad lösenordsåterställning:}
+\begin{verbatim}
+Datum: 2025-10-22 19:20:00
+Användare: Anders Svensson (ID: 42)
+Program: Authentication
+Rubrik: Password Reset Successful
+Händelse: Password changed via reset code - All refresh tokens invalidated
+- Old password hash: $2b$12$OLD... (första 20 tecken)
+- New password hash: $2b$12$NEW... (första 20 tecken)
+- Reset code used: prc_8f9a7b (6-siffrig kod: 482916)
+- IP-adress: 81.224.233.137
+- User-Agent: Mozilla/5.0 (X11; Linux x86_64)...
+- Refresh tokens invalidated: 2 st
+\end{verbatim}
+
+\textbf{2. Misslyckad återställning (ogiltig kod):}
+\begin{verbatim}
+Datum: 2025-10-22 19:25:00
+Användare: Unknown (försök för chef@revision.se)
+Program: Authentication
+Rubrik: Password Reset Failed - Invalid Code
+Händelse: Attempted password reset with invalid code
+- Email: chef@revision.se
+- Code entered: 123456 (ogiltig eller utgången)
+- IP-adress: 81.224.233.137
+- Attempt: 1/5 (rate limit tracking)
+\end{verbatim}
+
+\textbf{3. Rate limit överskriden:}
+\begin{verbatim}
+Datum: 2025-10-22 19:30:00
+Användare: Unknown (försök för chef@revision.se)
+Program: Security
+Rubrik: Rate Limit Exceeded - Password Reset
+Händelse: Too many password reset attempts (brute force protection)
+- Email: chef@revision.se
+- Attempts in last 15 min: 6
+- IP-adress: 81.224.233.137
+- Response: 429 Too Many Requests
+- Retry after: 900 seconds (15 min)
+\end{verbatim}
+
+\textbf{4. Ny kod begärd via "Skicka ny kod":}
+\begin{verbatim}
+Datum: 2025-10-22 19:35:00
+Användare: Anders Svensson (ID: 42)
+Program: Authentication
+Rubrik: Password Reset Code Resent
+Händelse: User requested new reset code
+- Email: chef@revision.se
+- New code ID: prc_xyz123
+- Old code ID: prc_8f9a7b (fortfarande giltig i 5 min)
+- IP-adress: 81.224.233.137
+\end{verbatim}
+
+\subsubsection{CSV-filer (Mock Database)}
+
+\textbf{data/users.csv (FÖRE återställning):}
+\begin{verbatim}
+id,email,password_hash,verified,created_at,updated_at
+42,chef@revision.se,$2b$12$OLDpasswordHASH...,true,2025-10-15 14:23:10,
+  2025-10-20 10:00:00
+\end{verbatim}
+
+\textbf{data/users.csv (EFTER återställning):}
+\begin{verbatim}
+id,email,password_hash,verified,created_at,updated_at
+42,chef@revision.se,$2b$12$NEWpasswordHASH...,true,2025-10-15 14:23:10,
+  2025-10-22 19:20:00
+\end{verbatim}
+
+\textbf{data/password\_reset\_codes.csv (FÖRE användning):}
+\begin{verbatim}
+id,user_id,email,code_hash,expires_at,used,created_at,ip_address
+prc_8f9a7b,42,chef@revision.se,$2b$12$Xy4z...,2025-10-22 19:15:00,
+  false,2025-10-22 19:00:00,81.224.233.137
+\end{verbatim}
+
+\textbf{data/password\_reset\_codes.csv (EFTER användning):}
+\begin{verbatim}
+id,user_id,email,code_hash,expires_at,used,created_at,ip_address
+prc_8f9a7b,42,chef@revision.se,$2b$12$Xy4z...,2025-10-22 19:15:00,
+  true,2025-10-22 19:00:00,81.224.233.137
+\end{verbatim}
+
+\textbf{data/refresh\_tokens.csv (FÖRE återställning):}
+\begin{verbatim}
+id,user_id,token_hash,expires_at,created_at
+rt_abc123,42,$2b$12$...,2025-11-21 18:30:00,2025-10-22 18:30:00
+rt_xyz789,42,$2b$12$...,2025-11-20 10:15:00,2025-10-21 10:15:00
+\end{verbatim}
+
+\textbf{data/refresh\_tokens.csv (EFTER återställning):}
+\begin{verbatim}
+(Tom för user_id=42 - alla tokens raderade för force logout)
+\end{verbatim}
+
+\subsection{Databastabeller (Framtida PostgreSQL)}
+
+Se Sida 4.5 (Glömt lösenord) för \texttt{password\_reset\_codes}-schema.
+
+\textbf{users-tabell uppdatering:}
+\begin{lstlisting}[language=sql]
+UPDATE users 
+SET password_hash = $1, updated_at = NOW() 
+WHERE id = $2;
+\end{lstlisting}
+
+\textbf{Refresh tokens invalidering:}
+\begin{lstlisting}[language=sql]
+DELETE FROM refresh_tokens WHERE user_id = $1;
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%SAMMANFATTNING SIDA 4.6%%%%%%%%%%%%%%%%%
+\subsection{Sammanfattning}
+
+\subsubsection{Scenario 1: Lyckad lösenordsåterställning (happy path)}
+
+Anna Svensson har fått en 6-siffrig återställningskod (\texttt{482916}) via email från föregående sida (Sida 4.5 - Glömt lösenord). Hon öppnar mailet och navigerar till sidan ``Ange nytt lösenord''.
+
+\textbf{Steg-för-steg:}
+\begin{enumerate}[noitemsep]
+  \item Anna matar in koden: \texttt{482916} i första fältet
+  \item Frontend validerar automatiskt: Endast siffror accepteras, max 6 tecken
+  \item Anna väljer nytt lösenord: \texttt{MyNewSecure2025!} (16 tecken, en siffra, en versal)
+  \item Anna bekräftar lösenordet: \texttt{MyNewSecure2025!} (matchar)
+  \item Frontend validerar: Lösenordskrav uppfyllda, alla fält ifyllda → Knappen aktiveras
+  \item Anna klickar ``Återställ lösenord''
+  \item Frontend skickar \texttt{POST /api/auth/reset-password} med:
+  \begin{lstlisting}[language=json]
+{
+  "email": "anna@revisionstockholm.se",
+  "code": "482916",
+  "newPassword": "MyNewSecure2025!"
+}
+  \end{lstlisting}
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Kollar rate limit → OK (första försöket)
+    \item Söker i \texttt{users.csv} → Email finns (user\_id: 42)
+    \item Söker i \texttt{password\_reset\_codes.csv} → Kod finns och matchar bcrypt hash
+    \item Kollar \texttt{expires\_at} → Koden skapades 19:00, nu är klockan 19:10 → Giltig (15 min window)
+    \item Kollar \texttt{used} → false (inte använd än)
+    \item Hashar nytt lösenord: \texttt{\$2b\$12\$NEWpasswordHASH...}
+    \item Uppdaterar \texttt{users.csv}: Nytt \texttt{password\_hash}, \texttt{updated\_at} = NOW()
+    \item Sätter \texttt{used=true} på återställningskoden i \texttt{password\_reset\_codes.csv}
+    \item Raderar ALLA refresh tokens för user\_id=42 från \texttt{refresh\_tokens.csv} (force logout på alla enheter)
+    \item Loggar händelse i \texttt{audit\_log.csv}: ``Password Reset Successful''
+    \item Skickar bekräftelse-email: ``Ditt lösenord har ändrats''
+    \item Returnerar 200 OK
+  \end{itemize}
+  \item Frontend:
+  \begin{itemize}[noitemsep]
+    \item Visar grön success-meddelande (kort flash): ``Lösenord återställt!''
+    \item Navigerar till \texttt{/login}
+    \item Visar banner på login-sidan: ``Du kan nu logga in med ditt nya lösenord''
+  \end{itemize}
+  \item Anna loggar in med ny lösenord → Lyckas → Navigeras till \texttt{/inledning}
+\end{enumerate}
+
+\textbf{Resultat:} Anna har ett nytt lösenord och är inloggad.
+
+\textbf{Säkerhetseffekt:} Om någon var inloggad på Annas gamla konto (stulen session) → De blir automatiskt utloggade när alla refresh tokens raderas.
+
+\subsubsection{Scenario 2: Ogiltig kod (fel inmatad)}
+
+En användare försöker gissa återställningskoden.
+
+\textbf{Vad händer:}
+\begin{enumerate}[noitemsep]
+  \item Användaren matar in: \texttt{123456} (fel kod)
+  \item Frontend validerar format → OK (6 siffror)
+  \item Användaren fyller i nytt lösenord + bekräfta lösenord
+  \item Klickar ``Återställ lösenord''
+  \item Frontend skickar \texttt{POST /api/auth/reset-password}
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Söker i \texttt{password\_reset\_codes.csv} för email
+    \item Hittar kod: \texttt{\$2b\$12\$Xy4z...} (bcrypt hash av \texttt{482916})
+    \item Jämför bcrypt: \texttt{bcrypt.compare("123456", "\$2b\$12\$Xy4z...")} → FALSE
+    \item Loggar misslyckad försök i \texttt{audit\_log.csv}: ``Password Reset Failed - Invalid Code''
+    \item Returnerar 400 Bad Request: \texttt{\{"error": "invalid\_code"\}}
+  \end{itemize}
+  \item Frontend:
+  \begin{itemize}[noitemsep]
+    \item Visar röd felruta: ``Verifieringskoden är ogiltig eller har upphört. Begär en ny kod.''
+    \item Kodfältet blir markerat med röd border
+    \item Användaren kan försöka igen
+  \end{itemize}
+\end{enumerate}
+
+\textbf{Säkerhetsvinst:} Rate limiting (5 försök per 15 min) förhindrar brute-force av 6-siffriga koder.
+
+\subsubsection{Scenario 3: Kod har upphört (timeout efter 15 min)}
+
+En användare fick en återställningskod kl 19:00 men matar in den först kl 19:20 (20 minuter senare).
+
+\textbf{Vad händer:}
+\begin{enumerate}[noitemsep]
+  \item Användaren matar in korrekt kod: \texttt{482916}
+  \item Fyller i nytt lösenord + bekräfta
+  \item Klickar ``Återställ lösenord''
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Söker i \texttt{password\_reset\_codes.csv}
+    \item Hittar kod med \texttt{expires\_at = 2025-10-22 19:15:00}
+    \item Nu är klockan: \texttt{2025-10-22 19:20:00}
+    \item \texttt{expires\_at \textless NOW()} → Koden har upphört
+    \item Loggar: ``Password Reset Failed - Code Expired''
+    \item Returnerar 400 Bad Request: \texttt{\{"error": "invalid\_code", "message": "...har upphört"\}}
+  \end{itemize}
+  \item Frontend:
+  \begin{itemize}[noitemsep]
+    \item Visar röd felruta: ``Verifieringskoden är ogiltig eller har upphört. Begär en ny kod.''
+    \item Framhäver länken ``Skicka ny kod'' (användaren ser den tydligare)
+  \end{itemize}
+  \item Användaren klickar ``Skicka ny kod''
+  \item Antingen:
+  \begin{itemize}[noitemsep]
+    \item \textbf{Alternativ A:} Navigeras tillbaka till \texttt{/forgot-password} (enklast)
+    \item \textbf{Alternativ B:} Frontend anropar \texttt{POST /api/auth/resend-reset-code} → Ny kod skickas → Användaren stannar på samma sida
+  \end{itemize}
+  \item Användaren får ny kod via email och försöker igen → Lyckas
+\end{enumerate}
+
+\textbf{UX-förbättring:} Lägg till countdown-timer på sidan: ``Koden är giltig i X minuter och Y sekunder'' för att användaren ska veta när den upphör.
+
+\subsubsection{Scenario 4: Rate limit nådd (brute-force försök)}
+
+En angripare försöker gissa 6-siffrig kod genom att prova många kombinationer.
+
+\textbf{Vad händer:}
+\begin{enumerate}[noitemsep]
+  \item Angriparen matar in kod: \texttt{000000} → 400 Invalid Code
+  \item Försök 2: \texttt{000001} → 400 Invalid Code
+  \item Försök 3: \texttt{000002} → 400 Invalid Code
+  \item Försök 4: \texttt{000003} → 400 Invalid Code
+  \item Försök 5: \texttt{000004} → 400 Invalid Code
+  \item Försök 6: \texttt{000005} → \textbf{429 Too Many Requests}
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Räknar försök från samma email senaste 15 min → 6 st
+    \item Rate limit är 5 försök → Blockerad
+    \item Loggar: ``Rate Limit Exceeded - Password Reset (Brute Force Protection)''
+    \item Returnerar 429: \texttt{\{"retryAfter": 900\}} (15 min)
+  \end{itemize}
+  \item Frontend:
+  \begin{itemize}[noitemsep]
+    \item Visar röd felruta: ``För många försök. Försök igen om 15 minuter.''
+    \item Knappen blir disabled
+    \item Visar countdown: ``Försök igen om 14:59''
+  \end{itemize}
+  \item Angriparen måste vänta 15 minuter innan nästa försök
+\end{enumerate}
+
+\textbf{Säkerhetsvinst:} Med 1 000 000 möjliga kombinationer (000000-999999) och endast 5 försök per 15 min → Det tar \textasciitilde{}95 år att prova alla kombinationer.
+
+\subsubsection{Scenario 5: Kod redan använd (replay attack)}
+
+En användare har redan återställt sitt lösenord men försöker använda samma kod igen (eller någon har kopierat koden och försöker använda den senare).
+
+\textbf{Vad händer:}
+\begin{enumerate}[noitemsep]
+  \item Användaren matar in kod: \texttt{482916} (som redan använts)
+  \item Backend:
+  \begin{itemize}[noitemsep]
+    \item Söker i \texttt{password\_reset\_codes.csv}
+    \item Hittar kod med \texttt{used = true}
+    \item Loggar: ``Password Reset Failed - Code Already Used''
+    \item Returnerar 400 Bad Request: \texttt{\{"error": "code\_already\_used"\}}
+  \end{itemize}
+  \item Frontend:
+  \begin{itemize}[noitemsep]
+    \item Visar röd felruta: ``Denna verifieringskod har redan använts. Begär en ny kod.''
+  \end{itemize}
+\end{enumerate}
+
+\textbf{Säkerhetsvinst:} Förhindrar ``replay attacks'' där någon sparar en giltig kod och försöker använda den flera gånger.
+
+\newpage
+
+% ############################################################################
+% ############################################################################
+% DEL 2: ONBOARDING SLIDES (MED SIDEBAR)
+% ############################################################################
+% ############################################################################
+
+% ============================================================================
+% SLIDE 1: INTRO (Första slide med sidebar)
+% ============================================================================
+
+\section{Intro (Slide 5)}
+
+\textit{TODO: Dokumentera intro-endpoints här (första slide med sidebar)...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 2: UPPDRAG
+% ============================================================================
+
+\section{Uppdrag (Slide 6)}
+
+\textit{TODO: Dokumentera uppdrag-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 3: VERKSAMHET
+% ============================================================================
+
+\section{Verksamhet (Slide 7)}
+
+\textit{TODO: Dokumentera verksamhet-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 4: RISKFRÅGOR
+% ============================================================================
+
+\section{Riskfrågor (Slide 8)}
+
+\textit{TODO: Dokumentera riskfrågor-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 5: IDENTITETSKONTROLL
+% ============================================================================
+
+\section{Identitetskontroll (Slide 9)}
+
+\textit{TODO: Dokumentera BankID-endpoints här...}
+
+\newpage
+
+\section{Kontrolltabell (Slide 10)}
+
+\textit{TODO: Dokumentera kontrolltabell-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 7: PEP-FÖRDJUPNING
+% ============================================================================
+
+\section{PEP-fördjupning (Slide 11)}
+
+\textit{TODO: Dokumentera PEP-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 8: VERKSAMHETSKOD
+% ============================================================================
+
+\section{Verksamhetskod (Slide 12)}
+
+\textit{TODO: Dokumentera SNI-kod-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 9: ÄGARSTRUKTUR
+% ============================================================================
+
+\section{Ägarstruktur (Slide 13)}
+
+\textit{TODO: Dokumentera Bolagsverket-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 10: STYRELSE
+% ============================================================================
+
+\section{Styrelse (Slide 14)}
+
+\textit{TODO: Dokumentera styrelse-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 11: FÖRETAGSDOKUMENTATION
+% ============================================================================
+
+\section{Företagsdokumentation (Slide 13.5)}
+
+\textit{TODO: Dokumentera PDF-upload och OCR-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 12: BOKFÖRINGSUNDERLAG
+% ============================================================================
+
+\section{Bokföringsunderlag (Slide 14.5)}
+
+\textit{TODO: Dokumentera file-upload och fraud-detection-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 13: BOKFÖRING
+% ============================================================================
+
+\section{Bokföring (Slide 15)}
+
+\textit{TODO: Dokumentera Skatteverket/SIE-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 14: LIKVIDITET
+% ============================================================================
+
+\section{Likviditet (Slide 16)}
+
+\textit{TODO: Dokumentera likviditets-analys-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 15: OMSÄTTNING
+% ============================================================================
+
+\section{Omsättning (Slide 17)}
+
+\textit{TODO: Dokumentera omsättnings-data-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 16: RESULTAT
+% ============================================================================
+
+\section{Resultat (Slide 18)}
+
+\textit{TODO: Dokumentera resultat-analys-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 17: BRANSCH
+% ============================================================================
+
+\section{Bransch (Slide 19)}
+
+\textit{TODO: Dokumentera bransch-jämförelse-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 18: BOKFÖRINGSANALYS
+% ============================================================================
+
+\section{Bokföringsanalys (Slide 20)}
+
+\textit{TODO: Dokumentera AI-analys-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 19: RISKBESKED
+% ============================================================================
+
+\section{Riskbesked (Slide 21)}
+
+\textit{TODO: Dokumentera risk-scoring-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 20: SKYLDIGHETER
+% ============================================================================
+
+\section{Skyldigheter (Slide 22)}
+
+\textit{TODO: Dokumentera avtal-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 21: FORTNOX-KOPPLING
+% ============================================================================
+
+\section{Fortnox-koppling (Slide 23)}
+
+\textit{TODO: Dokumentera Fortnox OAuth-endpoints här...}
+
+\newpage
+
+% ============================================================================
+% SLIDE 22: BANKRÄTTIGHETER
+% ============================================================================
+
+\section{Bankrättigheter (Slide 24)}
+
+\textit{TODO: Dokumentera bank-OAuth-endpoints här...}
+
+\newpage
+
+% ############################################################################
+% ############################################################################
+% DEL 3: ADMIN DASHBOARD (Separat spec finns i Admin_Dashboard_Spec.tex)
+% ############################################################################
+% ############################################################################
+
+\section{AdminDashboard}
+
+\textit{TODO: Dokumentera admin-endpoints här (referera till Admin\_Dashboard\_Spec.tex)...}
+
+\newpage
+
+\section{Appendix}
+
+\subsection{Gemensamma Error Codes}
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Code} & \textbf{Status} & \textbf{Beskrivning} \\ \midrule
+400 & Bad Request & Ogiltig input data \\
+401 & Unauthorized & Saknar eller ogiltig JWT token \\
+403 & Forbidden & Saknar behörighet för resursen \\
+404 & Not Found & Resursen finns inte \\
+409 & Conflict & Resurs existerar redan (t.ex. email) \\
+422 & Unprocessable Entity & Valideringsfel \\
+429 & Too Many Requests & Rate limit överskriden \\
+500 & Internal Server Error & Oväntat serverfel \\
+503 & Service Unavailable & Extern tjänst ej tillgänglig \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Rate Limiting}
+\begin{itemize}[noitemsep]
+  \item \textbf{Auth endpoints:} 5 requests/minut per IP
+  \item \textbf{File uploads:} 10 requests/minut per user
+  \item \textbf{Övriga endpoints:} 100 requests/minut per user
+\end{itemize}
+
+\subsection{File Upload Limits}
+\begin{itemize}[noitemsep]
+  \item \textbf{Max filstorlek:} 10 MB per fil
+  \item \textbf{Max totalt per request:} 50 MB
+  \item \textbf{Tillåtna format:} PDF, PNG, JPG, JPEG, SIE, XML
+\end{itemize}
+
+\newpage
+\section{Del 2: Onboarding-Slides (Med Sidebar)}
+
+Detta avsnitt dokumenterar API-endpoints för alla onboarding-slides som visas \textbf{efter} autentisering. Användaren har nu JWT tokens i localStorage och ser en sidebar med progress-indikator.
+
+Onboarding-flödet består av cirka 20-25 slides som samlar in kundinformation enligt Penningtvättslagen (PML) och Revisorslagens (RL) krav. Varje slide sparar data i backend och användaren kan navigera fram/tillbaka med progress bevarad.
+
+\subsection{Gemensamma mönster}
+\begin{itemize}[noitemsep]
+  \item \textbf{Autentisering:} Alla endpoints kräver \texttt{Authorization: Bearer <access\_token>} header
+  \item \textbf{User context:} Backend hämtar \texttt{user\_id} från JWT token
+  \item \textbf{Progress tracking:} Varje slide-completion sparas i \texttt{onboarding\_progress.csv}
+  \item \textbf{Draft saves:} Data sparas som drafts vid varje fältändring (debounced 2 sekunder)
+  \item \textbf{Validation:} Frontend validerar innan POST, backend validerar igen
+  \item \textbf{Error handling:} 400 (validation), 401 (auth), 500 (server error)
+\end{itemize}
+
+\newpage
+\subsection{Sida 6: Inledning och bakgrund}
+
+\subsubsection{API-endpoints Sammanfattning}
+\textbf{INGA API-endpoints} -- Denna slide är rent informativ och kräver ingen data från backend.
+
+\subsubsection{Översikt}
+Första sliden efter autentisering. Visar information om varför onboarding-processen är nödvändig (Penningtvättslagen, tillsyn av Länsstyrelserna, GDPR-krav). Innehåller endast en "Nästa"-knapp.
+
+\textbf{React-komponent:} \texttt{IntroSlide.jsx}
+
+\textbf{Route:} \texttt{/inledning}
+
+\textbf{User journey:}
+\begin{enumerate}[noitemsep]
+  \item Användaren loggar in → Navigeras till \texttt{/inledning}
+  \item Läser informationen om PML-krav och Länsstyrelsens tillsyn
+  \item Klickar "Nästa" → Navigeras till \texttt{/riskfragor}
+\end{enumerate}
+
+\textbf{Sidebar:} Visar "1. Inledning" som aktiv, övriga slides som grå
+
+\subsubsection{Frontend - Datalagring i Browser}
+\begin{itemize}[noitemsep]
+  \item \textbf{localStorage:} \texttt{accessToken}, \texttt{refreshToken} (redan sparade från login)
+  \item \textbf{sessionStorage:} INGET (behövs ej)
+  \item \textbf{State:} Ingen slide-specifik state (bara navigation)
+\end{itemize}
+
+\subsubsection{Backend - GDPR-loggning}
+\begin{itemize}[noitemsep]
+  \item \textbf{Event:} "Onboarding Started" (när användaren landar på /inledning första gången)
+  \item \textbf{Detaljer:} \texttt{"slide": "intro", "timestamp": "2025-10-22 20:30:15"}
+  \item \textbf{Sparas i:} \texttt{audit\_log.csv}
+\end{itemize}
+
+\textbf{Exempel audit\_log post:}
+\begin{lstlisting}
+2025-10-22 20:30:15,550e8400,anders@gmail.com,Onboarding,Onboarding Started,
+{"slide":"intro"},192.168.1.10,Mozilla/5.0...
+\end{lstlisting}
+
+\textbf{OBS:} Denna loggning sker automatiskt när React-appen navigerar till /inledning. Inget explicit API-anrop från frontend.
+
+\subsubsection{CSV-filer}
+\textbf{INGA nya CSV-filer} -- IntroSlide sparar ingen data.
+
+\textbf{Befintliga filer som kan läsas:}
+\begin{itemize}[noitemsep]
+  \item \texttt{users.csv} -- Backend kan läsa user\_name för att visa "Välkommen, Anders!" (valfritt)
+\end{itemize}
+
+\subsubsection{Databastabeller}
+\textbf{onboarding\_progress:} (PostgreSQL)
+\begin{lstlisting}
+CREATE TABLE onboarding_progress (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id),
+  current_slide VARCHAR(50) NOT NULL,  -- 'intro', 'riskfragor', 'foretagsinfo', etc.
+  completed_slides TEXT[],  -- Array: ['intro', 'riskfragor']
+  last_updated TIMESTAMP NOT NULL DEFAULT NOW(),
+  INDEX idx_user_id (user_id)
+);
+\end{lstlisting}
+
+\textbf{OBS:} När användaren klickar "Nästa" från IntroSlide, uppdatera:
+\begin{lstlisting}
+UPDATE onboarding_progress
+SET current_slide = 'riskfragor',
+    completed_slides = array_append(completed_slides, 'intro'),
+    last_updated = NOW()
+WHERE user_id = '<user_id_from_jwt>';
+\end{lstlisting}
+
+\subsubsection{Sammanfattning}
+\textbf{IntroSlide är en "läs-only" slide} utan API-anrop från frontend. Backend kan dock logga när användaren når denna slide första gången (via middleware som kollar route changes) för GDPR-compliance och progress tracking.
+
+\textbf{Teknisk sammanfattning:}
+\begin{itemize}[noitemsep]
+  \item Ingen data input från användaren
+  \item Ingen data sparad i backend från denna slide
+  \item Progress tracking: "intro" läggs till i \texttt{completed\_slides[]} när "Nästa" klickas
+  \item Navigation: Klick "Nästa" → Frontend navigerar till \texttt{/riskfragor}
+  \item Sidebar uppdatering: React state management (ingen backend sync)
+\end{itemize}
+
+\end{document}

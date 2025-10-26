@@ -11,7 +11,7 @@ export default function Sidebar({ currentPath, hasRoaringData = false }) {
     { path: '/', title: 'Hem', icon: 'home' },
     // Autentiseringssidor (login, register, verify) visas INTE i sidebar
     // eftersom de inte har sidebar överhuvudtaget
-    { path: '/inledning', title: 'Inledning', icon: 'info' },
+    { path: '/uppdragsval', title: 'Uppdragsval', icon: 'checkList' },
     { path: '/riskfragor', title: 'Riskfrågor', icon: 'question' },
     { path: '/identitetskontroll', title: 'Identitetskontroll', icon: 'idCard' },
     { path: '/kontrolltabell', title: 'Kontrolltabell', icon: 'checkList' },

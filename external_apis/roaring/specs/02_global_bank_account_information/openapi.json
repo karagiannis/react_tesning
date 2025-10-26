@@ -1,0 +1,654 @@
+{
+  "paths": {
+    "/account/{accountId}/transactions": {
+      "get": {
+        "operationId": "getAccountTransactions",
+        "parameters": [
+          {
+            "description": "Account id",
+            "in": "path",
+            "name": "accountId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "From date",
+            "in": "query",
+            "name": "fromDate",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "To date",
+            "in": "query",
+            "name": "toDate",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK, successfull response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Returned when authentication credentials are insufficient to grant access"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Get all accounts transactions",
+        "tags": [
+          "BankAccountData"
+        ]
+      }
+    },
+    "/aspsps_statuses": {
+      "get": {
+        "operationId": "getAspspsStatuses",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK, successfull response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Returned when authentication credentials are insufficient to grant access"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Gets aspsps statuses",
+        "tags": [
+          "BankAccountData"
+        ]
+      }
+    },
+    "/auth/session": {
+      "get": {
+        "operationId": "getAuthSession",
+        "parameters": [
+          {
+            "description": "Auth code",
+            "in": "query",
+            "name": "authCode",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK, successfull response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Returned when authentication credentials are insufficient to grant access"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Gets auth session",
+        "tags": [
+          "BankAccountData"
+        ]
+      }
+    },
+    "/auth/url/{country}/{bankName}": {
+      "post": {
+        "operationId": "getAuthUrl",
+        "parameters": [
+          {
+            "description": "Bank name",
+            "in": "path",
+            "name": "bankName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "banks country",
+            "in": "path",
+            "name": "country",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Url which user will be redirected after successful authorization",
+            "in": "query",
+            "name": "redirectUrl",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Two-letter lowercase language code in ISO 639-1 format. If omitted, defaults to the banks country language",
+            "in": "query",
+            "name": "language",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialsRequest"
+              }
+            }
+          },
+          "description": "request body with bank credentials"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK, successfull response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Returned when authentication credentials are insufficient to grant access"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Gets auth url",
+        "tags": [
+          "BankAccountData"
+        ]
+      }
+    },
+    "/banks/{psuType}": {
+      "get": {
+        "operationId": "getAvailableBanksList",
+        "parameters": [
+          {
+            "description": "psu type",
+            "in": "path",
+            "name": "psuType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Country connected to bank",
+            "in": "query",
+            "name": "countryCode",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK, successfull response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Returned when authentication credentials are insufficient to grant access"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Fetch a list of available banks",
+        "tags": [
+          "BankAccountData"
+        ]
+      }
+    },
+    "/session/{sessionId}": {
+      "delete": {
+        "operationId": "deleteSession",
+        "parameters": [
+          {
+            "description": "Session id",
+            "in": "path",
+            "name": "sessionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK, successfull response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Returned when authentication credentials are insufficient to grant access"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Deletes session",
+        "tags": [
+          "BankAccountData"
+        ]
+      }
+    },
+    "/account/details/{accountId}": {
+      "get": {
+        "operationId": "getAccountDetails",
+        "parameters": [
+          {
+            "description": "Account id",
+            "in": "path",
+            "name": "accountId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK, successfull response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Returned when authentication credentials are insufficient to grant access"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Gets account details",
+        "tags": [
+          "BankAccountData"
+        ]
+      }
+    }
+  },
+  "x-countries": [
+    "global"
+  ],
+  "x-category": "person",
+  "x-id": "BankAccountDataApi",
+  "components": {
+    "schemas": {
+      "BadRequest": {
+        "description": "Returned when something is wrong in the request, e.g. failed argument validation or missed argument",
+        "properties": {
+          "attributes": {
+            "description": "Invalid attributes",
+            "items": {
+              "$ref": "#/components/schemas/RequestAttribute"
+            },
+            "type": "array"
+          },
+          "error": {
+            "description": "Error name",
+            "type": "string"
+          },
+          "message": {
+            "description": "Description of the request error",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CredentialsRequest": {
+        "description": "Open banking credentials request",
+        "properties": {
+          "authOption": {
+            "description": "Authentication option name",
+            "type": "string"
+          },
+          "cardNumber": {
+            "type": "string"
+          },
+          "companyId": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "iban": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "personalCode": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "type": {
+            "description": "Bank account type",
+            "enum": [
+              "business",
+              "personal"
+            ],
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Forbidden": {
+        "description": "Returned when request is not authorized due to insufficient credentials",
+        "properties": {
+          "error": {
+            "description": "Error name",
+            "type": "string"
+          },
+          "message": {
+            "description": "Description of the request error",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RequestAttribute": {
+        "description": "Incorrect attribute of request",
+        "properties": {
+          "attribute": {
+            "description": "Parameter name",
+            "type": "string"
+          },
+          "value": {
+            "description": "Parameter value, subject for validation",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServerError": {
+        "description": "Internal server error",
+        "properties": {
+          "error": {
+            "description": "Error name",
+            "type": "string"
+          },
+          "message": {
+            "description": "Description of the request error",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "flows": {
+          "clientCredentials": {
+            "scopes": {},
+            "tokenUrl": "https://api.roaring.io/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "description": "Global bank account data",
+    "title": "Global bank account data",
+    "version": "1.0",
+    "x-logo": {
+      "url": "https://assets.roaring.io/svg/psd2-icon-v3.1.svg"
+    }
+  },
+  "openapi": "3.0.1",
+  "security": [
+    {
+      "OAuth2": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://api.roaring.io/global/bank-account-data/1.0"
+    }
+  ]
+}

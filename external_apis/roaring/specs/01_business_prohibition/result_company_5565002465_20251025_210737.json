@@ -1,0 +1,22 @@
+{
+  "records": [
+    {
+      "companyId": "5565002465",
+      "personsWithBusinessProhibition": [
+        {
+          "personId": "194812161596",
+          "relationsToCompany": [
+            {
+              "isCurrent": true,
+              "relation": "BOARD_MEMBER"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "status": {
+    "code": 0,
+    "text": "records found"
+  }
+}

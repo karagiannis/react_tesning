@@ -1,0 +1,147 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Bolagsverket - Kodlista: Organisationsformer",
+  "description": "Administrativ form som organisationen bedriver verksamhet i",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^[A-Z]+-ORGFO$": {
+      "type": "object",
+      "properties": {
+        "kod": {
+          "type": "string",
+          "pattern": "^[A-Z]+-ORGFO$"
+        },
+        "beskrivning": {
+          "type": "string"
+        }
+      },
+      "required": ["kod", "beskrivning"]
+    }
+  },
+  "definitions": {
+    "organisationsformer": {
+      "AB-ORGFO": {
+        "kod": "AB-ORGFO",
+        "beskrivning": "Aktiebolag"
+      },
+      "BAB-ORGFO": {
+        "kod": "BAB-ORGFO",
+        "beskrivning": "Bankaktiebolag"
+      },
+      "BF-ORGFO": {
+        "kod": "BF-ORGFO",
+        "beskrivning": "Bostadsförening"
+      },
+      "BFL-ORGFO": {
+        "kod": "BFL-ORGFO",
+        "beskrivning": "Utländsk banks filial"
+      },
+      "BRF-ORGFO": {
+        "kod": "BRF-ORGFO",
+        "beskrivning": "Bostadsrättsförening"
+      },
+      "E-ORGFO": {
+        "kod": "E-ORGFO",
+        "beskrivning": "Enskild näringsverksamhet"
+      },
+      "EB-ORGFO": {
+        "kod": "EB-ORGFO",
+        "beskrivning": "Enkla bolag"
+      },
+      "EEIG-ORGFO": {
+        "kod": "EEIG-ORGFO",
+        "beskrivning": "Europeisk ekonomisk intressegruppering"
+      },
+      "EGTS-ORGFO": {
+        "kod": "EGTS-ORGFO",
+        "beskrivning": "Europeisk gruppering för territoriellt samarbete"
+      },
+      "EK-ORGFO": {
+        "kod": "EK-ORGFO",
+        "beskrivning": "Ekonomisk förening"
+      },
+      "FAB-ORGFO": {
+        "kod": "FAB-ORGFO",
+        "beskrivning": "Försäkringsaktiebolag"
+      },
+      "FF-ORGFO": {
+        "kod": "FF-ORGFO",
+        "beskrivning": "Försäkringsförmedlare"
+      },
+      "FL-ORGFO": {
+        "kod": "FL-ORGFO",
+        "beskrivning": "Filial"
+      },
+      "FOF-ORGFO": {
+        "kod": "FOF-ORGFO",
+        "beskrivning": "Försäkringsförening"
+      },
+      "HB-ORGFO": {
+        "kod": "HB-ORGFO",
+        "beskrivning": "Handelsbolag"
+      },
+      "I-ORGFO": {
+        "kod": "I-ORGFO",
+        "beskrivning": "Ideell förening som bedriver näringsverksamhet"
+      },
+      "KB-ORGFO": {
+        "kod": "KB-ORGFO",
+        "beskrivning": "Kommanditbolag"
+      },
+      "KHF-ORGFO": {
+        "kod": "KHF-ORGFO",
+        "beskrivning": "Kooperativ hyresrättsförening"
+      },
+      "MB-ORGFO": {
+        "kod": "MB-ORGFO",
+        "beskrivning": "Medlemsbank"
+      },
+      "OFB-ORGFO": {
+        "kod": "OFB-ORGFO",
+        "beskrivning": "Ömsesidigt försäkringsbolag"
+      },
+      "OTPB-ORGFO": {
+        "kod": "OTPB-ORGFO",
+        "beskrivning": "Ömsesidigt tjänstepensionsbolag"
+      },
+      "S-ORGFO": {
+        "kod": "S-ORGFO",
+        "beskrivning": "Stiftelse som bedriver näringsverksamhet"
+      },
+      "SB-ORGFO": {
+        "kod": "SB-ORGFO",
+        "beskrivning": "Sparbank"
+      },
+      "SCE-ORGFO": {
+        "kod": "SCE-ORGFO",
+        "beskrivning": "Europakooperativ"
+      },
+      "SE-ORGFO": {
+        "kod": "SE-ORGFO",
+        "beskrivning": "Europabolag"
+      },
+      "SF-ORGFO": {
+        "kod": "SF-ORGFO",
+        "beskrivning": "Sambruksförening"
+      },
+      "TPAB-ORGFO": {
+        "kod": "TPAB-ORGFO",
+        "beskrivning": "Tjänstepensionsaktiebolag"
+      },
+      "TPF-ORGFO": {
+        "kod": "TPF-ORGFO",
+        "beskrivning": "Tjänstepensionsförening"
+      },
+      "TSF-ORGFO": {
+        "kod": "TSF-ORGFO",
+        "beskrivning": "Trossamfund som bedriver näringsverksamhet"
+      }
+    }
+  },
+  "metadata": {
+    "source": "Bolagsverket Värdefulladatamängder - Kodlista 1",
+    "total": 28,
+    "usage": "Fältet 'organisationsform' i grunddata"
+  }
+}

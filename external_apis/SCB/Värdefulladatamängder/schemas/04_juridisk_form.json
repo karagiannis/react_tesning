@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SCB Juridisk Form Schema",
+  "description": "Juridisk form enligt SCB:s klassificering. Beskriver företagets eller organisationens juridiska struktur.",
+  "type": "object",
+  "definitions": {
+    "juridiskForm": {
+      "type": "string",
+      "enum": [
+        "10", "21", "22", "23", "31", "32", "41", "42", "43", "49",
+        "51", "53", "54", "61", "62", "63", "71", "72", "81", "82",
+        "83", "84", "85", "87", "88", "89", "91", "92", "93", "94",
+        "95", "96", "98", "99"
+      ],
+      "description": "Juridisk form kod"
+    }
+  },
+  "properties": {
+    "codes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": { "$ref": "#/definitions/juridiskForm" },
+          "description": { "type": "string" }
+        },
+        "required": ["code", "description"]
+      }
+    }
+  },
+  "juridiskaFormer": [
+    { "code": "10", "description": "Enskild näringsidkare" },
+    { "code": "21", "description": "Enkelt bolag" },
+    { "code": "22", "description": "Enkelt bolag utan näringsverksamhet" },
+    { "code": "23", "description": "Enkelt bolag, kommanditbolag eller handelsbolag som ej ägs av juridiska personer" },
+    { "code": "31", "description": "Handelsbolag" },
+    { "code": "32", "description": "Kommanditbolag" },
+    { "code": "41", "description": "Aktiebolag" },
+    { "code": "42", "description": "Aktiebolag som är moder- eller dotterföretag till utländskt moderföretag" },
+    { "code": "43", "description": "Publikt aktiebolag" },
+    { "code": "49", "description": "Aktiebolag enligt äldre lagstiftning" },
+    { "code": "51", "description": "Ekonomisk förening" },
+    { "code": "53", "description": "Bostadsrättsförening" },
+    { "code": "54", "description": "Kooperativ hyresrättsförening" },
+    { "code": "61", "description": "Ideell förening" },
+    { "code": "62", "description": "Registrerat trossamfund" },
+    { "code": "63", "description": "Stiftelse" },
+    { "code": "71", "description": "Svensk filial till utländsk juridisk person" },
+    { "code": "72", "description": "Europabolag (SE)" },
+    { "code": "81", "description": "Staten" },
+    { "code": "82", "description": "Kommun eller kommunalförbund" },
+    { "code": "83", "description": "Landsting eller Region" },
+    { "code": "84", "description": "Statlig eller kommunal myndighet eller verksamhet" },
+    { "code": "85", "description": "Svenska kyrkan eller församling" },
+    { "code": "87", "description": "Dödsbo" },
+    { "code": "88", "description": "Utländsk juridisk person" },
+    { "code": "89", "description": "Europeisk ekonomisk intressegruppering (EEIG)" },
+    { "code": "91", "description": "Övrig associationsform med juridisk person" },
+    { "code": "92", "description": "Övrig associationsform utan juridisk person" },
+    { "code": "93", "description": "Konkursbo" },
+    { "code": "94", "description": "Okänd juridisk form" },
+    { "code": "95", "description": "Europabolag (SCE)" },
+    { "code": "96", "description": "Enskild firma som överlåtits eller nedlagts" },
+    { "code": "98", "description": "Särskild grupp för statistikändamål" },
+    { "code": "99", "description": "Övrigt" }
+  ],
+  "metadata": {
+    "source": "SCB Värdefulladatamängder",
+    "lastUpdated": "2025-10-26",
+    "field": "jurform",
+    "usage": "Klassificering av företagets juridiska form enligt svensk lagstiftning"
+  }
+}

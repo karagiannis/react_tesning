@@ -1,0 +1,448 @@
+\documentclass[12pt,a4paper]{article}
+
+% Paket
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[swedish]{babel}
+\usepackage[autostyle=true]{csquotes}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{listings}
+
+% Undvik konflikt med babels "-shorthand i löpande text
+\AtBeginDocument{\shorthandoff{"}}
+
+% Definiera JSON för listings
+\lstdefinelanguage{json}{
+  morestring=[b]",
+  morestring=[d]'
+}
+
+% Färger
+\definecolor{brandgreen}{RGB}{0,112,74}
+\definecolor{lightgray}{RGB}{245,245,245}
+
+% Hyperref
+\hypersetup{
+  colorlinks=true,
+  linkcolor=brandgreen,
+  urlcolor=brandgreen,
+  citecolor=brandgreen
+}
+
+% Titel
+\title{\textbf{Metod för riskbedömning av kund} \\ \large Version 3.0 – Celestial Risk Engine}
+\author{Celestial AB \\ Penningtvättsansvarig}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+% ========================================================================
+\section{Introduktion och metodval}
+% ========================================================================
+
+\subsection{Syfte}
+
+Detta dokument beskriver Celestial AB:s metod för riskbedömning av kunder enligt Penningtvättslagen (PTL 2017:630). Metoden används för att klassificera nya kunder i riskklasser och avgöra om Enhanced Due Diligence (EDD) krävs.
+
+\textbf{Version 3.0 ersätter tidigare Hot×Sårbarhet-modell} och inför en enhetlig 0–100 poäng-baserad Celestial Risk Engine.
+
+\subsection{Regelverkskrav}
+
+\begin{itemize}[noitemsep]
+  \item \textbf{PTL 3 kap 2 §:} Riskbaserade kundkännedomsåtgärder
+  \item \textbf{PTL 3 kap 10 §:} Fördjupad kundkännedom vid förhöjd risk
+  \item \textbf{FFFS 2009:1:} Finansinspektionens föreskrifter om åtgärder mot penningtvätt och finansiering av terrorism
+  \item \textbf{EU-direktiv 2015/849 (4:e penningtvättsdirektivet):} Riskbaserat arbetssätt
+\end{itemize}
+
+\subsection{Metodöversikt}
+
+\textbf{Celestial Risk Engine} kombinerar tre datakällor:
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Offentliga register} (30\% vikt): Bolagsverket, SPAR, Roaring (PEP, sanktioner, näringsförbud)
+  \item \textbf{Korsvalidering} (30\% vikt): Avvikelser mellan registerdata (VH-mismatch, adressmismatch, F-skatt/moms)
+  \item \textbf{Bokföringsdata} (40\% vikt): SIE-fil analys, bankkonto, nyckeltal
+\end{enumerate}
+
+\textbf{Steg 1 (Statisk KYC)} beräknar en \texttt{staticKycScore} (0–100) baserat på punkt 1–2 ovan (bokföring = 0 initialt).
+
+\textbf{Senare steg} lägger till bokföringskomponenten (40\%) när SIE-fil och bankkonto analyseras.
+
+% ========================================================================
+\section{SNI-kod och Hotfaktor}
+% ========================================================================
+
+\subsection{Hotfaktor (1–4) från branschkod}
+
+Varje företags SNI-kod (Svensk Näringsgrensindelning) mappas till en \textbf{Hotfaktor} enligt Finansinspektionens riskklassificering av branscher:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{cl}
+\toprule
+\textbf{Hot} & \textbf{Branschtyp} \\
+\midrule
+1 & Lågrisk: Konsulttjänster, IT, utbildning, design \\
+2 & Normal risk: Handel (ej kontanter), tillverkning, bygg \\
+3 & Förhöjd risk: Restaurang, taxi, frisör, bilhandel (kontantintensiv) \\
+4 & Hög risk: Spelverksamhet, valutaväxling, ädelmetaller, begagnathandel \\
+\bottomrule
+\end{tabular}
+\caption{SNI-kod till Hotfaktor-mappning}
+\end{table}
+
+\textbf{Källa:} Bolagsverket API returnerar SNI-kod automatiskt vid validering av organisationsnummer.
+
+\subsection{Hotfaktorns påverkan på riskscore}
+
+Hotfaktorn används för att lägga till en \textbf{hotbonus} direkt till den statiska KYC-scoren:
+
+\begin{equation}
+\text{hotBonus} = (\text{sniHotFactor} - 1) \times 10
+\end{equation}
+
+\begin{equation}
+\text{adjustedScore} = \text{publicData} + \text{crossValidation} + \text{bookkeeping} + \text{hotBonus}
+\end{equation}
+
+\textbf{Exempel:}
+\begin{itemize}[noitemsep]
+  \item Hot 1 (lågrisk): hotBonus = $(1-1) \times 10 = 0$ poäng
+  \item Hot 2 (normal): hotBonus = $(2-1) \times 10 = 10$ poäng
+  \item Hot 3 (förhöjd): hotBonus = $(3-1) \times 10 = 20$ poäng
+  \item Hot 4 (hög): hotBonus = $(4-1) \times 10 = 30$ poäng
+\end{itemize}
+
+\textbf{Motivering:} Kontantintensiva branscher (Hot 3–4) kräver extra granskning enligt PTL 3 kap 10 § 2 p. Den direkta additionen gör beräkningen transparent och lätt att följa i granskningssyfte.
+
+% ========================================================================
+\section{Celestial Risk Engine – Beräkningsmodell}
+% ========================================================================
+
+\subsection{Komponent 1: Offentliga register (max 30 poäng)}
+
+\textbf{Datakällor:}
+\begin{itemize}[noitemsep]
+  \item Bolagsverket: Företagsålder, organisationsform, status
+  \item SPAR: Folkbokföring VD/firmatecknare
+  \item Roaring: PEP-status, sanktionslistor, näringsförbud, verkliga huvudmän
+\end{itemize}
+
+\textbf{Poängberäkning:}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Faktor} & \textbf{Villkor} & \textbf{Poäng} \\
+\midrule
+Bolagsålder & $< 1$ år & +8 \\
+            & 1–3 år & +4 \\
+            & $> 3$ år & 0 \\
+PEP-status  & Någon huvudman är PEP & +10 \\
+Sanktioner  & Träff på sanktionslista & +30 (→ critical) \\
+Näringsförbud & Aktiv näringsförbudad person & +30 (→ critical) \\
+Utländsk VD & VD ej folkbokförd i Sverige & +5 \\
+\bottomrule
+\end{tabular}
+\caption{Offentliga register – poängtabell}
+\end{table}
+
+\textbf{Max-tak:} 30 poäng (utom vid sanktioner/näringsförbud som ger automatisk \texttt{critical}-klassning).
+
+\subsection{Komponent 2: Korsvalidering (max 30 poäng)}
+
+\textbf{Avvikelser mellan registerdata:}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Avvikelse} & \textbf{Beskrivning} & \textbf{Poäng} \\
+\midrule
+VH-mismatch & Användare påstår sig vara VH men Roaring visar ej & +15 \\
+Adressmismatch & SPAR-adress $\neq$ Bolagsverket-adress & +8 \\
+Saknad F-skatt & Fakturerar men ej F-skattesedel & +10 \\
+Saknad momsreg. & Omsättning $> 30\,000$ kr men ej momsregistrerad & +12 \\
+Dubblerad VD & Samma person VD i $>5$ bolag & +6 \\
+\bottomrule
+\end{tabular}
+\caption{Korsvalidering – poängtabell}
+\end{table}
+
+\textbf{Max-tak:} 30 poäng.
+
+\textbf{Motivering:} Avvikelser mellan register indikerar potentiella strukturer för skatteundandragande eller penningtvätt (PTL 3 kap 10 § 1 p).
+
+\subsection{Komponent 3: Bokföringsdata (max 40 poäng)}
+
+\textbf{Analyseras i senare steg} när SIE-fil och bankkonto laddas upp.
+
+\textbf{Indikatorer:}
+\begin{itemize}[noitemsep]
+  \item Kassaandel $> 40\%$ av omsättning (+12 poäng)
+  \item Negativ soliditet $< -20\%$ (+8 poäng)
+  \item Extraordinära transaktioner $> 500\,000$ kr utan verifikat (+15 poäng)
+  \item Utländska transaktioner till högrisländer (FATF grå-/svartlista) (+10 poäng)
+  \item Avvikelse bokföring vs. deklaration $> 15\%$ (+8 poäng)
+\end{itemize}
+
+\textbf{Max-tak:} 40 poäng.
+
+\textbf{I Steg 1 sätts denna komponent till 0}, eftersom bokföring ännu ej analyserats.
+
+% ========================================================================
+\section{Riskklassificering – Fyrgradig skala}
+% ========================================================================
+
+\subsection{Finansinspektionens standard}
+
+Celestial AB använder Finansinspektionens fyrgradig riskskala (FFFS 2009:1):
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Låg risk} (Low): Standardiserad kundkännedom
+  \item \textbf{Förhöjd risk} (Medium): Utökad kundkännedom
+  \item \textbf{Hög risk} (High): Enhanced Due Diligence (EDD) enligt PTL 3 kap 10 §
+  \item \textbf{Oacceptabel risk} (Critical): Avslag av uppdrag, anmälningsplikt Finanspolisen
+\end{enumerate}
+
+\subsection{Tröskelvärden}
+
+\textbf{Beräkning:}
+\begin{equation}
+\text{adjustedScore} = \text{publicData} + \text{crossValidation} + \text{bookkeeping} + \text{hotBonus}
+\end{equation}
+
+där $\text{hotBonus} = (\text{sniHotFactor} - 1) \times 10$
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Riskklass} & \textbf{adjustedScore} & \textbf{Åtgärd} \\
+\midrule
+Low & 0–40 poäng & Standardiserad KYC \\
+Medium & 41–70 poäng & Utökad KYC, extra dokumentation \\
+High & 71–90 poäng & EDD, godkännande av PTL-ansvarig \\
+Critical & $> 90$ poäng eller hårda triggers & Avslag, eventuell anmälan \\
+\bottomrule
+\end{tabular}
+\caption{Riskklassificering – tröskelvärden}
+\end{table}
+
+\subsection{Hårda triggers (automatisk Critical)}
+
+Oavsett score klassas kunden som \texttt{critical} vid:
+\begin{itemize}[noitemsep]
+  \item Träff på sanktionslista (Roaring Sanctions API)
+  \item Aktivt näringsförbud (Roaring Business Prohibition API)
+  \item Flera allvarliga avvikelser: VH-mismatch + saknad F-skatt + PEP
+\end{itemize}
+
+\subsection{Eskaleringstriggrar (höjer riskklass ett steg)}
+
+Om \texttt{adjustedScore} ligger på gränsen (t.ex. 38–42 eller 68–72) eskaleras riskklass vid:
+\begin{itemize}[noitemsep]
+  \item PEP-status + score $> 35$ → Low blir Medium
+  \item VH-mismatch + score $> 60$ → Medium blir High
+  \item Utländska partners (högrisländer) + score $> 55$ → Medium blir High
+\end{itemize}
+
+% ========================================================================
+\section{Implementering i Steg 1 API}
+% ========================================================================
+
+\subsection{Response-struktur}
+
+\textbf{Endpoint:} \texttt{POST /api/onboarding/\{onboardingId\}/riskfragor/steg1}
+
+\textbf{Response (förenklad):}
+\begin{lstlisting}[language=json]
+{
+  "success": true,
+  "riskAssessment": {
+    "staticKycScore": 45,
+    "adjustedScore": 59,
+    "sniHotFactor": 3,
+    "riskLevel": "medium",
+    "requiresEDD": false,
+    "components": {
+      "publicData": 12,
+      "crossValidation": 18,
+      "bookkeeping": 0
+    },
+    "triggers": {
+      "isPEP": false,
+      "hasSanctions": false,
+      "hasBusinessProhibition": false,
+      "vhMismatch": false,
+      "addressMismatch": true,
+      "missingFTax": false
+    }
+  },
+  "nextStep": "/riskfragor/steg2"
+}
+\end{lstlisting}
+
+\subsection{Beräkningsflöde}
+
+\begin{enumerate}[noitemsep]
+  \item Hämta SNI-kod från Bolagsverket $\rightarrow$ sniHotFactor (1–4)
+  \item Beräkna \texttt{publicData} (0–30 poäng)
+  \item Beräkna \texttt{crossValidation} (0–30 poäng)
+  \item Sätt \texttt{bookkeeping} = 0 (fylls i senare)
+  \item \texttt{staticKycScore} = publicData + crossValidation + bookkeeping
+  \item \texttt{hotBonus} = (sniHotFactor - 1) $\times$ 10
+  \item \texttt{adjustedScore} = staticKycScore + hotBonus
+  \item Klassificera \texttt{riskLevel} enligt tröskeltabell (0-40 Low, 41-70 Medium, 71-90 High, >90 Critical)
+  \item Kontrollera hårda triggers $\rightarrow$ eventuellt tvinga \texttt{critical}
+  \item Kontrollera eskaleringstriggrar $\rightarrow$ eventuellt höj riskklass
+\end{enumerate}
+
+% ========================================================================
+\section{Exempel: Restaurangföretag}
+% ========================================================================
+
+\subsection{Scenariodata}
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Företag:} Celestial Restaurang AB
+  \item \textbf{SNI-kod:} 56101 (Restaurangverksamhet) $\rightarrow$ Hot 3 (kontantintensiv)
+  \item \textbf{Bolagsålder:} 2 år (registrerat 2023-01-15)
+  \item \textbf{VD:} Bengt Bengtsson (personnr 197001011234)
+  \item \textbf{Verkliga huvudmän:} Bengt 60\%, Lisa Larsson 40\%
+  \item \textbf{PEP:} Nej
+  \item \textbf{Sanktioner:} Nej
+  \item \textbf{Avvikelser:} Adressmismatch (SPAR vs. Bolagsverket)
+\end{itemize}
+
+\subsection{Beräkning}
+
+\textbf{Steg 1: Offentliga register}
+\begin{itemize}[noitemsep]
+  \item Bolagsålder 1–3 år: +4 poäng
+  \item PEP: 0 poäng
+  \item Sanktioner: 0 poäng
+  \item Totalt: 4 poäng
+\end{itemize}
+
+\textbf{Steg 2: Korsvalidering}
+\begin{itemize}[noitemsep]
+  \item Adressmismatch: +8 poäng
+  \item Övriga: 0 poäng
+  \item Totalt: 8 poäng
+\end{itemize}
+
+\textbf{Steg 3: Bokföringsdata}
+\begin{itemize}[noitemsep]
+  \item Ännu ej analyserad: 0 poäng
+\end{itemize}
+
+\textbf{staticKycScore} = 4 + 8 + 0 = \textbf{12 poäng}
+
+\textbf{Steg 4: Hot-bonus}
+\begin{itemize}[noitemsep]
+  \item SNI 56101 = Restaurang → Hot 3 (kontantintensiv)
+  \item hotBonus = $(3-1) \times 10 = 20$ poäng
+\end{itemize}
+
+\textbf{adjustedScore} = $12 + 20 = \textbf{32 poäng}$
+
+\textbf{Riskklass:} Low (0–40 poäng)
+
+\textbf{requiresEDD:} false
+
+\subsection{Kommentar}
+
+Trots att restaurangbranschen är kontantintensiv (Hot 3, +20 poäng) är företaget fortfarande i \enquote{Low}-klass eftersom:
+\begin{itemize}[noitemsep]
+  \item Inga allvarliga avvikelser (endast mindre adressmismatch)
+  \item Inga PEP/sanktioner/näringsförbud
+  \item Bokföring ej analyserad ännu (kan höja score senare)
+  \item Total score 32 poäng ligger under Low-gränsen (40 poäng)
+\end{itemize}
+
+Om senare SIE-analys visar hög kassaandel ($>40\%$) kan score stiga mot Medium-klass.
+
+% ========================================================================
+\section{Uppdatering vid bokföringsanalys}
+% ========================================================================
+
+När SIE-fil och bankkonto analyseras (senare i onboarding-flödet):
+
+\begin{enumerate}[noitemsep]
+  \item Beräkna \texttt{bookkeeping}-komponenten (0–40 poäng)
+  \item Uppdatera \texttt{staticKycScore} = publicData + crossValidation + bookkeeping
+  \item Räkna om \texttt{adjustedScore}
+  \item Omklassificera \texttt{riskLevel}
+  \item Om riskklass höjs: Notifiera PTL-ansvarig, kräv extra dokumentation
+\end{enumerate}
+
+\textbf{Exempel fortsättning (Restaurang):}
+
+SIE-analys visar:
+\begin{itemize}[noitemsep]
+  \item Kassaandel 48\% av omsättning: +12 poäng
+  \item Soliditet -5\%: 0 poäng (gräns är $< -20\%$)
+  \item Totalt bookkeeping: 12 poäng
+\end{itemize}
+
+\textbf{Ny staticKycScore} = 4 + 8 + 12 = \textbf{24 poäng}
+
+\textbf{Ny adjustedScore} = $24 + 20 = \textbf{44 poäng}$
+
+\textbf{Ny riskklass:} Medium (41–70 poäng)
+
+\textbf{Kommentar:} Med hög kassaandel eskaleras företaget från Low till Medium-klass. Extra dokumentation och fördjupad granskning av kontanthantering krävs nu enligt PTL.
+
+% ========================================================================
+\section{Sammanfattning och riktlinjer}
+% ========================================================================
+
+\subsection{Nyckelprinciper}
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Riskbaserat:} Högre risk = mer granskning, inte automatiskt avslag
+  \item \textbf{Dynamiskt:} Score uppdateras när mer data tillkommer
+  \item \textbf{Transparent:} Kunden ser sin riskklass och kan förklara avvikelser
+  \item \textbf{Regelefterlevnad:} Baserat på PTL, FFFS 2009:1 och FATF-rekommendationer
+\end{enumerate}
+
+\subsection{Ansvar}
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Systemet:} Automatisk beräkning av staticKycScore och riskLevel
+  \item \textbf{PTL-ansvarig:} Godkänner High-klassade kunder, beslutar om EDD-åtgärder
+  \item \textbf{VD:} Slutligt beslut vid Critical-klass (avslag eller anmälan)
+\end{itemize}
+
+\subsection{Dokumentation}
+
+Alla riskbedömningar loggas i \texttt{event\_log.csv} (CSV-first approach) med:
+\begin{itemize}[noitemsep]
+  \item Timestamp
+  \item onboardingId
+  \item staticKycScore, adjustedScore, riskLevel
+  \item Triggers som aktiverades
+  \item PTL-ansvarigs kommentar (vid High/Critical)
+\end{itemize}
+
+\vspace{1cm}
+\hrule
+\vspace{0.5cm}
+\textbf{Godkänd av:} [PTL-ansvarig namn] \\
+\textbf{Datum:} \today \\
+\textbf{Nästa revidering:} Årligen eller vid regeländringar
+
+\end{document}

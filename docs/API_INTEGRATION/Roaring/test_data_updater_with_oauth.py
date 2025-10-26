@@ -3,18 +3,19 @@
 Roaring Data Updater API - Complete Test Suite with OAuth2
 
 This script:
-1. Authenticates with Roaring OAuth2 (using client_id + client_secret)
+1. Authenticates with Roaring OAuth2 (using client_id + client_secret from roaring.ini)
 2. Gets access token
 3. Runs all Data Updater API tests
 4. Tests webhook endpoints
 
 Usage:
-    # Set credentials (one time):
+    # Credentials läses automatiskt från roaring.ini
+    python3 test_data_updater_with_oauth.py
+    
+    # Alternativt med environment variables:
     export ROARING_CLIENT_ID="your_client_id"
     export ROARING_CLIENT_SECRET="your_client_secret"
     export ROARING_WEBHOOK_ID="your_webhook_id"  # Optional
-    
-    # Run tests:
     python3 test_data_updater_with_oauth.py
 
 Requirements:
@@ -27,6 +28,34 @@ import time
 import sys
 import os
 from datetime import datetime
+from pathlib import Path
+
+# ============================================================================
+# LOAD CREDENTIALS FROM roaring.ini
+# ============================================================================
+
+# Add project root to path to import roaring_credentials
+script_dir = Path(__file__).parent
+project_root = script_dir.parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+try:
+    from roaring_credentials import get_oauth2_credentials
+    CLIENT_ID, CLIENT_SECRET, PRIMARY_OAUTH_URL = get_oauth2_credentials()
+    print(f"✅ Credentials loaded from roaring.ini")
+    print(f"   Client ID: {CLIENT_ID[:20]}...")
+except ImportError:
+    print("⚠️  Could not import roaring_credentials module")
+    print("   Falling back to environment variables...")
+    CLIENT_ID = os.getenv("ROARING_CLIENT_ID", "")
+    CLIENT_SECRET = os.getenv("ROARING_CLIENT_SECRET", "")
+    PRIMARY_OAUTH_URL = "https://sandbox-api.roaring.io/oauth2/token"
+except Exception as e:
+    print(f"⚠️  Error loading credentials: {e}")
+    print("   Falling back to environment variables...")
+    CLIENT_ID = os.getenv("ROARING_CLIENT_ID", "")
+    CLIENT_SECRET = os.getenv("ROARING_CLIENT_SECRET", "")
+    PRIMARY_OAUTH_URL = "https://sandbox-api.roaring.io/oauth2/token"
 
 # ============================================================================
 # CONFIGURATION
@@ -34,14 +63,13 @@ from datetime import datetime
 
 # OAuth2 settings - Try different endpoints
 OAUTH_TOKEN_URLS = [
-    "https://auth.roaring.io/oauth/token",  # Most common
+    PRIMARY_OAUTH_URL,  # From roaring.ini
+    "https://sandbox-api.roaring.io/oauth2/token",
+    "https://auth.roaring.io/oauth/token",
     "https://api.roaring.io/oauth/token",
     "https://login.roaring.io/oauth/token",
     "https://id.roaring.io/oauth/token",
-    "https://api.roaring.io/oauth2/token",
 ]
-CLIENT_ID = os.getenv("ROARING_CLIENT_ID", "")
-CLIENT_SECRET = os.getenv("ROARING_CLIENT_SECRET", "")
 
 # API settings
 BASE_URL = "https://api.roaring.io/se/company/current-information/1.0"

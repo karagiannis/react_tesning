@@ -1,0 +1,754 @@
+{
+  "components": {
+    "schemas": {
+      "BadRequest": {
+        "description": "Returned when something is wrong in the request, e.g. failed argument validation or missed argument",
+        "properties": {
+          "attributes": {
+            "description": "Invalid attributes",
+            "items": {
+              "$ref": "#/components/schemas/RequestAttribute"
+            },
+            "type": "array"
+          },
+          "error": {
+            "default": "BadRequest",
+            "description": "Error name",
+            "type": "string"
+          },
+          "message": {
+            "default": "Required arguments are missing in the request",
+            "description": "Description of the request error",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Document": {
+        "properties": {
+          "date": {
+            "description": "Document date",
+            "type": "string"
+          },
+          "documentType": {
+            "description": "Type of document",
+            "enum": [
+              "ANNUAL_REPORT",
+              "INTERIM_REPORT",
+              "MEETING_MINUTES",
+              "REGISTRATION_CERTIFICATION",
+              "ARTICLES_OF_ASSOCIATION",
+              "ARTICLES_OF_ASSOCIATION_NONLIMITED",
+              "FINANCIAL_PLAN"
+            ],
+            "type": "string"
+          },
+          "fileType": {
+            "description": "Document file type",
+            "type": "string"
+          },
+          "id": {
+            "description": "Document id",
+            "type": "string"
+          },
+          "status": {
+            "description": "Status of document",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DownloadLink": {
+        "properties": {
+          "type": {
+            "description": "File type",
+            "type": "string"
+          },
+          "url": {
+            "description": "Url to download document",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ListDocumentRecord": {
+        "properties": {
+          "companyId": {
+            "description": "Company identifier (company registration number / organization number)",
+            "type": "string"
+          },
+          "companyName": {
+            "description": "Company name",
+            "type": "string"
+          },
+          "documents": {
+            "description": "Documents",
+            "items": {
+              "$ref": "#/components/schemas/Document"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ListDocumentResult": {
+        "description": "List documents result",
+        "properties": {
+          "records": {
+            "description": "found document(s)",
+            "items": {
+              "$ref": "#/components/schemas/ListDocumentRecord"
+            },
+            "type": "array"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SearchResultStatus"
+          }
+        },
+        "type": "object"
+      },
+      "OrderDocument": {
+        "properties": {
+          "date": {
+            "description": "Document date",
+            "type": "string"
+          },
+          "documentType": {
+            "description": "Type of document",
+            "enum": [
+              "ANNUAL_REPORT",
+              "INTERIM_REPORT",
+              "MEETING_MINUTES",
+              "REGISTRATION_CERTIFICATION",
+              "ARTICLES_OF_ASSOCIATION",
+              "ARTICLES_OF_ASSOCIATION_NONLIMITED",
+              "FINANCIAL_PLAN"
+            ],
+            "type": "string"
+          },
+          "downloadLink": {
+            "$ref": "#/components/schemas/DownloadLink"
+          },
+          "id": {
+            "description": "Document id",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OrderDocumentResult": {
+        "description": "Order documents result",
+        "properties": {
+          "records": {
+            "description": "ordered document(s)",
+            "items": {
+              "$ref": "#/components/schemas/ListDocumentRecord"
+            },
+            "type": "array"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SearchResultStatus"
+          }
+        },
+        "type": "object"
+      },
+      "RequestAttribute": {
+        "description": "Incorrect attribute of request",
+        "properties": {
+          "attribute": {
+            "description": "Parameter name",
+            "type": "string"
+          },
+          "value": {
+            "description": "Parameter value, subject for validation",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SearchResultStatus": {
+        "description": "Description of search result",
+        "properties": {
+          "code": {
+            "description": "0 - found, 1 - not found",
+            "format": "int32",
+            "type": "integer"
+          },
+          "text": {
+            "description": "search result description",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServerError": {
+        "description": "Internal server error",
+        "properties": {
+          "error": {
+            "default": "InternalServerError",
+            "description": "Error name",
+            "type": "string"
+          },
+          "message": {
+            "default": "An internal server error occurred, please contact the system administrator with information on the error",
+            "description": "Description of the request error",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "flows": {
+          "clientCredentials": {
+            "scopes": {},
+            "tokenUrl": "https://api.roaring.io/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "description": "List and order company documents",
+    "title": "Company Documents",
+    "version": "1.0",
+    "x-logo": {
+      "url": "https://assets.roaring.io/svg/docsIcon.svg"
+    }
+  },
+  "openapi": "3.0.1",
+  "paths": {
+    "/{companyId}": {
+      "get": {
+        "description": "Lists available documents for a given company",
+        "operationId": "viewDocuments",
+        "parameters": [
+          {
+            "description": "Id of company",
+            "in": "path",
+            "name": "companyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional filter to limit type of documents to return",
+            "explode": true,
+            "in": "query",
+            "name": "documentType",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListDocumentResult"
+                }
+              }
+            },
+            "description": "OK, successful response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "List documents",
+        "tags": [
+          "CompanyDocument"
+        ]
+      }
+    },
+    "/{companyId}/registration_certification": {
+      "get": {
+        "description": "Fetch company certification document for a company",
+        "operationId": "orderCompanyCertification",
+        "parameters": [
+          {
+            "description": "id of company",
+            "in": "path",
+            "name": "companyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDocumentResult"
+                }
+              }
+            },
+            "description": "OK, successful response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Fetch company certification",
+        "tags": [
+          "CompanyDocument"
+        ]
+      }
+    },
+    "/{companyId}/annual_report/{documentId}": {
+      "get": {
+        "description": "Fetch annual report document for a company",
+        "operationId": "orderAnnualReport",
+        "parameters": [
+          {
+            "description": "id of company",
+            "in": "path",
+            "name": "companyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id of document",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDocumentResult"
+                }
+              }
+            },
+            "description": "OK, successful response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Fetch annual report",
+        "tags": [
+          "CompanyDocument"
+        ]
+      }
+    },
+    "/{companyId}/interim_report/{documentId}": {
+      "get": {
+        "description": "Fetch interim report document for a company",
+        "operationId": "orderInterimReport",
+        "parameters": [
+          {
+            "description": "id of company",
+            "in": "path",
+            "name": "companyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id of document",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDocumentResult"
+                }
+              }
+            },
+            "description": "OK, successful response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Fetch interim report",
+        "tags": [
+          "CompanyDocument"
+        ]
+      }
+    },
+    "/{companyId}/meeting_minutes/{documentId}": {
+      "get": {
+        "description": "Fetch meeting minutes document for a company",
+        "operationId": "orderMeetingMinutes",
+        "parameters": [
+          {
+            "description": "id of company",
+            "in": "path",
+            "name": "companyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id of document",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDocumentResult"
+                }
+              }
+            },
+            "description": "OK, successful response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Fetch meeting minutes",
+        "tags": [
+          "CompanyDocument"
+        ]
+      }
+    },
+    "/{companyId}/articles_of_association/{documentId}": {
+      "get": {
+        "description": "Fetch articles of association document for a company",
+        "operationId": "orderArticlesOfAssociation",
+        "parameters": [
+          {
+            "description": "id of company",
+            "in": "path",
+            "name": "companyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id of document",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDocumentResult"
+                }
+              }
+            },
+            "description": "OK, successful response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Fetch articles of association",
+        "tags": [
+          "CompanyDocument"
+        ]
+      }
+    },
+    "/{companyId}/articles_of_association_nonlimited/{documentId}": {
+      "get": {
+        "description": "Fetch articles of association document for a non limited company",
+        "operationId": "orderStatutes",
+        "parameters": [
+          {
+            "description": "id of company",
+            "in": "path",
+            "name": "companyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id of document",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDocumentResult"
+                }
+              }
+            },
+            "description": "OK, successful response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Fetch articles of association non limited",
+        "tags": [
+          "CompanyDocument"
+        ]
+      }
+    },
+    "/{companyId}/financial_plan/{documentId}": {
+      "get": {
+        "description": "Fetch financial plan document for a company",
+        "operationId": "orderFinancialPlan",
+        "parameters": [
+          {
+            "description": "id of company",
+            "in": "path",
+            "name": "companyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "id of document",
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDocumentResult"
+                }
+              }
+            },
+            "description": "OK, successful response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Fetch financial plan",
+        "tags": [
+          "CompanyDocument"
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "OAuth2": []
+    }
+  ],
+  "x-id": "CompanyDocument",
+  "servers": [
+    {
+      "url": "https://api.roaring.io/se/company/document/1.0"
+    }
+  ],
+  "x-category": "company",
+  "x-countries": [
+    "se"
+  ]
+}

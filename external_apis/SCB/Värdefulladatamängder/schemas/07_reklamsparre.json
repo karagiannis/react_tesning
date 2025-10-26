@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SCB Reklamspärr Schema",
+  "description": "Reklamspärr enligt NIX-registret. Anger om företaget har spärrmarkering mot direktreklam.",
+  "type": "object",
+  "definitions": {
+    "reklamKod": {
+      "type": "string",
+      "enum": ["1", "2"],
+      "description": "Kod för reklamspärr"
+    }
+  },
+  "properties": {
+    "Reklam": {
+      "$ref": "#/definitions/reklamKod",
+      "description": "Reklamspärr-kod enligt NIX-registret"
+    }
+  },
+  "reklamKoder": [
+    {
+      "code": "1",
+      "description": "Reklamspärr aktiverad (får EJ skicka direktreklam)",
+      "legalImplication": "Företaget har registrerat sig i NIX-registret och får INTE kontaktas för marknadsföringsändamål",
+      "gdprNote": "Överträdelse kan leda till sanktioner enligt marknadsföringslagen och GDPR"
+    },
+    {
+      "code": "2",
+      "description": "Ingen reklamspärr (får skicka direktreklam)",
+      "legalImplication": "Företaget har inte aktiverat reklamspärr, men GDPR-regler gäller fortfarande",
+      "gdprNote": "Även utan reklamspärr krävs berättigat intresse eller samtycke enligt GDPR"
+    }
+  ],
+  "legalContext": {
+    "nixRegistret": {
+      "description": "NIX-registret (Nationella Nixregistret) är ett register för privatpersoner och företag som inte vill bli kontaktade för marknadsföring",
+      "operator": "Driva Mera i Sverige AB",
+      "website": "https://www.nixregistret.se/",
+      "scope": "Gäller telefon och post"
+    },
+    "marknadsforingslagen": {
+      "description": "Marknadsföringslagen (2008:486) reglerar direktmarknadsföring i Sverige",
+      "nixParagraf": "19 §: Förbud mot marknadsföring till dem som är registrerade i NIX"
+    },
+    "gdpr": {
+      "description": "GDPR kräver laglig grund för all marknadsföring, oavsett NIX-registrering",
+      "article6": "Kräver samtycke, avtal, berättigat intresse eller annan laglig grund"
+    }
+  },
+  "usageGuidelines": {
+    "complianceCheck": "Kontrollera ALLTID Reklam-fältet innan direktmarknadsföring",
+    "code1Action": "SKICKA INTE direktreklam om Reklam = '1'",
+    "code2Action": "Direktreklam tillåten om Reklam = '2', MEN GDPR-regler gäller fortfarande",
+    "bestPractice": "Kombinera NIX-kontroll med GDPR compliance och dokumentera laglig grund"
+  },
+  "examples": [
+    {
+      "PeOrgNr": "165599990001",
+      "Reklam": "1",
+      "action": "BLOCKED - Skicka INTE marknadsföring",
+      "reason": "Företaget har aktiverat reklamspärr"
+    },
+    {
+      "PeOrgNr": "165599990002",
+      "Reklam": "2",
+      "action": "ALLOWED - Marknadsföring tillåten (med GDPR-compliance)",
+      "reason": "Ingen reklamspärr aktiv, men verifiera laglig grund enligt GDPR"
+    }
+  ],
+  "metadata": {
+    "source": "SCB Värdefulladatamängder",
+    "lastUpdated": "2025-10-26",
+    "field": "Reklam",
+    "legalReferences": [
+      "Marknadsföringslagen (2008:486) 19 §",
+      "GDPR Artikel 6 (Lawfulness of processing)",
+      "GDPR Artikel 21 (Right to object)"
+    ],
+    "usage": "Compliance-kontroll innan direktmarknadsföring. KRITISKT för att undvika lagbrott och böter."
+  }
+}

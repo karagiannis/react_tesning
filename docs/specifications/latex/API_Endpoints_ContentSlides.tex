@@ -1,0 +1,2272 @@
+\documentclass[12pt,a4paper]{article}
+
+% Paket
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[swedish]{babel}
+\usepackage[autostyle=true]{csquotes}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{upquote}
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{verbatim}
+
+% Undvik konflikt med babels "-shorthand i löpande text
+\AtBeginDocument{\shorthandoff{"}}
+
+% Färger
+\definecolor{brandgreen}{RGB}{0,112,74}
+\definecolor{lightgray}{RGB}{245,245,245}
+\definecolor{codegray}{RGB}{50,50,50}
+
+% Hyperref inställningar
+\hypersetup{
+  colorlinks=true,
+  linkcolor=brandgreen,
+  urlcolor=brandgreen,
+  citecolor=brandgreen
+}
+
+% Listings för kodexempel
+\lstset{
+  basicstyle=\small\ttfamily,
+  backgroundcolor=\color{lightgray},
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny\color{codegray},
+  literate=%
+    {å}{{\aa}}1
+    {ä}{{\"a}}1
+    {ö}{{\"o}}1
+    {Å}{{\AA}}1
+    {Ä}{{\"A}}1
+    {Ö}{{\"O}}1
+    {é}{{\'e}}1
+    {≥}{$\geq$}1
+    {->}{{$\to$}}2
+    {→}{{$\to$}}1
+    {!=}{{$\neq$}}2
+    {≠}{{$\neq$}}1
+}
+
+% Unicode-mappningar för pdfLaTeX (vanlig text)
+\DeclareUnicodeCharacter{2192}{$\rightarrow$} % →
+\DeclareUnicodeCharacter{2260}{$\neq$}       % ≠
+\DeclareUnicodeCharacter{2705}{}              % ✅ (ta bort)
+
+% Definiera JSON och JavaScript för listings
+\lstdefinelanguage{json}{
+  morestring=[b]",
+  morestring=[d]'
+}
+
+\lstdefinelanguage{javascript}{
+  keywords={const, let, var, function, if, else, return, await, async, try, catch, fetch},
+  morecomment=[l]{//},
+  morestring=[b]",
+  morestring=[d]'
+}
+
+% Titel
+\title{\textbf{API Endpoints Specifikation: Content Slides} \\ \large Backend-mappning för Onboarding-flödet (med Sidebar)}
+\author{Celestial AB}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+% ========================================================================
+\section{Introduktion}
+% ========================================================================
+
+Detta dokument beskriver \textbf{alla API endpoints} som behövs för onboarding-slidesen (content slides med sidebar) enligt \texttt{Onboardin\_app\_ny.tex}.
+
+Dessa slides visas \textbf{efter inloggning} och utgör själva onboarding-processen där användaren:
+\begin{itemize}[noitemsep]
+  \item Väljer uppdragets art (vilka tjänster som behövs)
+  \item Besvarar riskfrågor (PTL-krav)
+  \item Genomgår identitetskontroll
+  \item Jämförs mot Bolagsverket/Roaring.io
+  \item Laddar upp företagsdokumentation
+  \item Får ekonomisk analys och riskbedömning
+  \item Signerar avtal med BankID
+\end{itemize}
+
+\subsection{Dokumentstruktur}
+
+Dokumentet följer samma struktur som \texttt{Onboardin\_app\_ny.tex} med sections och subsections:
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Sektion 1:} Uppdragsval och introduktion
+  \item \textbf{Sektion 2:} Riskbedömning (Steg 1 + Steg 2 fördjupning)
+  \item \textbf{Sektion 3:} Identitetskontroll
+  \item \textbf{Sektion 4:} Jämförelse mot externa register
+  \item \textbf{Sektion 5:} Företagsdokumentation
+  \item \textbf{Sektion 6:} Ekonomisk analys (SIE + Bankkonto)
+  \item \textbf{Sektion 7:} Djupgranskning och avtal
+\end{itemize}
+
+För varje slide/steg dokumenteras:
+\begin{itemize}[noitemsep]
+  \item Vilka API endpoints som behövs
+  \item HTTP-metod (GET, POST, PUT, DELETE)
+  \item Request-format (JSON schema, multipart/form-data för filer)
+  \item Response-format (success och error cases)
+  \item Affärslogik och valideringar
+  \item Externa integrationer (Bolagsverket, Skatteverket, Roaring.io, BankID, etc.)
+  \item Databastabeller som påverkas
+  \item Riskindikatorer och flaggor
+\end{itemize}
+
+\subsection{Teknisk arkitektur}
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Databas:} CSV-filer under utveckling, PostgreSQL som slutoptimering (använder UUID för process-ID)
+  \item \textbf{Externa API:er:} Bolagsverket, Skatteverket SPAR, Roaring.io, BankID
+  \item \textbf{AI-analys:} Hugging Face (microsoft/layoutlmv3-large) via Celery background tasks
+  \item \textbf{Fillagring:} S3/MinIO för uppladdade dokument (SIE, PDF, etc.)
+  \item \textbf{Autentisering:} JWT tokens med user\_id, varje onboarding-process identifieras med UUID
+\end{itemize}
+
+\textbf{VIKTIGT om databasval:} Hela applikationen byggs FÖRST med CSV-filer för ALL databashantering (onboarding\_processes.csv, external\_api\_responses.csv, event\_log.csv, etc.). PostgreSQL SQL införs som slutoptimering ENDAST efter att hela applikationen fungerar felfritt. Detta för att undvika race conditions och skrivfel vid flera samtidiga användare. CSV-first approach = snabbare utveckling, enklare debugging.
+
+\newpage
+
+% ========================================================================
+\section{SEKTION 1: Uppdragsval och introduktion}
+% ========================================================================
+
+\subsection{Content Slide: Välkommen – Uppdragets art}
+
+\textbf{React route:} \texttt{/inledning}\\
+\textbf{Beamer label:} \texttt{intro}\\
+\textbf{Sidebar:} Ja (första slide med sidebar)
+
+\textbf{Beskrivning:}\\
+Användaren väljer vilka tjänster de är intresserade av (löpande bokföring, årsbokslut, deklarationer, etc.). Detta är första steget i onboarding och sätter tonen för hela processen – kunden i centrum, myndighetskrav sekundärt.
+
+% ------------------------------------------------------------------------
+\subsection{API-endpoints för Uppdragsval och introduktion}
+% ------------------------------------------------------------------------
+
+\subsubsection{POST /api/onboarding/uppdrag}
+
+\textbf{Beskrivning:}\\
+Skapar en ny onboarding-process, sparar kundens valda tjänster och beräknar uppskattad kostnad baserat på vald tjänstekombination. Returnerar ett UUID som används för alla efterföljande API-anrop i denna onboarding-process.
+
+\textbf{Request Headers:}
+\begin{lstlisting}[language=json]
+{
+  "Authorization": "Bearer <access_token>",
+  "Content-Type": "application/json"
+}
+\end{lstlisting}
+
+\textbf{Request Body:}
+\begin{lstlisting}[language=json]
+{
+  "lopandeBokforing": true,
+  "arsbokslut": true,
+  "deklarationer": false,
+  "loneadministration": false,
+  "ekonomiskRadgivning": true,
+  "foretagsregistrering": false,
+  "finansiellRapportering": false,
+  "foretagsforsaljning": false,
+  "annat": "Succession till nästa generation"
+}
+\end{lstlisting}
+
+\textbf{Response (200 OK):}
+\begin{lstlisting}[language=json]
+{
+  "success": true,
+  "onboardingId": "a7f3c8e2-4b1d-4e9a-8c3f-1a2b3c4d5e6f",
+  "uppskattadKostnad": "15000 kr/år",
+  "antalTjanster": 3,
+  "riskIndikator": "low",
+  "message": "Onboarding-process skapad",
+  "nextStep": "/riskfragor"
+}
+\end{lstlisting}
+
+\textbf{Response (400 Bad Request):}
+\begin{lstlisting}[language=json]
+{
+  "success": false,
+  "error": "Minst en tjänst måste väljas",
+  "code": "NO_SERVICES_SELECTED"
+}
+\end{lstlisting}
+
+\textbf{Response (401 Unauthorized):}
+\begin{lstlisting}[language=json]
+{
+  "success": false,
+  "error": "Ogiltig eller utgången token",
+  "code": "INVALID_TOKEN"
+}
+\end{lstlisting}
+
+\textbf{Business Logic:}
+\begin{enumerate}[noitemsep]
+  \item Hämta \texttt{user\_id} från JWT token (Authorization header)
+  \item Validera att minst en tjänst är vald
+  \item Generera nytt UUID för onboarding-processen
+  \item Beräkna uppskattad kostnad baserat på prislista:
+    \begin{itemize}[noitemsep]
+      \item Löpande bokföring: 5000 kr/år
+      \item Årsbokslut: 8000 kr/år
+      \item Deklarationer: 3000 kr/år
+      \item Löneadministration: 4000 kr/år
+      \item Ekonomisk rådgivning: 10000 kr/år
+      \item Företagsregistrering: 15000 kr (engångsavgift)
+      \item Finansiell rapportering: 6000 kr/år
+      \item Företagsförsäljning/succession: Offert (kontakt)
+    \end{itemize}
+  \item Sätt riskindikator:
+    \begin{itemize}[noitemsep]
+      \item \texttt{foretagsregistrering = true} → riskIndikator = \enquote{medium} (nystartad = högre PTL-risk)
+      \item Annars → riskIndikator = \enquote{low}
+    \end{itemize}
+  \item Spara i databas (CSV under utveckling, PostgreSQL som slutoptimering)
+  \item Returnera \texttt{onboardingId} (UUID), uppskattad kostnad och nästa steg
+\end{enumerate}
+
+\textbf{Databas (SQL-syntax för framtida PostgreSQL, implementeras först som CSV):}
+\begin{lstlisting}[language=sql]
+-- Skapa ny onboarding-process
+-- NUVARANDE IMPLEMENTATION: onboarding_processes.csv
+-- FRAMTIDA OPTIMERING: PostgreSQL (efter att hela appen fungerar)
+INSERT INTO onboarding_processes (
+  id,                    -- UUID genererat av backend
+  user_id,               -- Från JWT token
+  status,                -- 'draft'
+  current_step,          -- 1
+  uppdrag_data,          -- JSONB med valda tjänster
+  uppskattad_kostnad,    -- Beräknad kostnad
+  risk_indikator,        -- 'low' eller 'medium'
+  created_at,
+  updated_at
+) VALUES (
+  gen_random_uuid(),     -- PostgreSQL genererar UUID
+  $1,                    -- user_id
+  'draft',
+  1,
+  $2::jsonb,             -- uppdrag_data
+  $3,                    -- uppskattad_kostnad
+  $4,                    -- risk_indikator
+  NOW(),
+  NOW()
+) RETURNING id;          -- Returnera UUID till backend
+\end{lstlisting}
+
+\textbf{Externa integrationer:}\\
+Inga (ren datalagring)
+
+\newpage
+% ========================================================================
+\section{Sektion 2A: Riskfrågor – Steg 1}
+% ========================================================================
+
+% ------------------------------------------------------------------------
+\subsection{API-endpoints Sammanfattning (Våra endpoints)}
+% ------------------------------------------------------------------------
+
+\begin{itemize}[noitemsep]
+  \item \texttt{POST /api/onboarding/\{onboardingId\}/riskfragor/steg1} — Sparar grundfrågor, validerar mot externa API:er, beräknar triggers
+  \item \textbf{Antal anrop vid sidladdning:} 0 (endpointen anropas när användaren klickar \enquote{Nästa})
+\end{itemize}
+
+% ------------------------------------------------------------------------
+\subsection{Översikt - När anropas våra endpoints}
+% ------------------------------------------------------------------------
+
+Riskfrågor Steg 1 är första delen i en multi-stage wizard för riskbedömning enligt Penningtvättslagen (PTL). Användaren presenteras med 9 grundläggande frågor om företagets verksamhet, kunder och ägare.
+
+\textbf{React route:} \texttt{/riskfragor/steg1}\\
+\textbf{React komponent:} \texttt{RiskFragorSteg1.jsx}\\
+\textbf{Beamer slide:} \texttt{riskfragor-steg1}
+
+\textbf{De 9 grundfrågorna:}
+\begin{enumerate}[noitemsep]
+  \item Företagets huvudsakliga affärsidé (textarea)
+  \item Kundtyper (checkboxes: privatpersoner, företag, offentlig sektor)
+  \item Utländska affärspartners/kunder (textarea)
+  \item Största leverantörer (textarea)
+  \item Verksamhet ändrad senaste 12 månaderna (textarea)
+  \item Organisationsnummer (input)
+  \item Personnummer VD/Firmatecknare (input)
+  \item \textbf{Är det du som är verklig huvudman?} (radio: Ja >25\%, Nej, Ej tillämpligt)
+  \item PEP-status (checkbox)
+\end{enumerate}
+
+När användaren fyller i formuläret och klickar \enquote{Nästa} skickas ett POST-anrop till backend med alla svar. Backend validerar organisationsnummer och personnummer mot externa API:er (Bolagsverket, SPAR, Roaring), beräknar triggers för riskflaggor, och returnerar ALLTID:
+\begin{itemize}[noitemsep]
+  \item \texttt{nextStep = "/riskfragor/steg2"} (Steg 2-4 visas ALLTID, eller fler enligt config.json)
+  \item \texttt{triggers} objekt används för risk-scoring och UI-betoning, INTE för att hoppa över steg
+  \item Triggers kan påverka vilka frågor som betonas med varningar eller extra hjälptext
+\end{itemize}
+
+\textbf{Vad används triggers till?}
+\begin{itemize}[noitemsep]
+  \item Flagga risker i backend för compliance-team
+  \item Betona specifika frågor i UI (t.ex. markera utländska transaktioner med varningsikon)
+  \item Påverka slutlig risk-score (low/medium/high)
+  \item Dokumentera varför Enhanced Due Diligence (EDD) kan krävas
+\end{itemize}
+
+% ------------------------------------------------------------------------
+\subsection{Externa API-endpoints Sammanfattning}
+% ------------------------------------------------------------------------
+
+\begin{itemize}[noitemsep]
+  \item \texttt{POST /organisationer} (Bolagsverket) — Validera org.nr, hämta VD/firmatecknare
+  \item \texttt{POST /navet/spar/personnummer} (Skatteverket SPAR) — Validera personnummer, folkbokföring
+  \item \texttt{GET /se/company/beneficial-owners/2.1/\{orgNr\}} (Roaring) — Hämta verkliga huvudmän >25\%
+  \item \texttt{GET /se/company/alternative-beneficial-owner/1.0/\{orgNr\}} (Roaring) — Hämta alternativ VH (VD) om ingen >25\%
+  \item \texttt{GET /se/pep/1.0/\{personnr\}} (Roaring) — PEP-kontroll per person
+  \item \texttt{GET /se/sanctions/1.0/\{personnr\}} (Roaring) — Sanktionskontroll per person
+  \item \texttt{GET /se/businessprohibition/1.0/person/\{personnr\}} (Roaring) — Näringsförbud per person
+\end{itemize}
+
+\textbf{Totalt antal externa anrop:} 3-9 beroende på antal verkliga huvudmän (se Implementation Notes)
+
+% ------------------------------------------------------------------------
+\subsection{Översikt - Varför behövs externa endpoints}
+% ------------------------------------------------------------------------
+
+PTL 3 kap 2 § kräver att vi identifierar och verifierar kunden (företaget) samt verkliga huvudmän. Detta innebär:
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Bolagsverket:} Verifiera att organisationsnumret finns, hämta officiellt företagsnamn, SNI-kod, VD och firmatecknare. Endast personer registrerade som VD/firmatecknare får påbörja onboarding.
+  \item \textbf{SPAR:} Verifiera att personnumret är korrekt och att personen är folkbokförd i Sverige. Hämta officiellt namn och adress för identitetskontroll.
+  \item \textbf{Roaring Beneficial Owners:} PTL 3 kap 6 § kräver identifiering av verkliga huvudmän (fysiska personer som äger/kontrollerar >25\%). Om ingen når tröskeln används PTL 3 kap 8 § (alternativ VH = högsta befattningshavare/VD).
+  \item \textbf{Roaring PEP/Sanctions/Business Prohibition:} PTL 3 kap 10 § kräver screening mot PEP-listor och sanktionslistor. Näringsförbud är en extra kontroll enligt bokföringslagen.
+\end{itemize}
+
+Alla externa API-svar sparas i \texttt{external\_api\_responses} för audit trail och GDPR-compliance (rätt till tillgång).
+
+% ------------------------------------------------------------------------
+\subsection{Endpoint 1: POST /api/onboarding/\{onboardingId\}/riskfragor/steg1}
+% ------------------------------------------------------------------------
+
+\subsubsection{Beskrivning}
+
+Sparar grundläggande riskfrågor (9 st.), validerar org.nr/personnr mot externa API:er (Bolagsverket, SPAR, Roaring), beräknar triggers för fördjupningsfrågor (Steg 2), och detekterar eventuell mismatch mellan användarens VH-påstående och Roaring.io:s register.
+
+\subsubsection{Request}
+
+\textbf{Headers:}
+\begin{lstlisting}[language=json]
+{
+  "Authorization": "Bearer <access_token>",
+  "Content-Type": "application/json"
+}
+\end{lstlisting}
+
+\textbf{Body (pseudokod):}
+\begin{lstlisting}
+{
+  "affarsIde": "string (textarea)",
+  "kundTyper": {
+    "privatpersoner": boolean,
+    "foretag": boolean,
+    "offentligSektor": boolean
+  },
+  "utlandskaPartners": "string (textarea)",
+  "storaLeverantorer": "string (textarea)",
+  "verksamhetAndrad": "string (textarea)",
+  "organisationsnummer": "string (format: XXXXXX-XXXX)",
+  "personnummer": "string (format: YYYYMMDD-XXXX)",
+  "verkligHuvudman": "enum: ja_over_25 | nej | ej_tillampligt",
+  "isPEP": boolean
+}
+\end{lstlisting}
+
+\subsubsection{Response 200 OK - Inga riskflaggor}
+
+\textbf{VIKTIGT:} Denna response följer \textbf{Celestial Risk Engine v3.0} (se \texttt{docs/Theory/metod\_riskbedömning\_kund\_v3.tex} för fullständig metodbeskrivning).
+
+\begin{lstlisting}
+{
+  "success": true,
+  "bolagsverketData": {
+    "foretagsnamn": "string",
+    "organisationsform": "string",
+    "sniKod": "string",
+    "sniBeskrivning": "string",
+    "registreringsdatum": "ISO-8601 date",
+    "status": "string"
+  },
+  "sparData": {
+    "namn": "string",
+    "personnummer": "string",
+    "folkbokforingsadress": "string",
+    "status": "string"
+  },
+  "riskAssessment": {
+    "staticKycScore": 12,
+    "adjustedScore": 32,
+    "hotBonus": 20,
+    "sniHotFactor": 3,
+    "riskLevel": "low",
+    "requiresEDD": false,
+    "components": {
+      "publicData": 4,
+      "crossValidation": 8,
+      "bookkeeping": 0
+    },
+    "triggers": {
+      "isPEP": false,
+      "hasSanctions": false,
+      "hasBusinessProhibition": false,
+      "vhMismatch": false,
+      "addressMismatch": true,
+      "missingFTax": false,
+      "missingVAT": false,
+      "newCompany": false,
+      "highRiskIndustry": true
+    }
+  },
+  "vhMismatch": {
+    "detected": false,
+    "reason": null,
+    "requiresManualReview": false
+  },
+  "wizardConfig": {
+    "totalSteps": 4,
+    "hasCustomConfig": false,
+    "steps": [
+      {
+        "id": 2,
+        "title": "Utländska transaktioner",
+        "isCustom": false
+      },
+      {
+        "id": 3,
+        "title": "Kunder & Affärspartners",
+        "isCustom": false
+      },
+      {
+        "id": 4,
+        "title": "Betalningar & Transaktioner",
+        "isCustom": false
+      }
+    ]
+  },
+  "message": "Grundläggande riskbedömning klar",
+  "nextStep": "/riskfragor/steg2"
+}
+\end{lstlisting}
+
+\textbf{OBS:} nextStep är ALLTID \enquote{/riskfragor/steg2}. Backend läser användarens custom config.json (om uppladdad via Inställningar) och mergear med default Steg 2-4. Frontend renderar wizard-steg dynamiskt baserat på \texttt{wizardConfig.steps}.
+
+\textbf{Förklaring av riskAssessment:}
+\begin{itemize}[noitemsep]
+  \item \texttt{staticKycScore}: Summan av publicData + crossValidation + bookkeeping (bookkeeping = 0 i Steg 1)
+  \item \texttt{hotBonus}: (sniHotFactor - 1) × 10 (Hot 1 = 0, Hot 2 = 10, Hot 3 = 20, Hot 4 = 30)
+  \item \texttt{adjustedScore}: staticKycScore + hotBonus
+  \item \texttt{sniHotFactor}: 1–4 från SNI-kod (se v3 metoddokument)
+  \item \texttt{riskLevel}: low (0-40) / medium (41-70) / high (71-90) / critical (>90 eller hårda triggers)
+  \item \texttt{requiresEDD}: true om Enhanced Due Diligence krävs (PTL 3 kap 10 §)
+  \item \texttt{components}: Delpoäng per komponent (publicData max 30, crossValidation max 30, bookkeeping max 40)
+  \item \texttt{triggers}: Boolean-flaggor för specifika riskfaktorer som påverkar score och åtgärder
+\end{itemize}
+
+\subsubsection{Response 200 OK - Riskflaggor aktiva}
+
+\begin{lstlisting}
+{
+  "success": true,
+  "bolagsverketData": { ... },
+  "sparData": { ... },
+  "triggers": {
+    "showUtlandska": true,
+    "showKontanter": true,
+    "showVerksamhet": false,
+    "showPEP": false
+  },
+  "vhMismatch": {
+    "detected": false,
+    "reason": null,
+    "requiresManualReview": false
+  },
+  "wizardConfig": {
+    "totalSteps": 4,
+    "hasCustomConfig": false,
+    "steps": [ /* samma som ovan */ ]
+  },
+  "message": "Riskflaggor identifierade (se triggers för detaljer)",
+  "nextStep": "/riskfragor/steg2"
+}
+\end{lstlisting}
+
+\textbf{OBS:} Samma nextStep och wizardConfig som vid inga triggers. Skillnaden är att triggers används för risk-scoring och kan påverka UI-presentation (betona frågor med varningsikon).
+
+\subsubsection{Response 200 OK - VH Mismatch Detected (Warning)}
+
+\begin{lstlisting}
+{
+  "success": true,
+  "bolagsverketData": { ... },
+  "sparData": { ... },
+  "triggers": { ... },
+  "vhMismatch": {
+    "detected": true,
+    "reason": "User claims VH but not found in Roaring register",
+    "requiresManualReview": true,
+    "details": {
+      "userPersonnummer": "196505011234",
+      "roaringVH": [
+        {"personnummer": "198012251234", "shares": 45.5},
+        {"personnummer": "197503201234", "shares": 30.0}
+      ]
+    }
+  },
+  "wizardConfig": {
+    "totalSteps": 4,
+    "hasCustomConfig": false,
+    "steps": [ /* samma som ovan */ ]
+  },
+  "warning": "Din uppgift om verklig huvudman stämmer inte med offentliga register. En redovisningskonsult kommer att kontakta dig för klargörande.",
+  "message": "Riskbedömning klar (manuell granskning krävs)",
+  "nextStep": "/riskfragor/steg2"
+}
+\end{lstlisting}
+
+\textbf{OBS:} VH-mismatch BLOCKERAR INTE processen. Användaren kan fortsätta, men ärendet flaggas för manuell granskning i Admin Dashboard.
+
+\subsubsection{Response 200 OK - Med Custom Config}
+
+\begin{lstlisting}
+{
+  "success": true,
+  "bolagsverketData": { ... },
+  "sparData": { ... },
+  "triggers": { ... },
+  "vhMismatch": { ... },
+  "wizardConfig": {
+    "totalSteps": 6,
+    "hasCustomConfig": true,
+    "customConfigVersion": "v2.1",
+    "steps": [
+      {
+        "id": 2,
+        "title": "Utländska transaktioner",
+        "isCustom": false,
+        "questionCount": 3
+      },
+      {
+        "id": 3,
+        "title": "Kunder & Affärspartners",
+        "isCustom": false,
+        "questionCount": 3
+      },
+      {
+        "id": 4,
+        "title": "Betalningar & Transaktioner",
+        "isCustom": false,
+        "questionCount": 5
+      },
+      {
+        "id": 5,
+        "title": "Miljöhänsyn & Hållbarhet",
+        "isCustom": true,
+        "questionCount": 4,
+        "questions": [
+          {
+            "id": "env_1",
+            "text": "Har företaget miljöcertifiering?",
+            "type": "radio",
+            "options": ["Ja", "Nej", "Under arbete"]
+          },
+          {
+            "id": "env_2",
+            "text": "Beskriv företagets miljöpolicy",
+            "type": "textarea",
+            "maxLength": 500
+          }
+          /* ... fler frågor ... */
+        ]
+      },
+      {
+        "id": 6,
+        "title": "IT-säkerhet & GDPR",
+        "isCustom": true,
+        "questionCount": 6,
+        "questions": [ /* ... */ ]
+      }
+    ]
+  },
+  "message": "Grundläggande riskbedömning klar (+ 2 anpassade steg)",
+  "nextStep": "/riskfragor/steg2"
+}
+\end{lstlisting}
+
+\textbf{OBS:} Backend läser användarens custom config.json (uppladdad via POST /api/user/settings/config) och mergear med default Steg 2-4. Custom steg kan INTE ersätta default steg 2-4, endast läggas till efter dem.
+
+\subsubsection{Response 400 Bad Request}
+
+\begin{lstlisting}
+{
+  "success": false,
+  "error": "validation_error",
+  "code": "INVALID_ORG_NUMBER",
+  "details": "Organisationsnummer måste vara 10 siffror (XXXXXX-XXXX)"
+}
+\end{lstlisting}
+
+\subsubsection{Response 403 Forbidden}
+
+\begin{lstlisting}
+{
+  "success": false,
+  "error": "not_authorized",
+  "code": "PERSON_NOT_AUTHORIZED",
+  "details": "Personnummer stämmer inte med VD/firmatecknare enligt Bolagsverket"
+}
+\end{lstlisting}
+
+\subsubsection{Response 404 Not Found}
+\begin{lstlisting}
+{
+  "success": false,
+  "error": "not_found",
+  "code": "COMPANY_NOT_FOUND",
+  "orgNr": "556789-1234"
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes}
+
+\textbf{Flöde (pseudokod):}
+\begin{lstlisting}
+1. Extrahera user_id från JWT token
+2. SELECT onboarding_process WHERE id = onboardingId AND user_id = user_id
+   OM INTE HITTAT -> 403 Forbidden
+3. Validera request body format:
+   - org.nr: Regex XXXXXX-XXXX
+   - personnr: Regex YYYYMMDD-XXXX
+   - verkligHuvudman: Enum ["ja_over_25", "nej", "ej_tillampligt"]
+4. Anropa Bolagsverket API (POST /organisationer)
+   SPARA response i external_api_responses
+5. Anropa SPAR API (POST /navet/spar/personnummer)
+   SPARA response i external_api_responses
+6. Verifiera personnummer mot VD/firmatecknare från Bolagsverket
+   OM INGEN MATCH -> 403 Forbidden
+7. Anropa Roaring Beneficial Owners (två-stegs algoritm):
+   a. GET /beneficial-owners/2.1/{orgNr}
+   b. OM tom array -> GET /alternative-beneficial-owner/1.0/{orgNr}
+   SPARA båda responses i external_api_responses
+8. Kontrollera VH-mismatch (verklig huvudman-validering):
+   OM verkligHuvudman === "ja_over_25":
+     personnr_from_form = request.personnummer
+     vh_from_roaring = external_api_responses.beneficial_owners
+     OM personnr_from_form INTE finns i vh_from_roaring:
+       FLAGGA mismatch_detected = true
+       SPARA mismatch_reason = "User claims VH but not in Roaring register"
+       LOG event: "VH_MISMATCH_DETECTED" med detaljer
+       SET requires_manual_review = true
+     ANNARS:
+       mismatch_detected = false
+9. FÖR varje VH (verklig huvudman från Roaring):
+   a. GET /pep/1.0/{personnr}
+   b. GET /sanctions/1.0/{personnr}
+   c. GET /businessprohibition/1.0/person/{personnr}
+   SPARA alla responses i external_api_responses
+10. Beräkna triggers baserat på API-svar och avvikelser:
+   
+   A. BASERAD PÅ ANVÄNDARENS INPUT (sparas för riskbedömning):
+   userFlags.hasInternationalPartners = (utlandskaPartners !== "Nej")
+   userFlags.servesCash = (kundTyper.privatpersoner === true)
+   userFlags.recentChanges = (verksamhetAndrad !== "Nej")
+   userFlags.selfReportedPEP = (isPEP === true)
+   
+   B. TRIGGERS FRÅN API-AVVIKELSER (triggar extra åtgärder):
+   triggers.pepDetected = (någon VH.isPEP === true FROM Roaring)
+   triggers.newCompany = (registrationDate < 6 månader FROM Bolagsverket)
+   triggers.addressMismatch = (SPAR adress !== Bolagsverket adress)
+   triggers.missingFTax = (fTaxReg === false FROM Roaring)
+   triggers.missingVAT = (vatReg === false FROM Roaring AND omsättning >80k)
+   triggers.vhMismatch = (mismatch_detected === true FROM steg 8)
+   triggers.sanctioned = (någon VH.isSanctioned === true FROM Roaring)
+   triggers.businessProhibition = (någon VH.hasProhibition === true)
+   triggers.highRiskIndustry = (SNI-kod i högrisklista FROM metoddokument)
+   
+   C. KOMBINATION (behövs för Celestial Engine):
+   riskProfile = {
+     userFlags: userFlags,
+     apiTriggers: triggers,
+     combinedRiskScore: calculate_celestial_score(userFlags, triggers)
+   }
+
+11. UPDATE onboarding_processes SET 
+      riskfragor_steg1 = request_body,
+      bolagsverket_data = bolagsverket_response,
+      spar_data = spar_response,
+      beneficial_owners_data = roaring_response,
+      vh_mismatch_detected = mismatch_detected,
+      vh_mismatch_reason = mismatch_reason,
+      requires_manual_review = requires_manual_review,
+      user_flags = userFlags,
+      api_triggers = triggers,
+      risk_profile = riskProfile,
+      current_step = 2,
+      updated_at = NOW()
+    WHERE id = onboardingId
+12. Läs användarens custom config (om uppladdad):
+    custom_config = SELECT custom_wizard_config FROM user_settings WHERE user_id = user_id
+    OM custom_config finns:
+      wizard_config = merge_wizard_steps(DEFAULT_STEPS_2_4, custom_config.additionalSteps)
+      wizard_config.hasCustomConfig = true
+      wizard_config.totalSteps = len(wizard_config.steps)
+    ANNARS:
+      wizard_config = DEFAULT_STEPS_2_4
+      wizard_config.hasCustomConfig = false
+      wizard_config.totalSteps = 4
+    OBS: Custom steg kan INTE ersätta Steg 2-4, endast läggas till som Steg 5, 6, 7...
+13. Beräkna nextStep:
+    nextStep = "/riskfragor/steg2" (ALLTID - Steg 2-N körs alltid)
+    OBS: Triggers används för risk-scoring och UI-betoning, INTE för att hoppa över steg
+14. Returnera response med nextStep="/riskfragor/steg2", wizardConfig, triggers (och mismatch_warning om flaggad)
+\end{lstlisting}
+
+\textbf{Valideringsregler:}
+\begin{itemize}[noitemsep]
+  \item org\_nr: Format XXXXXX-XXXX, måste finnas i Bolagsverket
+  \item personnr: Format YYYYMMDD-XXXX, måste vara VD/firmatecknare enligt Bolagsverket
+  \item personnr: Måste vara folkbokförd enligt SPAR
+  \item verkligHuvudman: Enum ["ja\_over\_25", "nej", "ej\_tillampligt"]
+  \item affarsIde: Max 1000 tecken
+  \item utlandskaPartners: Max 1000 tecken
+  \item storaLeverantorer: Max 1000 tecken
+  \item verksamhetAndrad: Max 1000 tecken
+\end{itemize}
+
+\textbf{VH-Mismatch Hantering:}
+\begin{itemize}[noitemsep]
+  \item \textbf{Vad är en mismatch?} Användaren svarar "Ja, jag är VH >25\%" men deras personnummer finns INTE i Roaring.io:s VH-register
+  \item \textbf{Varför kan detta hända?}
+    \begin{itemize}[noitemsep]
+      \item Roaring.io:s data är utdaterad (uppdateras kvartalsvis från Bolagsverket)
+      \item Nyligen gjord ägarförändring (ännu ej registrerad)
+      \item Indirekta ägare via holdingbolag (Roaring visar bara direktägande)
+      \item Användaren har missförstått definitionen av "verklig huvudman" (PTL 1 kap 3-6 §§)
+    \end{itemize}
+  \item \textbf{Hur hanterar vi det?}
+    \begin{itemize}[noitemsep]
+      \item Flagga onboarding för manuell granskning (\texttt{requires\_manual\_review = true})
+      \item Logga händelse med detaljer (personnr från form, VH från Roaring)
+      \item Backend returnerar varning i response (men BLOCKERAR INTE processen)
+      \item Admin Dashboard visar flaggade fall för manuell kontroll
+      \item Redovisningskonsult kontaktar kunden för klargörande
+    \end{itemize}
+  \item \textbf{Omvänd situation:} Användaren svarar "Nej" men Roaring visar dem som VH >25\%
+    \begin{itemize}[noitemsep]
+      \item Kan vara legitimt (ägarandelen precis under 25\%, eller indirekt ägande)
+      \item Flagga OCKSÅ för manuell granskning
+      \item LOG event: "VH\_REVERSE\_MISMATCH\_DETECTED"
+    \end{itemize}
+\end{itemize}
+
+\textbf{Trigger-definition och koppling till Celestial Risk Engine v3.0:}
+
+\textbf{VIKTIGT: Fullständig metodbeskrivning finns i} \texttt{docs/Theory/metod\_riskbedömning\_kund\_v3.tex}
+
+Tidigare version (Hot×Sårbarhet-modell) har ersatts med \textbf{Celestial Risk Engine 0–100 poäng-modell}:
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{staticKycScore} (0–100): Beräknas från tre komponenter
+    \begin{itemize}[noitemsep]
+      \item Offentliga register (max 30 poäng): Bolagsålder, PEP, sanktioner, näringsförbud
+      \item Korsvalidering (max 30 poäng): VH-mismatch, adressmismatch, F-skatt/moms-avvikelser
+      \item Bokföringsdata (max 40 poäng): Sätts till 0 i Steg 1, fylls i vid SIE-analys
+    \end{itemize}
+  
+  \item \textbf{sniHotFactor} (1–4): Hämtas från SNI-kod via Bolagsverket
+    \begin{itemize}[noitemsep]
+      \item 1 = Lågrisk (IT, konsult, design)
+      \item 2 = Normal risk (handel, tillverkning)
+      \item 3 = Förhöjd risk (restaurang, taxi, kontantintensiv)
+      \item 4 = Hög risk (spelverksamhet, valutaväxling, ädelmetaller)
+    \end{itemize}
+  
+  \item \textbf{adjustedScore}: staticKycScore + hotBonus
+    \begin{itemize}[noitemsep]
+      \item Hot 1: score + 0 poäng
+      \item Hot 2: score + 10 poäng
+      \item Hot 3: score + 20 poäng
+      \item Hot 4: score + 30 poäng
+    \end{itemize}
+  
+  \item \textbf{riskLevel} (fyrgradig skala enligt FFFS 2009:1):
+    \begin{itemize}[noitemsep]
+      \item \texttt{low}: adjustedScore 0–40
+      \item \texttt{medium}: adjustedScore 41–70
+      \item \texttt{high}: adjustedScore 71–90
+      \item \texttt{critical}: adjustedScore > 90 ELLER hårda triggers
+    \end{itemize}
+  
+  \item \textbf{Hårda triggers (automatisk critical-klassning):}
+    \begin{itemize}[noitemsep]
+      \item \texttt{hasSanctions = true} → STOPP, avslag av uppdrag
+      \item \texttt{hasBusinessProhibition = true} → STOPP, avslag av uppdrag
+      \item Kombination: VH-mismatch + saknad F-skatt + PEP → kritisk granskning
+    \end{itemize}
+  
+  \item \textbf{Eskaleringstriggrar (höjer riskklass ett steg om på gräns):}
+    \begin{itemize}[noitemsep]
+      \item \texttt{isPEP = true} + score > 35 → Low blir Medium
+      \item \texttt{vhMismatch = true} + score > 60 → Medium blir High
+      \item \texttt{addressMismatch = true} + \texttt{highRiskIndustry = true} → Betoning
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Kostnad externa API-anrop:}
+\begin{itemize}[noitemsep]
+  \item \textbf{Best Case (2 VH direktägande):} Bolagsverket (1) + SPAR (1) + Roaring BO (1) + (2 VH × 3 checks) = 9 anrop
+  \item \textbf{Worst Case (alternativ VH):} Bolagsverket (1) + SPAR (1) + Roaring BO (2) + (1 VH × 3 checks) = 7 anrop
+\end{itemize}
+
+% ------------------------------------------------------------------------
+\subsection{Extern Endpoint 1: POST /organisationer (Bolagsverket)}
+% ------------------------------------------------------------------------
+
+\subsubsection{Beskrivning}
+
+Validerar organisationsnummer och hämtar grundläggande företagsinformation inklusive VD och firmatecknare från Bolagsverkets officiella register.
+
+\textbf{Fullständig URL:} \texttt{https://portal.api.bolagsverket.se/open/v1/companies}
+
+\subsubsection{Request}
+
+\textbf{Headers:}
+\begin{lstlisting}
+{
+  "Content-Type": "application/json"
+}
+\end{lstlisting}
+
+\textbf{Body (pseudokod):}
+\begin{lstlisting}
+{
+  "organisationsnummer": ["556903-8671"]
+}
+\end{lstlisting}
+
+\subsubsection{Response 200 OK}
+\begin{lstlisting}
+{
+  "organisationer": [
+    {
+      "organisationsnummer": "string",
+      "namn": "string",
+      "organisationsform": "string (AB, HB, etc.)",
+      "sniKod": "string",
+      "sniBeskrivning": "string",
+      "registreringsdatum": "ISO-8601 date",
+      "status": "string (Aktiv, Avregistrerad)",
+      "vd": {
+        "namn": "string",
+        "personnummer": "string"
+      },
+      "firmatecknare": [
+        {
+          "namn": "string",
+          "personnummer": "string",
+          "firmateckningsregel": "string"
+        }
+      ]
+    }
+  ]
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes för Response}
+
+\textbf{Validering (pseudokod):}
+\begin{lstlisting}
+1. Extrahera organisationer array från response
+2. OM tom array -> REJECT med 404 Not Found
+3. Extrahera första org från array (endast en förväntad)
+4. OM org.status !== "Aktiv" -> REJECT med 400 Bad Request
+5. Extrahera VD personnummer: vd_personnr = org.vd.personnummer
+6. Extrahera firmatecknare personnummer: firmatecknare_list = org.firmatecknare.map(ft => ft.personnummer)
+7. Jämför användaren angett personnummer mot VD och firmatecknare:
+   OM (user_personnr === vd_personnr OR user_personnr IN firmatecknare_list)
+     -> GODKÄND
+   ANNARS
+     -> REJECT med 403 Forbidden ("Du är inte VD eller firmatecknare")
+8. Spara hela org-objektet i onboarding_processes.bolagsverket_data
+9. Spara hela response i external_api_responses tabell för audit trail
+\end{lstlisting}
+
+% ------------------------------------------------------------------------
+\subsection{Extern Endpoint 2: POST /navet/spar/personnummer (Skatteverket SPAR)}
+% ------------------------------------------------------------------------
+
+\subsubsection{Beskrivning}
+
+Validerar personnummer och hämtar folkbokföringsuppgifter från Skatteverkets SPAR-register (Svenska PersonAdressRegistret).
+
+\textbf{Fullständig URL:} \texttt{https://navet.skatteverket.se/spar/personnummer}
+
+\textbf{OBS:} Kräver X.509-certifikat för autentisering (test-certifikat för utveckling, prod-certifikat för produktion).
+
+\subsubsection{Request}
+
+\textbf{Headers:}
+\begin{lstlisting}
+{
+  "Content-Type": "application/json"
+}
+\end{lstlisting}
+
+\textbf{Body (pseudokod):}
+\begin{lstlisting}
+{
+  "personnummer": "195001011234",
+  "syfte": "Kundkännedom enligt PTL"
+}
+\end{lstlisting}
+
+\subsubsection{Response 200 OK}
+\begin{lstlisting}
+{
+  "personnummer": "string",
+  "namn": {
+    "fornamn": "string",
+    "efternamn": "string"
+  },
+  "folkbokforingsadress": {
+    "adress": "string",
+    "postnummer": "string",
+    "postort": "string"
+  },
+  "status": "string (Folkbokförd, Avregistrerad, Emigrerad)",
+  "fodelsedatum": "ISO-8601 date"
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes för Response}
+
+\textbf{Validering (pseudokod):}
+\begin{lstlisting}
+1. OM response.status !== "Folkbokförd" -> VARNING (inte blockerande, men flagga för manuell granskning)
+2. Extrahera fullständigt namn: fullName = fornamn + " " + efternamn
+3. Jämför namn mot Bolagsverket VD-namn (fuzzy match för att hantera skiljetecken):
+   OM (fuzzyMatch(sparNamn, bolagsverketVdNamn) < 80% match)
+     -> VARNING (namndiskrepans - flagga för manuell granskning)
+4. Spara hela SPAR-objektet i onboarding_processes.spar_data
+5. Spara hela response i external_api_responses tabell för audit trail
+\end{lstlisting}
+
+% ------------------------------------------------------------------------
+\subsection{Extern Endpoint 3: GET /se/company/beneficial-owners/2.1/\{orgNr\} (Roaring)}
+% ------------------------------------------------------------------------
+
+\subsubsection{Beskrivning}
+
+Hämtar registrerade verkliga huvudmän från Bolagsverkets register över verkliga huvudmän. Returnerar endast personer som äger/kontrollerar >25\% enligt PTL 3 kap 6 §.
+
+\textbf{Fullständig URL:} \texttt{https://api.roaring.io/se/company/beneficial-owners/2.1/\{orgNr\}}
+
+\textbf{PTL-grund:} PTL 3 kap 6 § - Identifiering av verklig huvudman
+
+\subsubsection{Request}
+
+\textbf{Headers:}
+\begin{lstlisting}
+{
+  "Authorization": "Bearer <roaring_access_token>"
+}
+\end{lstlisting}
+
+\subsubsection{Response 200 OK - Med VH >25\%}
+
+\begin{lstlisting}
+{
+  "organizationNumber": "string",
+  "companyName": "string",
+  "beneficialOwners": [
+    {
+      "personalNumber": "string",
+      "firstName": "string",
+      "lastName": "string",
+      "ownershipPercentage": float,
+      "votingRightsPercentage": float,
+      "ownershipType": "string (DIRECT, INDIRECT)",
+      "source": "string",
+      "verified": boolean
+    }
+  ],
+  "totalCoverage": float
+}
+\end{lstlisting}
+
+\subsubsection{Response 200 OK - Tom array (ingen >25\%)}
+\begin{lstlisting}
+{
+  "organizationNumber": "string",
+  "companyName": "string",
+  "beneficialOwners": [],
+  "totalCoverage": 0.0
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes för Response}
+
+\textbf{Två-stegs algoritm (pseudokod):}
+\begin{lstlisting}
+1. Anropa Primary Endpoint: GET /beneficial-owners/2.1/{orgNr}
+2. OM beneficialOwners.length > 0:
+     -> Använd dessa VH (registrerade ägare >25%)
+     -> Gå till steg 8
+3. OM beneficialOwners.length === 0:
+     -> Ingen ägare >25%, använd fallback (PTL 3 kap 8 paragraf)
+     -> Anropa Alternative Endpoint: GET /alternative-beneficial-owner/1.0/{orgNr}
+4. OM alternative response innehåller VD:
+     -> Använd VD som alternativ VH
+     -> Gå till steg 8
+5. OM både primary OCH alternative ger tomt resultat:
+     -> KRITISK ERROR (ingen VH identifierbar)
+     -> REJECT onboarding
+6. FÖR varje VH (från primary ELLER alternative):
+     a. GET /pep/1.0/{personnr}
+     b. GET /sanctions/1.0/{personnr}
+     c. GET /businessprohibition/1.0/person/{personnr}
+7. Analysera PEP/Sanctions/BusinessProhibition:
+   OM isSanctioned = true -> REJECT omedelbart
+   OM hasBusinessProhibition = true -> REJECT omedelbart
+   OM isPEP = true -> Sätt trigger showPEP = true
+8. Spara alla VH i onboarding_processes.beneficial_owners_data
+9. Spara alla responses i external_api_responses för audit trail
+\end{lstlisting}
+
+% ------------------------------------------------------------------------
+\subsection{Extern Endpoint 4: GET /se/company/alternative-beneficial-owner/1.0/\{orgNr\} (Roaring)}
+% ------------------------------------------------------------------------
+
+\subsubsection{Beskrivning}
+
+Hämtar alternativ verklig huvudman (VD/högsta befattningshavare) när ingen ägare når 25\%-tröskeln enligt PTL 3 kap 8 §.
+
+\textbf{Fullständig URL:} \texttt{https://api.roaring.io/se/company/alternative-beneficial-owner/1.0/\{orgNr\}}
+
+\textbf{PTL-grund:} PTL 3 kap 8 § - Alternativ verklig huvudman (högsta befattningshavare)
+
+\subsubsection{Request}
+
+\textbf{Headers:}
+\begin{lstlisting}
+{
+  "Authorization": "Bearer <roaring_access_token>"
+}
+\end{lstlisting}
+
+\subsubsection{Response 200 OK}
+\begin{lstlisting}
+{
+  "organizationNumber": "string",
+  "companyName": "string",
+  "alternativeBeneficialOwner": {
+    "personalNumber": "string",
+    "firstName": "string",
+    "lastName": "string",
+    "position": "string (VD, Styrelseordförande, etc.)",
+    "source": "string",
+    "verified": boolean
+  }
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes för Response}
+
+\textbf{Användning (pseudokod):}
+\begin{lstlisting}
+1. Anropas endast OM primary endpoint returnerar tom array
+2. Extrahera alternativeBeneficialOwner från response
+3. Verifiera att personnummer finns
+4. Kör SAMMA PEP/Sanctions/BusinessProhibition checks som för vanlig VH
+5. Markera i databasen att denna VH är "alternativ" (för rapportering)
+\end{lstlisting}
+
+% ------------------------------------------------------------------------
+\subsection{Extern Endpoint 5: GET /se/pep/1.0/\{personnr\} (Roaring)}
+% ------------------------------------------------------------------------
+
+\subsubsection{Beskrivning}
+
+Kontrollerar om person är Politically Exposed Person (PEP) enligt PTL 3 kap 10 §. Inkluderar nationella och internationella PEP-listor samt familjemedlemmar/nära medarbetare.
+
+\textbf{Fullständig URL:} \texttt{https://api.roaring.io/se/pep/1.0/\{personnr\}}
+
+\subsubsection{Request}
+
+\textbf{Headers:}
+\begin{lstlisting}
+{
+  "Authorization": "Bearer <roaring_access_token>"
+}
+\end{lstlisting}
+
+\subsubsection{Response 200 OK - Är PEP}
+
+\begin{lstlisting}
+{
+  "personalNumber": "string",
+  "isPEP": true,
+  "pepType": "string (DOMESTIC, FOREIGN, RCA)",
+  "position": "string",
+  "organization": "string",
+  "activeSince": "ISO-8601 date",
+  "activeUntil": "ISO-8601 date (nullable)"
+}
+\end{lstlisting}
+
+\subsubsection{Response 200 OK - Inte PEP}
+\begin{lstlisting}
+{
+  "personalNumber": "string",
+  "isPEP": false
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes för Response}
+
+\textbf{Hantering (pseudokod):}
+\begin{lstlisting}
+1. OM isPEP = true:
+     → Sätt trigger showPEP = true
+     → Spara PEP-detaljer för fördjupade frågor i Steg 2
+     → Fortsätt onboarding (PEP är INTE blockerande, kräver bara EDD)
+2. OM isPEP = false:
+     → Ingen ytterligare åtgärd
+\end{lstlisting}
+
+% ------------------------------------------------------------------------
+\subsection{Extern Endpoint 6: GET /se/sanctions/1.0/\{personnr\} (Roaring)}
+% ------------------------------------------------------------------------
+
+\subsubsection{Beskrivning}
+
+Kontrollerar om person finns på sanktionslistor (EU, UN, OFAC, etc.). Detta är BLOCKERANDE - om personen är sanktionerad MÅSTE onboarding avbrytas omedelbart.
+
+\textbf{Fullständig URL:} \texttt{https://api.roaring.io/se/sanctions/1.0/\{personnr\}}
+
+\subsubsection{Request}
+
+\textbf{Headers:}
+\begin{lstlisting}
+{
+  "Authorization": "Bearer <roaring_access_token>"
+}
+\end{lstlisting}
+
+\subsubsection{Response 200 OK - Är sanktionerad}
+
+\begin{lstlisting}
+{
+  "personalNumber": "string",
+  "isSanctioned": true,
+  "sanctionLists": [
+    {
+      "listName": "string (EU Sanctions, UN Sanctions, etc.)",
+      "addedDate": "ISO-8601 date",
+      "reason": "string"
+    }
+  ]
+}
+\end{lstlisting}
+
+\subsubsection{Response 200 OK - Inte sanktionerad}
+\begin{lstlisting}
+{
+  "personalNumber": "string",
+  "isSanctioned": false
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes för Response}
+
+\textbf{Hantering (pseudokod):}
+\begin{lstlisting}
+1. OM isSanctioned = true:
+     → REJECT onboarding OMEDELBART
+     → Returnera 403 Forbidden med message: "Sanktionerad person - onboarding ej möjlig"
+     → Logga incident för compliance-team
+     → AVSLUTA
+2. OM isSanctioned = false:
+     → Fortsätt onboarding
+\end{lstlisting}
+
+% ------------------------------------------------------------------------
+\subsection{Extern Endpoint 7: GET /se/businessprohibition/1.0/person/\{personnr\} (Roaring)}
+% ------------------------------------------------------------------------
+
+\subsubsection{Beskrivning}
+
+Kontrollerar om person har näringsförbud enligt bokföringslagen. Näringsförbud innebär att personen inte får driva företag och är BLOCKERANDE för onboarding.
+
+\textbf{Fullständig URL:} \texttt{https://api.roaring.io/se/businessprohibition/1.0/person/\{personnr\}}
+
+\subsubsection{Request}
+
+\textbf{Headers:}
+\begin{lstlisting}
+{
+  "Authorization": "Bearer <roaring_access_token>"
+}
+\end{lstlisting}
+
+\subsubsection{Response 200 OK - Har näringsförbud}
+
+\begin{lstlisting}
+{
+  "personalNumber": "string",
+  "hasBusinessProhibition": true,
+  "prohibitionStart": "ISO-8601 date",
+  "prohibitionEnd": "ISO-8601 date",
+  "reason": "string"
+}
+\end{lstlisting}
+
+\subsubsection{Response 200 OK - Inget näringsförbud}
+\begin{lstlisting}
+{
+  "personalNumber": "string",
+  "hasBusinessProhibition": false
+}
+\end{lstlisting}
+
+\subsubsection{Implementation Notes för Response}
+
+\textbf{Hantering (pseudokod):}
+\begin{lstlisting}
+1. OM hasBusinessProhibition = true:
+     → REJECT onboarding OMEDELBART
+     → Returnera 403 Forbidden med message: "Näringsförbud - onboarding ej möjlig"
+     → Logga incident för compliance-team
+     → AVSLUTA
+2. OM hasBusinessProhibition = false:
+     → Fortsätt onboarding
+\end{lstlisting}
+
+% ------------------------------------------------------------------------
+\subsection{Backend Persistent Lagring}
+% ------------------------------------------------------------------------
+
+\textbf{Tabell: onboarding\_processes}
+\begin{lstlisting}[language=sql]
+-- Utöka befintlig tabell med kolumner för Steg 1
+ALTER TABLE onboarding_processes
+ADD COLUMN IF NOT EXISTS riskfragor_steg1 JSONB,
+ADD COLUMN IF NOT EXISTS bolagsverket_data JSONB,
+ADD COLUMN IF NOT EXISTS spar_data JSONB,
+ADD COLUMN IF NOT EXISTS beneficial_owners_data JSONB,
+ADD COLUMN IF NOT EXISTS triggers JSONB DEFAULT '{}'::jsonb,
+ADD COLUMN IF NOT EXISTS red_flags JSONB DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS vh_mismatch_detected BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS vh_mismatch_reason TEXT,
+ADD COLUMN IF NOT EXISTS requires_manual_review BOOLEAN DEFAULT false;
+
+-- Index för snabba sökningar
+CREATE INDEX IF NOT EXISTS idx_onboarding_triggers 
+  ON onboarding_processes USING GIN (triggers);
+CREATE INDEX IF NOT EXISTS idx_onboarding_red_flags 
+  ON onboarding_processes USING GIN (red_flags);
+CREATE INDEX IF NOT EXISTS idx_manual_review
+  ON onboarding_processes (requires_manual_review)
+  WHERE requires_manual_review = true;
+\end{lstlisting}
+
+\textbf{Tabell: external\_api\_responses}
+\begin{lstlisting}[language=sql]
+-- Logga alla externa API-anrop för audit trail och GDPR
+CREATE TABLE IF NOT EXISTS external_api_responses (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  onboarding_id UUID NOT NULL REFERENCES onboarding_processes(id),
+  api_name VARCHAR(100) NOT NULL,  -- "bolagsverket", "spar", "roaring_pep", etc.
+  endpoint VARCHAR(255) NOT NULL,   -- "/organisationer", "/pep/1.0/{personnr}", etc.
+  request_data JSONB,               -- Request body (om relevant)
+  response_data JSONB,              -- Fullständig response
+  response_code INTEGER,            -- HTTP status code
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Index för snabba sökningar
+CREATE INDEX IF NOT EXISTS idx_api_responses_onboarding 
+  ON external_api_responses(onboarding_id);
+CREATE INDEX IF NOT EXISTS idx_api_responses_api_name 
+  ON external_api_responses(api_name);
+CREATE INDEX IF NOT EXISTS idx_api_responses_created 
+  ON external_api_responses(created_at);
+\end{lstlisting}
+
+\textbf{Update-query (pseudokod):}
+\begin{lstlisting}[language=sql]
+UPDATE onboarding_processes
+SET 
+  riskfragor_steg1 = $request_body,
+  bolagsverket_data = $bolagsverket_response,
+  spar_data = $spar_response,
+  beneficial_owners_data = $roaring_beneficial_owners,
+  triggers = $calculated_triggers,
+  red_flags = $detected_red_flags,
+  current_step = 2,
+  status = 'in_progress',
+  updated_at = NOW()
+WHERE id = $onboardingId
+  AND user_id = $user_id_from_jwt;
+\end{lstlisting}
+
+% ------------------------------------------------------------------------
+\subsection{Frontend Datalagring i Browser}
+% ------------------------------------------------------------------------
+
+\subsubsection{localStorage}
+
+\begin{itemize}[noitemsep]
+  \item \texttt{onboardingId} (UUID) — Identifierar processen, sätts av POST /uppdrag
+  \item \texttt{currentStep} (Integer) — Vilket steg användaren är på (0-7)
+  \item \texttt{riskfragorSteg1Draft} (JSON) — Autosave medan användaren fyller i formulär
+  \item \texttt{triggers} (JSON) — Vilka riskflaggor som är aktiva (används för UI-betoning)
+  \item \texttt{wizardConfig} (JSON) — Wizard-steg från backend (default + custom från config.json)
+  \item \texttt{bolagsverketData} (JSON) — Cached företagsinformation för visning
+  \item \texttt{sparData} (JSON) — Cached personuppgifter för visning
+\end{itemize}
+
+\textbf{Exempel localStorage efter Steg 1 (utan custom config):}
+\begin{lstlisting}[language=json]
+{
+  "onboardingId": "550e8400-e29b-41d4-a716-446655440000",
+  "currentStep": 2,
+  "triggers": {
+    "showUtlandska": true,
+    "showKontanter": false,
+    "showVerksamhet": false,
+    "showPEP": false
+  },
+  "wizardConfig": {
+    "totalSteps": 4,
+    "hasCustomConfig": false,
+    "steps": [
+      {"id": 2, "title": "Utländska transaktioner", "isCustom": false},
+      {"id": 3, "title": "Kunder & Affärspartners", "isCustom": false},
+      {"id": 4, "title": "Betalningar & Transaktioner", "isCustom": false}
+    ]
+  },
+  "bolagsverketData": {
+    "foretagsnamn": "Exempel AB",
+    "sniKod": "47111",
+    "sniBeskrivning": "Livsmedelsbutiker"
+  }
+}
+\end{lstlisting}
+
+\textbf{Exempel localStorage efter Steg 1 (med custom config från Inställningar):}
+\begin{lstlisting}[language=json]
+{
+  "onboardingId": "550e8400-...",
+  "currentStep": 2,
+  "wizardConfig": {
+    "totalSteps": 6,
+    "hasCustomConfig": true,
+    "customConfigVersion": "v2.1",
+    "steps": [
+      {"id": 2, "title": "Utländska transaktioner", "isCustom": false},
+      {"id": 3, "title": "Kunder & Affärspartners", "isCustom": false},
+      {"id": 4, "title": "Betalningar & Transaktioner", "isCustom": false},
+      {"id": 5, "title": "Miljöhänsyn & Hållbarhet", "isCustom": true, "questionCount": 4},
+      {"id": 6, "title": "IT-säkerhet & GDPR", "isCustom": true, "questionCount": 6}
+    ]
+  }
+}
+\end{lstlisting}
+
+\subsubsection{Cookies}
+
+\begin{itemize}[noitemsep]
+  \item \texttt{access\_token} (HttpOnly, Secure, SameSite=Strict) — JWT access token för API-autentisering
+  \item \texttt{refresh\_token} (HttpOnly, Secure, SameSite=Strict) — JWT refresh token för token renewal
+\end{itemize}
+
+Inga cookies specifika för Riskfrågor Steg 1.
+
+% ------------------------------------------------------------------------
+\subsection{Backend - Behandlingshistorik och GDPR}
+% ------------------------------------------------------------------------
+
+\subsubsection{Loggade händelser}
+
+Alla API-anrop och viktiga händelser loggas för GDPR-compliance (rätt till tillgång) och audit trail.
+
+\begin{itemize}[noitemsep]
+  \item \texttt{riskfragor\_steg1\_started} — När användaren besöker sliden
+  \item \texttt{riskfragor\_steg1\_autosave} — När formulär auto-sparas (localStorage)
+  \item \texttt{riskfragor\_steg1\_submitted} — När användaren klickar \enquote{Nästa}
+  \item \texttt{bolagsverket\_api\_called} — Organisationsnummer validering
+  \item \texttt{spar\_api\_called} — Personnummer validering
+  \item \texttt{roaring\_beneficial\_owner\_primary\_called} — VH >25\% check
+  \item \texttt{roaring\_beneficial\_owner\_alternative\_called} — Alternativ VH check (om behövs)
+  \item \texttt{vh\_mismatch\_detected} — \textbf{(NYT)} Användaren hävdar VH men finns ej i Roaring
+  \item \texttt{vh\_reverse\_mismatch\_detected} — \textbf{(NYT)} Roaring visar VH men användaren nekar
+  \item \texttt{manual\_review\_flagged} — \textbf{(NYT)} Ärendet flaggat för manuell granskning
+  \item \texttt{roaring\_pep\_called} — PEP-kontroll per VH
+  \item \texttt{roaring\_sanctions\_called} — Sanktionskontroll per VH
+  \item \texttt{roaring\_businessprohibition\_called} — Näringsförbud per VH
+  \item \texttt{triggers\_calculated} — Vilka fördjupningsfrågor triggades
+  \item \texttt{red\_flags\_detected} — Om PEP/Sanctions/BusinessProhibition hittades
+  \item \texttt{onboarding\_rejected} — Om sanktionerad eller näringsförbud
+\end{itemize}
+
+\subsubsection{CSV-filer (Primär databasimplementation)}
+
+\textbf{UTVECKLINGSSTRATEGI:} Hela applikationen byggs FÖRST med CSV-filer för ALL databashantering. PostgreSQL införs som slutoptimering ENDAST efter att hela applikationen fungerar felfritt. Detta undviker race conditions och concurrent write-problem under utveckling.
+
+\textbf{Varför CSV först?}
+\begin{itemize}[noitemsep]
+  \item Enklare debugging (kan öppna CSV i editor och se exakt vad som sparats)
+  \item Inga databaskonfigurationsproblem under utveckling
+  \item Snabbare iterationer (ingen migration/schema-hantering)
+  \item Fungerar perfekt för single-user development environment
+  \item PostgreSQL blir "drop-in replacement" när applikationen är stabil
+\end{itemize}
+
+\textbf{onboarding\_processes.csv:}
+\begin{lstlisting}
+id,user_id,riskfragor_steg1,triggers,vh_mismatch_detected,requires_manual_review,current_step,created_at,updated_at
+550e8400-...,123e4567-...,"{\"affarsIde\":\"...\"}","{\"showUtlandska\":true}",false,false,2,2025-10-24T10:00:00Z,2025-10-24T10:05:00Z
+\end{lstlisting}
+
+\textbf{external\_api\_responses.csv:}
+\begin{lstlisting}
+id,onboarding_id,api_name,endpoint,response_code,response_body,created_at
+uuid1,550e8400-...,bolagsverket,/organisationer,200,"{\"foretagsnamn\":\"...\"}",2025-10-24T10:01:00Z
+uuid2,550e8400-...,spar,/navet/spar/personnummer,200,"{\"namn\":\"...\"}",2025-10-24T10:02:00Z
+uuid3,550e8400-...,roaring_pep,/pep/1.0/195001011234,200,"{\"isPEP\":false}",2025-10-24T10:03:00Z
+\end{lstlisting}
+
+\textbf{event\_log.csv:}
+\begin{lstlisting}
+id,onboarding_id,event_type,user_id,details,created_at
+uuid1,550e8400-...,riskfragor_steg1_submitted,123e4567-...,"{\"step\":1}",2025-10-24T10:05:00Z
+uuid2,550e8400-...,vh_mismatch_detected,123e4567-...,"{\"reason\":\"...\"}",2025-10-24T10:05:30Z
+\end{lstlisting}
+
+% ------------------------------------------------------------------------
+\subsection{Databastabeller (Framtida PostgreSQL-optimering)}
+% ------------------------------------------------------------------------
+
+\textbf{OBS:} SQL-scheman nedan dokumenterar framtida PostgreSQL-implementation. NUVARANDE implementation använder CSV-filer med samma struktur. PostgreSQL införs som slutoptimering för multi-user concurrent access.
+Se sektion "Backend Persistent Lagring" ovan för fullständigt SQL-schema.
+
+\textbf{Sammanfattning:}
+\begin{itemize}[noitemsep]
+  \item \texttt{onboarding\_processes} — Huvudtabell, innehåller riskfragor\_steg1, triggers, bolagsverket\_data, spar\_data, beneficial\_owners\_data, red\_flags
+  \item \texttt{external\_api\_responses} — Audit trail för alla externa API-anrop, sparar request + response för GDPR-compliance
+  \item \texttt{user\_settings} — Innehåller custom\_wizard\_config (JSON) per användare
+  \item Index på triggers (GIN för JSONB) och red\_flags (GIN för JSONB) för snabba sökningar
+\end{itemize}
+
+% ------------------------------------------------------------------------
+\subsection{Custom Wizard Config (Valfri anpassning via Inställningar)}
+% ------------------------------------------------------------------------
+
+\subsubsection{Översikt}
+
+Användare kan ladda upp en custom \texttt{config.json} via Inställningar-sidan för att lägga till EGNA wizard-steg (Steg 5, 6, 7...) med anpassade frågor. De obligatoriska Steg 2-4 kan INTE ersättas eller tas bort, endast kompletteras.
+
+\textbf{När läses config.json?} Backend läser användarens custom config vid \texttt{POST /riskfragor/steg1} (precis innan Steg 2 ska visas). Detta är den ENKLASTE approachen — ingen extra API-anrop, ingen cache-invalidation, alltid uppdaterad config.
+
+\subsubsection{Upload Endpoint}
+
+\textbf{Endpoint:} \texttt{POST /api/user/settings/config}
+
+\textbf{Request:}
+\begin{lstlisting}
+{
+  "configFile": "base64-encoded JSON eller multipart/form-data",
+  "version": "v2.1"  // valfri versionstagg
+}
+\end{lstlisting}
+
+\textbf{Response 200 OK:}
+\begin{lstlisting}
+{
+  "success": true,
+  "message": "Custom wizard config sparad",
+  "totalStepsAdded": 2,
+  "configVersion": "v2.1"
+}
+\end{lstlisting}
+
+\textbf{Backend sparar:}
+\begin{lstlisting}[language=sql]
+-- CSV: user_settings.csv
+-- SQL (framtida):
+UPDATE user_settings
+SET custom_wizard_config = $1::jsonb,
+    config_version = $2,
+    updated_at = NOW()
+WHERE user_id = $3;
+\end{lstlisting}
+
+\subsubsection{Config.json Structure}
+
+\begin{lstlisting}[language=json]
+{
+  "version": "v2.1",
+  "additionalSteps": [
+    {
+      "id": 5,
+      "title": "Miljöhänsyn & Hållbarhet",
+      "description": "Frågor om företagets miljöarbete",
+      "conditional": false,
+      "questions": [
+        {
+          "id": "env_1",
+          "text": "Har företaget miljöcertifiering (t.ex. ISO 14001)?",
+          "type": "radio",
+          "required": true,
+          "options": ["Ja", "Nej", "Under arbete"]
+        },
+        {
+          "id": "env_2",
+          "text": "Beskriv företagets miljöpolicy (om tillämpligt)",
+          "type": "textarea",
+          "required": false,
+          "maxLength": 500,
+          "placeholder": "T.ex. återvinning, koldioxidkompensation..."
+        },
+        {
+          "id": "env_3",
+          "text": "Hållbarhetsrapportering enligt GRI/CSRD?",
+          "type": "checkbox",
+          "required": false,
+          "label": "Ja, vi rapporterar enligt standarder"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "IT-säkerhet & GDPR",
+      "description": "Frågor om informationssäkerhet",
+      "conditional": false,
+      "questions": [
+        {
+          "id": "it_1",
+          "text": "Har företaget utsett ett dataskyddsombud (DPO)?",
+          "type": "radio",
+          "required": true,
+          "options": ["Ja", "Nej", "Ej tillämpligt (< 250 anställda)"]
+        },
+        {
+          "id": "it_2",
+          "text": "Genomförs regelbundna säkerhetsrevisioner?",
+          "type": "radio",
+          "required": true,
+          "options": ["Ja, årligen", "Ja, vartannat år", "Nej", "Planerat"]
+        }
+      ]
+    }
+  ]
+}
+\end{lstlisting}
+
+\subsubsection{Regler för Custom Config}
+
+\begin{itemize}[noitemsep]
+  \item \textbf{Steg 2-4 är obligatoriska} — Custom steg får ENDAST id 5 och uppåt
+  \item \textbf{Max 10 additional steps} — För att undvika orimligt långa wizards
+  \item \textbf{Max 20 questions per step} — För att hålla steg hanterliga
+  \item \textbf{Conditional steg} — Kan använda triggers från Steg 1 (men rekommenderas ej för enkelhet)
+  \item \textbf{Question types} — Stödda typer: radio, checkbox, textarea, dropdown, number
+  \item \textbf{Validation} — Backend validerar config.json schema vid upload
+  \item \textbf{Fallback} — Om custom config är invalid/korrupt, använd default Steg 2-4 bara
+\end{itemize}
+
+\subsubsection{Frontend Rendering}
+
+Frontend använder \texttt{wizardConfig} från POST /riskfragor/steg1 response för att dynamiskt rendera steg:
+
+\begin{lstlisting}[language=javascript]
+// RiskFragorWizard.jsx
+const { wizardConfig } = responseData;
+
+{wizardConfig.steps.map((step, index) => (
+  <WizardStep 
+    key={step.id}
+    stepNumber={step.id}
+    totalSteps={wizardConfig.totalSteps}
+    title={step.title}
+    questions={step.questions || DEFAULT_QUESTIONS[step.id]}
+    isCustom={step.isCustom}
+  />
+))}
+\end{lstlisting}
+
+% ------------------------------------------------------------------------
+\subsection{Sammanfattning (Prosaisk beskrivning)}
+% ------------------------------------------------------------------------
+
+\subsubsection{Scenario 1: Första gången - Inga riskflaggor}
+
+\textbf{Aktörer:}
+\begin{itemize}[noitemsep]
+  \item \textbf{Användare (inloggad):} Anna Andersson, redovisningskonsult på byrån (hennes userId i JWT token)
+  \item \textbf{Presumtiv klient:} Celestial AB (org.nr 556903-8671), VD Bengt Bengtsson (personnr 196001011234)
+\end{itemize}
+
+Anna Andersson (redovisningskonsulten) sitter och intervjuar Bengt Bengtsson, VD för Celestial AB som vill bli kund. Anna har öppnat onboarding-appen och kommer från Uppdragsval-sliden med \texttt{onboardingId} sparat i localStorage. 
+
+På Riskfrågor Steg 1-sliden välkomnas hon med en intro-text om varför riskfrågor krävs (PTL-referens). Hon fyller i 9 grundfrågor baserat på information från Bengt:
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Affärsidé:} "Restaurang med mat från medelhavet"
+  \item \textbf{Kundtyper:} Privatpersoner OCH företag (både walk-in kunder och cateringuppdrag)
+  \item \textbf{Utländska partners:} "Nej"
+  \item \textbf{Leverantörer:} "Menigo, Martin \& Servera, Systembolaget"
+  \item \textbf{Verksamhet ändrad:} "Nej"
+  \item \textbf{Organisationsnummer:} 556903-8671 (Celestial AB)
+  \item \textbf{Personnummer VD:} 196001011234 (Bengt Bengtsson)
+  \item \textbf{Verklig huvudman:} "Nej" (Bengt äger bara 15\%, inte >25\%)
+  \item \textbf{PEP-status:} Avmarkerad
+\end{enumerate}
+
+När Anna klickar \enquote{Nästa} visas en loading spinner med text \enquote{Validerar uppgifter mot externa register...}. Backend gör följande:
+
+\textbf{Steg 1-3: Autentisering och validering}
+\begin{itemize}[noitemsep]
+  \item Extraherar user\_id från JWT token (Anna Andersson's userId - redovisningskonsulten)
+  \item Verifierar att onboardingId tillhör Anna (security check)
+  \item Validerar format på org.nr (556903-8671) och personnr (196001011234)
+\end{itemize}
+
+\textbf{Steg 4: Bolagsverket API-anrop}
+
+Backend anropar Bolagsverket POST /organisationer med org.nr 556903-8671 (klientens företag). Response innehåller:
+\begin{lstlisting}
+{
+  "organisationsnummer": "556903-8671",
+  "namn": "Celestial AB",
+  "organisationsform": "AB",
+  "sniKod": "56101",
+  "sniBeskrivning": "Restauranger och gatukök",
+  "vd": {
+    "namn": "Bengt Bengtsson",
+    "personnummer": "196001011234"
+  },
+  "firmatecknare": [
+    {
+      "namn": "Bengt Bengtsson",
+      "personnummer": "196001011234"
+    }
+  ]
+}
+\end{lstlisting}
+
+Backend verifierar att Bengt's personnummer (196001011234) matchar VD-personnumret från Bolagsverket. GODKÄND
+
+\textbf{Steg 5: SPAR API-anrop}
+
+Backend anropar Skatteverket SPAR POST /navet/spar/personnummer med personnummer 196001011234 (Bengt Bengtsson). Response innehåller:
+\begin{lstlisting}
+{
+  "personnummer": "196001011234",
+  "namn": {
+    "fornamn": "Bengt",
+    "efternamn": "Bengtsson"
+  },
+  "folkbokforingsadress": {
+    "adress": "Storgatan 1",
+    "postnummer": "12345",
+    "postort": "Stockholm"
+  },
+  "status": "Folkbokförd"
+}
+\end{lstlisting}
+
+Backend verifierar att Bengt är folkbokförd. GODKÄND
+
+\textbf{Steg 6-7: Roaring Beneficial Owners (två-stegs algoritm)}
+
+Backend anropar först Roaring Primary Endpoint GET /beneficial-owners/2.1/556903-8671 (Celestial AB). Response innehåller:
+\begin{lstlisting}
+{
+  "organizationNumber": "5569038671",
+  "companyName": "Celestial AB",
+  "beneficialOwners": [
+    {
+      "personalNumber": "197001011234",
+      "firstName": "Bengt",
+      "lastName": "Bengtsson",
+      "ownershipPercentage": 60.0,
+      "votingRightsPercentage": 60.0
+    },
+    {
+      "personalNumber": "196501011234",
+      "firstName": "Carl",
+      "lastName": "Carlsson",
+      "ownershipPercentage": 40.0,
+      "votingRightsPercentage": 40.0
+    }
+  ]
+}
+\end{lstlisting}
+
+Två verkliga huvudmän identifierade (båda >25\%). Backend behöver INTE anropa Alternative Endpoint eftersom primary gav resultat.
+
+\textbf{Steg 8: PEP/Sanctions/BusinessProhibition checks}
+
+För varje VH (Bengt och Carl) anropar backend:
+\begin{itemize}[noitemsep]
+  \item GET /pep/1.0/197001011234 → isPEP: false
+  \item GET /sanctions/1.0/197001011234 → isSanctioned: false
+  \item GET /businessprohibition/1.0/person/197001011234 → hasBusinessProhibition: false
+  \item GET /pep/1.0/196501011234 → isPEP: false
+  \item GET /sanctions/1.0/196501011234 → isSanctioned: false
+  \item GET /businessprohibition/1.0/person/196501011234 → hasBusinessProhibition: false
+\end{itemize}
+
+Alla checks ger grönt ljus. INGA RED FLAGS
+
+\textbf{Steg 9: Beräkna riskAssessment (Celestial Risk Engine v3.0)}
+
+\textbf{Komponent 1: Offentliga register (publicData)}
+\begin{itemize}[noitemsep]
+  \item Bolagsålder: Celestial AB registrerat 2023-01-15 = 2 år → +4 poäng
+  \item PEP-status: Ingen VH är PEP → 0 poäng
+  \item Sanktioner: Ingen VH på sanktionslista → 0 poäng
+  \item Näringsförbud: Ingen VH har näringsförbud → 0 poäng
+  \item \textbf{Totalt publicData:} 4 poäng (av max 30)
+\end{itemize}
+
+\textbf{Komponent 2: Korsvalidering (crossValidation)}
+\begin{itemize}[noitemsep]
+  \item VH-mismatch: Klienten svarade \enquote{Nej} (ej VH) men Roaring visar Bengt som 60\% ägare
+    → Omvänd mismatch detekterad → +8 poäng
+  \item Adressmismatch: SPAR visar Storgatan 1, Bolagsverket visar Storgatan 1 → 0 poäng
+  \item F-skatt: (Kontrolleras ej i detta scenario) → 0 poäng
+  \item Momsregistrering: (Kontrolleras ej i detta scenario) → 0 poäng
+  \item \textbf{Totalt crossValidation:} 8 poäng (av max 30)
+\end{itemize}
+
+\textbf{Komponent 3: Bokföringsdata (bookkeeping)}
+\begin{itemize}[noitemsep]
+  \item Ännu ej analyserad i Steg 1 → 0 poäng (av max 40)
+\end{itemize}
+
+\textbf{Beräkning:}
+\begin{align*}
+\text{staticKycScore} &= 4 + 8 + 0 = 12 \text{ poäng} \\
+\text{sniHotFactor} &= 3 \text{ (SNI 56101 = Restaurang, kontantintensiv)} \\
+\text{hotBonus} &= (3-1) \times 10 = 20 \text{ poäng} \\
+\text{adjustedScore} &= 12 + 20 = 32 \text{ poäng}
+\end{align*}
+
+\textbf{Riskkla ssificering:}
+\begin{itemize}[noitemsep]
+  \item adjustedScore = 32 → Inom intervall 0–40 → \texttt{riskLevel = "low"}
+  \item Inga hårda triggers (sanctions/businessProhibition) → \texttt{requiresEDD = false}
+  \item VH-mismatch detekterad → \texttt{requiresManualReview = true}
+\end{itemize}
+
+\textbf{Steg 10: Beräkna triggers för UI-betoning}
+
+Backend sätter triggers baserat på klientens svar OCH API-resultat:
+\begin{itemize}[noitemsep]
+  \item isPEP = false (varken VD eller VH är PEP)
+  \item hasSanctions = false
+  \item hasBusinessProhibition = false
+  \item vhMismatch = true (omvänd: klient säger nej men Roaring säger ja)
+  \item addressMismatch = false
+  \item missingFTax = false
+  \item missingVAT = false
+  \item newCompany = false (2 år gammalt)
+  \item highRiskIndustry = true (SNI 56101 = restaurang)
+\end{itemize}
+
+\textbf{OBS:} Triggers används INTE för att hoppa över Steg 2-4. Steg 2-4 visas ALLTID (eller fler steg enligt config.json). Triggers används för att flagga risker och kan påverka vilka frågor som betonas, men wizard-stegen körs alltid igenom.
+
+\textbf{Steg 10-11: Spara i databas och returnera}
+
+Backend uppdaterar onboarding\_processes tabell:
+\begin{lstlisting}[language=sql]
+UPDATE onboarding_processes
+SET 
+  riskfragor_steg1 = '{...Bengts/Celestials svar...}',
+  bolagsverket_data = '{...Celestial AB data...}',
+  spar_data = '{...Bengts folkbokföringsdata...}',
+  beneficial_owners_data = '[{...Bengt...}, {...Carl...}]',
+  triggers = '{"showUtlandska":false,"showKontanter":false,"showVerksamhet":false,"showPEP":false}',
+  current_step = 2,
+  updated_at = NOW()
+WHERE id = '550e8400-...' AND user_id = 'Anna_userId';
+\end{lstlisting}
+
+Backend sparar också alla 9 externa API-anrop i external\_api\_responses för audit trail.
+
+Backend returnerar response:
+\begin{lstlisting}
+{
+  "success": true,
+  "triggers": {"showUtlandska":false,"showKontanter":true,"showVerksamhet":false,"showPEP":false},
+  "message": "Grundläggande riskbedömning klar - kontanthantering flaggad",
+  "nextStep": "/riskfragor/steg2"
+}
+\end{lstlisting}
+
+\textbf{Frontend-hantering:}
+
+Frontend tar emot response, sparar triggers i localStorage, och navigerar ALLTID till \texttt{/riskfragor/steg2}. Frontend läser sedan config.json för att se vilka wizard-steg som ska visas (minst Steg 2-4, eventuellt fler enligt användarens config.json). Triggers används för att flagga risker i backend och kan påverka vilka frågor som betonas i UI, men påverkar INTE om stegen visas eller inte.
+
+\textbf{OBS om databas:} Under utveckling används CSV-filer för ALL databashantering (onboarding\_processes.csv, external\_api\_responses.csv, etc.). PostgreSQL SQL införs FÖRST när hela applikationen fungerar felfritt som slutoptimering för att hantera fler samtidiga användare utan skrivfel/race conditions.
+
+\subsubsection{Scenario 2: Triggers aktiverade (högre risk)}
+
+\textbf{Aktörer:}
+\begin{itemize}[noitemsep]
+  \item \textbf{Användare (inloggad):} Anna Andersson, redovisningskonsult på byrån
+  \item \textbf{Presumtiv klient:} TechStart AB, VD Eva Eriksson
+\end{itemize}
+
+Anna intervjuar Eva Eriksson, VD för TechStart AB som vill bli kund. Eva's företag har annorlunda profil än Celestial AB:
+\begin{itemize}[noitemsep]
+  \item \textbf{Kundtyper:} Privatpersoner OCH företag (högre risk)
+  \item \textbf{Utländska partners:} "Ja, vi har kunder i Norge och Danmark" (gränsöverskridande verksamhet)
+\end{itemize}
+
+När backend beräknar triggers:
+\begin{itemize}[noitemsep]
+  \item showUtlandska = true (utlandskaPartners !== "Nej")
+  \item showKontanter = true (kundTyper.privatpersoner = true)
+\end{itemize}
+
+Backend returnerar:
+\begin{lstlisting}
+{
+  "success": true,
+  "triggers": {"showUtlandska":true,"showKontanter":true,"showVerksamhet":false,"showPEP":false},
+  "message": "Riskflaggor identifierade (utländska transaktioner + kontanter)",
+  "nextStep": "/riskfragor/steg2"
+}
+\end{lstlisting}
+
+\textbf{Frontend-hantering:}
+
+Precis som i Scenario 1, navigerar frontend ALLTID till \texttt{/riskfragor/steg2}. Skillnaden är att triggers nu är aktiva (\texttt{showUtlandska = true}, \texttt{showKontanter = true}), vilket kan användas för att:
+\begin{itemize}[noitemsep]
+  \item Betona specifika frågor i UI (t.ex. markera utländska transaktioner med varning)
+  \item Visa extra hjälptext eller förklaringar för riskfyllda områden
+  \item Flagga ärendet för manuell granskning i backend
+  \item Påverka risk-score i slutlig bedömning
+\end{itemize}
+
+Frontend visar SAMMA wizard-steg (Steg 2-4) som i Scenario 1, men med triggers kan vissa frågor betonas eller flaggas för extra uppmärksamhet.
+
+\textbf{Steg 2-4 visas ALLTID (konfigurerbart via config.json):}
+\begin{enumerate}[noitemsep]
+  \item \textbf{Steg 2 (Utländska transaktioner):} Vilka länder, omsättningsandel, fast driftställe
+  \item \textbf{Steg 3 (Kunder \& Partners):} Återkommande partners, största leverantörer/kunder
+  \item \textbf{Steg 4 (Betalningar):} Betalningsmetoder, kontantandel, stora transaktioner
+\end{enumerate}
+
+Efter att Anna besvarat Steg 2-4 (+ eventuella extra steg från config.json), sparas alla svar via \texttt{POST /riskfragor/steg2} (en enda batch), och frontend navigerar till \texttt{/identitetskontroll}.
+
+\subsubsection{Scenario 3: Validering misslyckas - 403 Forbidden}
+
+\textbf{Aktörer:}
+\begin{itemize}[noitemsep]
+  \item \textbf{Användare (inloggad):} Anna Andersson, redovisningskonsult på byrån
+  \item \textbf{Presumtiv klient:} Celestial AB (org.nr 556903-8671), VD Bengt Bengtsson
+  \item \textbf{Person som försöker representera företaget:} David Davidsson (personnr 198001011234) - INTE behörig
+\end{itemize}
+
+Anna intervjuar David Davidsson som påstår sig vara VD för Celestial AB. Hon fyller i formuläret:
+\begin{itemize}[noitemsep]
+  \item \textbf{Organisationsnummer:} 556903-8671 (Celestial AB)
+  \item \textbf{Personnummer VD:} 198001011234 (David Davidsson)
+\end{itemize}
+
+Backend anropar Bolagsverket och får response som visar att Bengt Bengtsson (INTE David) är VD:
+\begin{lstlisting}
+{
+  "vd": {
+    "namn": "Bengt Bengtsson",
+    "personnummer": "196001011234"
+  },
+  "firmatecknare": [
+    {
+      "namn": "Bengt Bengtsson",
+      "personnummer": "196001011234"
+    }
+  ]
+}
+\end{lstlisting}
+
+Backend jämför det angivna personnumret (198001011234 - David) med VD och firmatecknare från Bolagsverket. INGEN MATCH hittas - David är inte behörig att representera företaget.
+
+Backend returnerar:
+\begin{lstlisting}
+{
+  "success": false,
+  "error": "not_authorized",
+  "code": "PERSON_NOT_AUTHORIZED",
+  "details": "Personnummer stämmer inte med VD/firmatecknare enligt Bolagsverket"
+}
+\end{lstlisting}
+
+Frontend visar error message i röd banner: "Du är inte behörig att skapa uppdrag för detta bolag. Endast VD och firmatecknare kan fortsätta."
+
+\subsubsection{Teknisk sammanfattning}
+
+Riskfrågor Steg 1 består av ett enda POST endpoint som tar emot 8 grundfrågor och gör omfattande validering mot externa API:er.
+
+\textbf{Externa anrop (total):}
+\begin{itemize}[noitemsep]
+  \item 1× Bolagsverket (organisationer) — Validera org.nr + VD
+  \item 1× SPAR (personnummer) — Validera VD personnummer
+  \item 1-2× Roaring (beneficial-owners) — Hämta VH (primary + optional fallback)
+  \item N× Roaring (PEP) — Kontrollera VD + VH mot PEP-listor (N = antal VH)
+  \item N× Roaring (Sanctions) — Kontrollera VD + VH mot sanktionslistor
+  \item N× Roaring (BusinessProhibition) — Kontrollera VD + VH mot näringsförbud
+\end{itemize}
+
+\textbf{Svarstid:} 3-5 sekunder beroende på antal VH och nätverkshastighet
+
+\textbf{Databas-operationer:}
+\begin{itemize}[noitemsep]
+  \item 1× SELECT (verifiera ägarskap av onboardingId)
+  \item 1× UPDATE (spara riskfrågor + triggers + externa API-data)
+  \item 3-9× INSERT (logga alla externa API-anrop i external\_api\_responses)
+\end{itemize}
+
+\textbf{Conditional routing:}
+\begin{itemize}[noitemsep]
+  \item OM alla triggers = false → Nästa steg = /identitetskontroll (hoppar över Steg 2)
+  \item OM minst en trigger = true → Nästa steg = /riskfragor/steg2
+\end{itemize}
+
+\textbf{Frontend uppdatering:}
+\begin{itemize}[noitemsep]
+  \item Spara triggers i localStorage
+  \item Spara bolagsverketData och sparData i localStorage (för visning)
+  \item Uppdatera currentStep till 2
+  \item Navigera till nextStep URL
+\end{itemize}
+
+\textbf{Blockerande fel:}
+\begin{itemize}[noitemsep]
+  \item Personnummer matchar inte VD/firmatecknare → 403 Forbidden
+  \item Organisationsnummer finns inte → 404 Not Found
+  \item Person är sanktionerad → 403 Forbidden (REJECT omedelbart)
+  \item Person har näringsförbud → 403 Forbidden (REJECT omedelbart)
+\end{itemize}
+
+\textbf{Icke-blockerande varningar:}
+\begin{itemize}[noitemsep]
+  \item Person är PEP → Trigger showPEP = true (kräver fördjupning i Steg 2)
+  \item Person ej folkbokförd → Varning till compliance-team (men fortsätt onboarding)
+  \item Komplex ägarstruktur (totalCoverage < 50\%) → Flagga för manuell granskning
+\end{itemize}
+
+
+\newpage
+
+% ========================================================================
+% SEKTION 2B: RISKFRÅGOR STEG 2 (FÖRDJUPADE FRÅGOR)
+% ========================================================================
+
+\section{SEKTION 2B: Riskfrågor – Steg 2 (Fördjupade frågor)}
+
+\subsubsection{POST /api/onboarding/\{onboardingId\}/riskfragor/steg2}
+
+\textbf{Beskrivning:}\\
+Sparar fördjupade riskfrågor baserat på triggers från Steg 1. Endast frågor där trigger = true visas för användaren. Uppdaterar riskpoäng och beräknar om enhanced due diligence (EDD) krävs.
+
+\textbf{Request Headers:}
+\begin{lstlisting}[language=json]
+{
+  "Authorization": "Bearer <access_token>",
+  "Content-Type": "application/json"
+}
+\end{lstlisting}
+
+\textbf{Request Body (Exempel - Alla triggers = true):}
+\begin{lstlisting}[language=json]
+{
+  "utlandskaTransaktioner": {
+    "lander": "Norge, Danmark, Tyskland",
+    "andel": "20%",
+    "syfte": "Konsultuppdrag för nordiska kunder",
+    "valutor": "NOK, DKK, EUR"
+  },
+  "kontanthantering": {
+    "omfattning": "Sällan",
+    "maxBelopp": "5000 SEK",
+    "rutiner": "Kvitton sparas, bokförs samma dag"
+  },
+  "verksamhetsandring": {
+    "vad": "Lagt till online-kurser som ny intäktskälla",
+    "nar": "2024-06",
+    "varfor": "Efterfrågan från kunder"
+  },
+  "pepDetaljer": {
+    "befattning": "Före detta kommunalråd",
+    "period": "2015-2019",
+    "familjerelation": "Nej"
+  }
+}
+\end{lstlisting}
+
+\textbf{Request Body (Exempel - Endast utländska = true):}
+\begin{lstlisting}[language=json]
+{
+  "utlandskaTransaktioner": {
+    "lander": "Norge, Danmark",
+    "andel": "10%",
+    "syfte": "Konsultuppdrag",
+    "valutor": "NOK, DKK"
+  }
+}
+\end{lstlisting}
+
+\textbf{Response (200 OK - Standard Risk):}
+\begin{lstlisting}[language=json]
+{
+  "success": true,
+  "riskScore": 35,
+  "riskLevel": "STANDARD",
+  "eddRequired": false,
+  "message": "Standardrisk - ingen fördjupad granskning krävs. Du kan gå vidare till identitetskontroll.",
+  "nextStep": "/identitetskontroll",
+  "riskFactors": [
+    {
+      "factor": "Utländska transaktioner",
+      "severity": "LOW",
+      "points": 15,
+      "reason": "Nordiska länder (lågriskländer), <25% av omsättning"
+    },
+    {
+      "factor": "Kontanthantering",
+      "severity": "LOW",
+      "points": 10,
+      "reason": "Sällan, små belopp, goda rutiner"
+    },
+    {
+      "factor": "Verksamhetsändring",
+      "severity": "LOW",
+      "points": 10,
+      "reason": "Naturlig expansion, logisk förklaring"
+    }
+  ]
+}
+\end{lstlisting}
+
+\textbf{Response (200 OK - Enhanced Due Diligence Required):}
+\begin{lstlisting}[language=json]
+{
+  "success": true,
+  "riskScore": 85,
+  "riskLevel": "HIGH",
+  "eddRequired": true,
+  "message": "Förhöjd risk - fördjupad due diligence krävs. Vi behöver granska fler dokument.",
+  "nextStep": "/identitetskontroll",
+  "riskFactors": [
+    {
+      "factor": "PEP-status",
+      "severity": "HIGH",
+      "points": 40,
+      "reason": "Politiskt exponerad person (före detta kommunalråd)"
+    },
+    {
+      "factor": "Utländska transaktioner",
+      "severity": "MEDIUM",
+      "points": 25,
+      "reason": "Flera länder, >10% av omsättning"
+    },
+    {
+      "factor": "Kontanthantering",
+      "severity": "MEDIUM",
+      "points": 20,
+      "reason": "Privatpersoner som kunder, kontanter förekommer"
+    }
+  ],
+  "eddRequirements": [
+    "Specificera källa till förmögenhet för PEP",
+    "Tillhandahåll kontrakt för utländska uppdrag",
+    "Dokumentera kontanthanteringsrutiner skriftligt",
+    "Förklara relation till utländska partners"
+  ]
+}
+\end{lstlisting}
+
+\textbf{Response (400 Bad Request):}
+\begin{lstlisting}[language=json]
+{
+  "success": false,
+  "error": "Obligatoriska fält saknas",
+  "code": "MISSING_REQUIRED_FIELDS",
+  "details": {
+    "utlandskaTransaktioner": "Detta fält är obligatoriskt när showUtlandska = true",
+    "pepDetaljer": "Detta fält är obligatoriskt när showPEP = true"
+  }
+}
+\end{lstlisting}
+
+\textbf{Response (403 Forbidden):}
+\begin{lstlisting}[language=json]
+{
+  "success": false,
+  "error": "Onboarding-process ägs inte av inloggad användare",
+  "code": "UNAUTHORIZED_ACCESS"
+}
+\end{lstlisting}
+
+\textbf{Business Logic:}
+\begin{enumerate}[noitemsep]
+  \item \textbf{Hämta user\_id från JWT och verifiera ägarskap:}
+    \begin{itemize}[noitemsep]
+      \item SELECT från \texttt{onboarding\_processes} WHERE id = \texttt{onboardingId} AND user\_id = \texttt{user\_id\_from\_jwt}
+      \item Hämta \texttt{triggers} från Steg 1 (vilka frågor ska ställas)
+    \end{itemize}
+  \item \textbf{Validera att endast relevanta fält är ifyllda:}
+    \begin{itemize}[noitemsep]
+      \item Om triggers.showUtlandska = false → utlandskaTransaktioner får INTE finnas
+      \item Om triggers.showUtlandska = true → utlandskaTransaktioner MÅSTE finnas
+      \item Samma logik för kontanthantering, verksamhetsandring, pepDetaljer
+    \end{itemize}
+  \item \textbf{Beräkna riskpoäng (0-100):}
+    \begin{itemize}[noitemsep]
+      \item \textbf{Utländska transaktioner:}
+        \begin{itemize}[noitemsep]
+          \item Lågriskländer (Norden, EU15) + <25\% andel → 10-20 poäng (LOW)
+          \item Medelriskländer (EU, OECD) + 25-50\% andel → 20-35 poäng (MEDIUM)
+          \item Högriskländer (FATF graylisting) + >50\% andel → 40-60 poäng (HIGH)
+        \end{itemize}
+      \item \textbf{Kontanthantering:}
+        \begin{itemize}[noitemsep]
+          \item Sällan + <10,000 SEK + goda rutiner → 5-10 poäng (LOW)
+          \item Ibland + 10,000-50,000 SEK + acceptabla rutiner → 15-25 poäng (MEDIUM)
+          \item Ofta + >50,000 SEK + bristfälliga rutiner → 30-50 poäng (HIGH)
+        \end{itemize}
+      \item \textbf{Verksamhetsändring:}
+        \begin{itemize}[noitemsep]
+          \item Naturlig expansion + logisk förklaring → 5-10 poäng (LOW)
+          \item Stor förändring + vag förklaring → 15-25 poäng (MEDIUM)
+          \item Komplett pivoting + ingen förklaring → 30-40 poäng (HIGH)
+        \end{itemize}
+      \item \textbf{PEP-status:}
+        \begin{itemize}[noitemsep]
+          \item Före detta (>2 år sedan) + lokal nivå → 30-40 poäng (HIGH)
+          \item Nuvarande + lokal nivå → 50-60 poäng (HIGH)
+          \item Nuvarande + nationell/internationell nivå → 70-90 poäng (CRITICAL)
+          \item Familj till PEP → +20 poäng extra
+        \end{itemize}
+    \end{itemize}
+  \item \textbf{Avgör risk level:}
+    \begin{itemize}[noitemsep]
+      \item 0-30 poäng → STANDARD (eddRequired = false)
+      \item 31-60 poäng → MEDIUM (eddRequired = true, mild EDD)
+      \item 61-100 poäng → HIGH (eddRequired = true, omfattande EDD)
+    \end{itemize}
+  \item \textbf{Generera EDD-krav baserat på riskfaktorer}
+  \item \textbf{Uppdatera onboarding\_processes:}
+    \begin{itemize}[noitemsep]
+      \item Spara riskfragor\_steg2, risk\_score, risk\_level, edd\_required
+      \item Uppdatera current\_step till 3 (identitetskontroll)
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Databas:}
+\begin{lstlisting}[language=sql]
+-- Hamta triggers fran Steg 1 for validering
+SELECT 
+  triggers,
+  riskfragor_steg1
+FROM onboarding_processes
+WHERE id = $1                    -- onboardingId (UUID)
+  AND user_id = $2;              -- Fran JWT (security check)
+
+-- Uppdatera med Steg 2 svar och riskbedömning
+UPDATE onboarding_processes
+SET 
+  riskfragor_steg2 = $1::jsonb,
+  risk_score = $2,               -- 0-100
+  risk_level = $3,               -- STANDARD/MEDIUM/HIGH
+  edd_required = $4,             -- boolean
+  risk_factors = $5::jsonb,      -- Array av riskfaktorer
+  current_step = 3,
+  status = 'in_progress',
+  updated_at = NOW()
+WHERE id = $6                    -- onboardingId (UUID)
+  AND user_id = $7;              -- Fran JWT token (security check)
+\end{lstlisting}
+
+\textbf{Database Schema (behövs i Loop 4):}
+\begin{lstlisting}[language=sql]
+-- Lagg till riskbedömning kolumner i onboarding_processes
+ALTER TABLE onboarding_processes
+ADD COLUMN IF NOT EXISTS riskfragor_steg2 JSONB,
+ADD COLUMN IF NOT EXISTS risk_score INTEGER DEFAULT 0 CHECK (risk_score >= 0 AND risk_score <= 100),
+ADD COLUMN IF NOT EXISTS risk_level VARCHAR(20) CHECK (risk_level IN ('STANDARD', 'MEDIUM', 'HIGH')),
+ADD COLUMN IF NOT EXISTS edd_required BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS risk_factors JSONB DEFAULT '[]'::jsonb;
+
+-- Index for risk-based queries
+CREATE INDEX IF NOT EXISTS idx_onboarding_risk_level 
+  ON onboarding_processes (risk_level);
+CREATE INDEX IF NOT EXISTS idx_onboarding_edd_required 
+  ON onboarding_processes (edd_required);
+\end{lstlisting}
+
+\textbf{PTL-relevans:}
+\begin{itemize}[noitemsep]
+  \item \textbf{PTL 2 kap 2 §:} Riskbaserad bedömning krävs
+  \item \textbf{PTL 2 kap 8 §:} Förhöjd risk vid:
+    \begin{itemize}[noitemsep]
+      \item PEP (Politically Exposed Person)
+      \item Högriskländer enligt FATF
+      \item Ovanliga transaktionsmönster
+      \item Omfattande kontanthantering
+    \end{itemize}
+  \item \textbf{PTL 3 kap 12-14 §§:} Enhanced Due Diligence (EDD) för högrisk
+  \item \textbf{PTL 4 kap 3 §:} Transaktionsövervakning
+\end{itemize}
+
+\newpage
+
+\section{SEKTION 3: Identitetskontroll}
+
+\textit{TODO: Dokumentera identitetskontroll och dokumentation}
+
+\section{SEKTION 4: Jämförelse mot externa register}
+
+\textit{TODO: Dokumentera resultatslides från Bolagsverket/Roaring.io}
+
+\section{SEKTION 5: Företagsdokumentation}
+
+\textit{TODO: Dokumentera dokumentuppladdning}
+
+\section{SEKTION 6: Ekonomisk analys}
+
+\textit{TODO: Dokumentera SIE-fil, IBAN, Klarna Kosma integration}
+
+\section{SEKTION 7: Djupgranskning och avtal}
+
+\textit{TODO: Dokumentera bokföringsanalys, riskbedömning, BankID-signering}
+
+\end{document}

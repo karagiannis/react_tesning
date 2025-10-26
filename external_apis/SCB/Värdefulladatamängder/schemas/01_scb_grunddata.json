@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SCB Grunddata Schema",
+  "description": "Schema för grunddata om företag från SCB (Statistiska Centralbyrån) - scb_bulkfil.zip. Källa: Värdefulladatamängder, EU-definition.",
+  "type": "object",
+  "properties": {
+    "PeOrgNr": {
+      "type": "string",
+      "description": "Personnummer/Organisationsnummer. 12 siffror. Fysiska personer (enskilda näringsidkare): börjar med 19/20. Juridiska personer: börjar med 16 följt av 10-ställigt org.nr.",
+      "pattern": "^(19|20|16)[0-9]{10}$",
+      "examples": [
+        "198503302393",
+        "165564866803"
+      ]
+    },
+    "Namn": {
+      "type": "string",
+      "description": "Det namn som är registrerat på den juridiska enheten. För fysiska personer (enskilda näringsidkare) är det ett personnamn.",
+      "examples": [
+        "Lars Andersson",
+        "Ztarz Kebab AB"
+      ]
+    },
+    "Foretagsnamn": {
+      "type": "string",
+      "description": "För enskilda näringsidkare som har inregistrerat företagsnamn hos Bolagsverket. Om flera finns visas det senast registrerade (om inte annat meddelats till SCB).",
+      "examples": [
+        "Lars Redovisningsbyrå",
+        ""
+      ]
+    },
+    "Ftgstat": {
+      "type": "string",
+      "description": "Företagsstatus - Anger om företaget är verksamt. Verksamt = registrerat för moms/gruppmoms och/eller F-skatt och/eller som arbetsgivare.",
+      "enum": ["0", "1", "9"],
+      "examples": ["1", "9"]
+    },
+    "Jestat": {
+      "type": "string",
+      "description": "Status för juridisk enhet - Om enheten finns i Skatteverkets organisationsnummerregister och ingår i SCB:s företagsregister.",
+      "enum": ["1", "2", "9"],
+      "examples": ["1", "2"]
+    },
+    "RegDatKtid": {
+      "type": "string",
+      "format": "date",
+      "description": "Registreringsdatum - Datum då företaget registrerades i SCB:s Företagsregister. Format: YYYY-MM-DD",
+      "examples": ["2020-01-15", "2023-10-01"]
+    },
+    "jurform": {
+      "type": "string",
+      "description": "Juridisk form - Klassificering av företagets juridiska struktur. Se 04_juridisk_form.json för fullständig lista.",
+      "pattern": "^[0-9]{2}$",
+      "examples": ["41", "10", "51"]
+    },
+    "Ng1": {
+      "type": "string",
+      "description": "Primär SNI-kod (huvudsaklig näringsverksamhet). 5-siffrig kod enligt SNI 2007. Se 05_sni_koder.json för detaljer.",
+      "pattern": "^[0-9]{5}$",
+      "examples": ["47110", "62010"]
+    },
+    "Ng2": {
+      "type": "string",
+      "description": "Sekundär SNI-kod (binäringsverksamhet 1). Se 05_sni_koder.json för detaljer.",
+      "pattern": "^[0-9]{5}$"
+    },
+    "Ng3": {
+      "type": "string",
+      "description": "Tertiär SNI-kod (binäringsverksamhet 2). Se 05_sni_koder.json för detaljer.",
+      "pattern": "^[0-9]{5}$"
+    },
+    "Ng4": {
+      "type": "string",
+      "description": "Kvartär SNI-kod (binäringsverksamhet 3). Se 05_sni_koder.json för detaljer.",
+      "pattern": "^[0-9]{5}$"
+    },
+    "Ng5": {
+      "type": "string",
+      "description": "Kvintär SNI-kod (binäringsverksamhet 4). Se 05_sni_koder.json för detaljer.",
+      "pattern": "^[0-9]{5}$"
+    },
+    "Gatuadress": {
+      "type": "string",
+      "description": "Gatuadress eller boxadress för företaget. Se 06_adressfalt.json för detaljer.",
+      "examples": ["Storgatan 12", "Box 123"]
+    },
+    "COadress": {
+      "type": "string",
+      "description": "C/O-adress (Care Of). Se 06_adressfalt.json för detaljer.",
+      "examples": ["c/o Andersson", ""]
+    },
+    "Postnummer": {
+      "type": "string",
+      "description": "Postnummer (5 siffror, utan mellanslag). Se 06_adressfalt.json för detaljer.",
+      "pattern": "^[0-9]{5}$",
+      "examples": ["11234", "58292"]
+    },
+    "PostOrt": {
+      "type": "string",
+      "description": "Postort enligt Postnummerservice. Se 06_adressfalt.json för detaljer.",
+      "examples": ["STOCKHOLM", "LINKÖPING"]
+    },
+    "Reklam": {
+      "type": "string",
+      "description": "Reklamspärr enligt NIX-registret. 1 = Reklamspärr aktiv (får EJ skicka direktreklam), 2 = Ingen reklamspärr. Se 07_reklamsparre.json för GDPR och legal compliance.",
+      "enum": ["1", "2"],
+      "examples": ["1", "2"]
+    }
+  },
+  "required": [
+    "PeOrgNr",
+    "Namn",
+    "Ftgstat",
+    "Jestat",
+    "RegDatKtid"
+  ],
+  "additionalProperties": false,
+  "metadata": {
+    "source": "SCB Värdefulladatamängder",
+    "file": "scb_bulkfil.zip",
+    "format": ".txt",
+    "updated": "Veckovis (varje måndag)",
+    "encoding": "UTF-8"
+  }
+}

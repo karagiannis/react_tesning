@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Bolagsverket - Kodlista: Organisationsnamntyper",
+  "description": "Typer av namn som en organisation kan ha",
+  "type": "object",
+  "definitions": {
+    "namntyper": {
+      "FORETAGSNAMN-ORGNAM": {
+        "kod": "FORETAGSNAMN-ORGNAM",
+        "beskrivning": "Företagsnamn"
+      },
+      "NAMN-ORGNAM": {
+        "kod": "NAMN-ORGNAM",
+        "beskrivning": "Namn"
+      },
+      "FORNAMN_FRSPRAK-ORGNAM": {
+        "kod": "FORNAMN_FRSPRAK-ORGNAM",
+        "beskrivning": "Företagsnamn på främmande språk"
+      },
+      "SARS_FORNAMN-ORGNAM": {
+        "kod": "SARS_FORNAMN-ORGNAM",
+        "beskrivning": "Särskilt företagsnamn"
+      }
+    }
+  },
+  "metadata": {
+    "source": "Bolagsverket Värdefulladatamängder (GRATIS) - Kodlista 4",
+    "total": 4,
+    "usage": "Fältet 'organisationsnamn' i grunddata. Format: [namn]$[typ]$[registreringsdatum]$[verksamhetsbeskrivning]. Flera namn separerade med |"
+  }
+}

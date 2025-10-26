@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SCB - Kodlista: Status för juridisk enhet (Jestat)",
+  "description": "Beskriver om den juridiska enheten finns registrerad hos Skatteverkets centrala organisationsnummerregister samt ingår i populationen för SCB:s företagsregister.",
+  "type": "object",
+  "definitions": {
+    "juridisk_enhet_status": {
+      "1": {
+        "kod": "1",
+        "beskrivning": "Ingår i populationen och är registrerad i Skatteverkets organisationsnummerregister"
+      },
+      "2": {
+        "kod": "2",
+        "beskrivning": "Ingår i populationen och är registrerad på annat sätt",
+        "detaljer": "Fysiska personer (enskilda näringsidkare) registrerade för moms/arbetsgivare/F-skatt eller med inregistrerat företagsnamn. Dödsbon registrerade för moms/F-skatt/arbetsgivare. Värdepappersfonder som inte finns i org.nr-registret men inte är avregistrerade."
+      },
+      "9": {
+        "kod": "9",
+        "beskrivning": "Ingår inte längre i populationen",
+        "detaljer": "Företaget ligger kvar i SCB:s företagsregister som avregistrerat och rensas bort efter 6 månader."
+      }
+    }
+  },
+  "metadata": {
+    "source": "SCB Värdefulladatamängder (GRATIS)",
+    "total": 3,
+    "usage": "Fältet 'Jestat' i SCB grunddata",
+    "note": "Kod 2 används för enheter som ingår i SCB:s register men INTE i Skatteverkets org.nr-register"
+  }
+}

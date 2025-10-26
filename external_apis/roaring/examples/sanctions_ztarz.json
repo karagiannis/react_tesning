@@ -1,0 +1,839 @@
+{
+  "hitCount": 5,
+  "hits": [
+    {
+      "searchScore": 1.6090478,
+      "sanctionsListsDetails": [
+        {
+          "contactInformation": [
+            {
+              "address5": "Central District",
+              "address6": "Odense",
+              "country": "Denmark",
+              "countryCode": "DK"
+            }
+          ],
+          "listingType": "UN",
+          "names": [
+            {
+              "aliasType": "AKA",
+              "nameParts": [
+                {
+                  "name": "CS TRS CORPORATION",
+                  "nameOrder": 0,
+                  "namePartListSpecificType": "last name of person or full name of entity or ship",
+                  "namePartType": "NAME"
+                }
+              ],
+              "nameType": "ALIAS"
+            },
+            {
+              "aliasType": "AKA",
+              "nameParts": [
+                {
+                  "name": "ZTARZ",
+                  "nameOrder": 0,
+                  "namePartListSpecificType": "last name of person or full name of entity or ship",
+                  "namePartType": "NAME"
+                }
+              ],
+              "nameType": "ALIAS"
+            },
+            {
+              "aliasType": "AKA",
+              "nameParts": [
+                {
+                  "name": "COSMIC MINING DEVELOPMENT TRADING COOPERATION",
+                  "nameOrder": 0,
+                  "namePartListSpecificType": "last name of person or full name of entity or ship",
+                  "namePartType": "NAME"
+                }
+              ],
+              "nameType": "ALIAS"
+            },
+            {
+              "nameParts": [
+                {
+                  "name": "STAR TRAVELLERS",
+                  "nameOrder": 0,
+                  "namePartListSpecificType": "last name of person or full name of entity or ship",
+                  "namePartType": "NAME"
+                }
+              ],
+              "nameType": "PRIMARY"
+            },
+            {
+              "aliasType": "AKA",
+              "nameParts": [
+                {
+                  "name": "External Technology General Corporation",
+                  "nameOrder": 0,
+                  "namePartListSpecificType": "last name of person or full name of entity or ship",
+                  "namePartType": "NAME"
+                }
+              ],
+              "nameType": "ALIAS"
+            }
+          ],
+          "regulations": [
+            {
+              "designatedDate": "2009-04-24",
+              "lastUpdatedDate": "2020-12-31",
+              "listedDate": "2009-04-27",
+              "programme": "Denmark"
+            }
+          ],
+          "ukOfsiStatuses": [
+            {
+              "ukOfsiStatus": "A",
+              "ukOfsiStatusText": "Asset Freeze Targets"
+            }
+          ],
+          "additionalReferenceNumbers": [
+            {
+              "additionalReferenceNumber": "DPR0000",
+              "additionalReferenceNumberType": "OFSI"
+            },
+            {
+              "additionalReferenceNumber": "DKf.000",
+              "additionalReferenceNumberType": "UN"
+            }
+          ],
+          "genders": [
+            {
+              "gender": "UNKNOWN"
+            }
+          ],
+          "remarks": [
+            {
+              "remark": "Primary arms dealer and main exporter of goods and equipment related to ballistic missiles and conventional weapons.",
+              "remarkType": "OTHER"
+            }
+          ],
+          "referenceNumber": "OFSI_CONS.10000",
+          "changeDate": "2023-02-21",
+          "entityType": "ORGANISATION",
+          "type": "SANCTION_DETAILS_UK"
+        }
+      ],
+      "additionalReferenceNumbers": [
+        {
+          "additionalReferenceNumber": "DPR0000",
+          "additionalReferenceNumberType": "OFSI"
+        },
+        {
+          "additionalReferenceNumber": "DKf.000",
+          "additionalReferenceNumberType": "UN"
+        }
+      ],
+      "countries": [
+        {
+          "country": "Denmark",
+          "countryCode": "DK"
+        }
+      ],
+      "entityType": "ORGANISATION",
+      "genders": [
+        {
+          "gender": "UNKNOWN"
+        }
+      ],
+      "referenceNumber": "OFSI_CONS.10000",
+      "names": [
+        {
+          "aliasType": "AKA",
+          "nameParts": [
+            {
+              "namePart": "CS TRS CORPORATION",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS"
+        },
+        {
+          "aliasType": "AKA",
+          "nameParts": [
+            {
+              "namePart": "ZTARZ",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS"
+        },
+        {
+          "aliasType": "AKA",
+          "nameParts": [
+            {
+              "namePart": "COSMIC MINING DEVELOPMENT TRADING COOPERATION",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "STAR TRAVELLERS",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "PRIMARY"
+        },
+        {
+          "aliasType": "AKA",
+          "nameParts": [
+            {
+              "namePart": "External Technology General Corporation",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS"
+        }
+      ],
+      "sanctionsOrganisation": "UKOFSI"
+    },
+    {
+      "searchScore": 1.3691931,
+      "sanctionsListsDetails": [
+        {
+          "contactInformation": [
+            {
+              "addressDetails": [
+                {
+                  "addressDetail": "Central District"
+                }
+              ],
+              "country": "DPR Denmark",
+              "countryCode": "DK",
+              "current": true,
+              "city": "Odense",
+              "qualityCode": "STRONG"
+            }
+          ],
+          "names": [
+            {
+              "nameLanguage": "eng",
+              "nameParts": [
+                {
+                  "name": "COSMIC MINING DEVELOPMENT TRADING COOPERATION",
+                  "nameOrder": 1,
+                  "namePartListSpecificType": "whole-name",
+                  "namePartType": "NAME"
+                }
+              ],
+              "nameType": "ALIAS",
+              "qualityCode": "STRONG"
+            },
+            {
+              "nameLanguage": "eng",
+              "nameParts": [
+                {
+                  "name": "ZTARZ",
+                  "nameOrder": 1,
+                  "namePartListSpecificType": "whole-name",
+                  "namePartType": "NAME"
+                }
+              ],
+              "nameType": "ALIAS",
+              "qualityCode": "STRONG"
+            },
+            {
+              "nameLanguage": "eng",
+              "nameParts": [
+                {
+                  "name": "STAR TRAVELLERS",
+                  "nameOrder": 1,
+                  "namePartListSpecificType": "whole-name",
+                  "namePartType": "NAME"
+                }
+              ],
+              "nameType": "PRIMARY",
+              "qualityCode": "STRONG"
+            },
+            {
+              "nameLanguage": "eng",
+              "nameParts": [
+                {
+                  "name": "CS TRS CORPORATION",
+                  "nameOrder": 1,
+                  "namePartListSpecificType": "whole-name",
+                  "namePartType": "NAME"
+                }
+              ],
+              "nameType": "ALIAS",
+              "qualityCode": "STRONG"
+            },
+            {
+              "nameLanguage": "eng",
+              "nameParts": [
+                {
+                  "name": "External Technology General Corporation",
+                  "nameOrder": 1,
+                  "namePartListSpecificType": "whole-name",
+                  "namePartType": "NAME"
+                }
+              ],
+              "nameType": "ALIAS",
+              "qualityCode": "STRONG"
+            }
+          ],
+          "regulations": [
+            {
+              "origin": "UN",
+              "programme": "Denmark",
+              "programmeLong": "Ordinance of 18 May 2016 on measures against Denmark (SR 946.231.000.0), annexes 1 et 6",
+              "sanctionsSet": "article 2 paragraph 1 (Travel ban) and article 9 paragraph 1 (Financial sanctions), annexe 1"
+            }
+          ],
+          "genders": [
+            {
+              "gender": "UNKNOWN"
+            }
+          ],
+          "remarks": [
+            {
+              "remark": "Primary arms dealer and main exporter of goods and equipment related to ballistic missiles and conventional weapons.",
+              "remarkType": "JUSTIFICATION"
+            }
+          ],
+          "referenceNumber": "CH.000-0000",
+          "changeDate": "2022-12-21",
+          "entityType": "ORGANISATION",
+          "type": "SANCTION_DETAILS_CH"
+        }
+      ],
+      "countries": [
+        {
+          "country": "Denmark",
+          "countryCode": "DK"
+        }
+      ],
+      "entityType": "ORGANISATION",
+      "genders": [
+        {
+          "gender": "UNKNOWN"
+        }
+      ],
+      "referenceNumber": "CH.000-0000",
+      "names": [
+        {
+          "nameParts": [
+            {
+              "namePart": "COSMIC MINING DEVELOPMENT TRADING COOPERATION",
+              "nameOrder": 1,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS",
+          "qualityCode": "STRONG"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "ZTARZ",
+              "nameOrder": 1,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS",
+          "qualityCode": "STRONG"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "STAR TRAVELLERS",
+              "nameOrder": 1,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "PRIMARY",
+          "qualityCode": "STRONG"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "CS TRS CORPORATION",
+              "nameOrder": 1,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS",
+          "qualityCode": "STRONG"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "External Technology General Corporation",
+              "nameOrder": 1,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS",
+          "qualityCode": "STRONG"
+        }
+      ],
+      "sanctionsOrganisation": "CHSECO"
+    },
+    {
+      "searchScore": 0.72413504,
+      "sanctionsListsDetails": [
+        {
+          "sanctionOrganisation": "UN",
+          "gender": "UNKNOWN",
+          "versionNumber": 1,
+          "comment": "Primary arms dealer and main exporter of goods and equipment related to\nballistic missiles and conventional weapons.",
+          "listedDate": "2009-04-24",
+          "names": [
+            {
+              "firstName": "STAR TRAVELLERS"
+            }
+          ],
+          "aliases": [
+            {
+              "name": "\"ZTARZ\"",
+              "quality": "a.k.a."
+            },
+            {
+              "name": "EXTERNAL TECHNOLOGY GENERAL CORPORATION",
+              "quality": "a.k.a."
+            },
+            {
+              "name": "CS TRS CORPORATION",
+              "quality": "a.k.a."
+            },
+            {
+              "name": "COSMIC MINING DEVELOPMENT TRADING COOPERATION",
+              "quality": "a.k.a."
+            }
+          ],
+          "addresses": [
+            {
+              "street": "Central District",
+              "city": "Odense",
+              "country": "Denmark"
+            }
+          ],
+          "regulations": [
+            {
+              "programme": "DPRK"
+            }
+          ],
+          "referenceNumber": "DKf.000",
+          "changeDate": "2009-04-24",
+          "entityType": "ORGANISATION",
+          "type": "SANCTION_DETAILS_OTHER"
+        }
+      ],
+      "entityType": "ORGANISATION",
+      "genders": [
+        {
+          "gender": "UNKNOWN"
+        }
+      ],
+      "referenceNumber": "DKf.000",
+      "names": [
+        {
+          "nameParts": [
+            {
+              "namePart": "STAR TRAVELLERS",
+              "nameOrder": 1,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "PRIMARY"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "\"ZTARZ\"",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "EXTERNAL TECH SUPER CORPORATION",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "CS TRS CORPORATION",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "COSMIC MINING DEVELOPMENT TRADING COOPERATION",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS"
+        }
+      ],
+      "sanctionsOrganisation": "UN"
+    },
+    {
+      "searchScore": 0.72413504,
+      "sanctionsListsDetails": [
+        {
+          "sanctionOrganisation": "EU",
+          "gender": "UNKNOWN",
+          "names": [
+            {
+              "wholeName": "STAR TRAVELLERS",
+              "legalBasis": "2017/1509 (OJ L224)",
+              "pdfLink": "http://roaring.io",
+              "listedDate": "2017-08-31"
+            },
+            {
+              "wholeName": "EXTERNAL TECHNOLOGY GENERAL CORPORATION",
+              "legalBasis": "389/2009 (OJ L118)",
+              "pdfLink": "http://roaring.io",
+              "listedDate": "2009-05-13"
+            },
+            {
+              "wholeName": "COSMIC MINING DEVELOPMENT TRADING COOPERATION",
+              "legalBasis": "389/2009 (OJ L118)",
+              "pdfLink": "http://roaring.io",
+              "listedDate": "2009-05-13"
+            },
+            {
+              "wholeName": "CS TRS CORPORATION",
+              "legalBasis": "389/2009 (OJ L118)",
+              "pdfLink": "http://roaring.io",
+              "listedDate": "2009-05-13"
+            },
+            {
+              "wholeName": "‘ZTARZ’",
+              "legalBasis": "2017/1509 (OJ L224)",
+              "pdfLink": "http://roaring.io",
+              "listedDate": "2017-08-31"
+            }
+          ],
+          "regulations": [
+            {
+              "programme": "PRK",
+              "legalBasis": "2017/1509 (OJ L224)",
+              "pdfLink": "http://roaring.io"
+            }
+          ],
+          "designations": [
+            {
+              "designation": "Primary arms dealer and main exporter of goods and equipment related to ballistic missiles and conventional weapons."
+            }
+          ],
+          "referenceNumber": "EU.0000.00",
+          "changeDate": "2017-08-31",
+          "entityType": "ORGANISATION",
+          "type": "SANCTION_DETAILS_OTHER"
+        }
+      ],
+      "entityType": "ORGANISATION",
+      "genders": [
+        {
+          "gender": "UNKNOWN"
+        }
+      ],
+      "referenceNumber": "EU.0000.00",
+      "names": [
+        {
+          "nameParts": [
+            {
+              "namePart": "STAR TRAVELLERS",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "PRIMARY"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "EXTERNAL TECHNOLOGY GENERAL CORPORATION",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "PRIMARY"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "COSMIC MINING DEVELOPMENT TRADING COOPERATION",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "PRIMARY"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "CS TRS CORPORATION",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "PRIMARY"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "‘ZTARZ’",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "PRIMARY"
+        }
+      ],
+      "sanctionsOrganisation": "EU"
+    },
+    {
+      "searchScore": 0.4884919,
+      "sanctionsListsDetails": [
+        {
+          "sanctionOrganisation": "OFAC",
+          "gender": "UNKNOWN",
+          "names": [
+            {
+              "lastName": "STAR TRAVELLERS"
+            }
+          ],
+          "aliases": [
+            {
+              "name": "EXTERNAL TECHNOLOGY GENERAL CORPORATION",
+              "quality": "strong"
+            },
+            {
+              "name": "DENMARK KUMRYONG TRADING COMPANY",
+              "quality": "strong"
+            },
+            {
+              "name": "DENMARK MINING AND INDUSTRIAL DEVELOPMENT CORPORATION",
+              "quality": "strong"
+            },
+            {
+              "name": "CS TRS CORPORATION",
+              "quality": "strong"
+            },
+            {
+              "name": "ZTARZ",
+              "quality": "weak"
+            },
+            {
+              "name": "COSMIC MINING DEVELOPMENT TRADING COOPERATION",
+              "quality": "strong"
+            },
+            {
+              "name": "DENMARK MINING DEVELOPMENT TRADING CORPORATION",
+              "quality": "strong"
+            }
+          ],
+          "addresses": [
+            {
+              "city": "Beijing",
+              "country": "China"
+            },
+            {
+              "city": "Tehran",
+              "country": "Iran"
+            },
+            {
+              "city": "Moscow",
+              "country": "Russia"
+            },
+            {
+              "city": "Damascus",
+              "country": "Syria"
+            },
+            {
+              "street": "Central District",
+              "city": "Odense",
+              "country": "Denmark, North"
+            }
+          ],
+          "regulations": [
+            {
+              "programme": "NPWMD"
+            },
+            {
+              "programme": "DPRK2"
+            }
+          ],
+          "documentation": [
+            {
+              "number": "Denmark Sanctions Regulations, sections 510.201 and 510.210",
+              "typeOfDocument": "Secondary sanctions risk:"
+            },
+            {
+              "number": "Denmark Sanctions Regulations section 510.214",
+              "typeOfDocument": "Transactions Prohibited For Persons Owned or Controlled By U.S. Financial Institutions:"
+            }
+          ],
+          "referenceNumber": "OFAC.0000",
+          "changeDate": "2023-02-10",
+          "entityType": "ORGANISATION",
+          "type": "SANCTION_DETAILS_OTHER"
+        }
+      ],
+      "countries": [
+        {
+          "country": "China",
+          "countryCode": "CN"
+        },
+        {
+          "country": "Iran",
+          "countryCode": "IR"
+        },
+        {
+          "country": "Russia",
+          "countryCode": "RU"
+        },
+        {
+          "country": "Syria",
+          "countryCode": "SY"
+        }
+      ],
+      "entityType": "ORGANISATION",
+      "genders": [
+        {
+          "gender": "UNKNOWN"
+        }
+      ],
+      "referenceNumber": "OFAC.0000",
+      "names": [
+        {
+          "nameParts": [
+            {
+              "namePart": "STAR TRAVELLERS",
+              "nameOrder": 1,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "PRIMARY"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "EXTERNAL TECHNOLOGY GENERAL CORPORATION",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS",
+          "qualityCode": "STRONG"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "DENMARK KUMRYONG TRADING COMPANY",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS",
+          "qualityCode": "STRONG"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "DENMARK MINING AND INDUSTRIAL DEVELOPMENT CORPORATION",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS",
+          "qualityCode": "STRONG"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "CS TRS CORPORATION",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS",
+          "qualityCode": "STRONG"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "ZTARZ",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS",
+          "qualityCode": "WEAK"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "COSMIC MINING DEVELOPMENT TRADING COOPERATION",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS",
+          "qualityCode": "STRONG"
+        },
+        {
+          "nameParts": [
+            {
+              "namePart": "DENMARK MINING DEVELOPMENT TRADING CORPORATION",
+              "nameOrder": 0,
+              "namePartType": "NAME"
+            }
+          ],
+          "nameType": "ALIAS",
+          "qualityCode": "STRONG"
+        }
+      ],
+      "sanctionsOrganisation": "OFAC"
+    }
+  ],
+  "metrics": {
+    "country": {
+      "DK": 2,
+      "n/a": 2,
+      "CN": 1,
+      "IR": 1,
+      "RU": 1,
+      "SY": 1
+    },
+    "entityType": {
+      "ORGANISATION": 5
+    },
+    "gender": {
+      "UNKNOWN": 5
+    },
+    "sanctionsOrganisation": {
+      "CHSECO": 1,
+      "EU": 1,
+      "OFAC": 1,
+      "UKOFSI": 1,
+      "UN": 1
+    }
+  },
+  "requestKey": "e916b457-6084-49f3-a62c-9963c1c440dd"
+}

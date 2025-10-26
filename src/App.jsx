@@ -6,7 +6,7 @@ import RegisterSlide from './components/Slides/RegisterSlide';
 import VerifySlide from './components/Slides/VerifySlide';
 import ForgotPasswordSlide from './components/Slides/ForgotPasswordSlide';
 import ResetPasswordSlide from './components/Slides/ResetPasswordSlide';
-import IntroSlide from './components/Slides/IntroSlide';
+import UppdragsvalsSlide from './components/Slides/UppdragsvalsSlide';
 import RiskFragorSlide from './components/Slides/RiskFragorSlide';
 import IdentitetskontrollSlide from './components/Slides/IdentitetskontrollSlide';
 import KontrolltabellSlide from './components/Slides/KontrolltabellSlide';
@@ -97,13 +97,13 @@ export default function App() {
   const handleLogin = () => {
     setIsLoggedIn(true);
     localStorage.setItem('isLoggedIn', 'true');
-    navigate('/inledning');
+    navigate('/uppdragsval');  // Start directly with service selection
   };
 
   const handleDemo = () => {
     setIsDemoMode(true);
     localStorage.setItem('isDemoMode', 'true');
-    navigate('/inledning');
+    navigate('/uppdragsval');  // Start directly with service selection
   };
 
   const renderPanel = () => {
@@ -192,7 +192,15 @@ export default function App() {
             <Route path="/verify" element={<VerifySlide onNext={handleLogin} />} />
             <Route path="/forgot-password" element={<ForgotPasswordSlide onNext={() => navigate('/reset-password')} onBack={() => navigate('/login')} />} />
             <Route path="/reset-password" element={<ResetPasswordSlide onNext={() => navigate('/login')} onResendCode={() => navigate('/forgot-password')} />} />
-            <Route path="/inledning" element={<IntroSlide onNext={() => navigate('/riskfragor')} />} />
+            <Route path="/uppdragsval" element={
+              <UppdragsvalsSlide 
+                onNext={(data) => {
+                  console.log('✅ Onboarding created:', data);
+                  console.log('📋 onboardingId:', data.onboardingId);
+                  navigate('/riskfragor');
+                }} 
+              />
+            } />
             <Route path="/riskfragor" element={
               <RiskFragorSlide 
                 onNext={() => {

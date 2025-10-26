@@ -1,0 +1,2027 @@
+{
+  "security": [
+    {
+      "OAuth2": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://api.roaring.io/global/sanctions-lists/3.0"
+    }
+  ],
+  "x-category": "other",
+  "x-countries": [
+    "global"
+  ],
+  "openapi": "3.0.1",
+  "paths": {
+    "/search": {
+      "get": {
+        "description": "It supports date parameter",
+        "operationId": "search",
+        "parameters": [
+          {
+            "description": "Sanction organisation (UN, UKOFSI, CHSECO, OFAC, EU)",
+            "in": "query",
+            "name": "sanctionOrg",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Name of sanction entity to search for - fill in a name for a Person, Organisation or Vessel or IMO Number",
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Birth date of sanction person (ISO format with YYYY, YYYY-MM or YYYY-MM-DD)",
+            "in": "query",
+            "name": "birthDate",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Gender of sanction person. (Male, Female or Unknown)",
+            "in": "query",
+            "name": "gender",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Country connected to sanction entity",
+            "in": "query",
+            "name": "country",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Type of sanction entity. (PERSON, ORGANISATION or OTHER)",
+            "in": "query",
+            "name": "entityType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "true/false (false is default)",
+            "in": "query",
+            "name": "fuzzy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "0,1 or 2 ( default: Auto = based on length of search string)",
+            "in": "query",
+            "name": "fuzzyDistance",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "true/false (false is default)",
+            "in": "query",
+            "name": "separateNameSearch",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SanctionsSearchResponse"
+                }
+              }
+            },
+            "description": "OK, successful response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "401": {
+            "description": "Returned when the user is not authenticated"
+          },
+          "403": {
+            "description": "Returned when the user is not authorized to access the resource"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Fetch sanctions lists"
+      }
+    },
+    "/{referenceNumber}": {
+      "get": {
+        "operationId": "view",
+        "parameters": [
+          {
+            "description": "sanction entity referenceNumber",
+            "in": "path",
+            "name": "referenceNumber",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SanctionsListsV3Wrapper"
+                }
+              }
+            },
+            "description": "OK, successful response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Returned when something is wrong in the request, e.g. failed argument validation or arguments are missing"
+          },
+          "401": {
+            "description": "Returned when the user is not authenticated"
+          },
+          "403": {
+            "description": "Returned when the user is not authorized to access the resource"
+          },
+          "404": {
+            "description": "Requested resource could not be found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerError"
+                }
+              }
+            },
+            "description": "An internal server error occurred, please contact the system administrator with information on the error"
+          }
+        },
+        "summary": "Fetch sanctions lists"
+      }
+    }
+  },
+  "x-id": "SanctionsLists",
+  "components": {
+    "schemas": {
+      "AdditionalReferenceNumberV3": {
+        "description": "Additional reference number",
+        "properties": {
+          "additionalReferenceNumber": {
+            "description": "Additional id of the target individual or entity",
+            "type": "string"
+          },
+          "additionalReferenceNumberType": {
+            "description": "Shows where the additional identifier comes from",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Address": {
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "legalBasis": {
+            "type": "string"
+          },
+          "listedDate": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "other": {
+            "type": "string"
+          },
+          "pdfLink": {
+            "type": "string"
+          },
+          "programme": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "stateProvince": {
+            "type": "string"
+          },
+          "street": {
+            "type": "string"
+          },
+          "zipcode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Alias": {
+        "properties": {
+          "cityOfBirth": {
+            "type": "string"
+          },
+          "countryOfBirth": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "quality": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BadRequest": {
+        "description": "Returned when something is wrong in the request, e.g. failed argument validation or missed argument",
+        "properties": {
+          "attributes": {
+            "description": "Invalid attributes",
+            "items": {
+              "$ref": "#/components/schemas/RequestAttribute"
+            },
+            "type": "array"
+          },
+          "error": {
+            "default": "BadRequest",
+            "description": "Error name",
+            "type": "string"
+          },
+          "message": {
+            "default": "Required arguments are missing in the request",
+            "description": "Description of the request error",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BirthData": {
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "fromYear": {
+            "type": "string"
+          },
+          "legalBasis": {
+            "type": "string"
+          },
+          "listedDate": {
+            "type": "string"
+          },
+          "noteDate": {
+            "type": "string"
+          },
+          "notePlace": {
+            "type": "string"
+          },
+          "pdfLink": {
+            "type": "string"
+          },
+          "place": {
+            "type": "string"
+          },
+          "programme": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "stateProvince": {
+            "type": "string"
+          },
+          "toYear": {
+            "type": "string"
+          },
+          "typeOfDate": {
+            "type": "string"
+          },
+          "year": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BirthDateV3": {
+        "description": "Birth date/year built or similar per target record",
+        "properties": {
+          "birthDate": {
+            "description": "Date of birth",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CHAddressDetail": {
+        "description": "Address detail information",
+        "properties": {
+          "addressDetail": {
+            "description": "Address detail, eg street information",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CHAmendedDate": {
+        "description": "Amended date information",
+        "properties": {
+          "amendedDate": {
+            "description": "Date of amendment of the target´s listing",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CHBirthDataV3": {
+        "description": "Birth data information",
+        "properties": {
+          "birthDates": {
+            "description": "List of birth dates",
+            "items": {
+              "$ref": "#/components/schemas/CHBirthDate"
+            },
+            "type": "array"
+          },
+          "birthPlaces": {
+            "description": "List of places of birth",
+            "items": {
+              "$ref": "#/components/schemas/CHBirthPlace"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CHBirthDate": {
+        "description": "Birth date information",
+        "properties": {
+          "birthDate": {
+            "description": "Date of birth, foundation or creation",
+            "type": "string"
+          },
+          "calendar": {
+            "description": "Calendar used for date of birth, foundation or creation",
+            "type": "string"
+          },
+          "qualityCode": {
+            "description": "Quality of the date of birth",
+            "enum": [
+              "STRONG",
+              "WEAK"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CHBirthPlace": {
+        "description": "Birth place information",
+        "properties": {
+          "city": {
+            "description": "City of birth",
+            "type": "string"
+          },
+          "cityVariants": {
+            "description": "List of variants for city of birth",
+            "items": {
+              "$ref": "#/components/schemas/CHVariantV3"
+            },
+            "type": "array"
+          },
+          "country": {
+            "description": "Country of birth",
+            "type": "string"
+          },
+          "countryCode": {
+            "description": "Country of birth as iso 3061 ",
+            "type": "string"
+          },
+          "qualityCode": {
+            "description": "Quality of place of birth  information",
+            "enum": [
+              "STRONG",
+              "WEAK"
+            ],
+            "type": "string"
+          },
+          "stateProvince": {
+            "description": "State, province or area of birth",
+            "type": "string"
+          },
+          "stateProvinceVariants": {
+            "description": "Alternative names of state/province/area of birth ",
+            "items": {
+              "$ref": "#/components/schemas/CHVariantV3"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CHContactInformationV3": {
+        "description": "Address and other contact information",
+        "properties": {
+          "addressDetails": {
+            "description": "List of address detail information",
+            "items": {
+              "$ref": "#/components/schemas/CHAddressDetail"
+            },
+            "type": "array"
+          },
+          "city": {
+            "description": "Address location (city)",
+            "type": "string"
+          },
+          "cityVariants": {
+            "description": "List of alternative city names",
+            "items": {
+              "$ref": "#/components/schemas/CHVariantV3"
+            },
+            "type": "array"
+          },
+          "co": {
+            "description": "Co address",
+            "type": "string"
+          },
+          "country": {
+            "description": "Address country name",
+            "type": "string"
+          },
+          "countryCode": {
+            "description": "Address country, as iso code 3166-2",
+            "type": "string"
+          },
+          "current": {
+            "description": "Current address flag",
+            "type": "boolean"
+          },
+          "qualityCode": {
+            "description": "Quality of the address information",
+            "enum": [
+              "STRONG",
+              "WEAK"
+            ],
+            "type": "string"
+          },
+          "remark": {
+            "description": "Additional information about an address, eg telephone ",
+            "type": "string"
+          },
+          "stateProvince": {
+            "description": "Address state/province/area",
+            "type": "string"
+          },
+          "stateProvinceVariants": {
+            "description": "List of alternative information on state/province/area",
+            "items": {
+              "$ref": "#/components/schemas/CHVariantV3"
+            },
+            "type": "array"
+          },
+          "zipCode": {
+            "description": "Zip code",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CHIdentificationDocumentV3": {
+        "description": "Identification document information",
+        "properties": {
+          "documentDescription": {
+            "description": "Description of the type of document",
+            "type": "string"
+          },
+          "documentNumber": {
+            "description": "Document number, eg passport number",
+            "type": "string"
+          },
+          "expiryDate": {
+            "description": "Expiry date",
+            "type": "string"
+          },
+          "issuer": {
+            "$ref": "#/components/schemas/CHIssuer"
+          },
+          "issuingDate": {
+            "description": "Date of issue of the identification document",
+            "type": "string"
+          },
+          "remark": {
+            "description": "Additional information about an identification document",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CHIssuer": {
+        "description": "Issuer of identification documents",
+        "properties": {
+          "issuerCode": {
+            "description": "Issuer country code (ISO-3166) or an official acronym, such as EU.",
+            "type": "string"
+          },
+          "issuerText": {
+            "description": "Issuing country or organisation name, in English",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CHNamePart": {
+        "description": "Part of the name",
+        "properties": {
+          "name": {
+            "description": "One part of the name",
+            "type": "string"
+          },
+          "nameOrder": {
+            "description": "Order of this part of the name",
+            "format": "int32",
+            "type": "integer"
+          },
+          "namePartListSpecificType": {
+            "description": "Type of name according to this list",
+            "type": "string"
+          },
+          "namePartSpellingVariants": {
+            "description": "A spelling variant - a language or a script specific variant of a name part",
+            "items": {
+              "$ref": "#/components/schemas/CHSpellingVariant"
+            },
+            "type": "array"
+          },
+          "namePartType": {
+            "description": "Type of name, unified between lists",
+            "enum": [
+              "SURNAME",
+              "NAME",
+              "FULLNAME",
+              "GIVEN_NAME",
+              "MIDDLE_NAME",
+              "UNDEFINED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CHNameV3": {
+        "description": "Name information",
+        "properties": {
+          "nameLanguage": {
+            "description": "Language which the name is written in iso three-letter code",
+            "type": "string"
+          },
+          "nameParts": {
+            "description": "List of name parts",
+            "items": {
+              "$ref": "#/components/schemas/CHNamePart"
+            },
+            "type": "array"
+          },
+          "nameType": {
+            "description": "Shows if the name is defined as a primary name or an alias",
+            "enum": [
+              "ALIAS",
+              "PRIMARY",
+              "PRIMARY_VARIANT"
+            ],
+            "type": "string"
+          },
+          "qualityCode": {
+            "description": "Quality of the name or alias",
+            "enum": [
+              "STRONG",
+              "WEAK"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "description": "Title",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CHRegulationV3": {
+        "description": "Regulation information",
+        "properties": {
+          "amendedDates": {
+            "description": "List of amendment dates",
+            "items": {
+              "$ref": "#/components/schemas/CHAmendedDate"
+            },
+            "type": "array"
+          },
+          "listedDate": {
+            "description": "Listing date of the target (in this programme)",
+            "type": "string"
+          },
+          "origin": {
+            "description": "The source of the targets listed in this sanctions program, e.g. UN or EU or CH",
+            "type": "string"
+          },
+          "programme": {
+            "description": "Short name for the programme",
+            "type": "string"
+          },
+          "programmeLong": {
+            "description": "Name of the programme",
+            "type": "string"
+          },
+          "sanctionsSet": {
+            "description": "Description of the relevant part of sanctions within a sanctions programme.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CHSpellingVariant": {
+        "description": "A spelling variant - a language or a script specific variant of a name part",
+        "properties": {
+          "spellingLanguage": {
+            "description": "Language of the spelling alternative of the name",
+            "type": "string"
+          },
+          "spellingLanguageCode": {
+            "description": "Language three-letter code ISO 639-2",
+            "type": "string"
+          },
+          "spellingScript": {
+            "description": "Script of the spelling alternative of the name",
+            "type": "string"
+          },
+          "spellingScriptCode": {
+            "description": "Script code of the spelling alternative of the name, ISO 15924",
+            "type": "string"
+          },
+          "spellingVariantName": {
+            "description": "Name (part) written in an alternative language",
+            "type": "string"
+          },
+          "spellingVariantType": {
+            "description": "Defines the type of the spelling variant, such as original-name or transliteration or not-defined",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CHVariantV3": {
+        "description": "Alternative name of state/province/area of birth ",
+        "properties": {
+          "text": {
+            "description": "Alternative area",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of alternative information",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CitizenData": {
+        "properties": {
+          "country": {
+            "type": "string"
+          },
+          "legalBasis": {
+            "type": "string"
+          },
+          "listedDate": {
+            "type": "string"
+          },
+          "pdfLink": {
+            "type": "string"
+          },
+          "programme": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Designation": {
+        "properties": {
+          "designation": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Documentation": {
+        "properties": {
+          "cityOfIssue": {
+            "type": "string"
+          },
+          "countryOfIssue": {
+            "type": "string"
+          },
+          "dateOfIssue": {
+            "type": "string"
+          },
+          "issuingCountry": {
+            "type": "string"
+          },
+          "legalBasis": {
+            "type": "string"
+          },
+          "listedDate": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "passportId": {
+            "type": "string"
+          },
+          "pdfLink": {
+            "type": "string"
+          },
+          "programme": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "typeOfDocument": {
+            "type": "string"
+          },
+          "typeOfDocument2": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EntityDescriptionV3": {
+        "description": "Description of entity",
+        "properties": {
+          "description": {
+            "description": "Description of the kind of organisation or ship",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GenderV3": {
+        "description": "Gender information",
+        "properties": {
+          "gender": {
+            "description": "Gender",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "UNKNOWN"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MetricsResult": {
+        "description": "Aggregated counts for this search",
+        "properties": {
+          "country": {
+            "additionalProperties": {
+              "description": "Counts by ISO 3166-1 alpha-2",
+              "format": "int64",
+              "type": "integer"
+            },
+            "description": "Counts by ISO 3166-1 alpha-2",
+            "example": {
+              "RU": 7
+            },
+            "type": "object"
+          },
+          "entityType": {
+            "additionalProperties": {
+              "description": "Counts by entity type",
+              "format": "int64",
+              "type": "integer"
+            },
+            "description": "Counts by entity type",
+            "example": {
+              "PERSON": 7
+            },
+            "type": "object"
+          },
+          "gender": {
+            "additionalProperties": {
+              "description": "Counts by gender",
+              "format": "int64",
+              "type": "integer"
+            },
+            "description": "Counts by gender",
+            "example": {
+              "MALE": 7
+            },
+            "type": "object"
+          },
+          "sanctionsOrganisation": {
+            "additionalProperties": {
+              "description": "Counts by sanctioning organisation",
+              "format": "int64",
+              "type": "integer"
+            },
+            "description": "Counts by sanctioning organisation",
+            "example": {
+              "CHSECO": 1,
+              "EU": 1,
+              "OFAC": 1,
+              "UKOFSI": 4
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "Name": {
+        "properties": {
+          "firstName": {
+            "type": "string"
+          },
+          "fourthName": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "legalBasis": {
+            "type": "string"
+          },
+          "listedDate": {
+            "type": "string"
+          },
+          "originalScriptName": {
+            "type": "string"
+          },
+          "pdfLink": {
+            "type": "string"
+          },
+          "programme": {
+            "type": "string"
+          },
+          "remark": {
+            "type": "string"
+          },
+          "secondName": {
+            "type": "string"
+          },
+          "thirdName": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "wholeName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NamePart": {
+        "description": "Part of the name",
+        "properties": {
+          "nameOrder": {
+            "description": "Order of this part of the name",
+            "format": "int32",
+            "type": "integer"
+          },
+          "namePart": {
+            "description": "One part of the name",
+            "type": "string"
+          },
+          "namePartType": {
+            "description": "Type of name, unified between lists",
+            "enum": [
+              "SURNAME",
+              "NAME",
+              "FULLNAME",
+              "GIVEN_NAME",
+              "MIDDLE_NAME",
+              "UNDEFINED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NameV3": {
+        "description": "Name under which the target is known",
+        "properties": {
+          "aliasType": {
+            "description": "Type of alias",
+            "enum": [
+              "AKA",
+              "FKA"
+            ],
+            "type": "string"
+          },
+          "nameParts": {
+            "description": "Array of parts of the name",
+            "items": {
+              "$ref": "#/components/schemas/NamePart"
+            },
+            "type": "array"
+          },
+          "nameType": {
+            "description": "Shows if the name is defined as a primary name or an alias",
+            "enum": [
+              "ALIAS",
+              "PRIMARY",
+              "PRIMARY_VARIANT"
+            ],
+            "type": "string"
+          },
+          "qualityCode": {
+            "description": "Quality of the name or alias",
+            "enum": [
+              "STRONG",
+              "WEAK"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "description": "Title",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Nationality": {
+        "properties": {
+          "mainEntry": {
+            "type": "boolean"
+          },
+          "nationality": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NationalityV3": {
+        "description": "Country which the target has a connection to - normally address country or nationality country",
+        "properties": {
+          "country": {
+            "description": "Country",
+            "type": "string"
+          },
+          "countryCode": {
+            "description": "Country code (ISO 3166)",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Regulation": {
+        "properties": {
+          "legalBasis": {
+            "type": "string"
+          },
+          "pdfLink": {
+            "type": "string"
+          },
+          "programme": {
+            "type": "string"
+          },
+          "publicationDate": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RelationV3": {
+        "description": "Relation information",
+        "properties": {
+          "relationId": {
+            "description": "Id of relation",
+            "type": "string"
+          },
+          "relationName": {
+            "description": "Name of relation",
+            "type": "string"
+          },
+          "relationType": {
+            "description": "Type of relation",
+            "type": "string"
+          },
+          "relationTypeDescription": {
+            "description": "Type of relation, free text",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RemarkV3": {
+        "description": "Remark information",
+        "properties": {
+          "remark": {
+            "description": "Reason of the listing and/or other information",
+            "type": "string"
+          },
+          "remarkType": {
+            "description": "Type of remark",
+            "enum": [
+              "OTHER",
+              "JUSTIFICATION"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RequestAttribute": {
+        "description": "Incorrect attribute of request",
+        "properties": {
+          "attribute": {
+            "description": "Parameter name",
+            "type": "string"
+          },
+          "value": {
+            "description": "Parameter value, subject for validation",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SanctionsListDetails_EU_OFAC_UN": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SanctionsListsDetailsBaseV3"
+          },
+          {
+            "properties": {
+              "addresses": {
+                "items": {
+                  "$ref": "#/components/schemas/Address"
+                },
+                "type": "array"
+              },
+              "aliases": {
+                "items": {
+                  "$ref": "#/components/schemas/Alias"
+                },
+                "type": "array"
+              },
+              "birthData": {
+                "items": {
+                  "$ref": "#/components/schemas/BirthData"
+                },
+                "type": "array"
+              },
+              "citizenData": {
+                "items": {
+                  "$ref": "#/components/schemas/CitizenData"
+                },
+                "type": "array"
+              },
+              "comment": {
+                "type": "string"
+              },
+              "deListingDate": {
+                "type": "string"
+              },
+              "designations": {
+                "items": {
+                  "$ref": "#/components/schemas/Designation"
+                },
+                "type": "array"
+              },
+              "documentation": {
+                "items": {
+                  "$ref": "#/components/schemas/Documentation"
+                },
+                "type": "array"
+              },
+              "gender": {
+                "type": "string"
+              },
+              "listedDate": {
+                "type": "string"
+              },
+              "names": {
+                "items": {
+                  "$ref": "#/components/schemas/Name"
+                },
+                "type": "array"
+              },
+              "nationalities": {
+                "items": {
+                  "$ref": "#/components/schemas/Nationality"
+                },
+                "type": "array"
+              },
+              "regulations": {
+                "items": {
+                  "$ref": "#/components/schemas/Regulation"
+                },
+                "type": "array"
+              },
+              "remark": {
+                "type": "string"
+              },
+              "sanctionOrganisation": {
+                "type": "string"
+              },
+              "updateHistories": {
+                "items": {
+                  "$ref": "#/components/schemas/UpdateHistory"
+                },
+                "type": "array"
+              },
+              "versionNumber": {
+                "format": "int32",
+                "type": "integer"
+              },
+              "vesselInfo": {
+                "$ref": "#/components/schemas/VesselInfo"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "description": "Sanctions list EU/OFAC/UN details",
+        "type": "object"
+      },
+      "SanctionsListsDetailsBaseV3": {
+        "description": "Sanctions lists detail information",
+        "discriminator": {
+          "mapping": {
+            "SANCTION_DETAILS_CH": "#/components/schemas/SanctionsListsDetailsCh",
+            "SANCTION_DETAILS_OTHER": "#/components/schemas/SanctionsListDetails_EU_OFAC_UN",
+            "SANCTION_DETAILS_UK": "#/components/schemas/SanctionsListsDetailsUk"
+          },
+          "propertyName": "type"
+        },
+        "properties": {
+          "changeDate": {
+            "description": "Date for the latest change (Date in ISO 8601 standard)",
+            "type": "string"
+          },
+          "entityType": {
+            "description": "Type of target - Individual (person), Entity or Ship (other)",
+            "enum": [
+              "PERSON",
+              "ORGANISATION",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "referenceNumber": {
+            "description": "Id of the target individual or entity",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "SANCTION_DETAILS_CH",
+              "SANCTION_DETAILS_UK",
+              "SANCTION_DETAILS_OTHER"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "type": "object"
+      },
+      "SanctionsListsDetailsCh": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SanctionsListsDetailsBaseV3"
+          },
+          {
+            "properties": {
+              "additionalReferenceNumbers": {
+                "description": "List of additional reference numbers of the target individual or entity",
+                "items": {
+                  "$ref": "#/components/schemas/AdditionalReferenceNumberV3"
+                },
+                "type": "array"
+              },
+              "birthData": {
+                "description": "List of birth data",
+                "items": {
+                  "$ref": "#/components/schemas/CHBirthDataV3"
+                },
+                "type": "array"
+              },
+              "contactInformation": {
+                "description": "Addresses and other contact information",
+                "items": {
+                  "$ref": "#/components/schemas/CHContactInformationV3"
+                },
+                "type": "array"
+              },
+              "entityDescriptions": {
+                "description": "Description of entity",
+                "items": {
+                  "$ref": "#/components/schemas/EntityDescriptionV3"
+                },
+                "type": "array"
+              },
+              "entityDetailedType": {
+                "description": "Further description on the type of an entity of type “OTHER”",
+                "type": "string"
+              },
+              "genders": {
+                "description": "List of genders",
+                "items": {
+                  "$ref": "#/components/schemas/GenderV3"
+                },
+                "type": "array"
+              },
+              "identificationDocuments": {
+                "description": "List of identification documents",
+                "items": {
+                  "$ref": "#/components/schemas/CHIdentificationDocumentV3"
+                },
+                "type": "array"
+              },
+              "names": {
+                "description": "List of names",
+                "items": {
+                  "$ref": "#/components/schemas/CHNameV3"
+                },
+                "type": "array"
+              },
+              "nationalities": {
+                "description": "List of nationalities of the target",
+                "items": {
+                  "$ref": "#/components/schemas/NationalityV3"
+                },
+                "type": "array"
+              },
+              "regulations": {
+                "description": "List of regulation information",
+                "items": {
+                  "$ref": "#/components/schemas/CHRegulationV3"
+                },
+                "type": "array"
+              },
+              "relations": {
+                "description": "List of relations",
+                "items": {
+                  "$ref": "#/components/schemas/RelationV3"
+                },
+                "type": "array"
+              },
+              "remarks": {
+                "description": "List of remarks",
+                "items": {
+                  "$ref": "#/components/schemas/RemarkV3"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "description": "Sanctions Lists CH details",
+        "type": "object"
+      },
+      "SanctionsListsDetailsUk": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SanctionsListsDetailsBaseV3"
+          },
+          {
+            "properties": {
+              "additionalReferenceNumbers": {
+                "description": "List of additional reference numbers of the target individual or entity",
+                "items": {
+                  "$ref": "#/components/schemas/AdditionalReferenceNumberV3"
+                },
+                "type": "array"
+              },
+              "birthData": {
+                "description": "List of birth data",
+                "items": {
+                  "$ref": "#/components/schemas/UKBirthDataV3"
+                },
+                "type": "array"
+              },
+              "contactInformation": {
+                "description": "List of addresses and other contact information such as website, phone number",
+                "items": {
+                  "$ref": "#/components/schemas/UKContactInformationV3"
+                },
+                "type": "array"
+              },
+              "entityDescriptions": {
+                "description": "Description of entity",
+                "items": {
+                  "$ref": "#/components/schemas/EntityDescriptionV3"
+                },
+                "type": "array"
+              },
+              "entityDetailedType": {
+                "description": "Further description on the type of an entity of type “OTHER”",
+                "type": "string"
+              },
+              "flagCountries": {
+                "description": "List of Ship flags",
+                "items": {
+                  "$ref": "#/components/schemas/UKCountryInfoV3"
+                },
+                "type": "array"
+              },
+              "genders": {
+                "description": "List of genders",
+                "items": {
+                  "$ref": "#/components/schemas/GenderV3"
+                },
+                "type": "array"
+              },
+              "identificationDocuments": {
+                "description": "List of identification documents",
+                "items": {
+                  "$ref": "#/components/schemas/UKIdentificationDocumentsV3"
+                },
+                "type": "array"
+              },
+              "listingType": {
+                "description": "Source of listing",
+                "type": "string"
+              },
+              "names": {
+                "description": "List of names",
+                "items": {
+                  "$ref": "#/components/schemas/UKNameV3"
+                },
+                "type": "array"
+              },
+              "nationalities": {
+                "description": "List of nationalities of the target",
+                "items": {
+                  "$ref": "#/components/schemas/NationalityV3"
+                },
+                "type": "array"
+              },
+              "positionInformation": {
+                "description": "List of position information for the target",
+                "items": {
+                  "$ref": "#/components/schemas/UKPositionInformationV3"
+                },
+                "type": "array"
+              },
+              "regulations": {
+                "description": "List of regulation information",
+                "items": {
+                  "$ref": "#/components/schemas/UKRegulationV3"
+                },
+                "type": "array"
+              },
+              "relations": {
+                "description": "List of relations",
+                "items": {
+                  "$ref": "#/components/schemas/RelationV3"
+                },
+                "type": "array"
+              },
+              "remarks": {
+                "description": "List of remarks",
+                "items": {
+                  "$ref": "#/components/schemas/RemarkV3"
+                },
+                "type": "array"
+              },
+              "shipAttributes": {
+                "description": "List of ship information",
+                "items": {
+                  "$ref": "#/components/schemas/UKShipAttributesV3"
+                },
+                "type": "array"
+              },
+              "ukOfsiStatuses": {
+                "description": "Statuses",
+                "items": {
+                  "$ref": "#/components/schemas/UkOfsiStatusesV3"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          }
+        ],
+        "description": "Sanctions list UK details",
+        "type": "object"
+      },
+      "SanctionsListsV3Record": {
+        "description": "Sanctions lists record",
+        "properties": {
+          "additionalReferenceNumbers": {
+            "description": "List of external reference numbers",
+            "items": {
+              "$ref": "#/components/schemas/AdditionalReferenceNumberV3"
+            },
+            "type": "array"
+          },
+          "birthDates": {
+            "description": "List of birth dates/year built or similar per target record",
+            "items": {
+              "$ref": "#/components/schemas/BirthDateV3"
+            },
+            "type": "array"
+          },
+          "countries": {
+            "description": "List of countries which the target has a connection to - normally address country or nationality country",
+            "items": {
+              "$ref": "#/components/schemas/NationalityV3"
+            },
+            "type": "array"
+          },
+          "entityType": {
+            "description": "Type of target",
+            "enum": [
+              "PERSON",
+              "ORGANISATION",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "genders": {
+            "description": "List of gender information",
+            "items": {
+              "$ref": "#/components/schemas/GenderV3"
+            },
+            "type": "array"
+          },
+          "names": {
+            "description": "List of names under which the target is known",
+            "items": {
+              "$ref": "#/components/schemas/NameV3"
+            },
+            "type": "array"
+          },
+          "referenceNumber": {
+            "description": "The identifier of the target in the specific list",
+            "type": "string"
+          },
+          "sanctionsListsDetails": {
+            "description": "Sanctions lists detail information",
+            "items": {
+              "$ref": "#/components/schemas/SanctionsListsDetailsBaseV3"
+            },
+            "type": "array"
+          },
+          "sanctionsOrganisation": {
+            "description": "The organisation or country which owns the list",
+            "enum": [
+              "UN",
+              "UKOFSI",
+              "CHSECO",
+              "OFAC",
+              "EU"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SanctionsListsV3Wrapper": {
+        "description": "Sanctions List result",
+        "properties": {
+          "records": {
+            "description": "Array of sanctions lists records (targets)",
+            "items": {
+              "$ref": "#/components/schemas/SanctionsListsV3Record"
+            },
+            "type": "array"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SearchResultStatus"
+          }
+        },
+        "type": "object"
+      },
+      "SanctionsSearchResponse": {
+        "properties": {
+          "hitCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "hits": {
+            "items": {
+              "$ref": "#/components/schemas/SanctionsSearchResult"
+            },
+            "type": "array"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/MetricsResult"
+          },
+          "next": {
+            "type": "string"
+          },
+          "previous": {
+            "type": "string"
+          },
+          "requestKey": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SanctionsSearchResult": {
+        "properties": {
+          "additionalReferenceNumbers": {
+            "description": "List of external reference numbers",
+            "items": {
+              "$ref": "#/components/schemas/AdditionalReferenceNumberV3"
+            },
+            "type": "array"
+          },
+          "birthDates": {
+            "description": "List of birth dates/year built or similar per target record",
+            "items": {
+              "$ref": "#/components/schemas/BirthDateV3"
+            },
+            "type": "array"
+          },
+          "countries": {
+            "description": "List of countries which the target has a connection to - normally address country or nationality country",
+            "items": {
+              "$ref": "#/components/schemas/NationalityV3"
+            },
+            "type": "array"
+          },
+          "entityType": {
+            "description": "Type of target",
+            "enum": [
+              "PERSON",
+              "ORGANISATION",
+              "OTHER"
+            ],
+            "type": "string"
+          },
+          "genders": {
+            "description": "List of gender information",
+            "items": {
+              "$ref": "#/components/schemas/GenderV3"
+            },
+            "type": "array"
+          },
+          "names": {
+            "description": "List of names under which the target is known",
+            "items": {
+              "$ref": "#/components/schemas/NameV3"
+            },
+            "type": "array"
+          },
+          "referenceNumber": {
+            "description": "The identifier of the target in the specific list",
+            "type": "string"
+          },
+          "sanctionsListsDetails": {
+            "description": "Sanctions lists detail information",
+            "items": {
+              "$ref": "#/components/schemas/SanctionsListsDetailsBaseV3"
+            },
+            "type": "array"
+          },
+          "sanctionsOrganisation": {
+            "description": "The organisation or country which owns the list",
+            "enum": [
+              "UN",
+              "UKOFSI",
+              "CHSECO",
+              "OFAC",
+              "EU"
+            ],
+            "type": "string"
+          },
+          "searchScore": {
+            "format": "float",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "SearchResultStatus": {
+        "description": "Description of search result",
+        "properties": {
+          "code": {
+            "description": "0 - found, 1 - not found",
+            "format": "int32",
+            "type": "integer"
+          },
+          "text": {
+            "description": "search result description",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServerError": {
+        "description": "Internal server error",
+        "properties": {
+          "error": {
+            "default": "InternalServerError",
+            "description": "Error name",
+            "type": "string"
+          },
+          "message": {
+            "default": "An internal server error occurred, please contact the system administrator with information on the error",
+            "description": "Description of the request error",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SpellingVariantV3": {
+        "description": "A language or a script specific variant of a name part",
+        "properties": {
+          "spellingLanguage": {
+            "description": "The language of the non-Latin script name",
+            "type": "string"
+          },
+          "spellingLanguageCode": {
+            "description": "Language three-letter code ISO 639-2",
+            "type": "string"
+          },
+          "spellingScript": {
+            "description": "The (non-Latin) spelling script",
+            "type": "string"
+          },
+          "spellingScriptCode": {
+            "description": "Language script ISO 15924 code",
+            "type": "string"
+          },
+          "spellingVariantName": {
+            "description": "The non-Latin script version of a name",
+            "type": "string"
+          },
+          "spellingVariantType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UKBirthDataV3": {
+        "description": "Birth data",
+        "properties": {
+          "birthDate": {
+            "description": "Date of birth for person, year built for other(ship)",
+            "type": "string"
+          },
+          "city": {
+            "description": "City of birth",
+            "type": "string"
+          },
+          "country": {
+            "description": "Country of birth",
+            "type": "string"
+          },
+          "countryCode": {
+            "description": "Country of birth as iso code 3166-2",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UKContactInformationV3": {
+        "description": "Contact information",
+        "properties": {
+          "address1": {
+            "description": "The first line of the address.",
+            "type": "string"
+          },
+          "address2": {
+            "description": "The second line of the address.",
+            "type": "string"
+          },
+          "address3": {
+            "description": "The third line of the address.",
+            "type": "string"
+          },
+          "address4": {
+            "description": "The fourth line of the address.",
+            "type": "string"
+          },
+          "address5": {
+            "description": "The fifth line of the address – normally the town",
+            "type": "string"
+          },
+          "address6": {
+            "description": "The sixth line of the address – normally the town, state or region",
+            "type": "string"
+          },
+          "country": {
+            "description": "Address country",
+            "type": "string"
+          },
+          "countryCode": {
+            "description": "Address country, as iso code 3166-2",
+            "type": "string"
+          },
+          "email": {
+            "description": "Email address",
+            "type": "string"
+          },
+          "phoneNumber": {
+            "description": "Phone number",
+            "type": "string"
+          },
+          "webAddress": {
+            "description": "Website",
+            "type": "string"
+          },
+          "zipCode": {
+            "description": "Zip code",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UKCountryInfoV3": {
+        "description": "Ship flag record",
+        "properties": {
+          "country": {
+            "description": "Ship - Country of registration",
+            "type": "string"
+          },
+          "countryCode": {
+            "description": "Ship -  country of registration - code (ISO 3166-2)",
+            "type": "string"
+          },
+          "current": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "UKIdentificationDocumentsV3": {
+        "description": "Identification document",
+        "properties": {
+          "documentNumber": {
+            "description": "Document number, eg passport number",
+            "type": "string"
+          },
+          "documentType": {
+            "description": "Type of document",
+            "type": "string"
+          },
+          "remark": {
+            "description": "Additional information",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UKNamePart": {
+        "description": "Part of the name",
+        "properties": {
+          "name": {
+            "description": "One part of the name",
+            "type": "string"
+          },
+          "nameOrder": {
+            "description": "Order of this part of the name",
+            "format": "int32",
+            "type": "integer"
+          },
+          "namePartListSpecificType": {
+            "description": "Type of name according to this list",
+            "type": "string"
+          },
+          "namePartType": {
+            "description": "Type of name, unified between lists",
+            "enum": [
+              "SURNAME",
+              "NAME",
+              "FULLNAME",
+              "GIVEN_NAME",
+              "MIDDLE_NAME",
+              "UNDEFINED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UKNameV3": {
+        "description": "Name",
+        "properties": {
+          "aliasType": {
+            "description": "Type of alias",
+            "enum": [
+              "AKA",
+              "FKA"
+            ],
+            "type": "string"
+          },
+          "nameParts": {
+            "description": "List of name parts",
+            "items": {
+              "$ref": "#/components/schemas/UKNamePart"
+            },
+            "type": "array"
+          },
+          "nameSpellingVariants": {
+            "description": "Spelling variants - a language or a script specific variant of a name part",
+            "items": {
+              "$ref": "#/components/schemas/SpellingVariantV3"
+            },
+            "type": "array"
+          },
+          "nameType": {
+            "description": "Shows if the name is defined as a primary name or an alias",
+            "enum": [
+              "ALIAS",
+              "PRIMARY",
+              "PRIMARY_VARIANT"
+            ],
+            "type": "string"
+          },
+          "qualityCode": {
+            "description": "Quality of the name or alias",
+            "enum": [
+              "STRONG",
+              "WEAK"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "description": "Honorary, religious or professional title",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UKPositionInformationV3": {
+        "description": "Position information",
+        "properties": {
+          "position": {
+            "description": "Designation/role/position of the target of financial sanctions",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UKRegulationV3": {
+        "description": "Regulation information",
+        "properties": {
+          "designatedDate": {
+            "description": "The date the target was designated to the list",
+            "type": "string"
+          },
+          "lastUpdatedDate": {
+            "description": "The date the target was added to a financial sanctions regime in the Consolidated List by HM Treasury.",
+            "type": "string"
+          },
+          "listedDate": {
+            "description": "The date that the identifying details of the target were last changed on the consolidated List by HM Treasury",
+            "type": "string"
+          },
+          "programme": {
+            "description": "Title of the financial sanctions program/regime under which the target is listed",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UKShipAttributesV3": {
+        "description": "Ship information",
+        "properties": {
+          "length": {
+            "description": "Ship length",
+            "type": "string"
+          },
+          "tonnage": {
+            "description": "Ship tonnage",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UkOfsiStatusesV3": {
+        "description": "Status information",
+        "properties": {
+          "ukOfsiStatus": {
+            "description": "UK consolidated list code which describes the type of sanction",
+            "type": "string"
+          },
+          "ukOfsiStatusText": {
+            "description": "Textual description of the type of sanction",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateHistory": {
+        "properties": {
+          "updatedDate": {
+            "type": "string"
+          },
+          "updatedItem": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VesselInfo": {
+        "properties": {
+          "callSign": {
+            "type": "string"
+          },
+          "grossRegisteredTonnage": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "tonnage": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "vesselFlag": {
+            "type": "string"
+          },
+          "vesselOwner": {
+            "type": "string"
+          },
+          "vesselType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "flows": {
+          "clientCredentials": {
+            "scopes": {},
+            "tokenUrl": "https://api.roaring.io/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "description": "Control if a person or organisation is on the EU, UN, OFAC, UK or Swiss sanctions lists and financial connection is prohibited",
+    "title": "Sanctions Lists",
+    "version": "3.0",
+    "x-logo": {
+      "url": "https://assets.roaring.io/svg/sanctions-icon-v3.1.svg"
+    }
+  }
+}

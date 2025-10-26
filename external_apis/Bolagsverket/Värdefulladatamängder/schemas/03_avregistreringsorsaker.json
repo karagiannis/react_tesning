@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Bolagsverket - Kodlista: Avregistreringsorsaker",
+  "description": "Orsaker till att en organisation har blivit avregistrerad",
+  "type": "object",
+  "definitions": {
+    "avregistreringsorsaker": {
+      "AKEJH-AVORG": {
+        "kod": "AKEJH-AVORG",
+        "beskrivning": "Aktiekapitalet inte höjts"
+      },
+      "ARSEED-AVORG": {
+        "kod": "ARSEED-AVORG",
+        "beskrivning": "Årsredovisning saknas"
+      },
+      "AVREG-AVORG": {
+        "kod": "AVREG-AVORG",
+        "beskrivning": "Avregistrerad"
+      },
+      "BABAKEJH-AVORG": {
+        "kod": "BABAKEJH-AVORG",
+        "beskrivning": "Ombildat till bankaktiebolag eller aktiekapitalet inte höjts"
+      },
+      "DELAV-AVORG": {
+        "kod": "DELAV-AVORG",
+        "beskrivning": "Delning"
+      },
+      "DOM-AVORG": {
+        "kod": "DOM-AVORG",
+        "beskrivning": "Beslut av instans"
+      },
+      "FUAV-AVORG": {
+        "kod": "FUAV-AVORG",
+        "beskrivning": "Fusion"
+      },
+      "GROMAV-AVORG": {
+        "kod": "GROMAV-AVORG",
+        "beskrivning": "Gränsöverskridande ombildning"
+      },
+      "KKAV-AVORG": {
+        "kod": "KKAV-AVORG",
+        "beskrivning": "Konkurs"
+      },
+      "LIAV-AVORG": {
+        "kod": "LIAV-AVORG",
+        "beskrivning": "Likvidation"
+      },
+      "NYINN-AVORG": {
+        "kod": "NYINN-AVORG",
+        "beskrivning": "Ny innehavare"
+      },
+      "OMAV-AVORG": {
+        "kod": "OMAV-AVORG",
+        "beskrivning": "Ombildning"
+      },
+      "OMBAB-AVORG": {
+        "kod": "OMBAB-AVORG",
+        "beskrivning": "Ombildat till bankaktiebolag"
+      },
+      "OVERK-AVORG": {
+        "kod": "OVERK-AVORG",
+        "beskrivning": "Overksamhet"
+      },
+      "UTLKKLI-AVORG": {
+        "kod": "UTLKKLI-AVORG",
+        "beskrivning": "Det utländska företagets likvidation eller konkurs"
+      },
+      "VDSAK-AVORG": {
+        "kod": "VDSAK-AVORG",
+        "beskrivning": "Verkställande direktör saknas"
+      },
+      "VERKUPP-AVORG": {
+        "kod": "VERKUPP-AVORG",
+        "beskrivning": "Verksamheten har upphört"
+      }
+    }
+  },
+  "metadata": {
+    "source": "Bolagsverket Värdefulladatamängder - Kodlista 2",
+    "total": 17,
+    "usage": "Fältet 'avregistreringsorsak' i grunddata"
+  }
+}

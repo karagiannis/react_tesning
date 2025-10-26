@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SCB Adressfält Schema",
+  "description": "Adressinformation för företag och organisationer enligt SCB:s struktur.",
+  "type": "object",
+  "properties": {
+    "Gatuadress": {
+      "type": "string",
+      "description": "Gatuadress eller boxadress för företaget",
+      "examples": [
+        "Storgatan 12",
+        "Box 123",
+        "Industrivägen 45 B"
+      ]
+    },
+    "COadress": {
+      "type": "string",
+      "description": "C/O-adress (Care Of). Används när post ska vidarebefordras till annan mottagare på adressen.",
+      "examples": [
+        "c/o Andersson",
+        "c/o Redovisningsbyrån AB"
+      ]
+    },
+    "Postnummer": {
+      "type": "string",
+      "pattern": "^[0-9]{5}$",
+      "description": "Postnummer (5 siffror, utan mellanslag)",
+      "examples": [
+        "11234",
+        "58292"
+      ]
+    },
+    "PostOrt": {
+      "type": "string",
+      "description": "Postort enligt Postnummerservice",
+      "examples": [
+        "STOCKHOLM",
+        "LINKÖPING",
+        "GÖTEBORG"
+      ]
+    }
+  },
+  "required": ["Postnummer", "PostOrt"],
+  "addressExamples": [
+    {
+      "Gatuadress": "Drottninggatan 89",
+      "COadress": "",
+      "Postnummer": "11360",
+      "PostOrt": "STOCKHOLM"
+    },
+    {
+      "Gatuadress": "Box 456",
+      "COadress": "c/o Ekonomiservice Sverige AB",
+      "Postnummer": "58220",
+      "PostOrt": "LINKÖPING"
+    },
+    {
+      "Gatuadress": "Teknikvägen 12 A",
+      "COadress": "",
+      "Postnummer": "90325",
+      "PostOrt": "UMEÅ"
+    }
+  ],
+  "metadata": {
+    "source": "SCB Värdefulladatamängder",
+    "lastUpdated": "2025-10-26",
+    "fields": ["Gatuadress", "COadress", "Postnummer", "PostOrt"],
+    "notes": [
+      "Gatuadress kan vara antingen gatuadress eller boxadress",
+      "COadress är valfritt och används endast vid vidarebefordran",
+      "Postnummer ska alltid vara 5 siffror utan mellanslag",
+      "PostOrt anges vanligen i VERSALER enligt Postnummerservice"
+    ],
+    "usage": "Fullständig postadress för kontakt och korrespondens med företaget"
+  }
+}
