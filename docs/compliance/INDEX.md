@@ -2,7 +2,7 @@
 
 **Princip:** Det som inte finns i detta index FINNS INTE!
 **Skapad:** 2025-10-26
-**Senast uppdaterad:** 2025-10-26 01:23
+**Senast uppdaterad:** 2025-10-27
 
 ---
 
@@ -14,55 +14,70 @@
 
 **Lagstiftning:**
 - Penningtvättslagen (2017:630)
-- Finansinspektionens föreskrifter och allmänna råd (FFFS 2024:20)
+- Länsstyrelsens föreskrifter (01FS 2024:20)
 
 ---
 
 ## 2. Dokument
 
-### `metod_riskbedömning_kund.pdf` (250KB)
-- **Titel:** Metod för riskbedömning av kund
-- **Syfte:** Guide för hur redovisningsbyråer ska bedöma risk hos nya kunder
+### `01FS_2024-20.md` (23KB, 700 rader)
+- **Titel:** Länsstyrelsen i Stockholms läns föreskrifter och allmänna råd om åtgärder mot penningtvätt och finansiering av terrorism
+- **Datum:** Beslutad 27 maj 2024, utkom från trycket 5 juni 2024
+- **Omfattning:** Stockholm, Södermanland, Gotland, Västmanland, Uppsala, Jämtland, Västernorrland, Västerbotten, Norrbotten
+- **Tillsynsmyndighet:** Länsstyrelsen Stockholm (för Sörmland och uppåt)
 - **Innehåll:**
-  - Riskfaktorer enligt PML (kap 3)
-  - Riskpoängsystem
-  - Kategorisering: Låg / Normal / Hög risk
-  - Skärpt kundkännedom (Enhanced Due Diligence) för högrisk
-- **Relevans för Celestial:** 🔴 CRITICAL - Detta dokument utgör grunden för Celestials riskmotor
-- **Status:** ✅ Implementerad i frontend (riskfrågor) och under utveckling i backend
-- **Implementation:**
-  - Riskfrågor i slides (components/Slides/RiskbedömningSlide.jsx)
-  - Risk scoring logic (ska implementeras i backend)
-
-### `rutin_lopande_kyc_ej_bokforingsnara.pdf` (154KB)
-- **Titel:** Rutin för löpande kundkännedom (ej bokföringsnära tjänster)
-- **Syfte:** Rutiner för kontinuerlig övervakning av befintliga kunder
-- **Innehåll:**
-  - Årlig översyn av kunddata
-  - Triggers för omprövning (väsentliga förändringar)
-  - Uppdatering av riskbedömning
+  - Tillämpningsområde för verksamhetsutövare (revisor, redovisningskonsult, advokat, m.fl.)
+  - Krav på allmän riskbedömning
+  - Rutiner för kundkännedom och löpande uppföljning
   - Dokumentationskrav
-- **Relevans för Celestial:** 🟡 IMPORTANT - Framtida feature för löpande KYC
-- **Status:** ⏳ Ej implementerad - planerad för v2.0
-- **Användningsfall:**
-  - Automatiska påminnelser för årlig översyn
-  - Detektering av förändringar i Bolagsverket-data (styrelse, UBO, etc.)
-  - Re-scoring av risk vid väsentliga förändringar
+  - Rapporteringsskyldighet
+- **Relevans för Celestial:** 🔴 CRITICAL - Primärt regelverk för compliance
+- **Status:** ✅ Referensdokument för implementation
+- **Not:** Andra tillsynsmyndigheter är Länsstyrelsen Västra Götaland och Länsstyrelsen Skåne
 
-### `rutin_riskkontroll_bokforingsdata.pdf` (182KB)
-- **Titel:** Rutin för riskkontroll av bokföringsdata
-- **Syfte:** Rutiner för att identifiera misstänkta transaktioner i bokföringen
+### `nationell_riskbedomning_2020-2021.pdf` (4.1MB)
+- **Titel:** Nationell riskbedömning av penningtvätt och finansiering av terrorism 2020-2021
+- **Utgivare:** Samordningsfunktionen för åtgärder mot penningtvätt och finansiering av terrorism
+- **Datum:** Publicerad 2021-04-21
+- **Samordnade myndigheter:** 17 organisationer (Bolagsverket, Ekobrottsmyndigheten, Finansinspektionen, Polismyndigheten, Skatteverket, m.fl.)
 - **Innehåll:**
-  - Röda flaggor i bokföringsdata
-  - Atypiska transaktionsmönster
-  - Rapporteringsskyldighet till Finanspolisen
-  - Dokumentationskrav
-- **Relevans för Celestial:** 🟢 NICE-TO-HAVE - Kompletterande feature för bokföringsassistans
-- **Status:** ⏳ Ej implementerad - kräver Skatteverket API-integration
-- **Användningsfall:**
-  - Automatisk analys av bokförda transaktioner (via Skatteverket API)
-  - Flagga misstänkta mönster (stora kontantuttag, utländska transaktioner, etc.)
-  - Generera rapporter för manuell granskning
+  - Riskbedömning av 22 sektorer
+  - Högriskaktörer: Finansiella institut, bokförings- och revisionstjänster, företagsmäklare, varuhandeln
+  - Konkreta exempel på penningtvätt: Sällanköpsvaror (bilar, båtar, konst, smycken), kontantbetalningar
+  - Nationella sårbarheter och trender
+- **Relevans för Celestial:** 🟡 HIGH - Auktoritativ källa för riskformuleringar och branschspecifika hot
+- **Status:** ✅ Nedladdad för referens i frågeformuleringar
+- **Användning:** Konkreta exempel på röda flaggor, branschspecifika risker för bokförings-/revisionsbranschen
+
+### `vagledning-till-redovisningskonsulter-och-skatteradgivare.pdf` (28 sidor)
+- **Titel:** Vägledning till redovisningskonsulter och skatterådgivare - Penningtvättslagen och tillhörande författningar
+- **Utgivare:** Polismyndigheten
+- **Datum:** [Kontrollera PDF för exakt datum]
+- **Målgrupp:** Redovisningskonsulter och skatterådgivare (PRIMÄR målgrupp för Celestial!)
+- **Innehåll:**
+  - **Straffansvar för näringspenningtvätt** (Lag 2014:307 om straff för penningtvättsbrott)
+    - § 7: Näringspenningtvätt - "medverkar till en åtgärd som skäligen kan antas vara vidtagen i sådant syfte"
+    - Straff: Böter eller fängelse upp till 2 år (ringa brott), 6 mån-6 år (grovt brott)
+    - **Nyckelformulering:** "Du behöver inte vara medveten om att pengarna kommer från brottslig verksamhet utan det räcker att du **borde ha insett det**"
+  - **Finansiering av terrorism** (Terroristbrottslagen 2022:666)
+    - Förbjudet att samla in, tillhandahålla eller ta emot pengar/egendom för terrorism
+    - Omfattar även indirekt stöd: utbildning, resekostnader, logi, material, utrustning
+  - Skyldigheter enligt PTL (2017:630)
+  - Praktisk vägledning för övervakning och kontroll av transaktioner
+  - Röda flaggor specifika för redovisningsbranschen
+- **Relevans för Celestial:** 🔴 CRITICAL - Primär vägledning för vår exakta målgrupp
+- **Status:** ✅ Nedladdad 2025-10-28
+- **Användning:** 
+  - Använd Polisens formuleringar direkt i "Varför frågar vi detta?"-sektioner
+  - Referera till straffansvar för att motivera compliance-krav
+  - Konkreta exempel på näringspenningtvätt i redovisningsbranschen
+- **Nyckelcitat för app:**
+  > "Du kan göra dig skyldig till penningtvätt och finansiering av terrorism. Om du som redovisningskonsult eller skatterådgivare medverkar till en åtgärd som kan antas vara vidtagen för att dölja att pengar eller annan egendom härrör från brott eller för att främja (underlätta) för någon att tillgodogöra sig sådan egendom, riskerar du att dömas för ett brott enligt lagen (2014:307) om straff för penningtvättsbrott. Du behöver inte vara medveten om att pengarna eller annan egendom kommer från brottslig verksamhet utan det räcker att du **borde ha insett det**."
+
+**Risk scoring algorithm:**
+- Version 1: `metod_riskbedömning_kund.pdf` (RADERAD - obsolet)
+- Version 2: Under utveckling
+- Version 3 (Current): Se [docs/RISK_SCORE_ALGORITHM/](../RISK_SCORE_ALGORITHM/) - Celestial Risk Engine v3.0
 
 ---
 
@@ -84,17 +99,23 @@
 - **Kap 5** - Förenklad kundkännedom
   - § 1: När förenklad kundkännedom får tillämpas
 
-### FFFS 2024:20 (Finansinspektionens föreskrifter)
+### 01FS 2024:20 (Länsstyrelsens föreskrifter)
 
-**Dokument:** `build/01FS 2024-20.pdf` (132KB) - Finns i [docs/specifications/latex/build/](../specifications/latex/build/)
+**Dokument:** `01FS_2024-20.md` (23KB, 700 rader)
+
+**Tillsynsmyndigheter för penningtvättslagen:**
+- **Länsstyrelsen Stockholm** - Sörmland och norrut (Stockholm, Södermanland, Gotland, Västmanland, Uppsala, Jämtland, Västernorrland, Västerbotten, Norrbotten)
+- **Länsstyrelsen Västra Götaland** - Västsverige
+- **Länsstyrelsen Skåne** - Sydsverige
 
 **Innehåll:**
-- Detaljerade krav för verksamhetsutövare
+- Detaljerade krav för verksamhetsutövare (revisor, redovisningskonsult, advokat, m.fl.)
 - Riskklassificering
 - Dokumentationskrav
 - Internkontroll
+- Rapporteringsrutiner
 
-**Relevans:** 🔴 CRITICAL - Primär regelverk för compliance
+**Relevans:** 🔴 CRITICAL - Primärt regelverk för compliance
 
 ---
 
@@ -212,7 +233,7 @@
 - ✅ Företagsuppgifter (org.nr, firma, adress) - Automatiskt från Bolagsverket
 - ✅ Styrelseledamöter - Automatiskt från Roaring/Bolagsverket
 - ✅ Verkliga huvudmän (UBO) - Automatiskt från Roaring
-- ✅ Riskbedömning - Automatisk + manuella frågor
+- ✅ Riskbedömning - Automatisk + manuella frågor (Celestial Risk Engine v3.0)
 - ✅ PEP-screening - Automatiskt från Roaring
 - ✅ Sanktionsscreening - Automatiskt från Roaring
 - ✅ Näringsförbudskontroll - Automatiskt från Roaring
@@ -232,6 +253,13 @@
 
 ## 8. Relaterade dokument
 
+**Riskbedömning:**
+- [docs/RISK_SCORE_ALGORITHM/](../RISK_SCORE_ALGORITHM/) - Celestial Risk Engine v3.0 (latest)
+  - metod_riskbedömning_kund_v3.tex (448 rader) - Algoritm som kombinerar:
+    - 30% Statisk KYC-data (företagsuppgifter, bransch, land)
+    - 30% Korsvalidering (Bolagsverket vs Roaring)
+    - 40% Bokföringsdata (transaktionsmönster, avvikelser)
+
 **Specifikationer:**
 - [docs/specifications/latex/](../specifications/latex/) - LaTeX-specifikationer för UI/UX
 - [docs/specifications/latex/build/uppdragsavtal_exempel.pdf](../specifications/latex/build/uppdragsavtal_exempel.pdf) - Template för uppdragsavtal
@@ -247,8 +275,8 @@
 
 ## 9. Nästa steg
 
-1. ✅ **INDEX.md skapad för compliance/**
-2. ⏳ **Implementera risk scoring engine** - Backend beräkning av riskpoäng
+1. ✅ **INDEX.md uppdaterad för compliance/** (2025-10-27)
+2. ⏳ **Implementera risk scoring engine** - Backend beräkning av riskpoäng (Celestial Risk Engine v3.0)
 3. ⏳ **PDF-rapportgenerering** - KYC-rapport för compliance-arkivering
 4. ⏳ **Uppdragsavtal-template integration** - Automatisk generering från template
 5. ⏳ **Enhanced Due Diligence workflow** - Extra steg för högrisk-kunder

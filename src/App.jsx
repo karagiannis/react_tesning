@@ -8,6 +8,9 @@ import ForgotPasswordSlide from './components/Slides/ForgotPasswordSlide';
 import ResetPasswordSlide from './components/Slides/ResetPasswordSlide';
 import UppdragsvalsSlide from './components/Slides/UppdragsvalsSlide';
 import RiskFragorSlide from './components/Slides/RiskFragorSlide';
+import RiskFragorSteg2Slide from './components/Slides/RiskFragorSteg2Slide';
+import RiskFragorSteg3Slide from './components/Slides/RiskFragorSteg3Slide';
+import RiskFragorSteg4Slide from './components/Slides/RiskFragorSteg4Slide';
 import IdentitetskontrollSlide from './components/Slides/IdentitetskontrollSlide';
 import KontrolltabellSlide from './components/Slides/KontrolltabellSlide';
 import PEPSlide from './components/Slides/PEPSlide';
@@ -204,18 +207,43 @@ export default function App() {
             <Route path="/riskfragor" element={
               <RiskFragorSlide 
                 onNext={() => {
-                  setIsPEP(true);
-                  navigate('/identitetskontroll');
+                  // Navigate to steg 2 instead of skipping directly to identitetskontroll
+                  navigate('/riskfragor/steg2');
                 }}
                 onSkipPEP={() => {
                   setIsPEP(false);
-                  navigate('/identitetskontroll');
+                  navigate('/riskfragor/steg2');
                 }}
                 onFormDataChange={(data) => {
                   setFormData({
                     organisationsnummer: data.organisationsnummer || '',
                     personnummer: data.personnummer || ''
                   });
+                }}
+              />
+            } />
+            <Route path="/riskfragor/steg2" element={
+              <RiskFragorSteg2Slide 
+                onNext={(data) => {
+                  // Save steg2 data
+                  console.log('Steg 2 data:', data);
+                }}
+              />
+            } />
+            <Route path="/riskfragor/steg3" element={
+              <RiskFragorSteg3Slide 
+                onNext={(data) => {
+                  // Save steg3 data
+                  console.log('Steg 3 data:', data);
+                }}
+              />
+            } />
+            <Route path="/riskfragor/steg4" element={
+              <RiskFragorSteg4Slide 
+                onNext={(data) => {
+                  // Save steg4 data
+                  console.log('Steg 4 data:', data);
+                  setIsPEP(true); // Could be based on data from steg1
                 }}
               />
             } />

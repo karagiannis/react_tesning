@@ -2,7 +2,7 @@
 
 **Princip:** Det som inte finns i detta index FINNS INTE!
 **Skapad:** 2025-10-26
-**Senast uppdaterad:** 2025-10-26 03:05
+**Senast uppdaterad:** 2025-10-27
 
 ---
 
@@ -11,20 +11,19 @@
 **Syfte:** Tekniska specifikationer för Celestial Onboarding App
 
 **Innehåll:**
-- LaTeX-specifikationer (Beamer presentations för UI/UX)
-- Arkitekturdesign och implementation notes
-- Databas-scheman och API-design
+- LaTeX-specifikationer (Beamer presentations för UI/UX och API endpoints)
+- Implementation notes och arkitekturdesign
+- Databas-scheman och konfigurationsstrukturer
 
 ---
 
-## 2. LaTeX Specifications
+## 2. Struktur
 
-### Sökväg: `latex/`
+**Sökväg:** `docs/specifications/`
 
-**Struktur:**
 ```
-latex/
-├── *.tex              # LaTeX source files
+specifications/
+├── *.tex              # LaTeX source files (Beamer presentations)
 ├── *.md               # Documentation och implementation notes
 └── build/             # Compiled PDFs och build artifacts
     ├── *.pdf          # Generated specifications
@@ -36,61 +35,68 @@ latex/
 
 ---
 
-## 3. Specifikationsdokument
+## 3. LaTeX Specifikationer
 
-### A. Onboarding Flow Specifications (Beamer)
+### A. Onboarding Flow Specification (Beamer)
 
-#### `Onboardin_app_ny.tex` (92KB)
+#### `Onboarding_app_ny.tex` (91KB)
 - **Format:** Beamer presentation (LaTeX slideshow)
 - **Syfte:** Komplett UI/UX-specifikation för onboarding-flödet
 - **Innehåll:**
-  - Alla slides/sidor i onboarding-processen
+  - Alla slides/sidor i onboarding-processen (30+ slides)
   - Layout och designelement
   - Formulärfält och valideringsregler
   - Användarflöde och navigering
   - Visuella mockups
-- **Byggt PDF:** `build/Onboardin_app_ny.pdf` (259KB)
+  - Backend-integration notes (OAuth, API-calls, etc.)
+- **Byggt PDF:** `build/Onboarding_app_ny.pdf` (253KB)
 - **Status:** ✅ Huvudspecifikation
 - **Senast uppdaterad:** 2025-10-25
+- **Not:** Innehåller även backend-detaljer som egentligen inte är nödvändiga för frontend
 
-#### `onboarding_app.tex` (31KB)
+**Legacy version:**
+- `onboarding_app.tex` (31KB) - Flyttad till ~/Documents/PENGATVÄTTS_KURSEN/ (2025-10-27)
+- `build/onboarding_app.pdf` (240KB) - Legacy PDF, kan raderas
+
+### B. API Endpoint Specifications (Beamer)
+
+**Not:** Dessa specifikationer innehåller både frontend interface OCH backend implementation detaljer (OAuth-flows, Google Auth server calls, etc.). Egentligen borde de endast specificera det interface frontend behöver känna till.
+
+#### `API_Endpoints_Auth.tex` (162KB)
 - **Format:** Beamer presentation
-- **Syfte:** Tidigare version av onboarding spec
-- **Byggt PDF:** `build/onboarding_app.pdf` (246KB)
-- **Status:** ⏳ Legacy - ersatt av Onboardin_app_ny.tex
-
-### B. API Endpoint Specifications
-
-#### `API_Endpoints_Auth.tex` (165KB)
 - **Syfte:** Specifikation för autentiserings-endpoints
 - **Innehåll:**
-  - OAuth2-flow
+  - OAuth2-flow (inklusive backend implementation mot Google Auth)
   - JWT token management
   - User registration/login
   - Email confirmation
+  - Backend-detaljer (serverside OAuth-hantering)
 - **Status:** ⏳ Under utveckling
 - **Byggt PDF:** Ej kompilerad än
+- **Senast uppdaterad:** 2025-10-24
 
-#### `API_Endpoints_ContentSlides.tex` (85KB)
+#### `API_Endpoints_ContentSlides.tex` (83KB)
+- **Format:** Beamer presentation
 - **Syfte:** Specifikation för content-relaterade endpoints
 - **Innehåll:**
   - CRUD för slides
   - Content management
   - Onboarding flow API
-- **Byggt PDF:** `build/API_Endpoints_ContentSlides.pdf` (526KB)
-- **Status:** ✅ Kompilerad 2025-10-25
+  - Backend implementation notes
+- **Byggt PDF:** `build/API_Endpoints_ContentSlides.pdf` (514KB)
+- **Status:** ✅ Kompilerad
 - **Senast uppdaterad:** 2025-10-25 04:00
 
 #### `API_Endpoints_ContentSlides_SEKTION2A_NY.tex` (40KB)
 - **Syfte:** Sektion 2A - ny struktur för content slides
 - **Status:** ⏳ Work in progress
 - **Byggt PDF:** Ej kompilerad än
+- **Senast uppdaterad:** 2025-10-25
 
-#### `API_Endpoints_Spec.pdf` (336KB)
-- **Syfte:** Tidigare API-specifikation (komplett)
-- **Status:** ⏳ Legacy spec - används som referens
+**Legacy API spec:**
+- `build/API_Endpoints_Spec.pdf` (328KB) - Tidigare API-specifikation, används som referens
 
-### C. Admin Dashboard Specification
+### C. Admin Dashboard Specification (Beamer)
 
 #### `Admin_Dashboard_Spec.tex` (31KB)
 - **Format:** Beamer presentation
@@ -100,7 +106,7 @@ latex/
   - User management
   - Analytics och rapporter
   - System settings
-- **Byggt PDF:** `build/Admin_Dashboard_Spec.pdf` (170KB)
+- **Byggt PDF:** `build/Admin_Dashboard_Spec.pdf` (166KB)
 - **Status:** ✅ Komplett specifikation
 
 ### D. Uppdragsavtal (Client Agreement)
@@ -113,7 +119,7 @@ latex/
   - Tjänstebeskrivning
   - Prissättning
   - GDPR-information
-- **Byggt PDF:** `build/uppdragsavtal_exempel.pdf` (102KB)
+- **Byggt PDF:** `build/uppdragsavtal_exempel.pdf` (100KB)
 - **Status:** ✅ Template klart
 - **Användning:** Genereras automatiskt vid onboarding (planerad feature)
 
@@ -143,7 +149,7 @@ latex/
 - Mock data: `/src/data/mockFirmConfig.js`
 
 **Relation till LaTeX-specs:**
-- Refererar till slides 28-30 i Onboardin_app_ny.tex
+- Refererar till slides 28-30 i Onboarding_app_ny.tex
 - KYC-frågor definierade i RISKFRAGOR_NY_STRUKTUR.md
 - API-endpoints specificerade i API_Endpoints_ContentSlides.tex
 
@@ -161,7 +167,7 @@ latex/
   - Underhållsinstruktioner
 - **Status:** ✅ Uppdaterad 2025-10-24
 
-#### `POSTGRES_UUID_ARKITEKTUR.md` (13KB)
+#### `POSTGRES_UUID_ARKITEKTUR.md` (14KB)
 - **Syfte:** Databasdesign med PostgreSQL och UUID-nycklar
 - **Innehåll:**
   - ER-diagram
@@ -171,7 +177,7 @@ latex/
 - **Status:** ✅ Arkitekturdesign klar
 - **Implementation:** ⏳ Ej påbörjad (SQLite används för prototyp)
 
-#### `ARBETSSCHEMA_SINGLE_LOOP.md` (13KB)
+#### `ARBETSSCHEMA_SINGLE_LOOP.md` (14KB)
 - **Syfte:** Arbetsflöde för development - single loop iteration
 - **Innehåll:**
   - Iterativ utvecklingsprocess
@@ -180,45 +186,6 @@ latex/
 - **Status:** ✅ Development workflow dokumenterad
 
 ### Slide Structure och Organization
-
-#### `STRUCTURE_PATTERN_CONTENT_SLIDES.md` (12KB)
-- **Syfte:** Standardiserat strukturmönster för content slides
-- **Innehåll:**
-  - Naming conventions
-  - File organization
-  - Component structure patterns
-- **Status:** ✅ Pattern dokumenterat
-- **Senast uppdaterad:** 2025-10-24
-
-#### `SUBSECTION_STRUCTURE_STANDARD.md` (11KB)
-- **Syfte:** Standardstruktur för subsections i Beamer
-- **Innehåll:**
-  - LaTeX subsection patterns
-  - Hierarchy rules
-  - Cross-references
-- **Status:** ✅ Standard etablerad
-- **Senast uppdaterad:** 2025-10-25
-
-#### `SLIDE_NUMBERING_SYNC.md` (8KB)
-- **Syfte:** Synkronisering av slide-numrering mellan spec och implementation
-- **Innehåll:**
-  - Numbering scheme
-  - Sync-process
-  - Troubleshooting
-- **Status:** ✅ Dokumenterat
-
-### Risk Assessment och KYC
-
-#### `RISKFRAGOR_NY_STRUKTUR.md` (8KB)
-- **Syfte:** Ny struktur för riskbedömningsfrågor
-- **Innehåll:**
-  - Question flow
-  - Risk scoring logic
-  - Branching rules
-- **Status:** ✅ Struktur etablerad
-- **Senast uppdaterad:** 2025-10-24
-
-#### `BEAMER_RISKFRAGOR_STADNING.md` (5KB)
 - **Syfte:** Cleanup notes för riskfrågor i Beamer
 - **Innehåll:**
   - Duplicates att ta bort
@@ -246,59 +213,82 @@ latex/
 - **Status:** ✅ Insights dokumenterade
 - **Senast uppdaterad:** 2025-10-24
 
+#### `BEAMER_RISKFRAGOR_STADNING.md` (5KB)
+- **Syfte:** Cleanup notes för riskfrågor i Beamer
+- **Innehåll:**
+  - Duplicates att ta bort
+  - Refactoring notes
+- **Status:** ⏳ Cleanup pending
+- **Senast uppdaterad:** 2025-10-25
+
+**Riskfrågor wizard-struktur:**
+- **Steg 1-4:** ALLTID visas (statiska steg)
+  - Steg 1: Grundläggande information (implementerad i RiskFragorSlide.jsx)
+  - Steg 2: Utländska transaktioner (behöver implementeras)
+  - Steg 3: Kunder & Affärspartners (behöver implementeras)
+  - Steg 4: Betalningar & Transaktioner (behöver implementeras)
+- **Steg 5+:** Konfigurerbara via config.json (byrå-specifika frågor, framtida feature)
+
+**Raderade filer:**
+- `RISKFRAGOR_NY_STRUKTUR.md` - Raderad 2025-10-27 (beskrev conditional rendering som inte längre används)
+
 ---
 
-## 5. Build Artifacts
+## 6. Build Artifacts
 
-### Sökväg: `latex/build/`
+### Sökväg: `build/`
 
 **Compiled PDFs:**
-- `Onboardin_app_ny.pdf` (259KB) - Huvudspec för onboarding
-- `onboarding_app.pdf` (246KB) - Legacy onboarding spec
-- `API_Endpoints_ContentSlides.pdf` (526KB) - API content endpoints
-- `API_Endpoints_Spec.pdf` (336KB) - Legacy API spec
-- `Admin_Dashboard_Spec.pdf` (170KB) - Admin dashboard spec
-- `uppdragsavtal_exempel.pdf` (102KB) - Uppdragsavtal template
-- `01FS 2024-20.pdf` (132KB) - FFFS compliance document
+- `Onboarding_app_ny.pdf` (253KB) - Huvudspec för onboarding ✅ CURRENT
+- `API_Endpoints_ContentSlides.pdf` (514KB) - API content endpoints ✅ CURRENT
+- `Admin_Dashboard_Spec.pdf` (166KB) - Admin dashboard spec ✅ CURRENT
+- `uppdragsavtal_exempel.pdf` (100KB) - Uppdragsavtal template ✅ CURRENT
+
+**Legacy PDFs (kan raderas):**
+- `onboarding_app.pdf` (240KB) - Legacy onboarding spec
+- `API_Endpoints_Spec.pdf` (328KB) - Legacy API spec
+- `01FS 2024-20.pdf` (130KB) - DUPLIKAT (finns i docs/compliance/01FS_2024-20.md)
 
 **Build files (LaTeX artifacts):**
 - `*.aux` - Auxiliary files
 - `*.log` - Build logs
 - `*.out` - Hyperref output
 - `*.toc` - Table of contents
-- `*.backup` - Backup files
+- `*.backup` - Backup files (kan raderas)
 
 ---
 
-## 6. Status per dokument
+## 7. Status per dokument
 
 | Document | Source (LaTeX) | PDF | Status | Senast uppdaterad |
 |----------|---------------|-----|--------|-------------------|
-| **Onboarding spec** | Onboardin_app_ny.tex (92KB) | ✅ 259KB | ✅ Current | 2025-10-25 |
-| **API Content** | API_Endpoints_ContentSlides.tex (85KB) | ✅ 526KB | ✅ Current | 2025-10-25 04:00 |
-| **Admin Dashboard** | Admin_Dashboard_Spec.tex (31KB) | ✅ 170KB | ✅ Complete | - |
-| **Uppdragsavtal** | uppdragsavtal_exempel.tex (6KB) | ✅ 102KB | ✅ Template | - |
-| **API Auth** | API_Endpoints_Auth.tex (165KB) | ❌ | ⏳ Draft | 2025-10-24 |
+| **Onboarding spec** | Onboarding_app_ny.tex (91KB) | ✅ 253KB | ✅ Current | 2025-10-25 |
+| **API Content** | API_Endpoints_ContentSlides.tex (83KB) | ✅ 514KB | ✅ Current | 2025-10-25 04:00 |
+| **Admin Dashboard** | Admin_Dashboard_Spec.tex (31KB) | ✅ 166KB | ✅ Complete | - |
+| **Uppdragsavtal** | uppdragsavtal_exempel.tex (6KB) | ✅ 100KB | ✅ Template | - |
+| **API Auth** | API_Endpoints_Auth.tex (162KB) | ❌ | ⏳ Draft | 2025-10-24 |
 | **API Sektion 2A** | ...SEKTION2A_NY.tex (40KB) | ❌ | ⏳ Draft | 2025-10-25 |
-| **Legacy Onboarding** | onboarding_app.tex (31KB) | ✅ 246KB | ⏳ Legacy | - |
-| **Legacy API** | - | ✅ 336KB | ⏳ Legacy | - |
+
+**Flyttade/raderade:**
+- `onboarding_app.tex` → Flyttad till ~/Documents/PENGATVÄTTS_KURSEN/ (2025-10-27)
+- `latex/` folder → Innehåll flyttat till specifications/ (2025-10-27)
 
 ---
 
-## 7. Build Process
+## 8. Build Process
 
 ### Kompilera LaTeX till PDF
 
 ```bash
-cd tic-tac-toe-app/docs/specifications/latex
+cd tic-tac-toe-app/docs/specifications
 
 # Kompilera en specifik .tex-fil
-pdflatex Onboardin_app_ny.tex
+pdflatex Onboarding_app_ny.tex
 
 # Full build (3 passes för references)
-pdflatex Onboardin_app_ny.tex
-pdflatex Onboardin_app_ny.tex
-pdflatex Onboardin_app_ny.tex
+pdflatex Onboarding_app_ny.tex
+pdflatex Onboarding_app_ny.tex
+pdflatex Onboarding_app_ny.tex
 
 # Flytta PDF till build/
 mv *.pdf build/
@@ -316,13 +306,13 @@ mv *.aux *.log *.out *.toc build/
 
 ---
 
-## 8. Relation till Implementation
+## 9. Relation till Implementation
 
 ### UI Components → LaTeX Specs
 
 **Mapping mellan slides i LaTeX och React komponenter:**
 
-| LaTeX Slide | React Component | Status |
+| LaTeX Slide (Onboarding_app_ny.tex) | React Component | Status |
 |------------|----------------|--------|
 | Hero Slide | HeroSlide.jsx | ✅ Implementerad |
 | Login Slide | LoginSlide.jsx | ✅ Implementerad |
@@ -347,19 +337,22 @@ mv *.aux *.log *.out *.toc build/
 
 ---
 
-## 9. Nästa steg
+## 10. Nästa steg
 
-1. ✅ **INDEX.md skapad för specifications/**
-2. ⏳ **Kompilera API_Endpoints_Auth.tex** - Färdigställ auth spec
-3. ⏳ **Kompilera API_Endpoints_ContentSlides_SEKTION2A_NY.tex** - Färdigställ sektion 2A
-4. ⏳ **Cleanup riskfrågor** - Följ BEAMER_RISKFRAGOR_STADNING.md
-5. ⏳ **Synkronisera slide numbering** - Verifiera SLIDE_NUMBERING_SYNC.md
-6. ⏳ **Implementera PostgreSQL schema** - Enligt POSTGRES_UUID_ARKITEKTUR.md
-7. ⏳ **Generera uppdragsavtal** - Automatisk PDF-generering från template
+1. ✅ **INDEX.md uppdaterad för specifications/** (2025-10-27)
+2. ✅ **latex/ mapp avskaffad** - Innehåll flyttat till specifications/ (2025-10-27)
+3. ✅ **Filnamn korrigerat** - Onboardin_app_ny.tex → Onboarding_app_ny.tex (2025-10-27)
+4. ⏳ **Radera legacy PDFs i build/** - onboarding_app.pdf, API_Endpoints_Spec.pdf, 01FS 2024-20.pdf
+5. ⏳ **Kompilera API_Endpoints_Auth.tex** - Färdigställ auth spec
+6. ⏳ **Kompilera API_Endpoints_ContentSlides_SEKTION2A_NY.tex** - Färdigställ sektion 2A
+7. ⏳ **Cleanup riskfrågor** - Följ BEAMER_RISKFRAGOR_STADNING.md
+8. ⏳ **Synkronisera slide numbering** - Verifiera SLIDE_NUMBERING_SYNC.md
+9. ⏳ **Implementera PostgreSQL schema** - Enligt POSTGRES_UUID_ARKITEKTUR.md
+10. ⏳ **Generera uppdragsavtal** - Automatisk PDF-generering från template
 
 ---
 
-## 10. Relaterade dokument
+## 11. Relaterade dokument
 
 **Compliance:**
 - [docs/compliance/](../compliance/) - KYC/AML compliance documentation

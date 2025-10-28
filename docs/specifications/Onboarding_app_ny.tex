@@ -1,0 +1,3653 @@
+\documentclass[10pt]{beamer}
+
+% Språk och tecken
+\usepackage[swedish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{comment}
+
+% Typsnitt – sans-serif för ren presentation
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+% Tema: Använd default (enklare att anpassa färger)
+\usetheme{default}
+\usefonttheme{structurebold}
+
+% FÄRGTEMA: Professionell grön AML/compliance-palett
+% OBS! React-appen använder nu grön färgskala (brand-50 till brand-900)
+% Definierad i tailwind.config.js:
+%   - brand-50: #f7f9f8 (nästan vit med grön nyans)
+%   - brand-100: #e8f0ed (mycket ljus grön)
+%   - brand-600: #00704a (primär grön för knappar)
+%   - brand-700: #005c3d (mörkare grön för hover)
+%   - brand-800: #004d32 (mörk skogsgrön för headers)
+%   - brand-900: #1a3a2e (mörkaste för text)
+% 
+% Detta LaTeX-dokument använder fortfarande varm beige/terracotta-palett
+% för presentationsformat. Vid implementation i React används den gröna paletten.
+
+\definecolor{warmbeige}{RGB}{245, 240, 230}     % Ljus bakgrund
+\definecolor{warmbrown}{RGB}{101, 73, 50}        % Mörk text & accent
+\definecolor{terracotta}{RGB}{204, 102, 85}      % För knappar / viktig info
+\definecolor{olive}{RGB}{120, 110, 90}           % Sekundär accent
+
+% Bakgrund och text
+\setbeamercolor{background canvas}{bg=warmbeige}
+\setbeamercolor{normal text}{fg=warmbrown}
+\setbeamercolor{structure}{fg=warmbrown}
+
+% Titel och frame-titel
+\setbeamercolor{title}{fg=white, bg=warmbrown}
+\setbeamercolor{frametitle}{fg=white, bg=warmbrown}
+
+% Knappar och länkar
+\setbeamercolor{button}{bg=terracotta, fg=white}
+\setbeamercolor{button border}{use=button, fg=button.bg}
+
+% Block (t.ex. exempel, varningar)
+\setbeamercolor{block title}{fg=white, bg=olive}
+\setbeamercolor{block body}{bg=warmbeige!70!white}
+
+% Stil för knappar
+\setbeamertemplate{buttons}[rounded]
+
+% Typsnittsstorlek
+\setbeamerfont{frametitle}{size=\Large}
+\setbeamerfont{title}{size=\LARGE}
+
+% Titel
+\title[Kundonboarding]{Kundonboarding: Accept eller Reject}
+\author[Celestial AB]{Celestial AB}
+\institute{Risk \& Compliance}
+\date{\today}
+
+% Snygga länkar utan röda ramar
+\hypersetup{
+  colorlinks=true,
+  linkcolor=terracotta,
+  urlcolor=terracotta
+}
+
+\begin{document}
+
+% ========================================================================
+% DEL 1: AUTENTISERINGSSIDOR (UTAN SIDEBAR)
+% ========================================================================
+% Dessa sidor visas INNAN användaren är inloggad och har INGEN sidebar.
+% De hanterar registrering, verifiering, inloggning och lösenordsåterställning.
+% ========================================================================
+
+% Hero-sektionen (förbättrad, mer lättläst och säljande)
+\begin{frame}[plain]
+  % Knappar uppe till höger
+  \begin{flushright}
+    \vspace{-0.8cm}
+    \hyperlink{login}{\beamerbutton{Logga in}} \hspace{0.3cm}
+    \hyperlink{register}{\beamerbutton{Registrera}}
+  \end{flushright}
+
+  \vspace{1.2cm}
+  \centering
+  {\usebeamerfont{title}\color{warmbrown}\textbf{Onboardingstöd för redovisnings- och revisionsbyråer}}
+
+  \vspace{0.8cm}
+
+  % Kort introduktion / värde
+  \begin{block}{Snabb översikt}
+    Automatisera riskbedömningen och säkerställ att onboarding av nya klienter sker enligt penningtvättslagen och tillsynsmyndighetens riktlinjer.
+  \end{block}
+
+  \vspace{0.5cm}
+
+  % AI och automatisering
+  \begin{block}{AI-stöd och kontroll}
+    Vår AI-baserade programvara samlar automatiskt all nödvändig information, kontrollerar klienten mot penningtvättsregister och företagsbankkonton för att upptäcka \textit{layering}, och hjälper dig att skriva och signera avtal med BankID.
+  \end{block}
+
+  \vspace{0.5cm}
+
+  % Compliance och lag
+  \begin{block}{Compliance och lagkrav}
+    Följ vår mall så sker onboardingprocessen enligt \textit{Länsstyrelsen Stockholms författningssamling 01FS 2024–20}.
+  \end{block}
+
+  \vspace{0.5cm}
+
+  % Funktioner (kortare, visuellt uppdelat)
+  \begin{block}{Vad du får hjälp med}
+    \begin{columns}[T]
+      \begin{column}{0.48\textwidth}
+        \textbullet\ Ägarstruktur \\
+        \textbullet\ Alternativ verklig huvudman \\
+        \textbullet\ Bankkonton \\
+        \textbullet\ Finansiell information \\
+        \textbullet\ Folkbokföringsregistret \\
+        \textbullet\ Företagsdokument
+      \end{column}
+      \begin{column}{0.48\textwidth}
+        \textbullet\ Aktiefakta \\
+        \textbullet\ Arbetsställen \\
+        \textbullet\ Fastighetsinformation \\
+        \textbullet\ Firmatecknare \\
+        \textbullet\ Företagsärenden \\
+        \textbullet\ Koncernträd
+      \end{column}
+    \end{columns}
+  \end{block}
+
+  \vspace{0.5cm}
+
+  % CTA
+  \beamerbutton{Börja onboarding nu} \hspace{0.5cm} \beamerbutton{Se demo}
+  
+  \vspace{1.5cm}
+  
+  % Cookie Banner (visas längst ner på skärmen)
+  \begin{block}{Cookie-meddelande (visas vid första besöket)}
+    \footnotesize
+    Vi använder cookies för att förbättra din upplevelse. Läs vår \textcolor{blue}{\underline{Cookie Policy}}.
+    
+    \vspace{0.3cm}
+    \beamerbutton{Tillåt alla cookies} \hspace{0.3cm} \beamerbutton{Tillåt endast nödvändiga cookies}
+  \end{block}
+\end{frame}
+
+% Herosektion fortsättning – mer lättläst
+\begin{frame}[plain]
+  \frametitle{Onboardingstöd – fortsättning}
+  \footnotesize
+  \begin{minipage}{0.92\textwidth}
+    \textbf{Få full kontroll över klienten med våra automatiserade kontroller:}
+    \medskip
+    \begin{columns}[T]
+      \begin{column}{0.48\textwidth}
+        \textbullet\ Kreditbeslut \\
+        \textbullet\ Penningtvättsregistret \\
+        \textbullet\ Rating av företag \\
+        \textbullet\ Sanktionslistor \\
+        \textbullet\ Styrelseuppdrag \\
+        \textbullet\ Verksamhetsbeskrivning
+      \end{column}
+      \begin{column}{0.48\textwidth}
+        \textbullet\ Näringsförbud \\
+        \textbullet\ PEP \\
+        \textbullet\ Riskindikatorer \\
+        \textbullet\ Styrelsemedlemmar \\
+        \textbullet\ Verklig huvudman
+      \end{column}
+    \end{columns}
+  \end{minipage}
+\end{frame}
+
+%Registreringssidan
+
+\begin{frame}[label=register]
+  \frametitle{Skapa konto}
+
+  \vspace{0.5cm}
+  \begin{minipage}{0.9\textwidth}
+    \small
+    \textbf{E-post:} \underline{\hspace{6.5cm}} \\
+    \textbf{Lösenord:} \underline{\hspace{6.5cm}} \\
+    \footnotesize\textit{(Minst 12 tecken, en siffra, en versal)} \\
+    \textbf{Bekräfta lösenord:} \underline{\hspace{6.5cm}} \\
+
+    \vspace{0.8cm}
+    \fbox{\parbox{6.5cm}{
+      \centering
+      \textcolor{gray}{\textbf{[Cloudflare Turnstile Widget]}} \\
+      \tiny Automatisk bot-verifiering (ingen manuell CAPTCHA)
+    }}
+    
+    \vspace{0.3cm}
+    \footnotesize
+    \textit{Vi använder Cloudflare Turnstile för att förhindra missbruk och spam.}
+
+    \vspace{1.2cm}
+    \centering
+    \beamerbutton{Skapa konto}
+    
+    \vspace{1.2cm}
+    \textcolor{warmbrown}{\textbf{eller}}
+    
+    \vspace{0.6cm}
+    \colorbox{white}{%
+      \parbox{5cm}{\centering\footnotesize\textbf{Fortsätt med Google}}%
+    }
+  \end{minipage}
+  
+  \vspace{0.8cm}
+  \begin{center}
+    \footnotesize
+    Har du redan konto? \hyperlink{login}{\beamergotobutton{Logga in}}
+  \end{center}
+\end{frame}
+
+%Sidan som simulerar registreringskoder erhållna via e-post
+\begin{frame}[label=verify]
+  \frametitle{Verifiera din registrering}
+
+  \vspace{0.5cm}
+  \begin{minipage}{0.9\textwidth}
+    \small
+    \textbf{Ange den registreringskod du fått via e-post eller sms:} \underline{\hspace{5cm}} \\
+
+    \vspace{0.8cm}
+    \begin{block}{Info}
+      Av säkerhetsskäl och på grund av problem med e-postlänkar (t.ex. Sendgrid) används nu registreringskoder istället för klickbara länkar.
+    \end{block}
+
+    \vspace{1.2cm}
+    \centering
+    \beamerbutton{Verifiera kod}
+    
+    \vspace{1.2cm}
+    \textcolor{warmbrown}{\textbf{eller}}
+    
+    \vspace{0.6cm}
+    \colorbox{white}{%
+      \parbox{5cm}{\centering\footnotesize\textbf{Skicka ny kod}}%
+    }
+  \end{minipage}
+\end{frame}
+
+%Login sidan
+
+\begin{frame}[label=login]
+  \frametitle{Logga in}
+
+  \vspace{0.5cm}
+  \begin{minipage}{0.9\textwidth}
+    \small
+    \textbf{E-post:} \underline{\hspace{6.5cm}} \\
+    \textbf{Lösenord:} \underline{\hspace{6.5cm}} \\
+    
+    \vspace{0.3cm}
+    \footnotesize
+    \hyperlink{forgotpassword}{\textcolor{terracotta}{Glömt lösenord?}}
+
+    \vspace{0.6cm}
+    \footnotesize
+    \fbox{\parbox{6.5cm}{
+      \centering
+      \textcolor{gray}{\textbf{[Cloudflare Turnstile Widget]}} \\
+      \tiny Automatisk bot-verifiering
+    }}
+
+    \vspace{0.8cm}
+    \centering
+    \beamerbutton{Logga in}
+
+    \vspace{1.2cm}
+    \textcolor{warmbrown}{\textbf{eller}}
+
+    \vspace{0.6cm}
+    \colorbox{white}{%
+      \parbox{5cm}{\centering\footnotesize\textbf{Fortsätt med Google}}%
+    }
+  \end{minipage}
+
+  \vspace{0.8cm}
+  \begin{center}
+    \footnotesize
+    Har du inget konto? \hyperlink{register}{\beamergotobutton{Registrera}}
+  \end{center}
+\end{frame}
+
+% Sida Glömt lösenord (ForgotPasswordSlide i React, route: /forgot-password)
+\begin{frame}[label=forgotpassword]
+  \frametitle{Återställ lösenord}
+
+  \vspace{0.5cm}
+  \begin{minipage}{0.9\textwidth}
+    \small
+    \textbf{E-post:} \underline{\hspace{6.5cm}} \\
+
+    \vspace{1cm}
+    \centering
+    \beamerbutton{Skicka återställningskod}
+
+    \vspace{1cm}
+    \footnotesize
+    En 6-siffrig kod kommer skickas till din e-post. Koden är giltig i 15 minuter.
+  \end{minipage}
+
+  \vspace{0.8cm}
+  \begin{center}
+    \footnotesize
+    \hyperlink{login}{\beamergotobutton{Tillbaka till login}}
+  \end{center}
+\end{frame}
+
+% Sida: Ange nytt lösenord (ResetPasswordSlide i React, route: /reset-password)
+\begin{frame}[label=resetpassword]
+  \frametitle{Ange nytt lösenord}
+
+  \vspace{0.5cm}
+  \begin{minipage}{0.9\textwidth}
+    \small
+    \textbf{Verifieringskod (6 siffror):} \underline{\hspace{6.5cm}} \\
+    \vspace{0.5cm}
+    \textbf{Nytt lösenord:} \underline{\hspace{6.5cm}} \\
+    \footnotesize\textit{(Minst 12 tecken, en siffra, en versal)} \\
+    \vspace{0.3cm}
+    \textbf{Bekräfta lösenord:} \underline{\hspace{6.5cm}} \\
+
+    \vspace{1cm}
+    \centering
+    \beamerbutton{Återställ lösenord}
+
+    \vspace{1cm}
+    \footnotesize
+    Fick du inte koden? \hyperlink{forgotpassword}{\textcolor{terracotta}{Skicka ny kod}}
+  \end{minipage}
+\end{frame}
+
+% ========================================================================
+% DEL 2: ONBOARDING SLIDES (MED SIDEBAR)
+% ========================================================================
+% Dessa slides visas EFTER inloggning och har sidebar med progressindikator.
+% De utgör själva onboarding-processen där företagsdata samlas in steg för steg.
+% ========================================================================
+
+% --- Kommentar: Inloggad vy med vänster sidebar och ikoner ---
+% När användaren är inloggad visas följande layout:
+%
+% 1. Vänster sidebar
+%    - Expanderbar
+%    - Mini-thumbnails över slidsen / steg i onboarding
+%    - Menylista med kugghjul för inställningar
+%
+% 2. Ikoner uppe i vänster sidebar eller över content-ytan
+%    - LLM: Klick på denna fäller ut en chattpanel till höger.
+%           LLM får via ett JSON-paket all data som appen hittills hämtat
+%           för att kunna svara på frågor efter bästa förmåga.
+%
+%    - Dokumentation: Klick fäller ut dokumentationspanel där användaren
+%           ser hur programmet används och vilka tester som körs.
+%
+%    - Support: Klick fäller ut en supportpanel med möjlighet till
+%           chatt och delning av skärm (likt Fortnox). 
+%           Knappen i den utfällda menyn heter "Supportinloggning".
+%           Symbol: ring med frågetecken.
+%
+% 3. Content-ytan
+%    - Visar huvudfunktioner, formulär och PDF/graph-visualisering
+%    - Eventuellt LLM / supportpanel fälls ut till höger, påverkar
+%      content-bredd dynamiskt.
+%
+% Kommentar: Denna design följer principen om modulär sidebar och
+% dynamiska paneler, vilket möjliggör både onboarding och interaktiv
+% assistans utan att navigera bort från huvudytan.
+
+% ========================================================================
+% SEKTION 1: UPPDRAGSVAL OCH INTRODUKTION
+% ========================================================================
+\section{Uppdragsval och introduktion}
+
+% ========================================================================
+% SLIDE 0: PTL-INTRODUKTION OCH NORMALISERING
+% ========================================================================
+% (PTLIntroSlide i React, route: /ptl-intro) - FÖRSTA SLIDE MED SIDEBAR
+% Före detta finns Auth-slides: Hero (/, HeroSlide), Login (/login), Register (/register), Verify (/verify)
+% 
+% SYFTE: Normalisera kommande frågor och flytta ansvar från byråchef till lagen.
+% 
+% ANVÄNDNING:
+% 1. Byråchef öppnar denna slide
+% 2. Småpratar med klienten medan texten visas på skärmen (vädret, semestern, etc.)
+% 3. Klienten läser texten perifert och förstår: "Detta gäller alla, officiellt"
+% 4. Efter 30-60 sekunder: Byråchef läser texten högt som "tråkig PowerPoint-föreläsare"
+% 5. Resultat: Klienten är normaliserad och redo att svara ärligt utan att känna sig utpekad
+% ========================================================================
+
+\begin{frame}[label=ptlintro]
+  \frametitle{}
+  
+  \vspace{1cm}
+  
+  \begin{center}
+    \begin{beamercolorbox}[wd=0.9\textwidth,sep=1cm,center,rounded=true,shadow=true]{title}
+      {\Large\textbf{ONBOARDING ENLIGT\\PENNINGTVÄTTSLAGEN (PTL)}}
+    \end{beamercolorbox}
+  \end{center}
+  
+  \vspace{1cm}
+  
+  \begin{block}{}
+    \large
+    \centering
+    \textbf{Länsstyrelsen} kräver att alla\\
+    redovisningsbyråer ställer dessa frågor till \textbf{ALLA}\\
+    nya kunder – \textbf{ingen undantag}.
+    
+    \vspace{0.5cm}
+    
+    Detta är \textbf{INTE vårt val} – det är lagen.
+    
+    \vspace{0.5cm}
+    
+    Frågorna tar ca \textbf{10–15 minuter}.\\
+    Vid varje fråga kan du klicka på \textbf{ⓘ} för att se\\
+    exakt lagtext som kräver att vi frågar.
+    
+    \vspace{0.8cm}
+    
+    \textit{Tack för ditt tålamod!}
+  \end{block}
+  
+  \vspace{1cm}
+  
+  \begin{center}
+    \beamerbutton{Börja onboarding →}
+  \end{center}
+  
+  \vspace{0.3cm}
+  
+  \begin{block}{\footnotesize Psykologisk teknik (intern anteckning för byrån):}
+    \tiny
+    \textbf{Normaliseringssekvens:}\\
+    1. Öppna denna slide i förväg\\
+    2. Småprata om vädret/semestern medan klienten läser texten perifert (30-60 sek)\\
+    3. Läs sedan texten högt som en "tråkig PowerPoint-föreläsare"\\
+    4. Resultat: Klienten accepterar processen utan att känna sig utpekad\\[0.2cm]
+    
+    \textbf{Nyckelord som normaliserar:}\\
+    • "Länsstyrelsen kräver" (extern myndighet, inte byrån)\\
+    • "ALLA nya kunder – ingen undantag" (du är inte speciell)\\
+    • "Detta är INTE vårt val" (vi är på samma sida)\\
+    • "Från och med 2024" (nytt krav, inte att vi blivit misstänksamma)\\[0.2cm]
+    
+    \textbf{Liknelse från Försvarsmakten:}\\
+    Instruktören småpratar om fotboll medan rekryterna läser "SÄKERHETSKLASSAD INFO"\\
+    på tavlan. Efter 1 minut läses texten upp monotont. Rekryterna tänker:\\
+    "OK, detta gäller alla, inte bara mig."
+  \end{block}
+\end{frame}
+
+\begin{alertblock}{Klicka ⓘ för viktig information om straffansvar}
+  \tiny \textbf{Information från Polismyndigheten till redovisningskonsulter och skatterådgivare}\\
+  \tiny \textit{Källa: "Information till redovisningskonsulter och skatterådgivare om Penningtvätt och finansiering av terrorism", sid. 14}\\[0.2cm]
+  \tiny \url{https://polisen.se/siteassets/dokument/om-polisen/penningtvatt/vagledning-till-redovisningskonsulter-och-skatteradgivare.pdf}\\[0.2cm]
+  
+  \tiny Du kan göra dig skyldig till penningtvätt och finansiering av terrorism. 
+  Om du som redovisningskonsult eller skatterådgivare medverkar till en åtgärd som 
+  kan antas vara vidtagen för att dölja att pengar eller annan egendom härrör från 
+  brott eller för att främja (underlätta) för någon att tillgodogöra sig sådan egendom, 
+  riskerar du att dömas för ett brott enligt lagen (2014:307) om straff för penningtvättsbrott.\\
+  
+  \textbf{Du behöver inte vara medveten om att pengarna eller annan egendom kommer från 
+  brottslig verksamhet utan det räcker att du borde ha insett det.} Det innebär att om 
+  du inte uppfyller dina skyldigheter enligt penningtvättslagen om bland annat övervakning 
+  och kontroll av transaktioner, kan du riskera att dömas till böter eller fängelse för 
+  bland annat näringspenningtvätt.\\[0.2cm]
+
+  \tiny \textbf{Lag (2014:307) om straff för penningtvättsbrott, 1 kap. 3-7 §§}\\
+
+  \tiny 3 §   För penningtvättsbrott döms, om åtgärden syftar till att dölja att pengar eller annan 
+  egendom härrör från brott eller brottslig verksamhet eller till att främja möjligheterna för 
+  någon att tillgodogöra sig egendomen eller dess värde, den som\\
+   \tiny 1. överlåter, förvärvar, omsätter, förvarar eller vidtar annan sådan åtgärd med egendomen, eller\\
+   \tiny 2. tillhandahåller, förvärvar eller upprättar en handling som kan ge en skenbar förklaring till 
+   innehavet av egendomen, deltar i transaktioner som utförs för skens skull, uppträder som bulvan 
+   eller vidtar annan sådan åtgärd.\\
+
+   \tiny Straffet är fängelse i högst två år.\\
+
+  \tiny 4 §   För penningtvättsbrott döms även den som, utan att åtgärden har ett sådant syfte som anges i 
+  3 §, otillbörligen främjar möjligheterna för någon att omsätta pengar eller annan egendom som härrör 
+  från brott eller brottslig verksamhet.\\
+
+  \tiny 5 §   Är brott som avses i 3 eller 4 § grovt, döms för grovt penningtvättsbrott till fängelse 
+  i lägst sex månader och högst sex år.\\
+
+  \tiny Vid bedömande av om brottet är grovt ska det särskilt beaktas om gärningen avsett betydande värden, 
+  om de brottsliga åtgärderna har ingått som ett led i en brottslighet som utövats systematiskt 
+  eller i större omfattning eller i annat fall varit av särskilt farlig art.
+
+  \tiny 6 §   Är brott som avses i 3 eller 4 § ringa, döms för penningtvättsförseelse till böter eller 
+  fängelse i högst sex månader.\\
+
+  \tiny För penningtvättsförseelse döms även den som i fall som avses i 3 eller 4 § inte insåg men 
+  hade skälig anledning att anta att egendomen härrörde från brott eller brottslig verksamhet.
+
+  \tiny 7 §   Den som, i näringsverksamhet eller såsom led i en verksamhet som bedrivs vanemässigt eller 
+  annars i större omfattning, medverkar till en åtgärd som skäligen kan antas vara vidtagen i sådant 
+  syfte som anges i 3 §, döms för näringspenningtvätt till fängelse i högst två år.
+
+  \tiny Är brottet grovt, döms till fängelse i lägst sex månader och högst sex år.
+
+  \tiny Är brottet ringa, döms till böter eller fängelse i högst sex månader. Till samma straff döms 
+  den som i annat fall än som anges i första stycket medverkar till en åtgärd som skäligen 
+  kan antas vara vidtagen i sådant syfte som anges i 3 §.\\[0.2cm]
+
+  \textbf{Viktiga juridiska aspekter:}\\
+  \tiny \textbullet Uppsåt finns i tre former: avsiktsuppsåt, insiktsuppsåt och likgiltlighetsuppsåt, där den nedre
+  gränsen - likgiltlighetsuppsåt - ligger mycket nära medveten oaktsamhet.\\
+  \tiny \textbullet Oaktsamhet finns i två varianter: medveten och omedveten.\\
+  \tiny \textbullet Det räcker med omedveten oaktsamhet för att straffas för penningtvättförseelse enligt 6 §
+  andra stycket penningtvättsbrottslagen.\\[0.2cm]
+  \tiny Källa: \textit{Penningtvätt och Straffrätten - EN HANDBOK}, sid. 160\\
+  \tiny \textit{Marie Wallin, jurist, tidigare kammaråklagare och specialist inom finansiell brottslighet}
+
+  \tiny \textbf{Varför visar vi detta?}\\
+  \tiny För att tydliggöra varför dessa frågor inte är valfria. Som redovisningskonsult 
+  har du ett personligt straffansvar om du inte följer penningtvättslagen. Denna 
+  onboardingprocess hjälper dig att uppfylla dina skyldigheter och skydda dig mot 
+  åtal för näringspenningtvätt.
+\end{alertblock}
+
+% ========================================================================
+% SLIDE 1: UPPDRAGSVAL
+% ========================================================================
+% INLEDNING OCH BAKGRUND
+% (UppdragsvalsSlide i React, route: /uppdragsval)
+\begin{frame}[label=intro]
+  \frametitle{Välkommen – Låt oss börja med det viktigaste}
+
+  \small
+  
+  % SEKTION 1: UPPDRAGETS ART (kunden i centrum)
+  \begin{block}{\textbf{1. Vilka tjänster behöver ditt företag?}}
+    \footnotesize
+    Välj de tjänster som passar ditt företags behov. Vi beräknar en uppskattad kostnad baserat på dina val.
+  \end{block}
+  
+  \vspace{0.2cm}
+  \footnotesize
+  %Priser hämtas dynamiskt från prislista i Settings eller config.json
+  ☐ Löpande bokföring (5000 kr/år)\\
+  ☐ Årsbokslut (8000 kr/år)\\
+  ☐ Deklarationer (moms, arbetsgivardeklaration, inkomstdeklaration) (3000 kr/år)\\
+  ☐ Löneadministration (4000 kr/år)\\
+  ☐ Ekonomisk rådgivning (10000 kr/år)\\
+  ☐ Företagsregistrering (nystartad verksamhet) (15000 kr engångsavgift)\\
+  ☐ Finansiell rapportering och analys (6000 kr/år)\\
+  ☐ Företagsförsäljning/succession (Offert)\\
+  ☐ Annat (specificera): \underline{\hspace{5cm}}
+  
+  \vspace{0.5cm}
+  
+  % SEKTION 2: VARFÖR FÖRDJUPADE FRÅGOR?
+  \begin{block}{\textbf{2. Varför kommer vi att ställa vissa fördjupade frågor?} \hspace{0.3cm} ⓘ}
+    \footnotesize
+    För att vi ska kunna ta oss an ditt uppdrag måste vi säkerställa att byrån uppfyller \textbf{penningtvättslagstiftningens krav} vid antagandet av nya kunder. Processen efterlever tillsynsmyndighetens krav där verksamhetsutövaren (byrån) är skyldig att redovisa hur man säkerställt att byrån inte gör sig skyldig till penningtvätt.\\
+    \vspace{0.2cm}
+    \textbf{Länsstyrelserna}, som ansvarar för tillsynen, har skärpt kraven på redovisningsbyråer och utfärdar \textcolor{red}{\textbf{sanktionsavgifter på hundratusentals kronor}} vid bristande efterlevnad.
+  \end{block}
+  
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+
+    \tiny \textbf{ 3 kap. 12 § PTL - Information om och uppföljning av affärsförbindelser} \\
+    \tiny 12 §   En verksamhetsutövare ska inhämta information om affärsförbindelsens syfte och art.\\
+
+    \tiny Informationen ska ligga till grund för en bedömning av\\
+    \tiny 1. vilka aktiviteter och transaktioner som kunden kan förväntas vidta och genomföra 
+     inom ramen för affärsförbindelsen, och\\
+    \tiny 2. kundens riskprofil enligt 2 kap. 3 §.
+    \vspace{0.5cm}
+
+    \tiny \textbf{ 3 kap. 13 §  1st. PTL - Information om och uppföljning av affärsförbindelser} \\
+    \tiny 13 §   En verksamhetsutövare ska löpande och vid behov följa upp pågående affärsförbindelser
+     i syfte att säkerställa att kännedomen om kunden enligt 7, 8 och 10-12 §§ är aktuell och tillräcklig
+      för att hantera den bedömda risken för penningtvätt eller finansiering av terrorism.\\
+    \vspace{0.5cm}
+
+    \tiny \textbf{Viktiga juridiska aspekter:}\\
+    \begin{itemize}
+      \item Även ageranden som \textbf{inte sker i ett bevisat syfte att tvätta pengar} kan bestraffas
+      \item Även agerande som \textbf{inte har med illegal egendom att göra} kan bestraffas enligt lagen, om de anses vara tillräckligt riskfyllda
+      \item Brottet \textbf{näringspenningtvätt enligt 1 kap. 7§ penningtvättsbrottlagen} innebär att ett så kallat klandervärt risktagande gjorts straffbart
+    \end{itemize}
+    \vspace{0.1cm}
+    \tiny Källa: \textit{Penningtvätt och Straffrätten - EN HANDBOK}, sid. 44\\
+    Marie Wallin, jurist, tidigare kammaråklagare och specialist inom finansiell brottslighet
+  \end{alertblock}
+  
+  \vspace{0.5cm}
+  
+  % SEKTION 3: SANKTIONER
+  \begin{block}{\textbf{3. Sanktioner vid bristande efterlevnad} \hspace{0.3cm} ⓘ}
+    \footnotesize
+    Länsstyrelserna har möjlighet att utfärda \textbf{sanktionsavgifter} som kan uppgå till mycket stora belopp för både företag och enskilda personer.
+  \end{block}
+  
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{7 kap. 14-16 §§ PTL (2017:630) – Sanktionsavgift}\\[0.2cm]
+
+    \tiny 14 §   Sanktionsavgiften för en verksamhetsutövare som är en juridisk person ska som högst fastställas till det högsta av
+    \tiny 1. två gånger den vinst som verksamhetsutövaren gjort till följd av överträdelsen, om beloppet går att fastställa, eller
+    \tiny 2. ett belopp i kronor motsvarande en miljon euro.
+
+    \tiny Sanktionsavgiften får inte bestämmas till ett lägre belopp än 5 000 kronor.
+
+    \tiny Avgiften tillfaller staten.
+
+    \tiny 15 §   Sanktionsavgiften för en fysisk person ska som högst fastställas till det högsta av\\
+    \tiny 1. två gånger den vinst som den fysiska personen gjort till följd av överträdelsen, 
+    om beloppet går att fastställa, eller\\
+    \tiny 2. ett belopp i kronor motsvarande en miljon euro.\\
+
+    \tiny Avgiften tillfaller staten.\\
+
+    \tiny 16 §   När sanktionsavgiftens storlek fastställs, ska särskild hänsyn tas till sådana 
+    omständigheter som anges i 13 § samt till den juridiska eller fysiska personens finansiella 
+    ställning och, om det går att fastställa, den vinst som gjorts till följd av överträdelsen.
+  \end{alertblock}
+
+  \vspace{0.5cm}
+  \begin{flushright}
+    \hyperlink{riskfragor-steg1}{\beamerbutton{Fortsätt →}}
+  \end{flushright}
+  
+  \vspace{0.2cm}
+  \begin{center}
+    \tiny Alla uppgifter sparas säkert och följer \textbf{GDPR} och \textbf{penningtvättslagen (PTL 2017:630)}
+  \end{center}
+  
+\end{frame}
+
+% API-dokumentation: Se API_Endpoints_ContentSlides.tex
+% Sektion 1 > POST /api/onboarding/uppdrag
+
+
+% ========================================================================
+% SEKTION 2: RISKBEDÖMNING
+% ========================================================================
+\section{Riskbedömning}
+
+% ========================================================================
+% RISKFRÅGOR - STEG 1 (GRUNDLÄGGANDE INFORMATION)
+% ========================================================================
+% RiskFragorSlide i React (route: /riskfragor)
+% Alla fält visas på samma sida för snabb överblick och enkel ifyllning
+% Detta matchar den nuvarande React-implementationen (RiskFragorSlide.jsx)
+% ========================================================================
+
+\begin{frame}[label=riskfragor-steg1]
+  \frametitle{Riskfrågor – Steg 1: Grundläggande information}
+
+  \vspace{0.3cm}
+
+  \footnotesize
+  \textbf{Bakgrund:}\\
+  Penningtvättslagen (PTL) kräver att redovisningsbyråer fastställer varje kunds riskprofil. 
+  Tillsynsmyndigheten Länsstyrelsen Stockholm ställer tydliga krav på dokumentation.
+
+  \vspace{0.4cm}
+
+  % Affärsidé
+  \textbf{1. Vad är företagets huvudsakliga affärsidé?}* \hspace{0.3cm} ⓘ
+  \begin{block}{Textarea}
+    \tiny Beskriv vad företaget gör, vilka produkter/tjänster som erbjuds
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 4 § PTL – Situationer som kräver kundkännedom}\\
+    \tiny  4 §   En verksamhetsutövare ska vidta åtgärder för kundkännedom vid etableringen av en 
+    affärsförbindelse.\\
+
+    \tiny Om verksamhetsutövaren inte har en affärsförbindelse med kunden, ska åtgärder för kundkännedom vidtas\\
+    \tiny 1. vid enstaka transaktioner som uppgår till ett belopp motsvarande 15 000 euro eller mer,\\
+    \tiny 2. vid transaktioner som understiger ett belopp motsvarande 15 000 euro och som verksamhetsutövaren 
+    inser eller borde inse har samband med en eller flera andra transaktioner och som tillsammans 
+    uppgår till minst detta belopp, och\\
+    \tiny 3. vid utförandet av sådana överföringar av medel eller kryptotillgångar som avses i artikel 3.9
+    i Europaparlamentets och rådets förordning (EU) 2023/1113 av den 31 maj 2023 om uppgifter som 
+    ska åtfölja överföringar av medel och vissa kryptotillgångar och ändring av direktiv (EU) 2015/849, 
+    om överföringen överstiger ett belopp motsvarande 1 000 euro.
+    Lag (2024:1166).\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 1 § första stycket PTL – Förbud mot affärsförbindelser och transaktioner}\\
+    \tiny Otillräcklig kundkännedom\\
+
+    \tiny 1 §   En verksamhetsutövare får inte etablera eller upprätthålla en affärsförbindelse 
+    eller utföra en enstaka transaktion, om verksamhetsutövaren inte har tillräcklig kännedom 
+    om kunden för att kunna\\
+    \tiny 1. hantera risken för penningtvätt eller finansiering av terrorism som kan förknippas med 
+    kundrelationen, och\\
+    \tiny 2. övervaka och bedöma kundens aktiviteter och transaktioner enligt 4 kap. 1 och 2 §§.\\[0.1cm]
+
+
+    \tiny \textbf{2 kap. 3 § PTL – Riskbedömning av kunder}\\
+    \tiny 3 §   En verksamhetsutövare ska bedöma den risk för penningtvätt eller finansiering av 
+    terrorism som kan förknippas med kundrelationen (kundens riskprofil). Kundens riskprofil ska 
+    bestämmas med utgångspunkt i den allmänna riskbedömningen och verksamhetsutövarens kännedom om kunden.\\
+
+    \tiny När det behövs för att bestämma kundens riskprofil ska verksamhetsutövaren beakta omständigheter 
+    som avses i 4 och 5 §§ och föreskrifter som meddelats med stöd av denna lag samt andra omständigheter 
+    som i det enskilda fallet påverkar risken som kan förknippas med kundrelationen.\\
+
+    \tiny Kundens riskprofil ska följas upp under pågående affärsförbindelser och ändras när det finns 
+    anledning till det.\\[0.1cm]
+    
+
+    \tiny \textbf{4 kap. 1-2 §§ PTL – Övervaknings- och rapporteringsskyldighet}\\
+    \tiny 1 §   En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma enstaka 
+    transaktioner i syfte att upptäcka aktiviteter och transaktioner som\\
+    \tiny 1. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån den kännedom om 
+    kunden som verksamhetsutövaren har,\\
+    \tiny 2. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån den kännedom 
+    som verksamhetsutövaren har om sina kunder, de produkter och tjänster som tillhandahålls, 
+    de uppgifter som kunden lämnar och övriga omständigheter, eller\\
+    \tiny 3. utan att vara avvikande enligt 1 eller 2 kan antas ingå som ett led i penningtvätt 
+    eller finansiering av terrorism.\\
+
+    \tiny Inriktningen och omfattningen av övervakningen ska bestämmas med beaktande av de risker 
+    som identifierats i den allmänna riskbedömningen, den risk för penningtvätt och finansiering av 
+    terrorism som kan förknippas med kundrelationen och annan information om tillvägagångssätt 
+    för penningtvätt eller finansiering av terrorism.\\
+
+    \tiny 2 §   Om avvikelser eller misstänkta aktiviteter eller transaktioner uppmärksammas enligt 
+    1 § eller på annat sätt, ska en verksamhetsutövare genom skärpta åtgärder för kundkännedom enligt 
+    3 kap. 16 § och andra nödvändiga åtgärder bedöma om det finns skälig grund att misstänka att det 
+    är fråga om penningtvätt eller finansiering av terrorism eller att egendom annars härrör från 
+    brottslig handling.\\
+
+    \tiny När en verksamhetsutövare anser att det finns skälig grund att misstänka att det är fråga 
+    om penningtvätt eller finansiering av terrorism eller att egendom annars härrör från brottslig 
+    handling, behöver ytterligare åtgärder enligt första stycket inte vidtas.\\[0.1cm]
+    
+
+    \tiny \textbf{3 kap. 16 § PTL – Skärpta åtgärder vid hög risk}
+
+    \tiny 16 §   Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med 
+    kundrelationen bedöms som hög, ska särskilt omfattande kontroller, bedömningar och utredningar 
+    enligt 7, 8 och 10-13 §§ göras.\\
+
+    \tiny Åtgärderna ska i sådant fall kompletteras med de ytterligare åtgärder som krävs för att 
+    motverka den höga risken för penningtvätt eller finansiering av terrorism. 
+    Sådana åtgärder kan avse inhämtande av ytterligare information om kundens affärsverksamhet 
+    eller ekonomiska situation och uppgifter om varifrån kundens ekonomiska medel kommer.\\[0.1cm]
+
+    \tiny \textbf{2 kap. 8 § första stycket PTL – Interna rutiner och riktlinjer}\\
+    \tiny 8 §   En verksamhetsutövare ska ha dokumenterade rutiner och riktlinjer avseende sina åtgärder 
+    för kundkännedom, övervakning och rapportering samt för behandling av personuppgifter.\\
+
+    \tiny Rutinerna och riktlinjerna ska fortlöpande anpassas efter nya och förändrade risker för 
+    penningtvätt och finansiering av terrorism.\\
+
+    \tiny Rutinernas och riktlinjernas omfattning och innehåll ska bestämmas med hänsyn till 
+    verksamhetsutövarens storlek, art och riskerna för penningtvätt och finansiering av terrorism 
+    som identifierats i den allmänna riskbedömningen.\\[0.1cm]
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Vi är skyldiga enligt 2 kap. 8 § PTL att följa våra skriftliga riktlinjer, 
+    och dessa får INTE avvika från lagens krav. Vi kan därför inte göra individuella 
+    undantag eller hoppa över frågor, även om vi känner er väl. Detta skyddar både er 
+    och oss juridiskt.\\[0.1cm]
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  % Kundtyper (checkboxes)
+  \textbf{2. Vilka typer av kunder har företaget?}* \hspace{0.3cm} ⓘ\\
+  \tiny
+  ☐ Privatpersoner \hspace{0.5cm} ☐ Företag \hspace{0.5cm} ☐ Offentlig sektor
+  \begin{block}{Validering}
+    \tiny Minst ett val krävs
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    % 3 kap. 1 § första stycket PTL – Förbud mot affärsförbindelser och transaktioner
+    \tiny \textbf{3 kap. 1 § första stycket PTL – Förbud mot affärsförbindelser och transaktioner}\\
+
+    \tiny Otillräcklig kundkännedom\\
+
+    \tiny 1 §   En verksamhetsutövare får inte etablera eller upprätthålla en affärsförbindelse eller 
+    utföra en enstaka transaktion, om verksamhetsutövaren inte har tillräcklig kännedom om kunden 
+    för att kunna\\
+    \tiny 1. hantera risken för penningtvätt eller finansiering av terrorism som kan förknippas 
+    med kundrelationen, och\\
+    \tiny 2. övervaka och bedöma kundens aktiviteter och transaktioner enligt 4 kap. 1 och 2 §§.
+    \vspace{0.1cm}
+
+    % 4 kap. 1 § PTL – Övervaknings- och rapporteringsskyldighet
+    \tiny \textbf{4 kap. 1 § första stycket PTL – Övervaknings- och rapporteringsskyldighet}\\
+    \tiny Övervaknings- och rapporteringsskyldighet
+
+    \tiny 1 §   En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma enstaka 
+    transaktioner i syfte att upptäcka aktiviteter och transaktioner som\\
+    \tiny 1. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån den kännedom om 
+    kunden som verksamhetsutövaren har,\\
+    \tiny 2. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån den kännedom 
+    som verksamhetsutövaren har om sina kunder, de produkter och tjänster som tillhandahålls, 
+    de uppgifter som kunden lämnar och övriga omständigheter, eller\\
+    \tiny 3. utan att vara avvikande enligt 1 eller 2 kan antas ingå som ett led i penningtvätt 
+    eller finansiering av terrorism.
+    \vspace{0.1cm}
+
+    %  2 kap. 3 § PTL – Riskbedömning av kunder
+    \tiny \textbf{2 kap. 3 § PTL – Riskbedömning av kunder}\\
+    \tiny 3 §   En verksamhetsutövare ska bedöma den risk för penningtvätt eller finansiering av 
+    terrorism som kan förknippas med kundrelationen (kundens riskprofil). 
+    Kundens riskprofil ska bestämmas med utgångspunkt i den allmänna riskbedömningen och 
+    verksamhetsutövarens kännedom om kunden.\\
+
+    \tiny När det behövs för att bestämma kundens riskprofil ska verksamhetsutövaren beakta 
+    omständigheter som avses i 4 och 5 §§ och föreskrifter som meddelats med stöd av denna lag 
+    samt andra omständigheter som i det enskilda fallet påverkar risken som kan 
+    förknippas med kundrelationen.\\
+
+    \tiny Kundens riskprofil ska följas upp under pågående affärsförbindelser och ändras 
+    när det finns anledning till det.\\
+    \vspace{0.1cm}
+
+    % 01FS 2024:20, 2 kap. 4 § – Riskbedömning av kunder
+    \tiny \textbf{01FS 2024:20, 2 kap. 4 § – Riskbedömning av kunder}\\
+    \tiny 4 § Bestämmelser om verksamhetsutövarens riskbedömning av kunder (kundens riskprofil) finns i 
+     2 kap. 3 § lagen (2017:630) om åtgärder mot penningtvätt och finansiering av terrorism. 
+    I 2 kap. 4 och 5 §§ samma lag finns exempel på omständigheter som kan tyda på att kundrelationen 
+    innebär en låg respektive hög risk för penningtvätt eller finansiering av terrorism.
+    \vspace{0.1cm}
+
+    % 01FS 2024:20, 2 kap. 5 § – Rutiner och riktlinjer
+    \tiny \textbf{01FS 2024:20, 2 kap. 5 § – Rutiner och riktlinjer}\\
+    \tiny 5 § Bestämmelser om vad verksamhetsutövarens rutiner och riktlinjer ska omfatta finns i 
+    2 kap. 8–10, 13 och 15 §§ samt 6 kap. 1 § lagen (2017:630) om åtgärder mot penningtvätt och 
+    finansiering av terrorism.\\
+
+    \tiny Verksamhetsutövarens rutiner och riktlinjer ska därutöver omfatta det som anges om\\
+
+    \tiny 1. identifiering och kontroll, verklig huvudman samt förenklade och skärpta åtgärder enligt 
+    3 kap. dessa föreskrifter,\\
+    \tiny 2. system för uppgiftslämning enligt 4 kap. dessa föreskrifter,\\
+    \tiny 3. bevarande av handlingar och uppgifter enligt 5 kap. dessa föreskrifter, och\\
+    \tiny 4. rutiner och funktioner för intern kontroll enligt 6 kap. dessa föreskrifter.\\
+    \vspace{0.1cm}
+
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny För att uppfylla 01FS 2024:20, 2 kap. 5 § punkt 1 måste våra rutiner omfatta 
+    identifiering och riskbedömning av olika kundtyper. Privatpersoner som kunder kan 
+    innebära kontanthantering vilket ökar risken för penningtvätt. Företagskunder har 
+    andra riskprofiler beroende på bransch och transaktionsmönster. Tillsynsmyndigheten 
+    (Länsstyrelsen) kräver inte bara påståenden som "låg risk" utan dokumenterade rutiner 
+    som visar \textit{hur} vi kommit fram till bedömningen baserat på faktiska kundtyper.
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  % Utländska partners
+  \textbf{3. Har företaget utländska affärspartners/kunder?}* \hspace{0.3cm} ⓘ
+  \begin{block}{Textarea}
+    \tiny Om ja, vilka länder? Om nej, skriv "Nej"
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 11 § PTL – Kontroll av högriskländer}\\
+    \tiny 11 §   En verksamhetsutövare ska kontrollera om kunden är etablerad i ett land utanför EES
+     som av Europeiska kommissionen har identifierats som ett högrisktredjeland.\\[0.1cm]
+    
+    \tiny \textbf{Juridisk kommentar:}\\
+    \tiny Redovisningsbyrån fungerar som outsourcad ekonomifunktion och ser alla klientens 
+    transaktioner i bokföringen. När klienten handlar med utländska affärspartners blir dessa 
+    transaktioner synliga för byrån. Enligt 3 kap. 12 § PTL måste byrån inhämta 
+    information om "affärsförbindelsens syfte och avsedda karaktär", vilket inkluderar att 
+    förstå var klientens affärspartners finns och varför transaktionerna sker. Om byrån ser 
+    betalningar till högriskländer utan att förstå sammanhanget kan byrån göra sig skyldig 
+    till näringspenningtvätt (Lag 2014:307 § 7).\\[0.1cm]
+    
+    \tiny \textbf{2 kap. 4 § PTL – Omständigheter som kan tyda på låg risk}\\
+    \tiny 4 §   Som omständigheter som kan tyda på att risken för penningtvätt och finansiering av
+     terrorism är låg kan verksamhetsutövaren beakta bland annat att kunden\\
+    \tiny 1. är en stat, en region, en kommun eller motsvarande eller en juridisk person över vilken en stat,
+     en region, en kommun eller motsvarande, var för sig eller tillsammans,
+     har ett direkt eller indirekt rättsligt bestämmande inflytande,\\
+    \tiny 2. har hemvist inom EES,\\
+    \tiny 3. har hemvist i en stat som har bestämmelser om åtgärder mot penningtvätt
+     och finansiering av terrorism som motsvarar dem i denna lag och som tillämpar
+     dessa bestämmelser på ett effektivt sätt,\\
+    \tiny 4. har hemvist i en stat som har en låg nivå av korruption och annan relevant brottslighet, och\\
+    \tiny 5. är ett företag vars överlåtbara värdepapper är upptagna till handel på en reglerad
+     marknad inom EES eller på en motsvarande marknad utanför EES. Lag (2019:980).
+    \vspace{0.1cm}
+    
+    \tiny \textbf{2 kap. 5 § PTL – Omständigheter som kan tyda på hög risk}\\
+    \tiny 5 §   Som omständigheter som kan tyda på att risken för penningtvätt eller finansiering av terrorism är hög kan verksamhetsutövaren beakta bland annat att
+    \tiny 1. kundens ägarstruktur framstår som ovanlig eller alltför komplicerad för dess verksamhet,\\
+    \tiny 2. kunden bedriver kontantintensiv verksamhet,\\
+    \tiny 3. kunden är en juridisk person som har nominella aktieägare eller andelar utställda på innehavaren,\\
+    \tiny 4. kunden är en juridisk person, en trust eller en liknande juridisk konstruktion som har till syfte 
+     att förvalta en viss fysisk persons tillgångar,\\
+    \tiny 5. kunden har hemvist i en stat som saknar effektiva system för bekämpning av penningtvätt
+     eller finansiering av terrorism,\\
+    \tiny 6. kunden har hemvist i en stat med betydande korruption och annan relevant brottslighet,\\
+    \tiny 7. kunden har hemvist i en stat som är föremål för sanktioner, embargon eller liknande åtgärder,\\
+    \tiny 8. kunden har hemvist i en stat som finansierar eller stöder terroristverksamhet
+     eller där terroristorganisationer är verksamma,\\
+    \tiny 9. affärsrelationer eller transaktioner sker på distans, utan användning av metoder som på ett 
+     tillförlitligt sätt kan säkerställa kundens identitet, och\\
+    \tiny 10. betalning av varor eller tjänster görs av någon som är okänd eller saknar koppling till kunden.
+    \vspace{0.1cm}
+    
+    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
+    \tiny 16 §   Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med
+     kundrelationen bedöms som hög, ska särskilt omfattande kontroller, bedömningar och utredningar
+      enligt 7, 8 och 10-13 §§ göras.\\
+
+    \tiny Åtgärderna ska i sådant fall kompletteras med de ytterligare åtgärder som krävs för att
+     motverka den höga risken för penningtvätt eller finansiering av terrorism.
+     Sådana åtgärder kan avse inhämtande av ytterligare information om kundens affärsverksamhet
+     eller ekonomiska situation och uppgifter om varifrån kundens ekonomiska medel kommer.\\[0.1cm]
+    
+    \tiny \textbf{01FS 2024:20, 3 kap. 8 § – Skärpta kundkännedomsåtgärder}\\
+    \tiny 6 § Bestämmelser om skärpta åtgärder för kundkännedom finns i 3 kap. 16 och 17 §§ lagen (2017:630)
+     om åtgärder mot penningtvätt och finansiering av terrorism.\\
+
+    \tiny Allmänna råd\\
+    \tiny Utöver vad som framgår av tabellen i 3 kap. 4 § dessa föreskrifter samt med hänsyn till vad
+     som framgår av 3 kap. 16 § lagen (2017:630) om åtgärder mot penningtvätt och finansiering av
+     terrorism och risken i den enskilda kundrelationen och övriga omständigheter kan skärpta
+    åtgärder bland annat avse\\
+
+    \tiny 1. fördjupad kontroll av kundens identitet, affärsverksamhet, ekonomiska situation och ekonomiska
+     medel genom inhämtning av information om kunden och kundens historik från flera tillförlitliga
+     och oberoende källor,\\
+    \tiny 2. att inhämta ytterligare information om affärsförbindelsens eller den enstaka transaktionens
+     avsedda syfte och art, genom att ställa fler frågor till kunden och kontrollera svaren,\\
+    \tiny 3. ökad frekvens för uppdatering av kundkännedomsinformation, exempelvis så att
+     informationen uppdateras flera gånger under ett år, eller\\
+    \tiny 4. ökad frekvens och intensitet för granskning av transaktioner, exempelvis så att 
+     granskning behöver göras oavsett belopp på transaktionen. För kunder som är etablerade 
+     i ett land som har identifierats som ett högrisktredjeland av Europeiska kommissionen, 
+     finns ytterligare krav på skärpta åtgärder i 3 kap. 17 § lagen (2017:630) om åtgärder mot 
+     penningtvätt och finansiering av terrorism.
+    \vspace{0.1cm}
+    
+    \tiny \textbf{EU-kommissionens lista över högriskländer}\\
+    \tiny Europeiska kommissionen publicerar en officiell lista över högriskländer med strategiska
+     brister i sina system mot penningtvätt och finansiering av terrorism. Detta är den juridiskt 
+     bindande listan som svenska verksamhetsutövare måste följa enligt PTL. 
+     Se aktuell lista på: \url{https://finance.ec.europa.eu/financial-crime/high-risk-third-countries_en}\\[0.1cm]
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Om ert företag har kunder i högriskländer påverkar det byråns riskbedömning av er som klient.
+     Vi måste kunna förklara för Länsstyrelsen (tillsynsmyndigheten) varför vi accepterade er som klient 
+     och vilka åtgärder vi vidtagit för att hantera risken. 
+     Detta är inte för att misstänkliggöra er - lagen tvingar oss att dokumentera detta 
+     enligt 3 kap. 12 § PTL (information om affärsförbindelsens syfte och art).
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  % Leverantörer
+  \textbf{4. Vilka är företagets största leverantörer?}* \hspace{0.3cm} ⓘ
+  \begin{block}{Textarea}
+    \tiny Namnge de största (om tillämpligt)
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{2 kap. 1 § PTL – Allmän riskbedömning}\\
+    \tiny 1 §   En verksamhetsutövare ska göra en bedömning av hur de produkter och tjänster
+     som tillhandahålls i verksamheten kan utnyttjas för penningtvätt eller finansiering 
+     av terrorism och hur stor risken är för att detta sker (allmän riskbedömning).\\
+
+    \tiny Vid den allmänna riskbedömningen ska det särskilt beaktas vilka slags produkter och
+     tjänster som tillhandahålls, vilka kunder och distributionskanaler som finns
+     och vilka geografiska riskfaktorer som föreligger. Hänsyn ska också tas till 
+     uppgifter som kommer fram vid verksamhetsutövarens rapportering av misstänkta 
+     aktiviteter och transaktioner samt till information om tillvägagångssätt för 
+     penningtvätt och finansiering av terrorism och andra relevanta uppgifter som 
+     myndigheter lämnar.\\[0.1cm]
+
+    \tiny \textbf{Juridisk kommentar:}\\
+    \tiny Redovisningsbyrån ser alla klientens transaktioner med leverantörer i bokföringen. 
+    Enligt 2 kap. 1 § måste byrån bedöma geografiska riskfaktorer, vilket inkluderar att 
+    förstå var klientens leverantörer finns och om transaktionerna är rimliga för verksamheten. 
+    Om klienten betalar leverantörer i högriskländer eller leverantörer som verkar ovanliga 
+    för branschen kan detta indikera penningtvätt. Byrån måste enligt 3 kap. 12 § PTL inhämta 
+    information om "affärsförbindelsens syfte och avsedda karaktär" för att förklara 
+    transaktionerna för Länsstyrelsen vid tillsyn.\\[0.1cm]
+    
+    \tiny \textbf{2 kap. 3 § PTL – Riskbedömning av kunder}\\
+    \tiny 3 §   En verksamhetsutövare ska bedöma den risk för penningtvätt eller finansiering
+     av terrorism som kan förknippas med kundrelationen (kundens riskprofil). 
+     Kundens riskprofil ska bestämmas med utgångspunkt i den allmänna riskbedömningen och 
+     verksamhetsutövarens kännedom om kunden.\\
+
+    \tiny När det behövs för att bestämma kundens riskprofil ska verksamhetsutövaren beakta
+     omständigheter som avses i 4 och 5 §§ och föreskrifter som meddelats med stöd av denna 
+     lag samt andra omständigheter som i det enskilda fallet påverkar risken som kan förknippas 
+     med kundrelationen.\\
+
+    \tiny Kundens riskprofil ska följas upp under pågående affärsförbindelser och ändras
+     när det finns anledning till det.\\[0.1cm]
+    
+    \tiny \textbf{Det riskbaserade förhållningssättet} (Marie Wallin, sid. 49):\\
+    \tiny Verksamhetsutövare måste:
+    \begin{enumerate}
+      \item förstå hur de kan utnyttjas för penningtvätt, och
+      \item göra det som står i deras makt för att hitta, stoppa och rapportera misstänkt penningtvätt.
+    \end{enumerate}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{Två konkreta krav} (Marie Wallin, sid. 49):\\
+    \begin{enumerate}
+      \item att göra en så kallad \textbf{allmän riskbedömning}, och
+      \item att ha god \textbf{kundkännedom} (KYC - Know Your Customer).
+    \end{enumerate}
+    \tiny Källa: \textit{Penningtvätt och Straffrätten - EN HANDBOK}, Marie Wallin, f.d. kammaråklagare
+    \vspace{0.1cm}
+    
+    \tiny \textbf{Varför frågar vi om leverantörer?}\\
+    \tiny För att förstå kundens affärsrelationer och geografiska riskfaktorer. 
+     Leverantörer från högriskländer, skatteparadis, eller ovanliga leverantörskedjor 
+     (t.ex. shell companies utan tydlig affärsmodell) kan indikera förhöjd risk för penningtvätt 
+     genom handelsbaserad penningtvätt (trade-based money laundering).\\[0.1cm]
+    
+    
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  % Verksamhet ändrad
+  \textbf{5. Har verksamheten ändrats under de senaste 12 månaderna?}* \hspace{0.3cm} ⓘ
+  \begin{block}{Textarea}
+    \tiny Om ja, beskriv ändringen. Om nej, skriv "Nej"
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+
+    \tiny \textbf{3 kap. 12 § PTL – Information om affärsförbindelsens syfte och art}\\
+    \tiny 12 §   En verksamhetsutövare ska inhämta information om affärsförbindelsens syfte och art.\\
+
+    \tiny Informationen ska ligga till grund för en bedömning av\\
+    \tiny 1. vilka aktiviteter och transaktioner som kunden kan förväntas vidta och genomföra inom ramen för affärsförbindelsen, och
+    \tiny 2. kundens riskprofil enligt 2 kap. 3 §.
+    \vspace{0.1cm}
+
+    \tiny \textbf{3 kap. 13 § första stycket PTL – Löpande uppföljning av affärsförbindelser}\\
+    \tiny 13 §   En verksamhetsutövare ska löpande och vid behov följa upp pågående affärsförbindelser
+     i syfte att säkerställa att kännedomen om kunden enligt 7, 8 och 10-12 §§ är aktuell och 
+     tillräcklig för att hantera den bedömda risken för penningtvätt eller finansiering av terrorism.\\[0.1cm]
+    
+    \tiny \textbf{4 kap. 1-3 §§ PTL – Övervaknings- och rapporteringsskyldighet}\\
+    \tiny 1 §   En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma
+     enstaka transaktioner i syfte att upptäcka aktiviteter och transaktioner som\\
+    \tiny 1. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån
+     den kännedom om kunden som verksamhetsutövaren har,\\
+    \tiny 2. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån den
+     kännedom som verksamhetsutövaren har om sina kunder, de produkter och tjänster som tillhandahålls, 
+     de uppgifter som kunden lämnar och övriga omständigheter, eller\\
+    \tiny 3. utan att vara avvikande enligt 1 eller 2 kan antas ingå som ett led i penningtvätt eller
+     finansiering av terrorism.
+
+    \tiny Inriktningen och omfattningen av övervakningen ska bestämmas med beaktande av de risker
+     som identifierats i den allmänna riskbedömningen, den risk för penningtvätt och finansiering 
+     av terrorism som kan förknippas med kundrelationen och annan information om tillvägagångssätt 
+     för penningtvätt eller finansiering av terrorism.
+
+    \tiny 2 §   Om avvikelser eller misstänkta aktiviteter eller transaktioner uppmärksammas
+     enligt 1 § eller på annat sätt, ska en verksamhetsutövare genom skärpta åtgärder för 
+     kundkännedom enligt 3 kap. 16 § och andra nödvändiga åtgärder bedöma om det finns skälig grund 
+     att misstänka att det är fråga om penningtvätt eller finansiering av terrorism eller att 
+     egendom annars härrör från brottslig handling.
+
+    \tiny När en verksamhetsutövare anser att det finns skälig grund att misstänka att det är
+     fråga om penningtvätt eller finansiering av terrorism eller att egendom annars härrör 
+     från brottslig handling, behöver ytterligare åtgärder enligt första stycket inte vidtas.
+
+    \tiny 3 §   Om en verksamhetsutövare efter en bedömning enligt 2 § har skälig grund att 
+    misstänka penningtvätt eller finansiering av terrorism eller att egendom annars härrör 
+    från brottslig handling, ska uppgifter om alla omständigheter som kan tyda på detta utan 
+    dröjsmål rapporteras till Polismyndigheten.
+
+    \tiny En sådan rapport ska göras även om transaktioner inte genomförs liksom om det före
+     ingåendet av en affärsförbindelse eller utförandet av en transaktion uppkommer misstanke om 
+     att kunden avser att använda verksamhetsutövarens produkter eller tjänster för penningtvätt 
+     eller finansiering av terrorism.
+
+    \tiny Om den egendom som avses i rapporten till Polismyndigheten finns hos verksamhetsutövaren
+     ska detta anges särskilt, liksom i förekommande fall uppgifter om\\
+    \tiny 1. vilka tillgodohavanden kunden har hos verksamhetsutövaren,\\
+    \tiny 2. huruvida verksamhetsutövaren avstått från att genomföra en misstänkt transaktion, och\\
+    \tiny 3. mottagare av en misstänkt transaktion.\\[0.1cm]
+
+    
+    
+    \tiny \textbf{Röda flaggor vid verksamhetsändring:}\\
+    \begin{itemize}
+      \item Plötslig verksamhetsändring kombinerat med ägarskifte eller ny ledning
+      \item Branscher med högre risk (kontantintensiva, kryptovaluta, värdeöverföring)
+      \item Historiska bokföringsdata saknas eller är inkonsekvent
+      \item Ändring från lågrisverksamhet till högriskverksamhet
+    \end{itemize}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Lagen tvingar oss att \textbf{löpande} ställa uppföljningsfrågor för att säkerställa att vår
+     kännedom om er verksamhet är aktuell. Detta är inte för att vi misstänker er - det är ett
+    lagkrav enligt 3 kap. 13 § PTL. Om er verksamhet ändras måste vi uppdatera er riskprofil 
+    och bedöma om nya åtgärder krävs. Väsentliga förändringar kan indikera ökad risk som kräver 
+    fördjupad granskning.
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  % Org.nr
+  \textbf{6. Organisationsnummer:}* \underline{\hspace{4cm}} \hspace{0.3cm} ⓘ
+  \begin{block}{Format \& API-trigger}
+    \tiny XXXXXX-XXXX | När giltigt format anges → Backend anropar Bolagsverket API
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 7 §  PTL – Identifiering och kontroll av kunden}\\
+    \tiny 7 §   En verksamhetsutövare ska identifiera kunden och kontrollera kundens identitet
+     genom identitetshandlingar eller registerutdrag eller genom andra uppgifter och handlingar
+     från en oberoende och tillförlitlig källa.\\
+
+    \tiny När första stycket tillämpas får man använda medel för elektronisk identifiering och
+     betrodda tjänster enligt Europaparlamentets och rådets förordning (EU) nr 910/2014 av den
+     23 juli 2014 om elektronisk identifiering och betrodda tjänster för elektroniska transaktioner
+     på den inre marknaden och om upphävande av direktiv 1999/93/EG. Andra säkra identifieringsprocesser 
+     på distans eller på elektronisk väg som är reglerade, erkända, godkända eller accepterade av 
+     relevanta myndigheter får också användas.\\
+
+    \tiny Om kunden företräds av en person som uppger sig handla på kundens vägnar, ska verksamhetsutövaren
+     kontrollera den personens identitet och behörighet att företräda kunden. Lag (2019:774).
+     \vspace{0.1cm}
+    
+    \tiny \textbf{01FS 2024:20, 3 kap. 3 §  – Identifiering av kunden}\\
+    \tiny 3 § Verksamhetsutövaren ska identifiera en kund som är en fysisk person genom att begära
+     uppgifter om personens namn, personnummer, samordningsnummer eller motsvarande nummer samt adress.
+
+    \tiny Verksamhetsutövaren ska identifiera en kund som är en juridisk person genom att begära
+     uppgifter om den juridiska personens namn och organisationsnummer, registrerad adress samt företrädare.
+
+    \tiny Om kunden företräds av ett ombud eller motsvarande, ska verksamhetsutövaren
+     också identifiera den personen i enlighet med första stycket.
+    \vspace{0.1cm}
+    
+    \tiny \textbf{01FS 2024:20, 3 kap. 4 § – Kontroll av kundens identitet}\\
+    \tiny 4 § Verksamhetsutövaren ska kontrollera identiteten hos en kund som är en fysisk 
+    person samt företrädare för en kund som är en juridisk person. Om kunden företräds av ett 
+    ombud eller motsvarande, ska verksamhetsutövaren också kontrollera ombudets identitet och 
+    behörighet att företräda kunden.\\[0.1cm]
+
+    \tiny Kontrollåtgärderna ska utföras och dokumenteras på det sätt som anges i nedanstående tabell.
+    Av dokumentationen ska det även framgå när kontrollen har utförts. 
+    Identitetskontroll ska genomföras även om kunden är en offentlig person eller känd sedan tidigare.\\[0.1cm]
+
+    \tiny Kontrollåtgärderna ska utföras i enlighet med nedanstående tabell, oavsett kundens risknivå.
+    (Se content-slide "Identitetskontroll" för sammanfattning av tabellens huvuddrag, eller 
+    fullständig tabell i 01FS 2024:20, 3 kap. 4 §)\\
+    \tiny \url{https://www.lansstyrelsen.se/stockholm/om-oss/om-lansstyrelsen-stockholm/lanets-forfattningssamling/forfattningar-2024/forfattningssamling-2024/2024-06-03-01fs-202420.html}\\[0.1cm]
+    
+    \tiny \textbf{Automatisk kontroll via API:er}\\
+    \tiny När du anger organisationsnummer hämtar systemet automatiskt uppgifter från:
+    \begin{itemize}
+      \item \textbf{Bolagsverket:} Firma, adress, styrelse, verkställande direktör, firmatecknare
+      \item \textbf{Roaring.io KYC/AML:} Verkliga huvudmän, näringsförbud, sanktionslistor (EU/OFAC/UN), PEP-screening
+    \end{itemize}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Organisationsnummer är grunden för identifiering av juridisk person enligt 3 kap. 7 § PTL. Vi måste kontrollera identiteten genom oberoende källor (Bolagsverket = offentligt register = tillförlitlig källa). Denna kontroll måste dokumenteras och sparas enligt 01FS 2024:20, oavsett om vi känner kunden sedan tidigare.
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  % Personnummer
+  \textbf{7. Personnummer (VD/Firmatecknare):}* \underline{\hspace{4cm}} \hspace{0.3cm} ⓘ
+  \begin{block}{Format \& API-trigger}
+    \tiny YYYYMMDD-XXXX (minst 12 siffror) | Triggar Skatteverket SPAR-kontroll
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 7 §  PTL – Identifiering och kontroll av kunden}\\
+    \tiny 7 §   En verksamhetsutövare ska identifiera kunden och kontrollera kundens identitet
+     genom identitetshandlingar eller registerutdrag eller genom andra uppgifter och handlingar
+     från en oberoende och tillförlitlig källa.\\
+
+    \tiny När första stycket tillämpas får man använda medel för elektronisk identifiering och
+     betrodda tjänster enligt Europaparlamentets och rådets förordning (EU) nr 910/2014 av den
+     23 juli 2014 om elektronisk identifiering och betrodda tjänster för elektroniska transaktioner
+     på den inre marknaden och om upphävande av direktiv 1999/93/EG. Andra säkra identifieringsprocesser 
+     på distans eller på elektronisk väg som är reglerade, erkända, godkända eller accepterade av 
+     relevanta myndigheter får också användas.\\
+
+    \tiny Om kunden företräds av en person som uppger sig handla på kundens vägnar, ska verksamhetsutövaren
+     kontrollera den personens identitet och behörighet att företräda kunden. Lag (2019:774).
+     \vspace{0.1cm}
+    
+    \tiny \textbf{01FS 2024:20, 3 kap. 3 §  – Identifiering av kunden}\\
+    \tiny 3 § Verksamhetsutövaren ska identifiera en kund som är en fysisk person genom att begära
+     uppgifter om personens namn, personnummer, samordningsnummer eller motsvarande nummer samt adress.
+
+    \tiny Verksamhetsutövaren ska identifiera en kund som är en juridisk person genom att begära
+     uppgifter om den juridiska personens namn och organisationsnummer, registrerad adress samt företrädare.
+
+    \tiny Om kunden företräds av ett ombud eller motsvarande, ska verksamhetsutövaren
+     också identifiera den personen i enlighet med första stycket.
+    \vspace{0.1cm}
+    
+    \tiny \textbf{01FS 2024:20, 3 kap. 4 § – Kontroll av kundens identitet}\\
+    \tiny 4 § Verksamhetsutövaren ska kontrollera identiteten hos en kund som är en fysisk 
+    person samt företrädare för en kund som är en juridisk person. Om kunden företräds av ett 
+    ombud eller motsvarande, ska verksamhetsutövaren också kontrollera ombudets identitet och 
+    behörighet att företräda kunden.\\[0.1cm]
+
+    \tiny Kontrollåtgärderna ska utföras och dokumenteras på det sätt som anges i nedanstående tabell.
+    Av dokumentationen ska det även framgå när kontrollen har utförts. 
+    Identitetskontroll ska genomföras även om kunden är en offentlig person eller känd sedan tidigare.\\[0.1cm]
+
+    \tiny Kontrollåtgärderna ska utföras i enlighet med nedanstående tabell, oavsett kundens risknivå.
+    (Se content-slide "Identitetskontroll" för sammanfattning av tabellens huvuddrag, eller 
+    fullständig tabell i 01FS 2024:20, 3 kap. 4 §)\\
+    \tiny \url{https://www.lansstyrelsen.se/stockholm/om-oss/om-lansstyrelsen-stockholm/lanets-forfattningssamling/forfattningar-2024/forfattningssamling-2024/2024-06-03-01fs-202420.html}\\[0.1cm]
+    
+    \tiny \textbf{Automatisk kontroll via API:er}\\
+    \tiny När du anger organisationsnummer hämtar systemet automatiskt uppgifter från:
+    \begin{itemize}
+      \item \textbf{Bolagsverket:} Firma, adress, styrelse, verkställande direktör, firmatecknare
+      \item \textbf{Roaring.io KYC/AML:} Verkliga huvudmän, näringsförbud, sanktionslistor (EU/OFAC/UN), PEP-screening
+    \end{itemize}
+    \vspace{0.1cm}
+    
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Personnummer är nödvändigt för att identifiera den fysiska person som företräder företaget (VD, styrelseledamot, firmatecknare) enligt 3 kap. 7 § PTL. Vi måste kontrollera att personen har behörighet att företräda kunden och att personen inte är föremål för sanktioner eller är politiskt exponerad person (PEP), vilket skulle kräva Enhanced Due Diligence. SPAR-registret = offentligt register = tillförlitlig källa enligt PTL.
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  % Verklig huvudman (endast juridisk person)
+  \textbf{8. (Om juridisk person) Är det du som är verklig huvudman?}* \hspace{0.3cm} ⓘ\\
+  \tiny
+  ◯ Ja, jag äger/kontrollerar >25\% \hspace{0.5cm} ◯ Nej \hspace{0.5cm} ◯ Ej tillämpligt (enskild firma)
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 8 § första stycket PTL – Utredning av verklig huvudman}\\
+    \tiny En verksamhetsutövare ska utreda om kunden har en verklig huvudman. En sådan utredning ska åtminstone avse sökning i registret över verkliga huvudmän enligt lagen (2017:631) om registrering av verkliga huvudmän. Om kunden är en juridisk person ska utredningen omfatta åtgärder för att \textbf{förstå kundens ägarförhållanden och kontrollstruktur}. Om kunden har en verklig huvudman, ska verksamhetsutövaren vidta åtgärder för att kontrollera den verkliga huvudmannens identitet.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 8 § tredje stycket PTL – Alternativ verklig huvudman}\\
+    \tiny Om kunden är en juridisk person och det efter åtgärder står klart att den juridiska personen inte har en verklig huvudman, ska den person som är \textbf{styrelseordförande, verkställande direktör eller motsvarande befattningshavare} anses vara verklig huvudman.\\[0.1cm]
+    
+    \tiny \textbf{Lag (2017:631) 1 kap. 3 § – Definition av verklig huvudman}\\
+    \tiny Med verklig huvudman avses:
+    \begin{enumerate}
+      \item en fysisk person som, ensam eller tillsammans med någon annan, \textbf{ytterst äger eller kontrollerar} en juridisk person, eller
+      \item en fysisk person till vars förmån någon annan handlar.
+    \end{enumerate}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{Lag (2017:631) 1 kap. 4 § – Presumtion om kontroll}\\
+    \tiny En fysisk person ska antas utöva den yttersta kontrollen över en juridisk person, om han eller hon:
+    \begin{enumerate}
+      \item på grund av innehav av aktier, andra andelar eller medlemskap kontrollerar \textbf{mer än 25 procent} av det totala antalet röster i den juridiska personen,
+      \item har rätt att utse eller avsätta \textbf{mer än hälften} av den juridiska personens styrelseledamöter eller motsvarande befattningshavare, eller
+      \item på grund av avtal med ägare, medlem eller den juridiska personen, föreskrift i bolagsordning, bolagsavtal och därmed jämförbara handlingar, kan utöva kontroll enligt 1 eller 2.
+    \end{enumerate}
+    \vspace{0.1cm}
+    
+    \tiny Om en fysisk person ska antas utöva den yttersta kontrollen över en eller flera juridiska personer som utövar kontroll över en annan juridisk person på ett sätt som anges ovan, ska han eller hon antas utöva den yttersta kontrollen också över den senare juridiska personen (indirekt kontroll).\\[0.1cm]
+    
+    \tiny \textbf{01FS 2024:20, 3 kap. 2 § – Kontroll av verklig huvudman}\\
+    \tiny Verksamhetsutövaren ska kontrollera den verkliga huvudmannens identitet på det sätt som anges i 3 kap. 4 § dessa föreskrifter (samma kontroll som för företrädare - dokumenteras och dateras).\\[0.1cm]
+    
+    \tiny \textbf{Automatisk kontroll via API:er}\\
+    \tiny Systemet hämtar automatiskt uppgifter om verkliga huvudmän från:
+    \begin{itemize}
+      \item \textbf{Bolagsverkets register över verkliga huvudmän} (enligt lag 2017:631)
+      \item \textbf{Roaring.io KYC/AML:} UBO-data, PEP-screening, sanktionslistor
+    \end{itemize}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Vi måste utreda och förstå ägarförhållanden och kontrollstruktur enligt 3 kap. 8 § PTL. Verklig huvudman är den fysiska person som ytterst kontrollerar företaget (>25\% röster, kontroll över styrelse, eller avtalskontroll). Om ingen verklig huvudman finns blir VD/styrelseordförande automatiskt verklig huvudman enligt PTL. Din bekräftelse hjälper oss verifiera korrekthet av automatiska uppgifter från Bolagsverket.
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  % PEP
+  \textbf{9. Är någon nyckelperson (VD/styrelse/ägare) politiskt exponerad person (PEP)?}* \hspace{0.3cm} ⓘ\\
+  \tiny
+  ☐ Ja, enligt PTL 1 kap 8§ 5 (t.ex. riksdagsledamot, minister, diplomat, VD i statligt bolag)
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{1 kap. 8 § punkt 5 PTL – Definition av person i politiskt utsatt ställning}\\
+    \tiny Person i politiskt utsatt ställning: fysisk person som har eller har haft en \textbf{viktig offentlig funktion} i en stat eller i en internationell organisation.\\[0.1cm]
+    
+    \tiny \textbf{1 kap. 9 § PTL – Viktig offentlig funktion i en stat}\\
+    \tiny Med viktig offentlig funktion i en stat avses funktioner som:
+    \begin{enumerate}
+      \item stats- eller regeringschefer, ministrar samt vice och biträdande ministrar
+      \item parlamentsledamöter och ledamöter av liknande lagstiftande organ
+      \item ledamöter i styrelsen för politiska partier
+      \item domare i högsta domstol, konstitutionell domstol eller andra rättsliga organ på hög nivå vilkas beslut endast undantagsvis kan överklagas
+      \item högre tjänstemän vid revisionsmyndigheter och ledamöter i centralbankers styrande organ
+      \item ambassadörer, beskickningschefer samt höga officerare i försvarsmakten
+      \item personer som ingår i statsägda företags förvaltnings-, lednings- eller kontrollorgan
+    \end{enumerate}
+    \vspace{0.1cm}
+    
+    \tiny Med viktig offentlig funktion i en \textbf{internationell organisation} avses funktioner som direktörer, biträdande direktörer, styrelseledamöter och innehavare av liknande poster.\\[0.1cm]
+    
+    \tiny \textbf{1 kap. 10 § PTL – Familjemedlemmar och kända medarbetare}\\
+    \tiny Med \textbf{familjemedlem} till en person i politiskt utsatt ställning avses make, registrerad partner, sambo, barn och deras makar, registrerade partner eller sambor samt föräldrar.\\[0.1cm]
+    
+    \tiny Med \textbf{känd medarbetare} avses:
+    \begin{enumerate}
+      \item fysisk person som gemensamt med en PEP är verklig huvudman till en juridisk person eller som på annat sätt har eller har haft nära förbindelser med en PEP
+      \item fysisk person som ensam är verklig huvudman till en juridisk person som egentligen har upprättats till förmån för en PEP
+    \end{enumerate}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{3 kap. 10 § PTL – Bedömning av PEP}\\
+    \tiny En verksamhetsutövare ska bedöma om kunden eller kundens verkliga huvudman är en person i politiskt utsatt ställning eller en familjemedlem eller känd medarbetare till en sådan person.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 19 § PTL – Åtgärder vid PEP}\\
+    \tiny Om kunden eller kundens verkliga huvudman är en person i politiskt utsatt ställning, ska en verksamhetsutövare utöver åtgärder enligt 7, 8 och 10-12 §§ alltid:
+    \begin{enumerate}
+      \item vidta lämpliga åtgärder för att \textbf{ta reda på varifrån de tillgångar} som hanteras inom ramen för affärsförbindelsen eller den enstaka transaktionen kommer
+      \item tillämpa \textbf{skärpt fortlöpande uppföljning} av affärsförbindelsen och övervaka aktiviteter och transaktioner i förhöjd omfattning
+      \item inhämta \textbf{godkännande från behörig beslutsfattare} inför beslut om att ingå eller avbryta en affärsförbindelse
+    \end{enumerate}
+    \vspace{0.1cm}
+    
+    \tiny Första stycket tillämpas också om kunden är en \textbf{familjemedlem eller känd medarbetare} till en person i politiskt utsatt ställning.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 20 § PTL – Efter upphörande av funktion}\\
+    \tiny När en person i politiskt utsatt ställning upphör att utöva en offentlig funktion, ska 19 § tillämpas i \textbf{18 månader}. Därefter ska åtgärder enligt 19 § tillämpas om risken bedöms som hög.\\[0.1cm]
+    
+    \tiny \textbf{Automatisk PEP-screening}\\
+    \tiny Systemet screener automatiskt alla nyckelpersoner (VD, styrelse, verkliga huvudmän, företrädare) mot globala PEP-databaser via Roaring.io KYC/AML API.\\[0.1cm]
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Vi måste bedöma om kunden eller verklig huvudman är PEP enligt 3 kap. 10 § PTL. Om ja, krävs Enhanced Due Diligence (EDD) enligt 3 kap. 19 §: godkännande från företagsledning, utredning av tillgångarnas ursprung, och skärpt löpande uppföljning. PEP-status gäller även familjemedlemmar och kända medarbetare. Efter att en PEP lämnat sin funktion gäller skärpta krav i 18 månader.
+  \end{alertblock}
+
+  \vspace{0.4cm}
+  \begin{flushright}
+    \hyperlink{riskfragor-steg2}{\beamerbutton{Nästa}} \hspace{0.3cm} \beamerbutton{Avbryt}
+  \end{flushright}
+\end{frame}
+
+% API-dokumentation: Se API_Endpoints_ContentSlides.tex
+% Sektion 2 > POST /api/onboarding/riskfragor/steg1
+% Triggar: Bolagsverket API, SPAR, Roaring.io
+
+
+% ========================================================================
+% RISKFRÅGOR - STEG 2 (UTLÄNDSKA TRANSAKTIONER)
+% ========================================================================
+% Alltid visas som del av standard wizard-flödet
+% ========================================================================
+
+% Steg 2: Utländska transaktioner
+\begin{frame}[label=riskfragor-steg2]
+  \frametitle{Riskfrågor – Steg 2 av 4: Utländska transaktioner}
+
+  \begin{center}
+    \textbf{Progress:} [●●○○] Steg 2/4
+  \end{center}
+
+  \vspace{0.5cm}
+
+  \footnotesize
+
+  \textbf{1. Vilka länder har företaget affärspartners/kunder i?}* \hspace{0.3cm} ⓘ
+  \begin{block}{Textarea + Dropdown}
+    \tiny Dropdown med FATF-klassificering | Högriskländer flaggas automatiskt\\
+    Exempel: Norge (Lågrisk), Ryssland (Högrisk), Nigeria (Högrisk)
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 11 § PTL – Kontroll av högriskländer}\\
+    \tiny En verksamhetsutövare ska kontrollera om kunden är etablerad i ett land utanför EES som av \textbf{Europeiska kommissionen} har identifierats som ett högrisktredjeland.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
+    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen bedöms som hög, ska särskilt omfattande kontroller, bedömningar och utredningar enligt 7, 8 och 10-13 §§ göras.\\[0.1cm]
+    
+    \tiny Åtgärderna ska i sådant fall kompletteras med de ytterligare åtgärder som krävs för att motverka den höga risken för penningtvätt eller finansiering av terrorism. Sådana åtgärder kan avse inhämtande av ytterligare information om kundens affärsverksamhet eller ekonomiska situation och uppgifter om varifrån kundens ekonomiska medel kommer.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 17 § första stycket PTL – Skärpta åtgärder vid högrisktredjeland}\\
+    \tiny Skärpta åtgärder enligt 16 § ska vidtas vid affärsförbindelser eller enstaka transaktioner när kunden är etablerad i ett land utanför EES som har identifierats som ett högrisktredjeland av Europeiska kommissionen.\\[0.1cm]
+    
+    \tiny \textbf{FATF High-Risk Jurisdictions}\\
+    \tiny Financial Action Task Force (FATF) publicerar listor över högriskländer med strategiska brister i sina system mot penningtvätt och finansiering av terrorism. EU-kommissionen baserar sin högrisklista delvis på FATF:s bedömningar. Aktuell FATF-lista: \url{https://www.fatf-gafi.org/en/countries/black-and-grey-lists.html}\\[0.1cm]
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Vi måste kontrollera om ert företags affärspartners är i högriskländer enligt 3 kap. 11 § PTL. Om ja, krävs skärpta åtgärder enligt 3 kap. 16 § och 3 kap. 17 §: ytterligare information om kundens affärsverksamhet och ekonomiska situation, uppgifter om varifrån kundens ekonomiska medel kommer, och särskilt omfattande kontroller. Detta är EU-kommissionens lista över högriskländer, baserat delvis på FATF:s bedömningar.
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{2. Typ av samarbete} \hspace{0.3cm} ⓘ\\
+  ☐ Import \hspace{0.5cm} ☐ Export \hspace{0.5cm} ☐ Konsulttjänster \hspace{0.5cm} ☐ Licensavtal
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 12 § PTL – Information om affärsförbindelsens syfte och art}\\
+    \tiny En verksamhetsutövare ska inhämta information om affärsförbindelsens syfte och art. Informationen ska ligga till grund för en bedömning av:
+    \begin{enumerate}
+      \item vilka aktiviteter och transaktioner som kunden kan förväntas vidta och genomföra inom ramen för affärsförbindelsen, och
+      \item kundens riskprofil enligt 2 kap. 3 §
+    \end{enumerate}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{3 kap. 1 § 1 st. PTL – Otillräcklig kundkännedom}\\
+    \tiny En verksamhetsutövare får inte etablera eller upprätthålla en affärsförbindelse om verksamhetsutövaren inte har tillräcklig kännedom om kunden för att kunna hantera risken för penningtvätt eller finansiering av terrorism.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
+    \tiny Olika samarbetsformer innebär olika risknivåer:
+    \begin{itemize}
+      \item \textbf{Import/Export:} Fysiska varor → risk för felaktig fakturering, under/överfakturering (trade-based money laundering)
+      \item \textbf{Konsulttjänster:} Immateriella tjänster → svårare att värdera, risk för ogrundade betalningar
+      \item \textbf{Licensavtal:} Royaltybetalningar → ofta gränsöverskridande, svår värdering, risk för överprissättning
+    \end{itemize}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Vi måste förstå affärsförbindelsens syfte och art enligt 3 kap. 12 § PTL för att kunna bedöma vilka transaktioner som är normala för er verksamhet. Detta hjälper oss identifiera atypiska betalningsflöden som kan tyda på penningtvätt. Om samarbetsformen innebär hög risk (t.ex. konsulttjänster med svår värdering), krävs skärpta åtgärder enligt 3 kap. 16 § PTL.
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{3. Ungefär hur stor andel av omsättningen kommer från utländska kunder?}* \hspace{0.3cm} ⓘ\\
+  Dropdown: [< 10\% / 10-30\% / 30-50\% / > 50\%]
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 12 § PTL – Information om affärsförbindelsens syfte och art}\\
+    \tiny En verksamhetsutövare ska inhämta information om affärsförbindelsens syfte och art. Informationen ska ligga till grund för en bedömning av:
+    \begin{enumerate}
+      \item vilka aktiviteter och transaktioner som kunden kan förväntas vidta och genomföra inom ramen för affärsförbindelsen, och
+      \item kundens riskprofil enligt 2 kap. 3 §
+    \end{enumerate}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{3 kap. 1 § 1 st. PTL – Otillräcklig kundkännedom}\\
+    \tiny En verksamhetsutövare får inte etablera eller upprätthålla en affärsförbindelse om verksamhetsutövaren inte har tillräcklig kännedom om kunden för att kunna hantera risken för penningtvätt eller finansiering av terrorism.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
+    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen bedöms som hög, ska särskilt omfattande kontroller göras. Hög andel omsättning från högriskländer innebär förhöjd risk som kräver:
+    \begin{itemize}
+      \item Fördjupad granskning av affärsförbindelsen
+      \item Dokumentation av medlens ursprung
+      \item Ytterligare information om kundens affärsverksamhet och ekonomiska situation
+      \item Ökad frekvens av löpande uppföljning
+    \end{itemize}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Vi måste förstå omfattningen av era utländska affärer enligt 3 kap. 12 § PTL för att bedöma er riskprofil. Om en stor andel (>50\%) av omsättningen kommer från högriskländer, krävs skärpta åtgärder enligt 3 kap. 16 § PTL. Detta är inte för att misstänkliggöra er - lagen kräver att vi anpassar vår granskning baserat på riskbilden.
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{4. Tar företaget emot betalningar i utländsk valuta?} \hspace{0.3cm} ⓘ\\
+  ◯ Ja \hspace{0.3cm} ◯ Nej\\
+  Om Ja → Vilka valutor? \underline{\hspace{6cm}}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{4 kap. 1 § 1 st. PTL – Övervakningsskyldighet}\\
+    \tiny En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma enstaka transaktioner för att säkerställa att transaktioner som görs överensstämmer med den kännedom som verksamhetsutövaren har om kunden, kundens verksamhet och riskprofil.\\[0.1cm]
+    
+    \tiny \textbf{2 kap. 5 § punkt 5 PTL – Geografisk risk}\\
+    \tiny Som omständigheter som kan tyda på att risken är hög kan verksamhetsutövaren beakta att kunden har hemvist i en stat som saknar effektiva system för bekämpning av penningtvätt. Betalningar i valutor från länder med svaga bankkontroller (även inom Europa) utgör förhöjd risk.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
+    \tiny Om risken bedöms som hög ska särskilt omfattande kontroller göras, t.ex. inhämtande av ytterligare information om kundens affärsverksamhet eller ekonomiska situation och uppgifter om varifrån kundens ekonomiska medel kommer.\\[0.1cm]
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Vi måste övervaka att transaktioner överensstämmer med er verksamhet enligt 4 kap. 1 § PTL. Betalningar i valutor från länder med svaga bankkontroller (där banker inte ställer frågor om pengarnas ursprung) utgör förhöjd risk enligt 2 kap. 5 § punkt 5 PTL. Vi behöver veta vilka valutor som är normala för er verksamhet för att kunna identifiera avvikande transaktioner och vid behov tillämpa skärpta åtgärder enligt 3 kap. 16 § PTL.
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{5. Förekommer överföringar till/från utländska bankkonton?} \hspace{0.3cm} ⓘ\\
+  ◯ Ja, regelbundet \hspace{0.3cm} ◯ Ja, ibland \hspace{0.3cm} ◯ Nej\\
+  Om Ja → Vilka länder? \underline{\hspace{6cm}}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{4 kap. 1 § 1 st. PTL – Övervakningsskyldighet}\\
+    \tiny En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma enstaka transaktioner för att säkerställa att transaktioner som görs överensstämmer med den kännedom som verksamhetsutövaren har om kunden, kundens verksamhet och riskprofil.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
+    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen bedöms som hög, ska särskilt omfattande kontroller göras. Transaktioner via banker i högriskländer eller länder med svaga AML-kontroller utgör förhöjd risk som kräver skärpta åtgärder.\\[0.1cm]
+    
+    \tiny \textbf{2 kap. 5 § punkt 5 PTL – Geografisk risk}\\
+    \tiny Som omständigheter som kan tyda på att risken är hög kan verksamhetsutövaren beakta att kunden har hemvist i en stat som saknar effektiva system för bekämpning av penningtvätt. Utländska bankkonton i länder med svaga bankkontroller utgör förhöjd risk.\\[0.1cm]
+    
+    \tiny \textbf{01FS 2024:20, 3 kap. 8 § – Skärpt kundkännedom}\\
+    \tiny Vid utländska bankkonton i högriskländer ska verksamhetsutövaren:
+    \begin{itemize}
+      \item Inhämta information om transaktionernas syfte och avsedda karaktär
+      \item Dokumentera affärsförbindelsens art
+      \item Övervaka transaktioner löpande
+    \end{itemize}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{Omvänd penningtvätt (Marie Wallin sid. 38)}\\
+    \tiny Utländska bankkonton kan användas för omvänd penningtvätt: vita pengar från Sverige överförs till utländskt konto för att dölja pengar, undvika skatt, eller betala svarta löner utomlands.\\[0.1cm]
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Vi måste övervaka att transaktioner överensstämmer med er verksamhet enligt 4 kap. 1 § PTL. Utländska bankkonton utgör förhöjd risk för BÅDE traditionell penningtvätt (svarta pengar in till Sverige) OCH omvänd penningtvätt (vita pengar ut för att betala svarta kostnader utomlands). Om kontona finns i högriskländer krävs skärpta åtgärder enligt 3 kap. 16 § PTL.
+  \end{alertblock}
+
+  \vspace{0.5cm}
+  \begin{flushright}
+    \hyperlink{riskfragor-steg1}{\beamerbutton{Tillbaka}} \hspace{0.3cm} \hyperlink{riskfragor-steg3}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Steg 3: Kunder & Affärspartners
+\begin{frame}[label=riskfragor-steg3]
+  \frametitle{Riskfrågor – Steg 3 av 4: Kunder \& Affärspartners}
+
+  \begin{center}
+    \textbf{Progress:} [●●●○] Steg 3/4
+  \end{center}
+
+  \vspace{0.3cm}
+
+  \footnotesize
+
+  \textbf{1. Har företaget återkommande affärspartners utanför Sverige?} \hspace{0.3cm} ⓘ\\
+  ◯ Ja \hspace{0.5cm} ◯ Nej\\
+  Om Ja → Beskriv: \underline{\hspace{6cm}}\\
+  \tiny (Vilka länder? Typ av samarbete? Ungefär hur stor andel av omsättningen?)
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 13 § 1 st. PTL – Löpande uppföljning}\\
+    \tiny Verksamhetsutövare ska vidta lämpliga åtgärder för att säkerställa att den kännedom som inhämtats i samband med kundkännedom hålls \textit{aktuell} och är tillräcklig.\\[0.1cm]
+    \tiny \textbf{4 kap. 1 § 1 st. PTL – Övervakningsskyldighet}\\
+    \tiny En verksamhetsutövare ska löpande övervaka att transaktioner som genomförs inom ramen för en affärsförbindelse överensstämmer med den kännedom som verksamhetsutövaren har om kunden, kundens verksamhet och riskprofil.\\[0.1cm]
+    \tiny \textbf{3 kap. 12 § PTL – Information om affärsförbindelsens art}\\
+    \tiny Vi ska inhämta information om affärsförbindelsens syfte och art, samt vilka transaktioner som kan \textit{förväntas} i förhållande till kundens verksamhet.\\[0.1cm]
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny För att göra en \textit{temporal riskbedömning}: Är era utländska affärspartners \textit{återkommande} (strukturella affärsrelationer) eller \textit{periodiska} (suspekta mönster vid vissa tidpunkter)? Om ni tidigare uppgav att 40\% av omsättningen kommer från utlandet, behöver vi förstå när detta mönster började för att avgöra om det är en naturlig del av verksamheten eller en nyligen uppkommen förändring. Detta är inte misstänksamhet – det är ett lagkrav på \textit{aktuell} kännedom (3 kap. 13 §).
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{2. Vilka är företagets tre största leverantörer?} \hspace{0.3cm} ⓘ\\
+  1. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
+  2. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
+  3. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 12 § PTL – Information om affärsförbindelsens syfte och art}\\
+    \tiny Vi ska inhämta information om affärsförbindelsens syfte och art, \textit{samt} information om vilka transaktioner som kan förväntas i förhållande till kundens verksamhet. Genom att be om \textit{de tre största} leverantörerna får vi en koncentrerad bild av var merparten av era inköp kommer ifrån, vilket är avgörande för att bedöma risk och betalningsflöden.\\[0.1cm]
+    \tiny \textbf{PTL 2 kap. 2 § – Riskbaserat tillvägagångssätt}\\
+    \tiny Verksamhetsutövaren ska bedöma och dokumentera de risker för penningtvätt som är förknippade med affärsförbindelsen.\\[0.1cm]
+    \tiny \textbf{Röda flaggor – leverantörer:}\\
+    \begin{itemize}
+      \item Leverantörer i högriskländer (FATF-listan)
+      \item Leverantörer utan tydlig affärsmodell
+      \item Ovanligt stora leveranser från okända företag
+      \item Betalningar till tredje part istället för till leverantören
+      \item Priset avviker avsevärt från marknadspris (över-/underfakturering)
+    \end{itemize}
+    \vspace{0.1cm}
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny För att göra en \textit{progressiv verifikation}: I tidigare steg frågade vi generellt om ni har utländska leverantörer. Nu ber vi om \textit{konkreta namn och länder} för att verifiera konsistens och identifiera specifika risker kopplade till \textit{trade-based money laundering} (penningtvätt via handel). Om svaren här skiljer sig från era tidigare uppgifter, kan det tyda på bristande intern kontroll eller medveten vilseledning – båda situationer som kräver skärpta åtgärder enligt 3 kap. 16 § PTL.
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{3. Vilka är företagets tre största kunder?} (om B2B) \hspace{0.3cm} ⓘ\\
+  1. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
+  2. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
+  3. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 12 § PTL – Information om affärsförbindelsens syfte och art}\\
+    \tiny Vi ska inhämta information om affärsförbindelsens syfte och art, samt information om vilka transaktioner som kan förväntas i förhållande till kundens verksamhet. Genom att be om \textit{de tre största} kunderna får vi en koncentrerad bild av var merparten av era intäkter kommer ifrån.\\[0.1cm]
+    \tiny \textbf{PTL 3 kap. 1 § 1 st. – Förbud vid otillräcklig kundkännedom}\\
+    \tiny En verksamhetsutövare får inte etablera en affärsförbindelse eller genomföra en transaktion om verksamhetsutövaren inte kan fullgöra de skyldigheter som följer av detta kapitel.\\[0.1cm]
+    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
+    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen bedöms som hög, ska särskilt omfattande kontroller göras. Om huvudsakliga kunder är i högriskländer föreligger förhöjd risk som kräver skärpt kundkännedom.\\[0.1cm]
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny För att göra en \textit{progressiv verifikation och konsistenskontroll}: I tidigare steg frågade vi generellt om ni har utländska kunder. Nu ber vi om \textit{konkreta namn och länder} för era tre största kunder för att verifiera konsistens och bedöma om ni har exponering mot högriskländer eller koncentrationsrisk (beroende av enskilda aktörer). Om en eller flera av era största kunder är från tredje land med strategiska brister enligt FATF, eller om svaren här skiljer sig från era tidigare uppgifter, måste vi vidta skärpta åtgärder enligt 3 kap. 16 § PTL. Detta är inte misstänksamhet – det är verifiering av \textit{aktuell} kännedom som krävs enligt 3 kap. 13 § PTL.
+  \end{alertblock}
+
+  \vspace{0.5cm}
+  \begin{flushright}
+    \hyperlink{riskfragor-steg2}{\beamerbutton{Tillbaka}} \hspace{0.3cm} \hyperlink{riskfragor-steg4}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Steg 4: Betalningar & Transaktioner
+\begin{frame}[label=riskfragor-steg4]
+  \frametitle{Riskfrågor – Steg 4 av 4: Betalningar \& Transaktioner}
+
+  \begin{center}
+    \textbf{Progress:} [●●●●] Steg 4/4
+  \end{center}
+
+  \vspace{0.3cm}
+
+  \footnotesize
+
+  \textbf{1. Hur tar företaget betalt från kunder?}* \hspace{0.3cm} ⓘ\\
+  ☐ Banköverföring/Swish \hspace{0.3cm} ☐ Kortbetalning \hspace{0.3cm} ☐ Faktura\\
+  ☐ Kontanter \hspace{0.3cm} ☐ Kryptovaluta
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{2 kap. 3 § PTL – Riskbedömning av kunder}\\
+    \tiny En verksamhetsutövare ska bedöma den risk för penningtvätt eller finansiering av terrorism som kan
+    förknippas med kundrelationen (kundens riskprofil). Kundens riskprofil ska bestämmas med utgångspunkt 
+    i den allmänna riskbedömningen och verksamhetsutövarens kännedom om kunden.\\
+
+    När det behövs för att bestämma kundens riskprofil ska verksamhetsutövaren beakta omständigheter 
+    som avses i 4 och 5 §§ och föreskrifter som meddelats med stöd av denna lag samt andra omständigheter 
+    som i det enskilda fallet påverkar risken som kan förknippas med kundrelationen.
+
+    Kundens riskprofil ska följas upp under pågående affärsförbindelser och ändras när det finns 
+    anledning till det.\\[0.1cm]
+
+    \tiny \textbf{3 kap. 4 § PTL – Situationer som kräver kundkännedom}\\
+    \tiny En verksamhetsutövare ska vidta åtgärder för kundkännedom vid etableringen av en affärsförbindelse.\\
+
+    Om verksamhetsutövaren inte har en affärsförbindelse med kunden, ska åtgärder för kundkännedom vidtas
+    1. vid enstaka transaktioner som uppgår till ett belopp motsvarande 15 000 euro eller mer,\\
+    2. vid transaktioner som understiger ett belopp motsvarande 15 000 euro och som verksamhetsutövaren 
+    inser eller borde inse har samband med en eller flera andra transaktioner och som tillsammans uppgår 
+    till minst detta belopp, och\\
+    3. vid utförandet av sådana överföringar av medel eller kryptotillgångar som avses i artikel 3.9 i 
+    Europaparlamentets och rådets förordning (EU) 2023/1113 av den 31 maj 2023 om uppgifter som 
+    ska åtfölja överföringar av medel och vissa kryptotillgångar och ändring av direktiv (EU) 2015/849, 
+    om överföringen överstiger ett belopp motsvarande 1 000 euro.
+    Lag (2024:1166).\\[0.1cm]
+
+    \tiny \textbf{3 kap. 6 § PTL – Kundkännedom vid kontanttransaktioner}\\
+    \tiny En verksamhetsutövare som avses i 1 kap. 2 § första stycket 16 ska, i stället för vad som 
+    följer av 4 §, vidta åtgärder för kundkännedom\\
+    1. vid etableringen av en affärsförbindelse, om det när förbindelsen ingås är sannolikt eller under 
+    förbindelsens gång står klart att utbetalt eller mottaget belopp i kontanter inom ramen för 
+    affärsförbindelsen uppgår till motsvarande 5 000 euro eller mer,\\
+    2. vid enstaka transaktioner där utbetalt eller mottaget belopp i kontanter uppgår till ett 
+    belopp motsvarande 5 000 euro eller mer, och\\
+    3. vid transaktioner där utbetalt eller mottaget belopp i kontanter understiger ett belopp 
+    motsvarande 5 000 euro och som verksamhetsutövaren inser eller borde inse har samband med en 
+    eller flera andra transaktioner i kontanter som tillsammans uppgår till minst detta belopp. Lag (2021:903).\\[0.1cm]
+
+    \tiny \textbf{4 kap. 1 § 1 st. PTL – Övervaknings- och rapporteringsskyldighet}\\
+    \tiny En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma enstaka transaktioner 
+    i syfte att upptäcka aktiviteter och transaktioner som\\
+    1. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån den kännedom 
+    om kunden som verksamhetsutövaren har,\\
+    2. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån den kännedom som 
+    verksamhetsutövaren har om sina kunder, de produkter och tjänster som tillhandahålls, 
+    de uppgifter som kunden lämnar och övriga omständigheter, eller\\
+    3. utan att vara avvikande enligt 1 eller 2 kan antas ingå som ett led i penningtvätt eller 
+    finansiering av terrorism.\\[0.1cm]
+
+    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
+    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen 
+    bedöms som hög, ska särskilt omfattande kontroller, bedömningar och utredningar enligt 
+    7, 8 och 10-13 §§ göras.\\[0.1cm]
+    \tiny \textbf{3 kap. 31-32 §§ PTL – Elektroniska pengar}\\
+    \tiny 31 §   En verksamhetsutövare får besluta att inte vidta de åtgärder för kundkännedom som 
+    avses i 7, 8 och 10-13 §§ i fråga om elektroniska pengar enligt lagen (2011:755) om elektroniska pengar, 
+    om\\
+    1. betalningsinstrumentet inte kan återuppladdas eller har en månatlig gräns för penningtransaktioner 
+    på ett belopp motsvarande högst 150 euro och endast kan användas för betalning i Sverige,\\
+    2. det högsta belopp som lagras elektroniskt inte överstiger ett belopp motsvarande 150 euro,\\ 
+    3. betalningsinstrumentet kan användas uteslutande för inköp av varor eller tjänster,\\
+    4. betalningsinstrumentet inte kan finansieras med anonyma elektroniska pengar, och\\
+    5. kontantinlösen eller kontantuttag av de elektroniska pengarnas penningvärde inte får 
+    ske med belopp som överstiger motsvarande 50 euro.\\
+
+    Förenklade åtgärder för kundkännedom enligt första stycket får tillämpas endast om\\
+    1. utgivaren av elektroniska pengar övervakar affärsförbindelserna och transaktionerna 
+    så noga att ovanliga eller misstänkta transaktioner kan upptäckas enligt 4 kap. 1 §, eller\\
+    2. en betalningstransaktion som initieras via internet eller genom något annat medel för distanskommunikation avser ett belopp som uppgår till motsvarande högst 50 euro.
+    Lag (2019:774).\\
+
+    32 §   Verksamhetsutövare som avses i 1 kap. 2 § första stycket 1-13 får ta emot betalning med 
+    ett anonymt betalningsinstrument som getts ut i ett land utanför EES bara om instrumentet 
+    uppfyller kraven i 31 §. Lag (2021:903).\\[0.1cm]
+
+    \tiny \textbf{Riskkategori – exempel:}\\
+    \tiny \textbf{Högrisk:} Kontanter (≥5000 euro per transaktion, 3 kap. 6 §), kryptovalutor, betalningar via tredjepartskonton.\\
+    \tiny \textbf{Lägre risk:} Banköverföring i kundens namn, kortbetalning via kända kortinlösare, fakturor med tydlig affärsrelation.\\[0.1cm]
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny För att bestämma kundens riskprofil (2 kap. 3 §). Betalningsmetod avgör när kundkännedom krävs (3 kap. 4 § och 6 §), hur omfattande övervakning behövs (4 kap. 1 §) och om skärpta åtgärder måste vidtas (3 kap. 16 §). Kontanter och kryptovalutor innebär sämre spårbarhet och högre anonymitet.
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{2. Om kontanter: Ungefär hur stor andel av omsättningen?} \hspace{0.3cm} ⓘ\\
+  Dropdown: [< 5\% / 5-20\% / 20-50\% / > 50\%]
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{2 kap. 3 § PTL – Riskbedömning av kunder}\\
+    \tiny En verksamhetsutövare ska bedöma den risk för penningtvätt eller finansiering av terrorism som kan
+    förknippas med kundrelationen (kundens riskprofil). Kundens riskprofil ska bestämmas med utgångspunkt 
+    i den allmänna riskbedömningen och verksamhetsutövarens kännedom om kunden.\\
+
+    När det behövs för att bestämma kundens riskprofil ska verksamhetsutövaren beakta omständigheter 
+    som avses i 4 och 5 §§ och föreskrifter som meddelats med stöd av denna lag samt andra omständigheter 
+    som i det enskilda fallet påverkar risken som kan förknippas med kundrelationen.
+
+    Kundens riskprofil ska följas upp under pågående affärsförbindelser och ändras när det finns 
+    anledning till det.\\[0.1cm]
+
+    \tiny \textbf{3 kap. 4 § PTL – Situationer som kräver kundkännedom}\\
+    \tiny En verksamhetsutövare ska vidta åtgärder för kundkännedom vid etableringen av en affärsförbindelse.\\
+
+    Om verksamhetsutövaren inte har en affärsförbindelse med kunden, ska åtgärder för kundkännedom vidtas
+    1. vid enstaka transaktioner som uppgår till ett belopp motsvarande 15 000 euro eller mer,\\
+    2. vid transaktioner som understiger ett belopp motsvarande 15 000 euro och som verksamhetsutövaren 
+    inser eller borde inse har samband med en eller flera andra transaktioner och som tillsammans uppgår 
+    till minst detta belopp, och\\
+    3. vid utförandet av sådana överföringar av medel eller kryptotillgångar som avses i artikel 3.9 i 
+    Europaparlamentets och rådets förordning (EU) 2023/1113 av den 31 maj 2023 om uppgifter som 
+    ska åtfölja överföringar av medel och vissa kryptotillgångar och ändring av direktiv (EU) 2015/849, 
+    om överföringen överstiger ett belopp motsvarande 1 000 euro.
+    Lag (2024:1166).\\[0.1cm]
+
+    \tiny \textbf{3 kap. 6 § PTL – Kundkännedom vid kontanttransaktioner}\\
+    \tiny En verksamhetsutövare som avses i 1 kap. 2 § första stycket 16 ska, i stället för vad som 
+    följer av 4 §, vidta åtgärder för kundkännedom\\
+    1. vid etableringen av en affärsförbindelse, om det när förbindelsen ingås är sannolikt eller under 
+    förbindelsens gång står klart att utbetalt eller mottaget belopp i kontanter inom ramen för 
+    affärsförbindelsen uppgår till motsvarande 5 000 euro eller mer,\\
+    2. vid enstaka transaktioner där utbetalt eller mottaget belopp i kontanter uppgår till ett 
+    belopp motsvarande 5 000 euro eller mer, och\\
+    3. vid transaktioner där utbetalt eller mottaget belopp i kontanter understiger ett belopp 
+    motsvarande 5 000 euro och som verksamhetsutövaren inser eller borde inse har samband med en 
+    eller flera andra transaktioner i kontanter som tillsammans uppgår till minst detta belopp. Lag (2021:903).\\[0.1cm]
+
+    \tiny \textbf{4 kap. 1 § 1 st. PTL – Övervaknings- och rapporteringsskyldighet}\\
+    \tiny En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma enstaka transaktioner 
+    i syfte att upptäcka aktiviteter och transaktioner som\\
+    1. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån den kännedom 
+    om kunden som verksamhetsutövaren har,\\
+    2. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån den kännedom som 
+    verksamhetsutövaren har om sina kunder, de produkter och tjänster som tillhandahålls, 
+    de uppgifter som kunden lämnar och övriga omständigheter, eller\\
+    3. utan att vara avvikande enligt 1 eller 2 kan antas ingå som ett led i penningtvätt eller 
+    finansiering av terrorism.\\[0.1cm]
+
+    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
+    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen 
+    bedöms som hög, ska särskilt omfattande kontroller, bedömningar och utredningar enligt 
+    7, 8 och 10-13 §§ göras.\\[0.1cm]
+    \tiny \textbf{3 kap. 31-32 §§ PTL – Elektroniska pengar}\\
+    \tiny 31 §   En verksamhetsutövare får besluta att inte vidta de åtgärder för kundkännedom som 
+    avses i 7, 8 och 10-13 §§ i fråga om elektroniska pengar enligt lagen (2011:755) om elektroniska pengar, 
+    om\\
+    1. betalningsinstrumentet inte kan återuppladdas eller har en månatlig gräns för penningtransaktioner 
+    på ett belopp motsvarande högst 150 euro och endast kan användas för betalning i Sverige,\\
+    2. det högsta belopp som lagras elektroniskt inte överstiger ett belopp motsvarande 150 euro,\\ 
+    3. betalningsinstrumentet kan användas uteslutande för inköp av varor eller tjänster,\\
+    4. betalningsinstrumentet inte kan finansieras med anonyma elektroniska pengar, och\\
+    5. kontantinlösen eller kontantuttag av de elektroniska pengarnas penningvärde inte får 
+    ske med belopp som överstiger motsvarande 50 euro.\\
+
+    Förenklade åtgärder för kundkännedom enligt första stycket får tillämpas endast om\\
+    1. utgivaren av elektroniska pengar övervakar affärsförbindelserna och transaktionerna 
+    så noga att ovanliga eller misstänkta transaktioner kan upptäckas enligt 4 kap. 1 §, eller\\
+    2. en betalningstransaktion som initieras via internet eller genom något annat medel för distanskommunikation avser ett belopp som uppgår till motsvarande högst 50 euro.
+    Lag (2019:774).\\
+
+    32 §   Verksamhetsutövare som avses i 1 kap. 2 § första stycket 1-13 får ta emot betalning med 
+    ett anonymt betalningsinstrument som getts ut i ett land utanför EES bara om instrumentet 
+    uppfyller kraven i 31 §. Lag (2021:903).\\[0.1cm]
+
+    \tiny \textbf{Riskkategori – exempel:}\\
+    \tiny \textbf{Högrisk:} Kontanter (≥5000 euro per transaktion, 3 kap. 6 §), kryptovalutor, betalningar via tredjepartskonton.\\
+    \tiny \textbf{Lägre risk:} Banköverföring i kundens namn, kortbetalning via kända kortinlösare, fakturor med tydlig affärsrelation.\\[0.1cm]
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny För att bestämma kundens riskprofil (2 kap. 3 §). Betalningsmetod avgör när kundkännedom krävs (3 kap. 4 § och 6 §), hur omfattande övervakning behövs (4 kap. 1 §) och om skärpta åtgärder måste vidtas (3 kap. 16 §). Kontanter och kryptovalutor innebär sämre spårbarhet och högre anonymitet.
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{3. Förekommer transaktioner över 150 000 kr?} \hspace{0.3cm} ⓘ\\
+  ◯ Ja \hspace{0.3cm} ◯ Nej \hspace{0.3cm} ◯ Ibland
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{2 kap. 3 § PTL – Riskbedömning av kunder}\\
+    \tiny En verksamhetsutövare ska bedöma den risk för penningtvätt eller finansiering av terrorism som kan
+    förknippas med kundrelationen (kundens riskprofil). Kundens riskprofil ska bestämmas med utgångspunkt 
+    i den allmänna riskbedömningen och verksamhetsutövarens kännedom om kunden.\\
+
+    När det behövs för att bestämma kundens riskprofil ska verksamhetsutövaren beakta omständigheter 
+    som avses i 4 och 5 §§ och föreskrifter som meddelats med stöd av denna lag samt andra omständigheter 
+    som i det enskilda fallet påverkar risken som kan förknippas med kundrelationen.
+
+    Kundens riskprofil ska följas upp under pågående affärsförbindelser och ändras när det finns 
+    anledning till det.\\[0.1cm]
+
+    \tiny \textbf{3 kap. 4 § PTL – Situationer som kräver kundkännedom}\\
+    \tiny En verksamhetsutövare ska vidta åtgärder för kundkännedom vid etableringen av en affärsförbindelse.\\
+
+    Om verksamhetsutövaren inte har en affärsförbindelse med kunden, ska åtgärder för kundkännedom vidtas
+    1. vid enstaka transaktioner som uppgår till ett belopp motsvarande 15 000 euro eller mer,\\
+    2. vid transaktioner som understiger ett belopp motsvarande 15 000 euro och som verksamhetsutövaren 
+    inser eller borde inse har samband med en eller flera andra transaktioner och som tillsammans uppgår 
+    till minst detta belopp, och\\
+    3. vid utförandet av sådana överföringar av medel eller kryptotillgångar som avses i artikel 3.9 i 
+    Europaparlamentets och rådets förordning (EU) 2023/1113 av den 31 maj 2023 om uppgifter som 
+    ska åtfölja överföringar av medel och vissa kryptotillgångar och ändring av direktiv (EU) 2015/849, 
+    om överföringen överstiger ett belopp motsvarande 1 000 euro.
+    Lag (2024:1166).\\[0.1cm]
+
+    \tiny \textbf{3 kap. 6 § PTL – Kundkännedom vid kontanttransaktioner}\\
+    \tiny En verksamhetsutövare som avses i 1 kap. 2 § första stycket 16 ska, i stället för vad som 
+    följer av 4 §, vidta åtgärder för kundkännedom\\
+    1. vid etableringen av en affärsförbindelse, om det när förbindelsen ingås är sannolikt eller under 
+    förbindelsens gång står klart att utbetalt eller mottaget belopp i kontanter inom ramen för 
+    affärsförbindelsen uppgår till motsvarande 5 000 euro eller mer,\\
+    2. vid enstaka transaktioner där utbetalt eller mottaget belopp i kontanter uppgår till ett 
+    belopp motsvarande 5 000 euro eller mer, och\\
+    3. vid transaktioner där utbetalt eller mottaget belopp i kontanter understiger ett belopp 
+    motsvarande 5 000 euro och som verksamhetsutövaren inser eller borde inse har samband med en 
+    eller flera andra transaktioner i kontanter som tillsammans uppgår till minst detta belopp. Lag (2021:903).\\[0.1cm]
+
+    \tiny \textbf{4 kap. 1 § 1 st. PTL – Övervaknings- och rapporteringsskyldighet}\\
+    \tiny En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma enstaka transaktioner 
+    i syfte att upptäcka aktiviteter och transaktioner som\\
+    1. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån den kännedom 
+    om kunden som verksamhetsutövaren har,\\
+    2. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån den kännedom som 
+    verksamhetsutövaren har om sina kunder, de produkter och tjänster som tillhandahålls, 
+    de uppgifter som kunden lämnar och övriga omständigheter, eller\\
+    3. utan att vara avvikande enligt 1 eller 2 kan antas ingå som ett led i penningtvätt eller 
+    finansiering av terrorism.\\[0.1cm]
+
+    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
+    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen 
+    bedöms som hög, ska särskilt omfattande kontroller, bedömningar och utredningar enligt 
+    7, 8 och 10-13 §§ göras.\\[0.1cm]
+    \tiny \textbf{3 kap. 31-32 §§ PTL – Elektroniska pengar}\\
+    \tiny 31 §   En verksamhetsutövare får besluta att inte vidta de åtgärder för kundkännedom som 
+    avses i 7, 8 och 10-13 §§ i fråga om elektroniska pengar enligt lagen (2011:755) om elektroniska pengar, 
+    om\\
+    1. betalningsinstrumentet inte kan återuppladdas eller har en månatlig gräns för penningtransaktioner 
+    på ett belopp motsvarande högst 150 euro och endast kan användas för betalning i Sverige,\\
+    2. det högsta belopp som lagras elektroniskt inte överstiger ett belopp motsvarande 150 euro,\\ 
+    3. betalningsinstrumentet kan användas uteslutande för inköp av varor eller tjänster,\\
+    4. betalningsinstrumentet inte kan finansieras med anonyma elektroniska pengar, och\\
+    5. kontantinlösen eller kontantuttag av de elektroniska pengarnas penningvärde inte får 
+    ske med belopp som överstiger motsvarande 50 euro.\\
+
+    Förenklade åtgärder för kundkännedom enligt första stycket får tillämpas endast om\\
+    1. utgivaren av elektroniska pengar övervakar affärsförbindelserna och transaktionerna 
+    så noga att ovanliga eller misstänkta transaktioner kan upptäckas enligt 4 kap. 1 §, eller\\
+    2. en betalningstransaktion som initieras via internet eller genom något annat medel för distanskommunikation avser ett belopp som uppgår till motsvarande högst 50 euro.
+    Lag (2019:774).\\
+
+    32 §   Verksamhetsutövare som avses i 1 kap. 2 § första stycket 1-13 får ta emot betalning med 
+    ett anonymt betalningsinstrument som getts ut i ett land utanför EES bara om instrumentet 
+    uppfyller kraven i 31 §. Lag (2021:903).\\[0.1cm]
+
+    \tiny \textbf{Riskkategori – exempel:}\\
+    \tiny \textbf{Högrisk:} Kontanter (≥5000 euro per transaktion, 3 kap. 6 §), kryptovalutor, betalningar via tredjepartskonton.\\
+    \tiny \textbf{Lägre risk:} Banköverföring i kundens namn, kortbetalning via kända kortinlösare, fakturor med tydlig affärsrelation.\\[0.1cm]
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny För att bestämma kundens riskprofil (2 kap. 3 §). Betalningsmetod avgör när kundkännedom krävs (3 kap. 4 § och 6 §), hur omfattande övervakning behövs (4 kap. 1 §) och om skärpta åtgärder måste vidtas (3 kap. 16 §). Kontanter och kryptovalutor innebär sämre spårbarhet och högre anonymitet.
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{4. Tar företaget emot betalningar från tredje part?} \hspace{0.3cm} ⓘ\\
+  ◯ Ja \hspace{0.5cm} ◯ Nej\\
+  \tiny Exempel: Kund A betalar för Kund B:s tjänst
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 7 § PTL – Information om kunden och verklig huvudman}\\
+    \tiny Verksamhetsutövaren ska inhämta information om kundens identitet samt, om det är tillämpligt, identiteten på den verkliga huvudmannen. Vid betalningar från tredje part ska denna tredje parts identitet och relation till kunden utredas.\\[0.1cm]
+    \tiny \textbf{3 kap. 8 § PTL – Verifiering av kundens identitet}\\
+    \tiny Verksamhetsutövaren ska kontrollera att den information som har inhämtats är riktig genom att använda tillförlitliga och oberoende källor. Vid tredjepartsbetalningar ska också den tredje partens identitet verifieras.\\[0.1cm]
+    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
+    \tiny Vid hög risk ska mer omfattande kontroller göras. Tredjepartsbetalningar, särskilt från högriskländer eller okända parter, innebär förhöjd risk.\\[0.1cm]
+    \tiny \textbf{Röda flaggor:}\\
+    \begin{itemize}
+      \item Tredje part i högriskland
+      \item Tredje part utan tydlig koppling till kunden
+      \item Upprepade betalningar från olika tredje parter
+      \item Tredje part som inte kan verifieras via oberoende källor
+    \end{itemize}
+    \vspace{0.1cm}
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Tredjepartsbetalningar kan dölja penningtvättens ursprung genom att bryta spårbarheten (\"layering\"). Enligt 3 kap. 7-8 §§ PTL måste vi identifiera och verifiera tredje partens identitet och förstå dennes relation till kunden. Detta är särskilt kritiskt vid betalningar från högriskländer.
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{5. Förekommer överföringar till/från utländska bankkonton?} \hspace{0.3cm} ⓘ\\
+  ◯ Ja, regelbundet \hspace{0.3cm} ◯ Ja, ibland \hspace{0.3cm} ◯ Nej\\
+  Om Ja → Vilka länder? \underline{\hspace{5cm}}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{2 kap. 5 § punkt 5 PTL – Geografisk riskfaktor}\\
+    \tiny Vid riskbedömning ska det beaktas om transaktionen genomförs i, från eller till en stat som Europeiska kommissionen eller FATF har identifierat som en stat som saknar effektiva system för att förebygga penningtvätt eller finansiering av terrorism.\\[0.1cm]
+    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
+    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen bedöms som hög, ska särskilt omfattande kontroller, bedömningar och utredningar enligt 7, 8 och 10-13 §§ göras.\\[0.1cm]
+    \tiny \textbf{4 kap. 1 § PTL – Övervakningsskyldighet}\\
+    \tiny En verksamhetsutövare ska övervaka pågående affärsförbindelser i syfte att upptäcka avvikande transaktioner. Utländska överföringar kräver särskild övervakning.\\[0.1cm]
+    \tiny \textbf{01FS 2024:20, 3 kap. 8 § – Skärpt kundkännedom}\\
+    \tiny Vid utländska bankkonton i högriskländer krävs:\\
+    \begin{itemize}
+      \item Inhämta information om transaktionernas syfte
+      \item Dokumentera affärsförbindelsens art
+      \item Övervaka transaktioner löpande
+      \item Granska ursprung och destination för betalningar
+    \end{itemize}
+    \vspace{0.1cm}
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny För att identifiera geografisk risk (2 kap. 5 § punkt 5). Transaktioner till/från högriskländer eller länder med svaga AML-system kräver skärpta åtgärder enligt 3 kap. 16 § PTL. Detta gäller både in-flöden (traditionell penningtvätt) och ut-flöden (omvänd penningtvätt, se Marie Wallin sid. 38).
+  \end{alertblock}
+
+  \vspace{0.5cm}
+  \begin{flushright}
+    \hyperlink{riskfragor-steg3}{\beamerbutton{Tillbaka}} \hspace{0.3cm} \hyperlink{identitetskontroll}{\beamerbutton{Slutför \& Nästa}}
+  \end{flushright}
+\end{frame}
+
+% ========================================================================
+% RISKFRÅGOR WIZARD-STRUKTUR
+% ========================================================================
+% Steg 1-4: ALLTID visas (statiska steg)
+%   - Steg 1: Grundläggande information (RiskFragorSlide.jsx)
+%   - Steg 2: Utländska transaktioner
+%   - Steg 3: Kunder & Affärspartners
+%   - Steg 4: Betalningar & Transaktioner
+%
+% Steg 5+: KONFIGURERBARA steg via config.json
+%   - Byrån laddar ner config.json från Settings-sidan
+%   - Lägger till custom riskfrågor i config
+%   - Laddar upp uppdaterad config.json
+%   - Extra steg visas automatiskt baserat på config
+%
+% Backend endpoints:
+%   - POST /api/onboarding/{id}/riskfragor/steg1 - Sparar steg 1
+%   - POST /api/onboarding/{id}/riskfragor/steg2 - Sparar steg 2
+%   - POST /api/onboarding/{id}/riskfragor/steg3 - Sparar steg 3
+%   - POST /api/onboarding/{id}/riskfragor/steg4 - Sparar steg 4
+%   - POST /api/onboarding/{id}/riskfragor/custom - Sparar steg 5+ (från config)
+%
+% OBS: PEP-frågor finns i separat slide "PEP-Kontroll" efter Identitetskontroll
+% Verkliga huvudmän hämtas automatiskt från Roaring.io i Steg 1
+% ========================================================================
+
+% SAMMANFATTNINGSSIDA: Backend-endpoints för Riskfrågor
+\begin{frame}[label=riskfragor-api]
+  \frametitle{Backend API-endpoints för Riskfrågor}
+
+  \footnotesize
+
+  \textbf{Steg 1:} POST /api/onboarding/verify-identity\\
+  \tiny → Anropar Roaring.io + Bolagsverket → Returnerar företagsnamn, SNI-kod, ägare
+
+  \vspace{0.3cm}
+
+  \textbf{Steg 2:} POST /api/onboarding/business-description\\
+  \tiny → Sparar verksamhetsbeskrivning → Jämför SNI-kod med Bolagsverket → Flaggar avvikelser
+
+  \vspace{0.3cm}
+
+  \textbf{Steg 3:} POST /api/onboarding/business-relationships\\
+  \tiny → Sparar kunder/leverantörer → Kontrollerar högriskländer (FATF-listan)
+
+  \vspace{0.3cm}
+
+  \textbf{Steg 4:} POST /api/onboarding/payment-methods\\
+  \tiny → Sparar betalningsmetoder → Flaggar högrisk (kontanter >20\%, kryptovaluta)
+
+  \vspace{0.3cm}
+
+  \textbf{Steg 5:} POST /api/onboarding/ownership-pep\\
+  \tiny → Sparar ägarstruktur → Jämför med Roaring.io → PEP-kontroll → Sanktionslistkontroll
+
+  \vspace{0.5cm}
+
+  \begin{alertblock}{Databas}
+    \tiny All data sparas i \texttt{client\_onboarding\_data.csv} (eller PostgreSQL i production)\\
+    Externa API-svar sparas i \texttt{roaring\_data.csv} och \texttt{bolagsverket\_data.csv}
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \begin{block}{Korsvalidering}
+    \tiny Backend jämför automatiskt klientens svar med officiell data från Roaring.io/Bolagsverket.\\
+    Avvikelser sparas i \texttt{risk\_flags.csv} och visas senare i Riskbedömning-sliden.
+  \end{block}
+\end{frame}
+
+
+
+% IDENTITETSKONTROLL OCH DOKUMENTATION
+% (IdentitetskontrollSlide i React, route: /identitet)
+% Denna slide är alltid med och följer PTL 3 kap. 2 och 4 §§.
+\begin{frame}[label=identitetskontroll]
+  \frametitle{Identitetskontroll och dokumentation}
+
+  \small
+  För att uppfylla penningtvättslagens krav måste identiteten kontrolleras och dokumenteras enligt följande:
+  \begin{itemize}
+    \item \textbf{Fysisk person:} Pass, körkort eller annan identitetshandling med foto utfärdad av myndighet, tillförlitlig elektronisk legitimation, eller dokument/uppgifter från oberoende och tillförlitliga källor.
+    \item \textbf{Juridisk person:} Registreringsbevis eller motsvarande utdrag (ej äldre än en vecka), samt uppgifter om företrädare.
+    \item \textbf{Ombud/företrädare:} Fullmakt eller motsvarande behörighetshandling.
+  \end{itemize}
+
+  \vspace{0.5cm}
+  \textbf{Dokumentation:}
+  \begin{itemize}
+    \item Anteckna identitetshandlingens nummer och giltighetstid eller bevara kopia.
+    \item Bevara kopia av elektronisk legitimation eller andra dokument som legat till grund för kontrollen.
+    \item Kopia av registreringsbevis, fullmakt och andra relevanta handlingar ska sparas.
+    \item All dokumentation ska sparas minst fem år och vara sökbar.
+  \end{itemize}
+
+  \vspace{0.8cm}
+  \begin{minipage}{0.45\textwidth}
+    \begin{flushleft}
+      % Simulerad knapp för att ta foto med webbkamera
+      \beamerbutton{Ta foto med webbkamera}
+      \footnotesize
+      	\textit{(Personen håller upp sitt ID/körkort)}
+    \end{flushleft}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.45\textwidth}
+    \begin{flushright}
+      \hyperlink{nextslide}{\beamerbutton{Nästa}}
+    \end{flushright}
+  \end{minipage}
+\end{frame}
+
+% IDENTITETSKONTROLL – SAMMANFATTANDE TABELL
+% (KontrolltabellSlide i React, route: /kontrolltabell)
+% Tabell enligt Länsstyrelsen Stockholms författningssamling 01FS 2024:20 och penningtvättslagen (2017:630)
+\begin{frame}[label=kontrolltabell]
+  \frametitle{Identitetskontroll – sammanfattande tabell}
+  \footnotesize
+  \textit{Tabellen nedan sammanfattar kraven enligt Länsstyrelsen Stockholms författningssamling 01FS 2024:20 och lagen (2017:630) om åtgärder mot penningtvätt och finansiering av terrorism.}
+  \vspace{0.3cm}
+  \begin{tabular}{|p{2.8cm}|p{5.2cm}|p{5.2cm}|}
+    \hline
+    \textbf{Vem kontrolleras} & \textbf{Vad kontrolleras} & \textbf{Dokumentation av kontrollen} \\
+    \hline
+    Fysisk person & 
+    1. Pass, körkort eller annan identitetshandling med foto utfärdad av myndighet eller tillförlitlig utfärdare.\\
+    2. Tillförlitlig elektronisk legitimation.\\
+    3. Andra dokument/uppgifter från oberoende och tillförlitliga källor. Vid svårigheter, använd flera källor. &
+    1. Anteckna identitetshandlingens nummer och giltighetstid eller bevara kopia.\\
+    2. Bevara kopia av bekräftelsen på elektronisk legitimation.\\
+    3. Bevara kopia av dokument/uppgifter som legat till grund för kontrollen. \\
+    \hline
+    Fysisk person på distans &
+    1. Tillförlitlig elektronisk legitimation.\\
+    2. Namn, personnummer/samordningsnummer och adress mot externa register/intyg/oberoende källor, samt\\
+    a) Skicka bekräftelse till folkbokföringsadress, eller\\
+    b) Inhämta vidimerad kopia av identitetshandling. &
+    1. Bevara kopia av bekräftelsen på elektronisk legitimation.\\
+    2. Bevara kopia av dokument/uppgifter som legat till grund för kontrollen samt kopia av bekräftelsebrev eller vidimerad kopia. \\
+    \hline
+    Företrädare, ombud eller motsvarande &
+    1. Se identitetskontroll för fysisk person eller fysisk person på distans.\\
+    2. Fullmakt, förordnande eller motsvarande behörighetshandling. &
+    1. Se dokumentationskrav för fysisk person eller fysisk person på distans.\\
+    2. Bevara kopia av fullmakt, förordnande eller motsvarande behörighetshandling. \\
+    \hline
+    Juridisk person &
+    Registreringsbevis, registerutdrag eller uppgifter från andra tillförlitliga och oberoende källor. &
+    Bevara kopia av de kontrollerade handlingarna. \\
+    \hline
+    Verklig huvudman &
+    Se identitetskontroll för fysisk person eller fysisk person på distans. &
+    Se dokumentationskrav för fysisk person eller fysisk person på distans. \\
+    \hline
+  \end{tabular}
+  \vspace{0.3cm}
+  \footnotesize
+  \textit{Se även:}
+  \begin{itemize}
+    \item Länsstyrelsen Stockholms författningssamling 01FS 2024:20, 3 kap. 4 § och tabell 1
+    \item Lagen (2017:630) om åtgärder mot penningtvätt och finansiering av terrorism
+  \end{itemize}
+\end{frame}
+
+
+
+  % Slide 5: Skärpt kundkännedom vid PEP (PEPSlide i React, route: /pepfordjupning)
+  % OBS! Denna slide visas dynamiskt om kunden eller någon i företaget är PEP.
+  \begin{frame}[label=pepfordjupning]
+    \frametitle{Skärpt kundkännedom – PEP}
+
+    \small
+    Eftersom du eller någon i företaget är en PEP (person i politiskt utsatt ställning) krävs fördjupad kontroll enligt penningtvättslagen. Vänligen besvara följande frågor:
+    \begin{itemize}
+      \item Vad är ursprunget till de medel som ska användas i affärsförbindelsen?
+      \item Beskriv affärsverksamhetens syfte och art.
+      \item Vilka ekonomiska medel och resurser har företaget tillgång till?
+      \item Finns det ytterligare dokumentation som styrker medlens ursprung?
+      \item Har du eller någon i företaget affärsrelationer med högriskländer?
+      \item Finns det andra omständigheter som kan påverka riskbedömningen?
+    \end{itemize}
+
+    \vspace{0.8cm}
+    \begin{flushright}
+      \hyperlink{nextslide}{\beamerbutton{Nästa}}
+    \end{flushright}
+  \end{frame}
+
+% ========================================================================
+% JÄMFÖRELSE MOT BOLAGSVERKET/ROARING.IO (Resultatslides från API)
+% ========================================================================
+
+% VERKSAMHETSBESKRIVNING & VERKSAMHETSKODER
+% (VerksamhetSlide i React, route: /verksamhet) - RESULTATSLIDE från Roaring API
+\begin{frame}[label=verksamhetskod]
+  \frametitle{Verksamhetsbeskrivning och SNI-koder}
+  \small
+  \textbf{Beskrivning:} \underline{\hspace{8cm}} \\
+  \textbf{Bransch/SNI-kod:} \underline{\hspace{8cm}} \\
+  \textbf{Sekundära namn:} \underline{\hspace{8cm}} \\
+  \vspace{0.5cm}
+  \begin{block}{Jämförelse}
+    Om beskrivningen eller bransch inte stämmer med kundens uppgifter, diskutera och dokumentera avvikelsen.
+  \end{block}
+  \vspace{0.8cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% ÄGARSTRUKTUR & VERKLIG HUVUDMAN
+% (AgarstrukturSlide i React, route: /agarstruktur) - RESULTATSLIDE från Roaring API
+\begin{frame}[label=agarstruktur]
+  \frametitle{Ägarstruktur och verklig huvudman}
+  \small
+  \textbf{Ägare:} \underline{\hspace{8cm}} \\
+  \textbf{Verklig huvudman:} \underline{\hspace{8cm}} \\
+  \textbf{Alternativa huvudmän:} \underline{\hspace{8cm}} \\
+  \textbf{Ägarandelar:} \underline{\hspace{8cm}} \\
+  \vspace{0.5cm}
+  \begin{block}{Jämförelse}
+    Om ägaruppgifter avviker från kundens svar, diskutera och dokumentera.
+  \end{block}
+  \vspace{0.8cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% STYRELSEMEDLEMMAR & FIRMATECKNARE
+% (StyrelseSlide i React, route: /styrelse) - RESULTATSLIDE från Roaring API
+\begin{frame}[label=styrelse]
+  \frametitle{Styrelsemedlemmar och firmatecknare}
+  \small
+  \textbf{Styrelse:} \underline{\hspace{8cm}} \\
+  \textbf{VD:} \underline{\hspace{8cm}} \\
+  \textbf{Firmatecknare:} \underline{\hspace{8cm}} \\
+  \textbf{Signaturrätt:} \underline{\hspace{8cm}} \\
+  \textbf{Historik:} \underline{\hspace{8cm}} \\
+  \vspace{0.5cm}
+  \begin{block}{Jämförelse}
+    Om styrelseuppgifter avviker från kundens svar, diskutera och dokumentera.
+  \end{block}
+  \vspace{0.8cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% RISKINDIKATORER & SANKTIONSLISTOR
+% (RiskindikatorerSlide i React, route: /riskindikatorer) - RESULTATSLIDE från Roaring API
+\begin{frame}[label=riskindikator]
+  \frametitle{Riskindikatorer och sanktionslistor}
+  \small
+  \textbf{Riskpoäng:} \underline{\hspace{8cm}} \\
+  \textbf{Larm:} \underline{\hspace{8cm}} \\
+  \textbf{Sanktionslistor:} \underline{\hspace{8cm}} \\
+  \textbf{PEP:} \underline{\hspace{8cm}} \\
+  \vspace{0.5cm}
+  \begin{block}{Jämförelse}
+    Om riskindikatorer eller sanktionslistor avviker från kundens svar, diskutera och dokumentera.
+  \end{block}
+  \vspace{0.8cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}\begin{frame}[label=login]
+  \frametitle{Logga in}
+  
+  ...
+  \textbf{Lösenord:} \underline{\hspace{6.5cm}} \\
+  
+  \vspace{0.3cm}
+  \footnotesize
+  \hyperlink{forgotpassword}{\textcolor{terracotta}{Glömt lösenord?}}
+  
+  \vspace{0.8cm}
+  \beamerbutton{Logga in}
+  ...
+\end{frame}
+
+\begin{frame}[label=forgotpassword]
+  \frametitle{Återställ lösenord}
+  
+  \textbf{E-post:} \underline{\hspace{6.5cm}} \\
+  
+  \vspace{0.8cm}
+  \beamerbutton{Skicka återställningskod}
+  
+  \vspace{1cm}
+  \footnotesize
+  En 6-siffrig kod kommer skickas till din e-post.
+\end{frame}
+
+\begin{frame}[label=resetpassword]
+  \frametitle{Ange ny lösenord}
+  
+  \textbf{Verifieringskod:} \underline{\hspace{6.5cm}} \\
+  \textbf{Nytt lösenord:} \underline{\hspace{6.5cm}} \\
+  \textbf{Bekräfta lösenord:} \underline{\hspace{6.5cm}} \\
+  
+  \vspace{0.8cm}
+  \beamerbutton{Återställ lösenord}
+\end{frame}
+  \end{flushright}
+\end{frame}
+
+% ÖVRIGA DATAPUNKTER
+% (OvrigaDataSlide i React, route: /ovrigadata) - RESULTATSLIDE från Roaring API
+\begin{frame}[label=ovrigt]
+  \frametitle{Övriga datapunkter}
+  \small
+  \textbf{Fastigheter:} \underline{\hspace{8cm}} \\
+  \textbf{Engagemang:} \underline{\hspace{8cm}} \\
+  \textbf{Rättsliga ärenden:} \underline{\hspace{8cm}} \\
+  \vspace{0.5cm}
+  \begin{block}{Jämförelse}
+    Om övriga datapunkter avviker från kundens svar, diskutera och dokumentera.
+  \end{block}
+  \vspace{0.8cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% ========================================================================
+% FLÖDE: Bokföringsdata → Ekonomisk rådgivning → Djupgranskning
+% ========================================================================
+% Kombinerad inmatning av IBAN + SIE-fil (Fortnox/Visma/Bokio + manuell uppladdning)
+% Detta motsvarar BokforingDataSlide i React (route: /bokforing)
+%
+% EKONOMISK RÅDGIVNING: Värdeskapande analys FÖRE potentiell avslag
+%   - Likviditetsanalys – Graf över likviditet från bankkonto (LikviditetsanalysSlide)
+%   - Omsättningsanalys – Omsättning per räkenskapsår från SIE (OmsattningsanalysSlide)
+%   - Resultatanalys – Årets resultat per räkenskapsår från SIE (ResultatanalysSlide)
+%   - Branschjämförelse – Företagets nyckeltal vs SCB-data för branschen (BranschjamforelseSlide)
+%
+% DJUPGRANSKNING: Detaljerad kontroll som kan leda till avslag
+%   - Bokföringsanalys – AI-granskning av verifikationer (BokforingsanalysSlide)
+%   - Riskbedömning & Besked – Slutligt besked (RiskbedomningSlide)
+%   - Kundens skyldigheter – Vad kunden måste uppfylla (SkyldigheterSlide)
+%   - Avtalsvillkor och godkännande – BankID-signering (AvtalSlide)
+%   - E-postbekräftelse och leverans av dokument (DocumentDeliverySlide)
+%
+% Config.json styr:
+%   - Antal år för SIE-filhämtning (standard 7 år, kan minskas för nystartade företag)
+%   - Vilka risktester som är aktiverade
+%   - Textanpassningar och valfria fält
+% ========================================================================
+
+% FÖRETAGSDOKUMENTATION
+% (ForetagsdokumentationSlide i React, route: /dokumentation)
+\begin{frame}[label=foretagsdokumentation]
+  \frametitle{Företagsdokumentation}
+  \small
+  För att verifiera företagets existens och styrelsemedlemmar behöver vi grundläggande företagsdokumentation.
+  
+  \vspace{0.3cm}
+  \begin{block}{Varför behövs detta?}
+    \footnotesize
+    ✅ \textbf{Registreringsbevis} verifierar företagets existens hos Bolagsverket\\
+    ✅ Ger oss \textbf{styrelsemedlemmar} och \textbf{VD} med personnummer (för närstående-kontroll)\\
+    ✅ Bekräftar företagets \textbf{registrerade adress} (för leveransadress-validering)\\
+    ✅ \textbf{Standard vid onboarding} enligt PTL 2 kap. 7 § (kundkännedom)
+  \end{block}
+  
+  \vspace{0.3cm}
+  \begin{minipage}{0.48\textwidth}
+    \textbf{Registreringsbevis från Bolagsverket:}\\
+    \vspace{0.2cm}
+    
+    % Dropyta för registreringsbevis (obligatoriskt)
+    \fbox{\begin{minipage}{4.2cm}
+      \centering
+      \vspace{0.3cm}
+      📄\\
+      \vspace{0.2cm}
+      \footnotesize\textbf{Dra och släpp PDF här}\\
+      \vspace{0.1cm}
+      \tiny{eller klicka för att välja fil}\\
+      \vspace{0.3cm}
+    \end{minipage}}\\
+    \vspace{0.2cm}
+    \footnotesize\textcolor{red}{* Obligatoriskt (max 3 mån gammalt)}
+    
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.48\textwidth}
+    \textbf{Årsredovisning (valfritt):}\\
+    \vspace{0.2cm}
+    
+    % Dropyta för årsredovisning (valfritt)
+    \fbox{\begin{minipage}{4.2cm}
+      \centering
+      \vspace{0.3cm}
+      📊\\
+      \vspace{0.2cm}
+      \footnotesize\textbf{Dra och släpp PDF här}\\
+      \vspace{0.1cm}
+      \tiny{eller klicka för att välja fil}\\
+      \vspace{0.3cm}
+    \end{minipage}}\\
+    \vspace{0.2cm}
+    \footnotesize\textcolor{gray}{Valfritt men rekommenderat}
+  \end{minipage}
+  
+  \vspace{0.3cm}
+  \begin{block}{Vad händer med dokumenten?}
+    \footnotesize
+    Vi \textbf{parsar automatiskt} registreringsbeviset med OCR/PDF-parsing för att extrahera:\\
+    • Organisationsnummer → Verifieras mot Bolagsverket GRATIS API\\
+    • Företagsnamn → Verifieras mot angivna uppgifter\\
+    • Styrelseledamöter + personnummer → Används för närstående-kontroll (SPAR/Roaring.io)\\
+    • Registrerad adress → Används för leveransadress-validering i bokföringsanalysen
+  \end{block}
+  
+  \vspace{0.3cm}
+  \begin{flushright}
+    \hyperlink{bokforing_bank}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Slide 13: Bokföringsdata och bankkonto (BokforingDataSlide i React, route: /bokforing)
+\begin{frame}[label=bokforing_bank]
+  \frametitle{Bokföringsdata och Skattekonto}
+  \small
+  För att göra en fullständig riskbedömning behöver vi tillgång till företagets bokföringsunderlag och skattedata.
+  
+  \vspace{0.3cm}
+  \begin{minipage}{0.48\textwidth}
+    \textbf{Bokföringsdata (SIE-filer):}\\
+    \vspace{0.2cm}
+    
+    % Integration mot bokföringsprogram
+    \beamerbutton{Fortnox} \quad
+    \beamerbutton{Visma} \quad
+    \beamerbutton{Bokio}\\
+    \footnotesize\textit{(OAuth-integration, hämtar automatiskt)}
+    
+    \vspace{0.2cm}
+    \textbf{eller ladda upp manuellt:}\\
+    \vspace{0.2cm}
+    
+    % Dropyta för manuell uppladdning
+    \fbox{\rule{4.5cm}{1.2cm}}\\
+    \footnotesize\textit{Dra och släpp SIE-filer här}
+    
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.48\textwidth}
+    \textbf{Skattekonto \& Deklarationer:}\\
+    \vspace{0.2cm}
+    
+    \beamerbutton{Hämta via Skatteverket}\\
+    \footnotesize\textit{(BankID-autentisering, hämtar automatiskt)}
+    
+    \vspace{0.2cm}
+    \textbf{eller ladda upp CSV manuellt:}\\
+    \vspace{0.2cm}
+    
+    \fbox{\rule{4.5cm}{1.2cm}}\\
+    \footnotesize\textit{Skattekonto CSV från skatteverket.se}
+  \end{minipage}
+  
+  \vspace{0.3cm}
+  \begin{block}{Skatteverket OAuth2-flöde (ACG med BankID)}
+    \footnotesize
+    \textbf{1. Användare klickar:} "Hämta via Skatteverket" → OAuth2-redirect till Skatteverkets inloggningssida\\
+    \textbf{2. BankID-autentisering:} Användaren loggar in med BankID \textit{(Skatteverket betalar, ingen kostnad för appen)}\\
+    \textbf{3. Godkännande:} Användaren godkänner åtkomst till \textbf{både} Skattekonto \textbf{och} Inkomstdeklarationer (7 år)\\
+    \textbf{4. Redirect tillbaka:} Auktorisationskod → access token → hämtar data via API\\
+    \textbf{Scope:} \texttt{skattekonto:read inkomstdeklaration:read} (kombinerade i ETT anrop)\\
+    \textbf{Fallback:} Om OAuth2 misslyckas, visa handledning för manuell CSV-nedladdning
+  \end{block}
+  
+  \vspace{0.3cm}
+  \begin{flushright}
+    \hyperlink{bokforingsunderlag}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Slide 12: Bokföringsunderlag (BokforingsunderlagSlide i React, route: /underlag)
+\begin{frame}[label=bokforingsunderlag]
+  \frametitle{Bokföringsunderlag och Bankinformation}
+  \small
+  För att analysera verksamhetskongruens och upptäcka privatkonsumtion behöver vi era fakturor och kontoutdrag.
+  
+  \vspace{0.3cm}
+  \begin{block}{Varför behövs detta?}
+    \footnotesize
+    ✅ \textbf{Verksamhetskongruens:} Vi kontrollerar att inköp matchar verksamhetsbeskrivningen\\
+    \hspace{0.5cm}\textit{Exempel: Blästringsföretag ska inte köpa motorcykeldäck}\\
+    ✅ \textbf{Privatkonsumtion:} Vi flaggar ICA, H\&M, Willys bokförda på företaget\\
+    ✅ \textbf{Konkurskontroll:} Vi varnar om betalning till avregistrerade företag\\
+    ✅ \textbf{Leveransadress-validering:} Vi jämför mot företagets registrerade adress
+  \end{block}
+  
+  \vspace{0.3cm}
+  \begin{block}{💡 Tips: Du kan ladda upp blandat!}
+    \footnotesize
+    Det är helt okej att ladda upp alla dokument i en zon, blandat. Vår AI kommer automatiskt att sortera och kategorisera dokumenten åt dig.\\
+    \textbf{OBS:} Detta tar större datakraft och längre bearbetningstid (ca 2-5 min extra), men det är ett tillåtet alternativ om du har mycket data.
+  \end{block}
+  
+  \vspace{0.3cm}
+  \textbf{Bankinformation (valfritt):}\\
+  \vspace{0.2cm}
+  \begin{minipage}{0.48\textwidth}
+    \footnotesize
+    \textbf{Bankgiro eller Plusgiro:}\\
+    \fbox{\rule{4.5cm}{0.5cm}}\\
+    \tiny\textcolor{gray}{Format: 123-4567 (bankgiro) eller 12345-6 (plusgiro)}\\
+    \tiny\textcolor{gray}{IBAN anges på nästa slide (Bokföringsdata)}
+  \end{minipage}
+  
+  \vspace{0.4cm}
+  \textbf{Ladda upp bokföringsunderlag (5 kategorier):}\\
+  \vspace{0.2cm}
+  \footnotesize
+  \begin{itemize}
+    \item \textbf{Kontoutdrag:} Bankkontoutdrag (PDF)
+    \item \textbf{Leverantörsfakturor:} Inköpsfakturor från era leverantörer
+    \item \textbf{Kundfakturor:} Försäljningsfakturor till era kunder
+    \item \textbf{Kvitton:} Kontantkvitton och småutlägg
+    \item \textbf{Momsrapporter:} XML eller PDF från Skatteverket
+    \item \textbf{Årsredovisningar (saknade år):} PDF - vi hämtar digitalt insända från 2021 via Bolagsverket API (endast juridiska personer)
+  \end{itemize}
+  
+  \vspace{0.3cm}
+  \textbf{OBS:} SIE-filer, IBAN-nummer och inkomstdeklarationer (K10/INK2) hämtas programvarumässigt via Skatteverket på nästa slide (Bokföringsdata).
+  
+  \vspace{0.3cm}
+  \fbox{\begin{minipage}{10cm}
+    \centering
+    \vspace{0.3cm}
+    �\\
+    \vspace{0.2cm}
+    \footnotesize\textbf{Dra och släpp alla filer här (PDF/PNG/JPG/XML)}\\
+    \vspace{0.1cm}
+    \tiny{Du kan ladda upp blandat - vår AI sorterar automatiskt (tar 2-5 min extra)}\\
+    \vspace{0.1cm}
+    \tiny{Eller använd separata zoner för varje kategori för snabbare bearbetning}\\
+    \vspace{0.3cm}
+  \end{minipage}}
+  
+  \vspace{0.3cm}
+  \begin{flushright}
+    \hyperlink{likviditet}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% ═══════════════════════════════════════════════════════════════════════
+% EKONOMISK RÅDGIVNING (Slides 11-14)
+% Värdeskapande analys som ges FÖRE eventuell djupgranskning/avslag
+% ═══════════════════════════════════════════════════════════════════════
+
+% Slide 11: Likviditetsanalys
+\begin{frame}[label=likviditet]
+  \frametitle{Likviditetsanalys}
+  \small
+  Baserat på bankkontots transaktionshistorik kan vi ge en översikt av företagets likviditetsutveckling.
+  
+  \vspace{0.5cm}
+  \begin{center}
+    \textbf{Graf: Likviditet över tid (12 månader)}\\
+    \vspace{0.3cm}
+    \begin{tikzpicture}[scale=0.8]
+      % Enkel linjegraf - ersätts med Recharts i React
+      \draw[->] (0,0) -- (10,0) node[right] {Månad};
+      \draw[->] (0,0) -- (0,4) node[above] {Belopp (KSEK)};
+      \draw[thick, brand] plot coordinates {(0,2) (2,2.3) (4,1.8) (6,2.5) (8,2.8) (10,3.2)};
+      \node at (5,-1) {\footnotesize Jan → Dec 2024};
+    \end{tikzpicture}
+  \end{center}
+  
+  \vspace{0.5cm}
+  \begin{minipage}{0.48\textwidth}
+    \textbf{Nuvarande likviditet:} 320 000 kr\\
+    \textbf{Genomsnitt (12 mån):} 250 000 kr\\
+    \textbf{Trend:} \textcolor{green}{Positiv (+28\%)}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.48\textwidth}
+    \textbf{AI-analys:}\\
+    \footnotesize
+    ✅ Inga layering-mönster\\
+    ✅ Normala transaktionsstorlekar\\
+    ⚠️ 2 ovanligt stora insättningar (granskas)
+  \end{minipage}
+  
+  \vspace{0.5cm}
+  \begin{block}{Rekommendation}
+    Byråchefen kan ge kommentarer kring likviditetsutvecklingen och föreslå åtgärder vid behov.
+  \end{block}
+  
+  \vspace{0.5cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Slide 12: Omsättningsanalys
+\begin{frame}[label=omsattning]
+  \frametitle{Omsättningsanalys}
+  \small
+  Från bokföringens resultatrapporter kan vi se hur omsättningen utvecklats över åren.
+  
+  \vspace{0.5cm}
+  \begin{center}
+    \textbf{Graf: Omsättning per räkenskapsår}\\
+    \vspace{0.3cm}
+    \begin{tikzpicture}[scale=0.8]
+      % Stapeldiagram - ersätts med Recharts BarChart i React
+      \draw[->] (0,0) -- (10,0) node[right] {År};
+      \draw[->] (0,0) -- (0,4) node[above] {Omsättning (MSEK)};
+      \fill[brand!70] (0.5,0) rectangle (1.5,1.5);
+      \fill[brand!70] (2.5,0) rectangle (3.5,2.0);
+      \fill[brand!70] (4.5,0) rectangle (5.5,2.4);
+      \fill[brand!70] (6.5,0) rectangle (7.5,2.8);
+      \fill[brand!70] (8.5,0) rectangle (9.5,3.2);
+      \node at (1,-0.5) {\footnotesize 2020};
+      \node at (3,-0.5) {\footnotesize 2021};
+      \node at (5,-0.5) {\footnotesize 2022};
+      \node at (7,-0.5) {\footnotesize 2023};
+      \node at (9,-0.5) {\footnotesize 2024};
+    \end{tikzpicture}
+  \end{center}
+  
+  \vspace{0.5cm}
+  \begin{minipage}{0.48\textwidth}
+    \textbf{Omsättning 2024:} 3,2 MSEK\\
+    \textbf{Tillväxt (YoY):} \textcolor{green}{+14\%}\\
+    \textbf{CAGR (5 år):} +16\%
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.48\textwidth}
+    \textbf{Analys:}\\
+    \footnotesize
+    ✅ Stabil tillväxt\\
+    ✅ Inga ovanliga hopp\\
+    ℹ️ Liten nedgång 2021 (pandemi?)
+  \end{minipage}
+  
+  \vspace{0.5cm}
+  \begin{block}{Rekommendation}
+    Omsättningstillväxten är sund och följer en naturlig kurva. Fortsätt fokusera på tillväxtstrategier.
+  \end{block}
+  
+  \vspace{0.5cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Slide 13: Resultatanalys
+\begin{frame}[label=resultat]
+  \frametitle{Resultatanalys}
+  \small
+  Från balansrapporterna kan vi se lönsamhetsutvecklingen över tid.
+  
+  \vspace{0.5cm}
+  \begin{center}
+    \textbf{Graf: Årets resultat per räkenskapsår}\\
+    \vspace{0.3cm}
+    \begin{tikzpicture}[scale=0.8]
+      % Linjediagram med områdesfyllning - ersätts med Recharts AreaChart
+      \draw[->] (0,0) -- (10,0) node[right] {År};
+      \draw[->] (0,0) -- (0,4) node[above] {Resultat (KSEK)};
+      \fill[brand!30] (0,0) -- (0,1.2) -- (2,1.5) -- (4,1.0) -- (6,1.8) -- (8,2.2) -- (10,2.5) -- (10,0) -- cycle;
+      \draw[thick, brand] plot coordinates {(0,1.2) (2,1.5) (4,1.0) (6,1.8) (8,2.2) (10,2.5)};
+      \node at (5,-1) {\footnotesize 2020 → 2024};
+    \end{tikzpicture}
+  \end{center}
+  
+  \vspace{0.5cm}
+  \begin{minipage}{0.48\textwidth}
+    \textbf{Resultat 2024:} 250 000 kr\\
+    \textbf{Rörelsemarginal:} 7,8\%\\
+    \textbf{Trend:} \textcolor{green}{Förbättras}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.48\textwidth}
+    \textbf{Analys:}\\
+    \footnotesize
+    ✅ Positiva resultat alla år\\
+    ℹ️ Lägre 2022 (högre kostnader?)\\
+    ✅ Stark återhämtning 2023-2024
+  \end{minipage}
+  
+  \vspace{0.5cm}
+  \begin{block}{Rekommendation}
+    Företaget är lönsamt och visar god utveckling. Överväg att optimera kostnadsstrukturen ytterligare.
+  \end{block}
+  
+  \vspace{0.5cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% Slide 14: Branschjämförelse
+\begin{frame}[label=bransch]
+  \frametitle{Branschjämförelse mot SCB-data}
+  \small
+  Hur står sig företaget mot branschgenomsnittet?
+  
+  \vspace{0.5cm}
+  \begin{center}
+    \textbf{Nyckeltal: Företaget vs Bransch (SNI 62010)}\\
+    \vspace{0.3cm}
+    \begin{tabular}{l|c|c|c}
+      \textbf{Nyckeltal} & \textbf{Företaget} & \textbf{Bransch (SCB)} & \textbf{Status} \\ \hline
+      Rörelsemarginal & 7,8\% & 8,5\% & ⚠️ Något lägre \\
+      Soliditet & 42\% & 35\% & ✅ Bättre \\
+      Kassalikviditet & 180\% & 150\% & ✅ Bättre \\
+      Omsättning/anställd & 1,6 MSEK & 1,4 MSEK & ✅ Bättre \\
+      Skuldsättningsgrad & 1,4 & 1,9 & ✅ Lägre (bättre) \\
+    \end{tabular}
+  \end{center}
+  
+  \vspace{0.5cm}
+  \begin{block}{Sammanfattning}
+    \footnotesize
+    \textbf{Styrkor:}\\
+    • Stark soliditet och kassalikviditet ger god finansiell stabilitet\\
+    • Låg skuldsättning minskar finansiell risk\\
+    • Hög produktivitet (omsättning/anställd)
+    
+    \vspace{0.3cm}
+    \textbf{Förbättringsområden:}\\
+    • Rörelsemarginalen kan förbättras genom kostnadsoptimering\\
+    • Analysera varför marginalen ligger något under branschsnittet
+  \end{block}
+  
+  \vspace{0.5cm}
+  \begin{flushright}
+    \hyperlink{nextslide}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% ═══════════════════════════════════════════════════════════════════════
+% DJUPGRANSKNING (Slides 15-16)
+% Detaljerad analys som kan leda till fördjupad kontroll eller avslag
+% ═══════════════════════════════════════════════════════════════════════
+
+% Slide 19: Bokföringsanalys och verifikationsfel (BokforingsanalysSlide i React, route: /bokanalys)
+\begin{frame}[label=bokanalys]
+  \frametitle{Bokföringsanalys och verifikationsfel}
+  \small
+  AI-baserad granskning av verifikationer från SIE-filer. Endast flaggade poster visas.
+  
+  \vspace{0.4cm}
+  \begin{minipage}{0.48\textwidth}
+    \textbf{Sammanfattning:}\\
+    \vspace{0.2cm}
+    \begin{itemize}
+      \item \textbf{4} Flaggade poster
+      \item \textbf{2} Allvarliga avvikelser
+      \item \textbf{2} Varningar
+      \item \textbf{25\,732} Godkända
+    \end{itemize}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.48\textwidth}
+    \textbf{AI-granskning:}\\
+    \vspace{0.2cm}
+    \footnotesize
+    Samtliga verifikationer har analyserats automatiskt. Poster som avviker från normala mönster flaggas för manuell granskning.
+  \end{minipage}
+  
+  \vspace{0.5cm}
+  \begin{block}{Flaggade verifikationer (klickbara rader)}
+    \footnotesize
+    \begin{tabular}{|l|l|l|p{4.5cm}|}
+      \hline
+      \textbf{Ver.nr} & \textbf{Datum} & \textbf{Belopp} & \textbf{Beskrivning} \\
+      \hline
+      A1 & 2024-01-15 & 850\,000 kr & Ovanligt hög konsultkostnad \\
+      \hline
+      A2 & 2024-03-22 & 45\,000 kr & Kontantuttag utan kvitto \\
+      \hline
+      A5 & 2024-09-20 & 8\,500 kr & Reseersättning kontant \\
+      \hline
+      A6 & 2024-10-12 & 320\,000 kr & Konsulttjänster från Cypern \\
+      \hline
+    \end{tabular}
+  \end{block}
+  
+  \vspace{0.3cm}
+  \begin{block}{Funktionalitet}
+    \footnotesize
+    \textbf{Klick på rad:} Öppnar modal med fullständig verifikation (debet/kredit, belopp, AI-flaggorsak)\\
+    \textbf{Bedömning:} Användaren avgör om avvikelsen är acceptabel eller om fördjupad kontroll krävs
+  \end{block}
+  
+  \vspace{0.5cm}
+  \begin{flushright}
+    \hyperlink{fortnoxkoppling}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+
+
+% Slide 20: Riskbedömning och besked (RiskbedomningSlide i React, route: /beslut)
+\begin{frame}[label=riskbesked]
+  \frametitle{Riskbedömning och besked}
+  \small
+  Efter analys av insamlad data görs en samlad riskbedömning baserat på:
+  
+  \vspace{0.3cm}
+  \begin{itemize}
+    \footnotesize
+    \item Företagsdata och ägarstruktur
+    \item Ekonomisk analys (likviditet, omsättning, resultat, branschjämförelse)
+    \item Bokföringsanalys (verifikationer, avvikelser)
+    \item Riskindikatorer (sanktionslistor, PEP, högriskländer)
+  \end{itemize}
+  
+  \vspace{0.4cm}
+  \begin{block}{Beslut (Endast för byråchef)}
+    \footnotesize
+    \textbf{Välj besked:}\\
+    \vspace{0.2cm}
+    $\square$ \textbf{Acceptera kund} – Gå vidare till avtal\\
+    $\square$ \textbf{Fördjupad kontroll} – Begär ytterligare dokumentation\\
+    $\square$ \textbf{Avslag} – Kunden accepteras ej\\
+  \end{block}
+  
+  \vspace{0.4cm}
+  \begin{block}{Prissättning (vid Accept)}
+    \footnotesize
+    Baserat på kundens valda tjänster och behov:
+    \vspace{0.3cm}
+    
+    \textbf{Månadspris:} \underline{\hspace{4cm}} SEK \textit{(exklusive moms)}\\
+    \vspace{0.2cm}
+    
+    \textit{Detta pris kommer att framgå i avtalet som genereras på nästa slide.}\\
+    \textit{Prisförslag baseras på: Löpande bokföring, deklarationshjälp, fakturering, rådgivning, etc.}
+  \end{block}
+  
+  \vspace{0.4cm}
+  \begin{block}{AI-rekommendation}
+    \footnotesize
+    AI-systemet har analyserat kundens risk och komplexitet.\\
+    \textbf{Rekommenderat pris:} \underline{\hspace{3cm}} SEK/mån (exkl. moms)
+  \end{block}
+  
+  \vspace{0.4cm}
+  \begin{flushright}
+    \hyperlink{skyldigheter}{\beamerbutton{Generera avtal \& Gå vidare}}
+  \end{flushright}
+\end{frame}
+
+% Slide 21: Kundens förväntade skyldigheter (SkyldigheterSlide i React, route: /skyldigheter)
+% 
+% VIKTIGT: Denna slide innehåller även ett MODALT FÖNSTER som inte har egen sidebar-ingång!
+% Modal öppnas via knapp "Byråns egna kontrollfrågor" och visar branschspecifika regler.
+% 
+\begin{frame}[label=skyldigheter]
+  \frametitle{Kundens förväntade skyldigheter}
+  \small
+  Efter att kunden godkänts i riskbedömningen informeras om vilka skyldigheter som gäller under samarbetet:
+  
+  \textbf{Grundläggande skyldigheter (grid-layout):}
+  \begin{itemize}
+    \item Faktura och förenklad faktura - korrekt utseende enligt Skatteverkets regler.
+    \item Arkivering av bokföringsmaterial i minst sju år.
+    \item Lämna korrekta, fullständiga och aktuella uppgifter till byrån.
+    \item Inkomma med begärda underlag i tid.
+    \item Omgående rapportera förändringar i verksamheten eller annan relevant information.
+    \item Samarbeta vid frågor om kundkännedom och verksamhetens art.
+    \item Förstå och följa grundläggande redovisningsskyldigheter.
+    \item Vara medveten om att samarbetet kan avslutas vid avtalsbrott eller bristande efterlevnad.
+  \end{itemize}
+  
+  \vspace{0.3cm}
+  \textbf{KRITISKA FÖRBUD (5 obligatoriska checkboxar - måste alla checkas):}
+  \begin{enumerate}
+    \item Kontanthantering utan Skatteverkets tillstånd (Skatteförfarandelagen 39 kap)
+    \item Vinstmarginalbeskattning utan Skatteverkets medgivande (ML 9a kap)
+    \item Ta emot betalning utan faktura (BFL 5 kap, Brottsbalken 11 kap)
+    \item Faktura utan fullständig specifikation (ML 11 kap 1§, BFL 5 kap)
+    \item Otillåtna lån från företaget till ägare/styrelse/VD (Aktiebolagslagen 21 kap 1§)
+  \end{enumerate}
+  
+  \vspace{0.3cm}
+  \textbf{Modal-fönster: "Byråns egna kontrollfrågor"}
+  \begin{itemize}
+    \item Öppnas via lila knapp (INTE egen slide i sidebar)
+    \item Visar branschspecifika exempel: restaurang (kassaregister), bygg (F-skatt/RUT/ROT), e-handel (MOSS/OSS), fordon (vinstmarginal)
+    \item Framtida funktion (v2.0): Läser från \texttt{config.json} med byråns egna frågor
+    \item Kunden måste bekräfta alla custom-frågor innan onboarding slutförs
+  \end{itemize}
+  
+  \vspace{0.3cm}
+  \textit{Navigation aktiveras först när alla 5 kritiska förbud + acknowledgement-box är checkade.}
+  
+  \vspace{0.5cm}
+  \begin{flushright}
+    \beamerbutton{Gå vidare till avtal}
+  \end{flushright}
+\end{frame}
+
+% Slide 22: Avtalsvillkor och godkännande (AvtalSlide i React, route: /avtal)
+% BankID-signering med PDF-visning och sidebar
+\begin{frame}[fragile]
+  \frametitle{Avtalsvillkor och godkännande}
+
+  \begin{block}{Avtal (skrolla för att läsa)}
+    \vspace{0.2cm}
+    % Här visas avtalet i en inbäddad PDF-komponent.
+    % Exempelvis:
+    % \includepdf[pages=1,width=\linewidth,pagecommand={}]{avtal.pdf}
+    %
+    % I webbgränssnittet motsvarar detta en skrollbar vy.
+    \textit{\footnotesize Avtalet visas här i PDF-format. Användaren kan skrolla för att läsa hela innehållet.}
+    \vspace{0.4cm}
+  \end{block}
+
+  \vspace{0.4cm}
+  \begin{center}
+    \beamerbutton{Signera med BankID}
+  \end{center}
+
+  \vspace{0.6cm}
+  \small
+  Efter genomförd signering ersätts PDF-dokumentet automatiskt med en version där
+  namnet från BankID-identifieringen infogas som signatur i dokumentet.
+  \medskip
+
+  \textit{Exempel:}\\
+  \textbf{Signerad av:} Anna Svensson (BankID)
+
+\end{frame}
+
+% Slide 23: E-postbekräftelse och leverans av dokument (DocumentDeliverySlide i React, route: /dokument)
+\begin{frame}[fragile]
+  \frametitle{Bekräftelse och leverans av material}
+
+  \begin{block}{Ange e-postadress för kopia av dokument}
+    \vspace{0.2cm}
+    \textit{För din dokumentation skickas en kopia av alla relevanta filer till den e-postadress du anger nedan.}
+    \vspace{0.4cm}
+
+    % Fältet motsvarar en e-postinput i appens gränssnitt
+    \textbf{E-postadress:} \underline{\hspace{6cm}}
+    \vspace{0.5cm}
+
+    \begin{itemize}
+      \item Avtal (PDF med BankID-signatur)
+      \item Riskanalys och grafisk rapport (PDF)
+      \item Sammanställning av dina svar
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.5cm}
+  \begin{center}
+    \beamerbutton{Skicka material till min e-post}
+  \end{center}
+
+  \vspace{0.6cm}
+  \small
+  \textit{När du bekräftar skickas all information krypterat via säker anslutning.  
+  Du får även ett meddelande som bekräftar att signeringen sVälkommen som kund! 🎉lutförts.}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% POST-KONTRAKT SETUP: Hjälp kunden komma igång
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Slide 23: Koppling till Fortnox – Välja rätt paket (FortnoxPackageSlide i React, route: /fortnox)
+\begin{frame}[label=fortnoxkoppling]
+  \frametitle{Koppling till Fortnox – Ditt bokföringsprogram}
+  \small
+  Vi använder Fortnox för löpande bokföring. Du behöver ett eget Fortnox-abonnemang.\\
+  \textit{"Vi rekommenderar våra klienter att köpa Mini eller Mellan. Om du gör beställningen med en gång kan jag koppla upp dig direkt till vårt företagskonto."}
+  
+  \vspace{0.3cm}
+  \begin{block}{Rekommenderade paket (För enmansföretagare)}
+    \footnotesize
+    \begin{tabular}{|l|l|p{5.5cm}|r|}
+      \hline
+      \textbf{Paket} & \textbf{För vem?} & \textbf{Inkluderar} & \textbf{Pris} \\
+      \hline
+      Mini & Enklast & Bokföring, bank, fakturering, företagskort & 189 kr/mån \\
+      \hline
+      \textbf{Liten} & \textbf{Populärast} & \textbf{+ Lön till dig själv, integrationer} & \textbf{319 kr/mån} \\
+      \hline
+      \textbf{Mellan} & \textbf{Rekommenderat} & \textbf{+ Avancerade rapporter} & \textbf{489 kr/mån} \\
+      \hline
+      Stor & Mest funktioner & + Budgetverktyg, analysverktyg & 709 kr/mån \\
+      \hline
+    \end{tabular}
+  \end{block}
+  
+  \vspace{0.2cm}
+  \begin{block}{För dig med anställda (+ paketen)}
+    \footnotesize
+    \textbf{Mini+} (329 kr/mån), \textbf{Liten+} (439 kr/mån), \textbf{Mellan+} (589 kr/mån), \textbf{Stor+} (839 kr/mån)\\
+    Inkluderar: Lönehantering, faktura-attestering, anläggningsregister
+  \end{block}
+  
+  \vspace{0.2cm}
+  \begin{block}{Erbjudande för nystartade företag}
+    \footnotesize
+    \textbf{Kod: NYSTARTAD} – Valfritt paket kostnadsfritt i 6 månader!\\
+    \textit{(Gäller företag startade inom senaste 3 månaderna)}
+  \end{block}
+  
+  \vspace{0.3cm}
+  \begin{center}
+    \hyperlink{https://www.fortnox.se/paket}{\beamerbutton{Beställ Fortnox-paket}}
+  \end{center}
+  
+  \vspace{0.3cm}
+  \begin{flushright}
+    \hyperlink{bankrattigheter}{\beamerbutton{Nästa: Bankkoppling}}
+  \end{flushright}
+\end{frame}
+
+% Slide 24: Läsrättigheter till företagsbankkonto (BankRattigheterSlide i React, route: /bank)
+\begin{frame}[fragile,label=bankrattigheter]
+  \frametitle{Steg 1: Läsrättigheter till företagets bankkonto}
+
+  \begin{block}{Varför behövs detta?}
+    \vspace{0.2cm}
+    För att vi ska kunna hjälpa dig med löpande bokföring behöver vi läsrättigheter till ditt företagsbankkonto.
+    Detta gör att vi automatiskt kan hämta kontoutdrag och matcha betalningar mot fakturor.
+    \vspace{0.2cm}
+    \textbf{OBS:} Vi får ENDAST läsrättigheter – vi kan aldrig göra betalningar eller överföringar.
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{Så här gör du (välj din bank):}
+    \footnotesize
+    \begin{itemize}
+      \item \textbf{SEB:} Logga in på företag.seb.se → Inställningar → Behörigheter → Lägg till läsrättighet → Ange vårt org.nr: [AUTO-IFYLLT]
+      \item \textbf{Handelsbanken:} Företag.handelsbanken.se → Behörigheter → Kontoåtkomst → Lägg till extern part → Org.nr: [AUTO-IFYLLT]
+      \item \textbf{Nordea:} Logga in på företag.nordea.se → Administrera → Behörigheter → Open Banking → Ge läsrättighet → [AUTO-IFYLLT]
+      \item \textbf{Swedbank:} Företag.swedbank.se → Inställningar → Företagsbehörigheter → Lägg till mottagare → [AUTO-IFYLLT]
+      \item \textbf{Andra banker:} Kontakta din bank och be om läsrättighet (PSD2/Open Banking) för org.nr: [AUTO-IFYLLT]
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.4cm}
+  \begin{center}
+    \beamerbutton{✓ Klart – jag har gett läsrättighet}
+  \end{center}
+
+  \vspace{0.3cm}
+  \footnotesize
+  \textit{Tips: Ta en skärmdump när du givit behörigheten – då har du ett kvitto för framtida referens.}
+
+\end{frame}
+
+% ----------------------------------------------------------
+% Slide 25: Deklarationsombud via Skatteverket (DeklarationsombudSlide i React, route: /ombud)
+\begin{frame}[fragile]
+  \frametitle{Steg 2: Lägg till oss som deklarationsombud}
+
+  \begin{block}{Varför behövs detta?}
+    \vspace{0.2cm}
+    För att vi ska kunna deklarera F-skatt, moms och arbetsgivaravgifter åt dig behöver du lägga till oss
+    som deklarationsombud hos Skatteverket.
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{Så här gör du:}
+    \footnotesize
+    \begin{enumerate}
+      \item Gå till \textbf{skatteverket.se/etjanster}
+      \item Logga in med BankID
+      \item Välj \textbf{"Mina sidor"} → \textbf{"Fullmakter"} → \textbf{"Lägg till ombud"}
+      \item Ange vårt organisationsnummer: \textbf{[AUTO-IFYLLT från config.json]}
+      \item Välj behörigheter:
+        \begin{itemize}
+          \item ✓ Deklarationsombud (F-skatt)
+          \item ✓ Momsdeklaration
+          \item ✓ Arbetsgivardeklaration
+          \item ✓ Inkomstdeklaration för företag
+        \end{itemize}
+      \item Bekräfta med BankID
+    \end{enumerate}
+  \end{block}
+
+  \vspace{0.4cm}
+  \begin{center}
+    \beamerbutton{Verifiera att jag lagt till ombud}
+  \end{center}
+
+  \vspace{0.3cm}
+  \footnotesize
+  \textit{När du klickar verifierar vi via Skatteverkets Ombudshantering API att behörigheten är registrerad.}\\
+  \textit{Om det inte syns än: Det kan ta några minuter – prova igen om en stund.}
+
+\end{frame}
+
+% ----------------------------------------------------------
+% Slide 26: Digital dokumenthantering (Scan to Dropbox/Email) - EJ IMPLEMENTERAD ÄN
+% TODO: Skapa DocumentSetupSlide.jsx för route: /dokument-setup
+\begin{frame}[fragile]
+  \frametitle{Steg 3: Sätt upp digital dokumenthantering}
+
+  \begin{block}{Varför är detta viktigt?}
+    \vspace{0.2cm}
+    För att vi ska kunna bokföra snabbt och korrekt behöver vi få dina underlag digitalt.
+    Med rätt setup behöver du bara lägga fakturor och kvitton i skannern – resten sker automatiskt!
+  \end{block}
+
+  \vspace{0.4cm}Bokförda transaktioner
+
+Sök bland transaktioner som är bokförda till och med 2025-10-20 kl. 03.03
+
+Om du väljer att visa alla typer av transaktioner kan du även beställa utskrift av sökresultatet. Utskriften skickar vi till dig eller till den mottagare som du väljer.
+Val av tidsperiod Val av tidsperiod
+Valfri period
+Datum från och med Datum från och med
+Skriv datum i formatet år fyra siffror, månad två siffror och dag två siffror eller välj ur kalendern.
+
+Måndag 1 januari 2018
+Datum till och med Datum till och med
+Skriv datum i formatet år fyra siffror, månad två siffror och dag två siffror eller välj ur kalendern.
+
+Måndag 20 oktober 2025
+Typ av transaktion Typ av transaktion
+Välj vilka typer av kontohändelser eller transaktioner som du vill söka fram.
+
+Välj "Alla" om du vill beställa utskrift av sökresultatet (kontohistorik).
+transaktionstypDropdownBeskrivningtransaktionstypDropdownBeskrivningExtra
+Välj typ (Alla valda)
+Sökresultat (201)
+
+
+  \begin{block}{Alternativ 1: Scan to Email (enklast)}
+    \footnotesize
+    \textbf{Steg:}
+    \begin{enumerate}
+      \item Hitta "Scan to Email"-funktionen i din skanner (oftast under Settings/Network)
+      \item Lägg till vår e-postadress: \textbf{underlag@[DIN-BYRA].se} [AUTO-IFYLLT]
+      \item Testa genom att scanna ett kvitto och skicka
+      \item Vi bekräftar när vi mottagit test-dokumentet ✓
+    \end{enumerate}Välkommen som kund! 🎉
+    \textbf{Funkar med:} De flesta kontorsskannrar (Fujitsu, Brother, HP, Canon, Epson)
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{Alternativ 2: Scan to Dropbox (rekommenderas)}
+    \footnotesize
+    \textbf{Steg:}
+    \begin{enumerate}
+      \item Vi skapar en delad Dropbox-mapp: \textbf{[FÖRETAGSNAMN]\_Underlag}
+      \item Du får en inbjudan på e-post – acceptera den
+      \item Konfigurera din skanner att spara till Dropbox-mappen
+      \item Skapa undermappar: \texttt{Leverantörsfakturor}, \texttt{Kvitton}, \texttt{Avtal}, \texttt{Löner}
+    \end{enumerate}
+    \textbf{Fördel:} Du kan släppa filer från mobilen, datorn eller skannern – allt hamnar på samma ställe!
+  \end{block}
+
+  \vspace{0.4cm}
+  \begin{center}
+    \beamerbutton{✓ Klart – jag har konfigurerat dokumenthantering}
+  \end{center}
+
+\end{frame}
+
+% ----------------------------------------------------------
+% SLIDE 24b: Guide för vanliga skannermärken (expanderbar)
+% ----------------------------------------------------------
+\begin{frame}[fragile]
+  \frametitle{Steg 3b: Scannerguide (per märke)}
+  \framesubtitle{Expandera din scannermodell för detaljerad guide}
+
+  \begin{block}{Fujitsu ScanSnap (iX-serien, S1300, etc.)}
+    \footnotesize
+    \begin{enumerate}
+      \item Öppna \textbf{ScanSnap Manager}
+      \item Högerklicka på ikonen → \textbf{Settings}
+      \item Under "Save" välj \textbf{"Specify a folder"}
+      \item Bläddra till din Dropbox-mapp: \texttt{Dropbox/[FÖRETAGSNAMN]\_Underlag/}
+      \item Klart! Testa genom att scanna ett dokument
+    \end{enumerate}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{block}{Brother (ADS-serien, MFC-serien)}
+    \footnotesize
+    \begin{enumerate}
+      \item Tryck på \textbf{Scan} på skannerns display
+      \item Välj \textbf{"to E-mail"} eller \textbf{"to Network"}
+      \item Lägg till e-post: \textbf{underlag@[DIN-BYRA].se}
+      \item Spara inställningen som favorit (t.ex. "Bokföring")
+      \item Framöver: Tryck bara på favoriten och scanna!
+    \end{enumerate}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{block}{HP OfficeJet / LaserJet (med ADF)}
+    \footnotesize
+    \begin{enumerate}
+      \item Gå till skannerns webbgränssnitt (skriv IP-adressen i webbläsare)
+      \item Välj \textbf{Scan/Digital Send} → \textbf{Email}
+      \item Konfigurera SMTP (vi hjälper dig med detta)
+      \item Lägg till mottagare: \textbf{underlag@[DIN-BYRA].se}
+      \item Spara som snabbval
+    \end{enumerate}
+  \end{block}
+
+  \vspace{0.3cm}
+  \footnotesize
+  \textit{Behöver du hjälp? Ring oss på [TELEFONNUMMER] så går vi igenom setup tillsammans! (5-10 min)}
+
+\end{frame}
+
+
+% Slide 27: Välkommen som kund! 🎉 [WelcomeSlide.jsx]
+% React implementation: /src/components/Slides/WelcomeSlide.jsx
+% Route: /welcome - Final onboarding summary with completed steps, next steps, and contact info
+\begin{frame}[fragile]
+  \frametitle{🎉 Välkommen som kund!}
+
+  \begin{block}{Grattis – du är nu redo att börja!}
+    \vspace{0.2cm}
+    Alla steg är nu klara och vi kan börja arbeta med din bokföring.
+    Här är en sammanfattning av vad som hänt:
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{✓ Klart:}
+    \footnotesize
+    \begin{itemize}
+      \item ✓ Du har genomgått vår onboarding-process
+      \item ✓ Riskbedömning genomförd och godkänd
+      \item ✓ Avtal signerat med BankID
+      \item ✓ Läsrättigheter till bankkonto uppsatta
+      \item ✓ Deklarationsombud registrerat hos Skatteverket
+      \item ✓ Digital dokumenthantering konfigurerad
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{Nästa steg:}
+    \footnotesize
+    \begin{enumerate}
+      \item \textbf{Inom 24 timmar:} Din personliga redovisningskonsult kontaktar dig för att boka uppstartsmöte
+      \item \textbf{Uppstartsmöte:} Vi går igenom din verksamhet, förväntningar och bokföringsrutiner (30-45 min)
+      \item \textbf{Första bokföringen:} Vi påbörjar arbetet med din löpande bokföring
+      \item \textbf{Månadsmöte:} Varje månad får du en ekonomisk rapport och rådgivning
+    \end{enumerate}
+  \end{block}
+
+  \vspace{0.4cm}
+
+
+
+  \vspace{0.4cm}
+  \begin{center}
+    \Large\textbf{Tack för ditt förtroende!}\\
+    \vspace{0.2cm}
+    \normalsize\textit{Vi ser fram emot ett långt och framgångsrikt samarbete.}
+  \end{center}
+
+  \vspace{0.5cm}
+  \begin{flushright}
+    \beamerbutton{Nästa: Löpande rutiner}
+  \end{flushright}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Slide 28: Löpande rutiner [OngoingRoutinesSlide.jsx]
+% React implementation: /src/components/Slides/OngoingRoutinesSlide.jsx
+% Route: /rutiner - KYC updates, risk reassessment, document submission schedules
+\begin{frame}[fragile]
+  \frametitle{Löpande rutiner}
+  \framesubtitle{Så här håller vi din verksamhet uppdaterad och regelkonform}
+
+  \begin{block}{Viktigt att veta}
+    Du behöver inte komma ihåg alla dessa datum – vi skickar automatiska påminnelser och 
+    sköter de flesta rutinerna åt dig. Din enda uppgift är att leverera underlag enligt 
+    överenskommen tidsplan.
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{block}{🔄 KYC-uppdateringar (Årligen)}
+    \footnotesize
+    \begin{itemize}
+      \item Bekräfta ägarstruktur (förändringar i ägande över 25\%)
+      \item Uppdatera kontaktinformation för verkliga huvudmän
+      \item Verifiera verksamhetsbeskrivning och SNI-kod
+      \item Granska eventuella förändringar i styrelsens sammansättning
+    \end{itemize}
+    \textit{Vi skickar ut formulär via e-post 30 dagar innan årsdagen}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{block}{🛡️ Årlig riskbedömning (Årligen)}
+    \footnotesize
+    \begin{itemize}
+      \item Genomgång av transaktionsmönster från det senaste året
+      \item Kontroll mot uppdaterade sanktionslistor (EU, UN, OFAC)
+      \item Bedömning av PEP-status (Politically Exposed Persons)
+      \item Dokumentation av riskklassificering (låg/medel/hög)
+    \end{itemize}
+    \textit{Automatisk körning varje år + vid väsentliga förändringar}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{block}{📄 Dokumentinlämning (Månatligen)}
+    \footnotesize
+    \begin{itemize}
+      \item Senast den 10:e: Leverantörsfakturor för föregående månad
+      \item Senast den 10:e: Kvitton och utlägg
+      \item Vid löneperiod: Löneunderlag senast 5 dagar före utbetalning
+    \end{itemize}
+    \textit{Automatiska påminnelser 3 dagar innan deadline}
+  \end{block}Bokförda transaktioner
+
+Sök bland transaktioner som är bokförda till och med 2025-10-20 kl. 03.03
+
+Om du väljer att visa alla typer av transaktioner kan du även beställa utskrift av sökresultatet. Utskriften skickar vi till dig eller till den mottagare som du väljer.
+Val av tidsperiod Val av tidsperiod
+Valfri period
+Datum från och med Datum från och med
+Skriv datum i formatet år fyra siffror, månad två siffror och dag två siffror eller välj ur kalendern.
+
+Måndag 1 januari 2018
+Datum till och med Datum till och med
+Skriv datum i formatet år fyra siffror, månad två siffror och dag två siffror eller välj ur kalendern.
+
+Måndag 20 oktober 2025
+Typ av transaktion Typ av transaktion
+Välj vilka typer av kontohändelser eller transaktioner som du vill söka fram.
+
+Välj "Alla" om du vill beställa utskrift av sökresultatet (kontohistorik).
+transaktionstypDropdownBeskrivningtransaktionstypDropdownBeskrivningExtra
+Välj typ (Alla valda)
+Sökresultat (201)
+
+
+  \vspace{0.3cm}
+
+  \begin{block}{📅 Compliance-kalender (Enligt schema)}
+    \footnotesize
+    \begin{itemize}
+      \item Månatligen: Momsredovisning (vid månadsredovisning)
+      \item Kvartalsvis: Arbetsgivardeklaration
+      \item Maj varje år: Inkomstdeklaration och årsredovisning
+    \end{itemize}
+    \textit{Vi sköter alla inlämningar automatiskt – du får kopia}
+  \end{block}
+
+  \vspace{0.5cm}
+  \begin{flushright}
+    \beamerbutton{Nästa: Support \& kontakt}
+  \end{flushright}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Slide 29: Support & Kontakt [SupportSlide.jsx]
+% React implementation: /src/components/Slides/SupportSlide.jsx
+% Route: /support - How to get help, escalation, compliance questions
+\begin{frame}[fragile]Bokförda transaktioner
+
+Sök bland transaktioner som är bokförda till och med 2025-10-20 kl. 03.03
+
+Om du väljer att visa alla typer av transaktioner kan du även beställa utskrift av sökresultatet. Utskriften skickar vi till dig eller till den mottagare som du väljer.
+Val av tidsperiod Val av tidsperiod
+Valfri period
+Datum från och med Datum från och med
+Skriv datum i formatet år fyra siffror, månad två siffror och dag två siffror eller välj ur kalendern.
+
+Måndag 1 januari 2018
+Datum till och med Datum till och med
+Skriv datum i formatet år fyra siffror, månad två siffror och dag två siffror eller välj ur kalendern.
+
+Måndag 20 oktober 2025
+Typ av transaktion Typ av transaktion
+Välj vilka typer av kontohändelser eller transaktioner som du vill söka fram.
+
+Välj "Alla" om du vill beställa utskrift av sökresultatet (kontohistorik).
+transaktionstypDropdownBeskrivningtransaktionstypDropdownBeskrivningExtra
+Välj typ (Alla valda)
+Sökresultat (201)
+
+  \frametitle{Support \& Kontakt}
+  \framesubtitle{Vi finns här för att hjälpa dig – välj rätt kanal för snabbast svar}
+
+  \begin{columns}[T]
+  \column{0.48\textwidth}
+  
+  \begin{block}{💻 Teknisk support}
+    \footnotesize
+    Problem med inloggning, systemet eller filuppladdning\\
+    \textbf{E-post:} support@dinbyra.se\\
+    \textbf{Telefon:} 08-123 45 67\\
+    \textbf{Svar:} Inom 4 timmar\\
+    \textit{Mån-Fre 08:00-17:00}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{block}{📊 Bokföringsfrågor}
+    \footnotesize
+    Frågor om bokföring, verifikationer och rapporter\\
+    \textbf{Kontakt:} Din tilldelade redovisningskonsult\\
+    \textbf{Svar:} Inom 24 timmar\\
+    \textit{Se kontaktinformation i välkomstbrevet}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{block}{⚖️ Regelverksfrågor}
+    \footnotesize
+    Penningtvätt, KYC, sanktioner\\
+    \textbf{E-post:} compliance@dinbyra.se\\
+    \textbf{Telefon:} 08-123 45 68\\
+    \textbf{Svar:} Inom 24h (akut: 2h)\\
+    \textit{Mån-Fre 09:00-16:00}
+  \end{block}
+
+  \column{0.48\textwidth}
+  
+  \begin{block}{🏛️ Skattefrågor}
+    \footnotesize
+    Deklarationer, moms, Skatteverket\\
+    \textbf{E-post:} skatt@dinbyra.se\\
+    \textbf{Telefon:} 08-123 45 69\\
+    \textbf{Svar:} Inom 24h (deadline: samma dag)\\
+    \textit{Mån-Fre 08:00-17:00}
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{block}{🚨 Akuta ärenden}
+    \footnotesize
+    Brådskande situationer\\
+    \textbf{Ring alltid:} 08-123 45 70\\
+    \textbf{E-post:} akut@dinbyra.se\\
+    \textbf{Svar:} Omedelbar hantering\\
+    \textit{Helgfria vardagar 08:00-17:00}
+    
+    \vspace{0.2cm}
+    Exempel:
+    \begin{itemize}
+      \item Skatteverket kontaktar företaget
+      \item Misstänkta bedrägerier
+      \item Förelägganden med kort svarstid
+    \end{itemize}
+  \end{block}
+
+  \end{columns}
+
+  \vspace{0.4cm}
+
+  \begin{block}{Eskaleringsprocess}
+    \footnotesize
+    \textbf{1.} Kontakta rätt supportkanal $\rightarrow$ 
+    \textbf{2.} Får inget svar? Påminnelse efter 24h $\rightarrow$ 
+    \textbf{3.} Akut? Ring 08-123 45 70
+  \end{block}
+
+  \vspace{0.3cm}
+
+  \begin{block}{Självhjälpsresurser}
+    \footnotesize
+    \begin{itemize}
+      \item \textbf{FAQ:} Vanliga frågor och snabba svar
+      \item \textbf{Användarguider:} Steg-för-steg-instruktioner
+      \item \textbf{Videotutorials:} Lär dig genom att se
+      \item \textbf{Regelverksdokumentation:} AML, GDPR, bokföringslag
+    \end{itemize}
+  \end{block}
+
+  \vspace{0.5cm}
+  \begin{flushright}
+    \beamerbutton{Klar med onboarding! 🎉}
+  \end{flushright}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Sida för inställningar som erhålles vid klick på kuggghjulet uppe till höger
+
+% --- Slide: Inställningar (via kugghjulet) ---
+\begin{frame}[fragile]
+  \frametitle{Inställningar – åtkomst via kugghjulet uppe till höger}
+
+  \begin{block}{Syfte}
+    Denna sida låter användaren hantera sitt konto och firmans grundinformation.
+    För denna version används inga användarroller; allt hanteras av kontoägaren.
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{Funktionalitet}
+    \begin{enumerate}
+      \item \textbf{Firmakonfiguration} – Kontaktuppgifter som auto-fylls i dokument och avtal:
+        \begin{itemize}
+          \item Firmanamn, organisationsnummer
+          \item Supportkontakt (e-post, telefon)
+          \item Ansvarig för efterlevnad (compliance officer)
+          \item Skattekontor och revisorsuppgifter
+        \end{itemize}
+      Dessa uppgifter används för att automatiskt fylla i kontaktinformation i avtal, rapporter och kommunikation med klienter.
+      \vspace{0.2cm}
+      
+      \item \textbf{Ladda upp konfigurationsfil (config.json)} – \textit{Framtida funktion:}
+        \begin{itemize}
+          \item Textinnehåll för editerbara slides
+          \item Antal år för SIE-filhämtning (standard: 7 år enligt lag, kan reduceras för nystartade företag)
+          \item Valfria fält och textanpassningar
+        \end{itemize}
+      Vissa slides (t.ex.\ drop zones och inmatning av personnummer/org.nr) är låsta men kan ordnas om i listan.
+      \textit{OBS:} För närvarande används config.json endast för avtalsdata.
+      \vspace{0.2cm}
+      
+      \item \textbf{Användarhantering} – Hantera åtkomst till systemet:
+        \begin{itemize}
+          \item Registrera nya användare genom att skicka inbjudan till e-postadress
+          \item Se lista över aktiva användare med roller och senaste inloggning
+          \item \textbf{"Glömt lösenord"-funktionalitet} via e-post med säker återställningslänk
+          \item Ta bort användare (kräver bekräftelse)
+        \end{itemize}
+      \vspace{0.2cm}
+      
+      \item \textbf{Risktester och validering} – Information om automatiska kontroller:
+        \begin{itemize}
+          \item Länk till fullständig dokumentation: \texttt{VALIDATION\_TESTS\_NEW.md}
+          \item Översikt över testade områden:
+            \begin{itemize}
+              \item \textbf{Kategori 1:} SIE-filintegritet (KSUMMA, balansräkning, debet/kredit)
+              \item \textbf{Kategori 2:} Bristande bokföringskompetens (okunniga bokförare)
+              \item \textbf{Kategori 3:} Fuskindikationer (Test 3.3 Momsrapporter, 3.4 Avskrivningar, \textbf{3.7 Sammanslagna verifikationer, 3.8 Raderade transaktioner, 3.9 Sekvensbrott i verifikationsnummer})
+              \item \textbf{Kategori 4:} Penningtvätt \& kundbedrägeri (layering, PEP, sanktionslistor)
+            \end{itemize}
+          \item \textbf{OBS:} Testerna kan \textit{inte} stängas av av användaren.
+          \item Systemet "tjuter och plingar" vid avvikelser – detta är enligt lag obligatoriskt.
+          \item Användare måste acceptera att alla valideringskontroller körs på all bokföringsdata.
+          \item \textbf{Exempel på AI-detektering:} Test 3.7 använder Claude/GPT för att identifiera sammanslagna verifikationer (obfuscering) genom semantisk textanalys.
+          \item \textbf{Test 3.8 - Raderade transaktioner:} Validerar att \texttt{\#BTRANS} (borttagna) och \texttt{\#RTRANS} (korrigerade) finns i SIE-filen enligt bokföringslagen. Flaggar export "Utan strukna rader" (Visma Administration).
+          \item \textbf{Test 3.9 - Sekvensbrott:} Kontrollerar att verifikationsnummer är löpande inom varje serie (A1, A2, A3, ...). Saknade nummer indikerar manuell radering ur SIE-fil.
+        \end{itemize}
+      \vspace{0.2cm}
+      
+      \item \textbf{Prenumeration och fakturahantering:}
+        \begin{itemize}
+          \item Se aktuell prenumeration, status och förfallodatum
+          \item Förnya prenumeration (dirigeras till betalning via Stripe/Klarna)
+          \item Avsluta prenumeration (kräver bekräftelse, data raderas efter 30 dagar)
+          \item Fakturahistorik via extern integration (Fortnox/Stripe)
+          \item \textit{OBS:} Faktura-PDFer lagras INTE lokalt – endast metadata och externa länkar
+          \item Kunden kan ladda ner fakturor direkt från faktureringstjänstens portal
+        \end{itemize}
+      \vspace{0.2cm}
+      
+      \item \textbf{Ta bort konto} – \textit{Danger Zone:}
+        \begin{itemize}
+          \item Permanent radering av alla kunddata och bokföringsunderlag
+          \item Kräver dubbel bekräftelse (checkbox + bekräftelse-modal)
+          \item Varning: All data raderas omedelbart och kan ej återställas
+          \item Endast tillgängligt för kontoägare
+        \end{itemize}
+    \end{enumerate}
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}{Framtida UI-idéer}
+    \begin{itemize}
+      \item React-komponenter i Tailwind CSS (brand green palette: brand-50 till brand-900)
+      \item Moderna "card"-sektioner för varje inställningskategori med ikoner
+      \item Tydlig visuell hierarki med \texttt{hover}-effekter och "expand/collapse"-komponenter
+      \item Formulärvalidering i realtid för firmakonfiguration
+      \item Integration med backend via REST API för användar- och filhantering
+      \item Toast-notifikationer vid lyckade ändringar
+    \end{itemize}
+  \end{block}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{frame}{Administrationspanel - AdminDashboard}
+\framesubtitle{Systemöversikt och hantering för Celestial Consulting AB}
+
+\begin{block}{Syfte}
+Ge systemadministratören (Lasse) realtidsöversikt och kontroll över plattformen utan att lagra personlig kunddata.
+\end{block}
+
+\begin{block}{1. Dashboard-översikt (Startsida)}
+  \begin{itemize}
+    \item \textbf{Statistikkort (Cards):}
+      \begin{itemize}
+        \item API-anrop: Idag / Denna månad (med trendpilar: \textcolor{green}{↗} stigande, \textcolor{red}{↘} fallande)
+        \item Aktiva sessioner: Antal inloggade användare just nu (klickbar för att expandera lista)
+        \item Totalt kunder: Antal registrerade kunder med tillväxt \% sedan förra månaden
+        \item Systemdrift: Uptime \% (färgkodad: grön 99+\%, gul 95-99\%, röd <95\%)
+      \end{itemize}
+    \item \textbf{Recent Activity (Timeline):}
+      \begin{itemize}
+        \item Senaste 20 aktiviteter: Kundinloggning, dokumentuppladdning, risktest flaggad, supportärende skapat
+        \item Tidsstämpel, ikon per aktivitetstyp, anonym kundidentifiering (customer\_hash)
+        \item Klickbar för detaljer (öppnar modal med fullständig metadata)
+      \end{itemize}
+  \end{itemize}
+\end{block}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Administrationspanel - Support \& Fakturering}
+\framesubtitle{Hantering av kundärenden och ekonomi}
+
+\begin{block}{2. Support Queue (Ärendekö)}
+  \begin{itemize}
+    \item \textbf{Tabell med kolumner:}
+      \begin{itemize}
+        \item Kund: Anonym hash eller firmanamn (om tillåtet av kund)
+        \item Ärendetyp: Dropdown (Teknisk, Bokföring, Compliance, Skatt, Brådskande)
+        \item Prioritet: Badges med färgkodning (Hög=röd, Medel=orange, Låg=grön)
+        \item Status: Open / In Progress / Resolved med färgkodning
+        \item Väntetid: Beräknas automatiskt från skapelsetid (flagga om >24h)
+        \item Åtgärder: Ikonknappar (Visa detaljer, Markera löst, Eskalera)
+      \end{itemize}
+    \item \textbf{Filter- och sorteringskontroller:}
+      \begin{itemize}
+        \item Filtrera på: Ärendetyp, Prioritet, Status
+        \item Sortera efter: Väntetid (längst först), Prioritet, Skapelsedatum
+      \end{itemize}
+    \item \textbf{Ärendedetaljer (Modal):}
+      \begin{itemize}
+        \item Kundens meddelande, bifogade filer (screenshots), historik
+        \item Textfält för svar, "Skicka svar"-knapp (triggar email via SendGrid)
+        \item Intern anteckningsyta (syns ej för kund)
+      \end{itemize}
+  \end{itemize}
+\end{block}
+
+\begin{block}{3. Fakturering (Invoice Management)}
+  \begin{itemize}
+    \item \textbf{Fakturaöversikt (Tabell):}
+      \begin{itemize}
+        \item Kund, Belopp (kr), Status (Betald=grön, Väntande=orange, Förfallen=röd)
+        \item Förfallodatum (highlight om överskridet), Fakturatyp (Prenumeration, Engångskostnad)
+        \item Åtgärder: Ladda ner PDF (länk till Fortnox), Skicka påminnelse (email)
+      \end{itemize}
+    \item \textbf{Integration med Fortnox API:}
+      \begin{itemize}
+        \item Metadata lagras lokalt (invoice\_id, belopp, datum, status, fortnox\_url)
+        \item PDF:er hämtas on-demand från Fortnox via proxy-route med temporär signerad URL
+        \item "Skicka påminnelse" genererar automatiskt email med betalningslänk
+      \end{itemize}
+    \item \textbf{Mock-data för LIA-demo:}
+      \begin{itemize}
+        \item 10 testfakturor med varierande status (5 betalda, 3 väntande, 2 förfallna)
+        \item Realistiska belopp (1 200 - 5 000 kr/månad)
+      \end{itemize}
+  \end{itemize}
+\end{block}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Administrationspanel - Quick Actions \& Teknisk Bas}
+\framesubtitle{Snabbåtkomst och systemarkitektur}
+
+\begin{block}{4. Quick Actions Panel}
+  \begin{itemize}
+    \item \textbf{6 stora ikonknappar:}
+      \begin{itemize}
+        \item Skapa kund: Navigerar till onboarding-flöde
+        \item Kör riskscan: Triggar bakgrundsjobb för all bokföringsdata
+        \item Generera rapport: Exporterar PDF-sammanställning av alla tester
+        \item Exportera data: CSV-nedladdning av aggregerad metadata
+        \item Systeminställningar: Öppnar konfigurationsmodal
+        \item Dokumentation: Länk till VALIDATION\_TESTS\_NEW.md och API-docs
+      \end{itemize}
+    \item \textbf{Design:} Färgglada ikoner, hover-effekter, tooltips med beskrivningar
+  \end{itemize}
+\end{block}
+
+\begin{block}{Teknisk Implementation}
+  \begin{itemize}
+    \item \textbf{Frontend:} React + Tailwind CSS, routing via React Router (/admin)
+    \item \textbf{Mock-data:} Hårdkodade JSON-objekt för demo (statistics, tickets, invoices, activities)
+    \item \textbf{API-integration (framtida):}
+      \begin{itemize}
+        \item GET /api/admin/stats - Hämta dashboard-statistik
+        \item GET /api/admin/support/tickets - Hämta supportärenden
+        \item POST /api/admin/support/tickets/:id/resolve - Markera löst
+        \item GET /api/admin/invoices - Hämta fakturaöversikt
+        \item POST /api/admin/invoices/:id/remind - Skicka påminnelse
+        \item GET /api/admin/activity - Hämta recent activity timeline
+      \end{itemize}
+    \item \textbf{Responsive design:} Fungerar på desktop (primär) och tablet
+    \item \textbf{Åtkomstkontroll:} Endast admin-användare (role=admin) får tillgång
+  \end{itemize}
+\end{block}
+
+\begin{block}{Mock-data för LIA-Demo}
+  \begin{itemize}
+    \item 3 mock användare (Anna, Erik, Lisa från SettingsPage)
+    \item 5 supportärenden (2 open, 2 in-progress, 1 resolved)
+    \item 10 fakturor (5 betalda, 3 väntande, 2 förfallna)
+    \item 20 recent activities (login, upload, test flagged, support created)
+    \item Statistik: 1 234 API calls idag, 45 678 denna månad, 12 aktiva sessioner, 87 totalt kunder
+  \end{itemize}
+\end{block}
+
+\end{frame}
+
+
+
+\end{document}
+
+
+

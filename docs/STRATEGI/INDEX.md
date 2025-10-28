@@ -2,7 +2,7 @@
 
 **Princip:** Det som inte finns i detta index FINNS INTE!
 **Skapad:** 2025-10-26
-**Senast uppdaterad:** 2025-10-27 00:05
+**Senast uppdaterad:** 2025-10-28
 
 ---
 
@@ -14,7 +14,47 @@ Denna mapp innehåller strategiska dokument för Celestial Onboarding App - lån
 
 ## Strategidokument
 
-### 1. BANKGIRO_UPPFÖLJNING_UTKAST.md
+### 1. BYOK_API_SPECIFICATION.md
+
+**Skapad:** 2025-10-28
+**Status:** SPECIFICATION - Implementation pending
+**Prioritet:** 🔴 CRITICAL (Enterprise feature)
+
+**Syfte:**
+Tillåt stora redovisningsbyråer (PwC, Ludvig & Co, Grant Thornton) att använda sina egna API-avtal med Bolagsverket och Roaring.io istället för Celestials poolade nycklar.
+
+**Innehåll:**
+- **Affärsvärde:** Attraktivt för Enterprise-kunder, behåller kundrelation trots egen API-integration
+- **3 Tiers:** Starter (poolade nycklar), Professional (volymrabatt), Enterprise (BYOK)
+- **Prissättning:**
+  - Bolagsverket: 1000 kr/mån (500 anrop) = 2.50 kr/anrop efter moms
+  - Roaring.io: 2295 kr/mån total (1795 bas + 500 AML)
+  - Celestial markup: 0-50% beroende på tier
+- **Teknisk implementation:**
+  - Backend: AES-256 kryptering av credentials
+  - API proxy service med automatisk key selection
+  - Settings UI för Enterprise-kunder
+  - Audit logging och usage tracking
+- **Säkerhet:**
+  - Frontend ser ALDRIG Client Secret
+  - Master key via AWS Secrets Manager
+  - Yearly key rotation
+- **Migration plan:** Fas 1-3 (Q1-Q3 2026)
+
+**Kostnadsjämförelse stora byråer (1000+ anrop/mån):**
+- Celestial Professional: 3500 kr
+- Eget avtal (BYOK): 3545 kr → **BYOK REKOMMENDERAT** (full kontroll)
+
+**Nästa steg:**
+- [ ] Databas-schema för API credentials
+- [ ] Kryptering service
+- [ ] Settings UI (React)
+- [ ] Test connection endpoint
+- [ ] Documentation för Enterprise-kunder
+
+---
+
+### 2. BANKGIRO_UPPFÖLJNING_UTKAST.md
 
 **Skapad:** 2025-10-26
 **Status:** UTKAST - Mejl till Bankgirot (väntar på att skickas)
@@ -39,7 +79,7 @@ Denna mapp innehåller strategiska dokument för Celestial Onboarding App - lån
 
 ---
 
-### 2. DATAKÄLLOR_STRATEGI.md (23K)
+### 3. DATAKÄLLOR_STRATEGI.md (23K)
 
 **Skapad:** 2025-10-21
 **Status:** REFERENSDOKUMENT - Vissa delar föråldrade efter beslut om betallösning
