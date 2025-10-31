@@ -62,18 +62,20 @@ docs/
 
 ---
 
-## 4. Specifikationer (`/specifications/`)
+## 3. Teknisk Specifikation (`/specifications/`)
 
-**Syfte:** Tekniska specifikationer, UI/UX-design, API-endpoints, konstruktionsdokumentation
+**Syfte:** Tekniska specifikationer för UI/UX, API-endpoints, databas
 
-**Dokument:**
-- `Onboarding_app_ny.tex` (91KB) - Beamer presentation med alla slides
-- `CONFIG_STRUCTURE.md` - JSON-konfiguration för byråer
-- `LEGAL_TEXTS_STRUCTURE.md` (12KB) - Centraliserad lagtext-databas ⭐
-- `LocalStorage.md` (16KB) - useState → localStorage persistens för wizard ⭐ NYT!
-- LaTeX build artifacts (PDFs)
+**Huvuddokument:**
+- `Onboarding_app_ny.tex` (91KB) - Komplett UI/UX-spec för onboarding-flödet (Beamer)
+- `API_Endpoints_ContentSlides.tex` (83KB) - API-spec för content/slides endpoints (Beamer)
+- `Admin_Dashboard_Spec.tex` (31KB) - Admin dashboard spec (Beamer)
+- `LocalStorage.md` (16KB) - Konstruktionsdokument för localStorage i wizard
+- `SettingsPage.md` (24KB) - Konstruktionsdokument för Settings-sidan med fjärronboarding
 
 **Index:** [`specifications/INDEX.md`](./specifications/INDEX.md)
+
+---
 
 ---
 

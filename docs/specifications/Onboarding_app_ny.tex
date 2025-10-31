@@ -2862,6 +2862,95 @@
   \end{flushright}
 \end{frame}
 
+% Slide 11b: Penningflödesanalys med geografisk kartvisualisering (PenningflodesanalysSlide i React, route: /penningflodes)
+\begin{frame}[label=penningflodes]
+  \frametitle{Penningflödesanalys - Geografisk kartläggning}
+  \small
+  Forensisk analys av betalningsflöden med geografisk visualisering. \textcolor{red}{\textbf{OBS: Endast för byråchef i fjärronboarding-läge.}}
+  
+  \vspace{0.4cm}
+  \begin{alertblock}{Forensisk Bokföringsanalys}
+    \footnotesize
+    Denna slide analyserar geografiska betalningsflöden från SIE-filer och validerar mottagare mot Bolagsverket.
+    Syftet är att identifiera misstänkta transaktioner enligt 01FS 2024:20.
+  \end{alertblock}
+  
+  \vspace{0.4cm}
+  \textbf{Kartvisualisering:}\\
+  \vspace{0.2cm}
+  \footnotesize
+  \begin{itemize}
+    \item \textbf{Leaflet-karta} med OpenStreetMap-tiles, centrerad på Sverige (lat: 59.3293, lng: 18.0686, zoom: 6)
+    \item \textbf{Markörer} per transaktion med färgkodning:
+      \begin{itemize}
+        \footnotesize
+        \item \textcolor{green!70!black}{🟢 Grön}: Klientens folkbokföringsadress (hemadress)
+        \item \textcolor{red}{🔴 Röd}: MISSTÄNKT - Hyresbetalning till bostadsfastighet (potentiell privat levnadskostnad)
+        \item \textcolor{orange!80!black}{🟠 Orange}: Hyresbetalning till industrifastighet (OK)
+        \item \textcolor{blue}{🔵 Blå}: Leverantörer/suppliers
+        \item \textcolor{purple!70!black}{🟣 Lila}: Kunder/customers
+      \end{itemize}
+    \item \textbf{50 km-radie} runt klientens hemadress (grå cirkel)
+    \item \textbf{Klickbara popups} med detaljerad info: Namn, adress, belopp, frekvens, org.nr, verksamhet, risk score
+  \end{itemize}
+  
+  \vspace{0.4cm}
+  \begin{alertblock}{Varningar upptäckta}
+    \textcolor{red}{\textbf{⚠️ 2 misstänkta hyresbetalningar till bostadsfastigheter}}\\
+    \vspace{0.2cm}
+    \footnotesize
+    \begin{tabular}{|l|l|r|r|}
+      \hline
+      \textbf{Mottagare} & \textbf{Org.nr} & \textbf{Belopp} & \textbf{Risk} \\
+      \hline
+      Fastighets AB Bostäder, Göteborg & 556234-5678 & 15\,000 kr/mån & 85\% \\
+      \hline
+      Lägenhets AB Stockholm & 559123-4567 & 12\,500 kr/mån & 78\% \\
+      \hline
+    \end{tabular}
+    \vspace{0.2cm}\\
+    \textbf{Flagg-orsak:} Hyresbetalningar till bostadsfastigheter kan vara privata levnadskostnader som felaktigt dragits av i företaget.
+  \end{alertblock}
+  
+  \vspace{0.4cm}
+  \begin{block}{Backend-integration}
+    \footnotesize
+    \textbf{Dataflöde:}\\
+    1. \textbf{SIE-fil} parsas → Hitta alla Bankgiro-betalningar\\
+    2. \textbf{Bankgirot API} (BYOK-nyckel) → Koppla Bankgiro till Org.nr\\
+    3. \textbf{Bolagsverket API} (BYOK-nyckel) → Hämta verksamhetskod (SNI-kod)\\
+    4. \textbf{SNI-validering:} SNI 68201 (Bostadsfastigheter) = FLAGGA RÖD, SNI 68202 (Industrifastigheter) = OK\\
+    5. \textbf{Geocoding:} Adress → Lat/Lng (Google Maps API eller Nominatim)\\
+    6. \textbf{Distansberäkning:} Haversine-formel (avstånd från hemadress)
+    \vspace{0.2cm}\\
+    \textbf{Mock data (development):} 9 mockade locations (Stockholm, Göteborg, Malmö, Uppsala, Västerås, Örebro, Linköping, Helsingborg, Jönköping) med färdigdefinierade lat/lng, belopp, frekvens, risk scores.
+  \end{block}
+  
+  \vspace{0.4cm}
+  \begin{block}{Fjärronboarding-läge}
+    \footnotesize
+    \textbf{Remote mode:} Denna slide visas ENDAST för byråchefen. Klienten ser istället en väntskärm:\\
+    \vspace{0.2cm}
+    \textit{``Byråchefen granskar bokföringsdata. Du kommer att fortsätta till nästa steg när granskningen är klar.''}\\
+    \vspace{0.2cm}
+    När byråchefen är klar, skickas WebSocket-event: \texttt{forensic-review-complete} → Klienten fortsätter till Omsättningsanalys.
+  \end{block}
+  
+  \vspace{0.4cm}
+  \begin{block}{Nästa steg för byråchefen}
+    \footnotesize
+    ✅ Granska flaggade transaktioner i detalj (klicka på röda markörer)\\
+    ✅ Begär in originalkvitton för misstänkta hyresbetalningar\\
+    ⚠️ Dokumentera beslut i AML-dokumentation (01FS 2024:20 § 15)\\
+    ⚠️ Överväg fördjupad kundkännedom (EDD) om misstänkt skattefusk
+  \end{block}
+  
+  \vspace{0.5cm}
+  \begin{flushright}
+    \hyperlink{omsattning}{\beamerbutton{Nästa (Omsättningsanalys)}}
+  \end{flushright}
+\end{frame}
+
 % Slide 12: Omsättningsanalys
 \begin{frame}[label=omsattning]
   \frametitle{Omsättningsanalys}

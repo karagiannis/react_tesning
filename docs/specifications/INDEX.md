@@ -2,7 +2,7 @@
 
 **Princip:** Det som inte finns i detta index FINNS INTE!
 **Skapad:** 2025-10-26
-**Senast uppdaterad:** 2025-01-29
+**Senast uppdaterad:** 2025-10-31
 
 ---
 
@@ -274,6 +274,31 @@ specifications/
   - Task breakdown
   - Testing workflow
 - **Status:** ✅ Development workflow dokumenterad
+
+#### `LocalStorage.md` (16KB)
+- **Syfte:** Konstruktionsdokument för localStorage-implementation i wizard
+- **Innehåll:**
+  - useLocalStorage hook arkitektur
+  - localStorage keys och datastrukturer för Steg 1-4
+  - Info button UI pattern
+  - Data lifecycle diagram
+  - Säkerhetsöverväganden och best practices
+- **Status:** ✅ COMPLETED
+- **Senast uppdaterad:** 2025-10-31
+
+#### `SettingsPage.md` (24KB)
+- **Syfte:** Konstruktionsdokument för Settings-sidan med Themesberg-inspiration
+- **Innehåll:**
+  - Sidebar navigation struktur
+  - User management (invite, roles, permissions)
+  - Fjärronboarding session creation (access codes, JWT links)
+  - Byråinställningar (firm config, pricing, email templates)
+  - Fakturering mock (overview, create invoice)
+  - API-nycklar (BYOK)
+  - Access code generation (word-1234 format)
+  - Database schemas och API endpoints
+- **Status:** ✅ COMPLETED - Awaiting implementation
+- **Senast uppdaterad:** 2025-10-31
 
 ### Slide Structure och Organization
 - **Syfte:** Cleanup notes för riskfrågor i Beamer
