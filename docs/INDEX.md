@@ -64,11 +64,13 @@ docs/
 
 ## 4. Specifikationer (`/specifications/`)
 
-**Syfte:** Tekniska specifikationer, UI/UX-design, API-endpoints
+**Syfte:** Tekniska specifikationer, UI/UX-design, API-endpoints, konstruktionsdokumentation
 
 **Dokument:**
 - `Onboarding_app_ny.tex` (91KB) - Beamer presentation med alla slides
 - `CONFIG_STRUCTURE.md` - JSON-konfiguration för byråer
+- `LEGAL_TEXTS_STRUCTURE.md` (12KB) - Centraliserad lagtext-databas ⭐
+- `LocalStorage.md` (16KB) - useState → localStorage persistens för wizard ⭐ NYT!
 - LaTeX build artifacts (PDFs)
 
 **Index:** [`specifications/INDEX.md`](./specifications/INDEX.md)

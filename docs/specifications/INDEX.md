@@ -148,7 +148,7 @@ specifications/
 - Frontend: WelcomeSlide.jsx, SupportSlide.jsx
 - Mock data: `/src/data/mockFirmConfig.js`
 
-### LEGAL_TEXTS_STRUCTURE.md (12KB) ⭐ NYT!
+### LEGAL_TEXTS_STRUCTURE.md (12KB) ⭐
 
 **Skapad:** 2025-10-31
 **Typ:** Konstruktionsdokument
@@ -176,6 +176,45 @@ specifications/
 **Relaterad:**
 - `LEGAL_TEXT_CORRECTIONS.md` - Historik av lagtextfel och korrigeringar
 - `Onboarding_app_ny.tex` - UI-specifikation (användarfokus)
+
+### LocalStorage.md (16KB) ⭐ NYT!
+
+**Skapad:** 2025-10-31
+**Typ:** Konstruktionsdokument
+**Status:** ✅ Aktiv konstruktionsspecifikation
+
+**Innehåll:**
+- Custom hook: `useLocalStorage(key, initialValue)`
+- Automatisk sparning och laddning av formulärdata
+- localStorage-nycklar per wizard-steg (`onboarding-wizard-steg1-4`)
+- Datastrukturer för alla wizard-steg (Steg 1-3 implementerade)
+- Info button pattern (absolute top-4 right-4 + expandable)
+- Cross-tab synkronisering med storage events
+- Data lifecycle och säkerhetshänsyn
+- Framtida förbättringar (versionshantering, TTL, kryptering)
+
+**Syfte:**
+- Bevara formulärdata mellan navigeringar och sessioner
+- Förbättra UX - användare kan fortsätta där de slutade
+- Eliminera data loss vid tillbaka-navigation
+- Möjliggöra pausad onboarding över flera dagar
+
+**Implementation:**
+- Hook: `/src/hooks/useLocalStorage.js`
+- Steg 1: `RiskFragorSlide.jsx` (8 fields)
+- Steg 2: `RiskFragorSteg2Slide.jsx` (6 questions, BLOCK A/B/C)
+- Steg 3: `RiskFragorSteg3Slide.jsx` (5 questions, betalningsflöden)
+- Steg 4 EDD: Planerad implementation
+
+**Funktioner:**
+- Auto-load vid mount från localStorage
+- Auto-save vid varje onChange
+- `clearWizardData()` utility för data-rensning
+- Error handling med fallback till initialValue
+
+**Relaterad:**
+- `CONFIG_STRUCTURE.md` - Byråkonfiguration
+- `Onboarding_app_ny.tex` - Wizard-steg specifikation (rad 2248-2281)
 
 **Relation till LaTeX-specs:**
 - Refererar till slides 28-30 i Onboarding_app_ny.tex
