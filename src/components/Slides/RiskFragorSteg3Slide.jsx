@@ -74,7 +74,15 @@ export default function RiskFragorSteg3Slide({ onNext }) {
 
         <div className="space-y-6">
           {/* 1. Betalmetoder */}
-          <div>
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+            <button
+              onClick={() => toggleInfo('question1')}
+              className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
+              aria-label="Visa lagtext"
+            >
+              <Info className="w-5 h-5" />
+            </button>
+
             <label className="block text-sm font-medium text-brand-800 mb-2">
               1. Hur tar företaget betalt från kunder? *
             </label>
@@ -130,11 +138,31 @@ export default function RiskFragorSteg3Slide({ onNext }) {
                 ⚠️ <strong>Hög risk:</strong> Kontanter och kryptovaluta innebär ökad risk för penningtvätt
               </p>
             )}
+
+            {expandedInfo.question1 && (
+              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg text-xs space-y-2">
+                {getLegalTextsForQuestion('steg3', 'question1').map((lagtext, idx) => (
+                  <div key={idx}>
+                    <p className="font-semibold text-brand-900">{lagtext.law}</p>
+                    <p className="text-gray-700 mt-1">{lagtext.shortText}</p>
+                    <p className="text-gray-500 italic mt-1">Referens: [{lagtext.id}]</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* 2. Kontanterandel (conditional) */}
           {showKontanterFollowUp && (
-            <div>
+            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+              <button
+                onClick={() => toggleInfo('question2')}
+                className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
+                aria-label="Visa lagtext"
+              >
+                <Info className="w-5 h-5" />
+              </button>
+
               <label className="block text-sm font-medium text-brand-800 mb-2">
                 2. Om kontanter: Ungefär hur stor andel av omsättningen?
               </label>
@@ -167,11 +195,31 @@ export default function RiskFragorSteg3Slide({ onNext }) {
                   </p>
                 </div>
               )}
+
+              {expandedInfo.question2 && (
+                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg text-xs space-y-2">
+                  {getLegalTextsForQuestion('steg3', 'question2').map((lagtext, idx) => (
+                    <div key={idx}>
+                      <p className="font-semibold text-brand-900">{lagtext.law}</p>
+                      <p className="text-gray-700 mt-1">{lagtext.shortText}</p>
+                      <p className="text-gray-500 italic mt-1">Referens: [{lagtext.id}]</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {/* 3. Stora transaktioner */}
-          <div>
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+            <button
+              onClick={() => toggleInfo('question3')}
+              className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
+              aria-label="Visa lagtext"
+            >
+              <Info className="w-5 h-5" />
+            </button>
+
             <label className="block text-sm font-medium text-brand-800 mb-2">
               3. Förekommer transaktioner över 150 000 kr?
             </label>
@@ -213,10 +261,30 @@ export default function RiskFragorSteg3Slide({ onNext }) {
             <p className="text-xs text-brand-600 mt-1">
               PTL kräver förstärkt kundkännedom vid stora transaktioner
             </p>
+
+            {expandedInfo.question3 && (
+              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg text-xs space-y-2">
+                {getLegalTextsForQuestion('steg3', 'question3').map((lagtext, idx) => (
+                  <div key={idx}>
+                    <p className="font-semibold text-brand-900">{lagtext.law}</p>
+                    <p className="text-gray-700 mt-1">{lagtext.shortText}</p>
+                    <p className="text-gray-500 italic mt-1">Referens: [{lagtext.id}]</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* 4. Tredjepartsbetalningar */}
-          <div>
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+            <button
+              onClick={() => toggleInfo('question4')}
+              className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
+              aria-label="Visa lagtext"
+            >
+              <Info className="w-5 h-5" />
+            </button>
+
             <label className="block text-sm font-medium text-brand-800 mb-2">
               4. Tar företaget emot betalningar från tredje part?
             </label>
@@ -252,10 +320,30 @@ export default function RiskFragorSteg3Slide({ onNext }) {
                 ⚠️ <strong>Högrisk:</strong> Tredjepartsbetalningar innebär ökad risk för penningtvätt
               </p>
             )}
+
+            {expandedInfo.question4 && (
+              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg text-xs space-y-2">
+                {getLegalTextsForQuestion('steg3', 'question4').map((lagtext, idx) => (
+                  <div key={idx}>
+                    <p className="font-semibold text-brand-900">{lagtext.law}</p>
+                    <p className="text-gray-700 mt-1">{lagtext.shortText}</p>
+                    <p className="text-gray-500 italic mt-1">Referens: [{lagtext.id}]</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* 5. Utländska överföringar */}
-          <div>
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+            <button
+              onClick={() => toggleInfo('question5')}
+              className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
+              aria-label="Visa lagtext"
+            >
+              <Info className="w-5 h-5" />
+            </button>
+
             <label className="block text-sm font-medium text-brand-800 mb-2">
               5. Förekommer överföringar till/från utländska bankkonton?
             </label>
@@ -302,6 +390,18 @@ export default function RiskFragorSteg3Slide({ onNext }) {
                 className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 placeholder="Vilka länder?"
               />
+            )}
+
+            {expandedInfo.question5 && (
+              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg text-xs space-y-2">
+                {getLegalTextsForQuestion('steg3', 'question5').map((lagtext, idx) => (
+                  <div key={idx}>
+                    <p className="font-semibold text-brand-900">{lagtext.law}</p>
+                    <p className="text-gray-700 mt-1">{lagtext.shortText}</p>
+                    <p className="text-gray-500 italic mt-1">Referens: [{lagtext.id}]</p>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
