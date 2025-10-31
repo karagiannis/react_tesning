@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import Icon from '../Shared/Icon';
+import MoneyFlowMapWidget from './MoneyFlowMapWidget';
 
 const MySwal = withReactContent(Swal.mixin({
   customClass: {
@@ -688,6 +689,9 @@ const AdminDashboard = () => {
                 </p>
               </div>
             </div>
+
+            {/* Money Flow Map */}
+            <MoneyFlowMapWidget />
 
             {/* Fraud Alerts List */}
             <div className="bg-white rounded-lg shadow">
