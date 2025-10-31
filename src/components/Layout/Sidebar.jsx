@@ -33,9 +33,10 @@ export default function Sidebar({ currentPath, hasRoaringData = false }) {
     { path: '/omsattning', title: 'Omsättningsanalys', icon: 'trendingUp' },
     { path: '/resultat', title: 'Resultatanalys', icon: 'pieChart' },
     { path: '/bransch', title: 'Branschjämförelse', icon: 'comparison' },
-    // Deep dive analysis (slide 15)
+    // Deep dive analysis (slides 19-20)
     { path: '/bokanalys', title: 'Bokföringsanalys', icon: 'documentSearch' },
-    // Risk assessment and decision (slide 17)
+    { path: '/penningflodes', title: 'Penningflödesanalys', icon: 'map' },
+    // Risk assessment and decision (slide 20)
     { path: '/riskbedomning', title: 'Riskbedömning', icon: 'shield' },
     // Customer obligations (slide 18)
     { path: '/skyldigheter', title: 'Skyldigheter', icon: 'checkList' },

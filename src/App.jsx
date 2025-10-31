@@ -27,6 +27,7 @@ import OmsattningsanalysSlide from './components/Slides/OmsattningsanalysSlide';
 import ResultatanalysSlide from './components/Slides/ResultatanalysSlide';
 import BranschjamforelseSlide from './components/Slides/BranschjamforelseSlide';
 import BokforingsanalysSlide from './components/Slides/BokforingsanalysSlide';
+import PenningflodesanalysSlide from './components/Slides/PenningflodesanalysSlide';
 import RiskbedomningSlide from './components/Slides/RiskbedomningSlide';
 import SkyldigheterSlide from './components/Slides/SkyldigheterSlide';
 import AvtalSlide from './components/Slides/AvtalSlide';
@@ -274,8 +275,9 @@ export default function App() {
             <Route path="/bransch" element={<BranschjamforelseSlide onNext={() => navigate('/bokanalys')} onBack={() => navigate('/resultat')} />} />
             
             {/* Djupgranskning och beslut (slides 15-20) */}
-            <Route path="/bokanalys" element={<BokforingsanalysSlide onNext={() => navigate('/riskbedomning')} onBack={() => navigate('/bransch')} />} />
-            <Route path="/riskbedomning" element={<RiskbedomningSlide onNext={() => navigate('/skyldigheter')} onBack={() => navigate('/bokanalys')} />} />
+            <Route path="/bokanalys" element={<BokforingsanalysSlide onNext={() => navigate('/penningflodes')} onBack={() => navigate('/bransch')} />} />
+            <Route path="/penningflodes" element={<PenningflodesanalysSlide onNext={() => navigate('/riskbedomning')} onBack={() => navigate('/bokanalys')} />} />
+            <Route path="/riskbedomning" element={<RiskbedomningSlide onNext={() => navigate('/skyldigheter')} onBack={() => navigate('/penningflodes')} />} />
             <Route path="/skyldigheter" element={<SkyldigheterSlide onNext={() => navigate('/avtal')} onBack={() => navigate('/riskbedomning')} />} />
             <Route path="/avtal" element={<AvtalSlide onNext={() => navigate('/dokument')} onBack={() => navigate('/skyldigheter')} />} />
             <Route path="/dokument" element={<DocumentDeliverySlide onNext={() => navigate('/fortnox')} onBack={() => navigate('/avtal')} />} />

@@ -1,6 +1,6 @@
 import React from 'react';
 import SlideLayout from './SlideLayout';
-import MoneyFlowMapWidget from './MoneyFlowMapWidget';
+import MoneyFlowMapWidget from '../Admin/MoneyFlowMapWidget';
 
 const PenningflodesanalysSlide = ({ onNext, onBack }) => {
   return (
