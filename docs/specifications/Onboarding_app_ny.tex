@@ -445,26 +445,26 @@
   \end{center}
   
   \vspace{0.3cm}
-  
-  \begin{block}{\footnotesize Psykologisk teknik (intern anteckning för byrån):}
-    \tiny
-    \textbf{Normaliseringssekvens:}\\
-    1. Öppna denna slide i förväg\\
-    2. Småprata om vädret/semestern medan klienten läser texten perifert (30-60 sek)\\
-    3. Läs sedan texten högt som en "tråkig PowerPoint-föreläsare"\\
-    4. Resultat: Klienten accepterar processen utan att känna sig utpekad\\[0.2cm]
+  %%%Denna nstruktioner för byrån - vår kund i Docuemnts reubrik "hur man använder appen %%%
+  %\begin{block}{\footnotesize Psykologisk teknik (intern anteckning för byrån):}
+  %  \tiny
+  %  \textbf{Normaliseringssekvens:}\\
+  %   1. Öppna denna slide i förväg\\
+  %   2. Småprata om vädret/semestern medan klienten läser texten perifert (30-60 sek)\\
+  %   3. Läs sedan texten högt som en "tråkig PowerPoint-föreläsare"\\
+  %   4. Resultat: Klienten accepterar processen utan att känna sig utpekad\\[0.2cm]
     
-    \textbf{Nyckelord som normaliserar:}\\
-    • "Länsstyrelsen kräver" (extern myndighet, inte byrån)\\
-    • "ALLA nya kunder – ingen undantag" (du är inte speciell)\\
-    • "Detta är INTE vårt val" (vi är på samma sida)\\
-    • "Från och med 2024" (nytt krav, inte att vi blivit misstänksamma)\\[0.2cm]
+  %   \textbf{Nyckelord som normaliserar:}\\
+  %   • "Länsstyrelsen kräver" (extern myndighet, inte byrån)\\
+  %   • "ALLA nya kunder – ingen undantag" (du är inte speciell)\\
+  %   • "Detta är INTE vårt val" (vi är på samma sida)\\
+  %   • "Från och med 2024" (nytt krav, inte att vi blivit misstänksamma)\\[0.2cm]
     
-    \textbf{Liknelse från Försvarsmakten:}\\
-    Instruktören småpratar om fotboll medan rekryterna läser "SÄKERHETSKLASSAD INFO"\\
-    på tavlan. Efter 1 minut läses texten upp monotont. Rekryterna tänker:\\
-    "OK, detta gäller alla, inte bara mig."
-  \end{block}
+  %   \textbf{Liknelse från Försvarsmakten:}\\
+  %   Instruktören småpratar om fotboll medan rekryterna läser "SÄKERHETSKLASSAD INFO"\\
+  %   på tavlan. Efter 1 minut läses texten upp monotont. Rekryterna tänker:\\
+  %   "OK, detta gäller alla, inte bara mig."
+  % \end{block}
 \end{frame}
 
 \begin{alertblock}{Klicka ⓘ för viktig information om straffansvar}
@@ -664,10 +664,21 @@
 % RiskFragorSlide i React (route: /riskfragor)
 % Alla fält visas på samma sida för snabb överblick och enkel ifyllning
 % Detta matchar den nuvarande React-implementationen (RiskFragorSlide.jsx)
+% 
+% NAVIGATION: Multistep wizard med klickbara completion dots (1-4)
+% - Användaren kan klicka på prickarna för att hoppa mellan steg
+% - Endast steg med ifyllda fält är klickbara (validering)
+% - Aktiv sida markeras med brand-600 färg
+% - Tidigare steg kan alltid redigeras
 % ========================================================================
 
 \begin{frame}[label=riskfragor-steg1]
   \frametitle{Riskfrågor – Steg 1: Grundläggande information}
+  
+  \vspace{-0.2cm}
+  \begin{center}
+    \tiny \textbf{Navigation:} Klicka på prickarna (● ○ ○ ○) för att hoppa mellan steg 1-4
+  \end{center}
 
   \vspace{0.3cm}
 
@@ -685,7 +696,7 @@
   \end{block}
   \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
     \tiny \textbf{3 kap. 4 § PTL – Situationer som kräver kundkännedom}\\
-    \tiny  4 §   En verksamhetsutövare ska vidta åtgärder för kundkännedom vid etableringen av en 
+    \tiny  En verksamhetsutövare ska vidta åtgärder för kundkännedom vid etableringen av en 
     affärsförbindelse.\\
 
     \tiny Om verksamhetsutövaren inte har en affärsförbindelse med kunden, ska åtgärder för kundkännedom vidtas\\
@@ -699,10 +710,10 @@
     om överföringen överstiger ett belopp motsvarande 1 000 euro.
     Lag (2024:1166).\\[0.1cm]
     
-    \tiny \textbf{3 kap. 1 § första stycket PTL – Förbud mot affärsförbindelser och transaktioner}\\
+    \tiny \textbf{3 kap. 1 § 1 st. PTL – Förbud mot affärsförbindelser och transaktioner}\\
     \tiny Otillräcklig kundkännedom\\
 
-    \tiny 1 §   En verksamhetsutövare får inte etablera eller upprätthålla en affärsförbindelse 
+    \tiny En verksamhetsutövare får inte etablera eller upprätthålla en affärsförbindelse 
     eller utföra en enstaka transaktion, om verksamhetsutövaren inte har tillräcklig kännedom 
     om kunden för att kunna\\
     \tiny 1. hantera risken för penningtvätt eller finansiering av terrorism som kan förknippas med 
@@ -711,7 +722,7 @@
 
 
     \tiny \textbf{2 kap. 3 § PTL – Riskbedömning av kunder}\\
-    \tiny 3 §   En verksamhetsutövare ska bedöma den risk för penningtvätt eller finansiering av 
+    \tiny  En verksamhetsutövare ska bedöma den risk för penningtvätt eller finansiering av 
     terrorism som kan förknippas med kundrelationen (kundens riskprofil). Kundens riskprofil ska 
     bestämmas med utgångspunkt i den allmänna riskbedömningen och verksamhetsutövarens kännedom om kunden.\\
 
@@ -724,7 +735,7 @@
     
 
     \tiny \textbf{4 kap. 1-2 §§ PTL – Övervaknings- och rapporteringsskyldighet}\\
-    \tiny 1 §   En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma enstaka 
+    \tiny En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma enstaka 
     transaktioner i syfte att upptäcka aktiviteter och transaktioner som\\
     \tiny 1. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån den kännedom om 
     kunden som verksamhetsutövaren har,\\
@@ -752,7 +763,7 @@
 
     \tiny \textbf{3 kap. 16 § PTL – Skärpta åtgärder vid hög risk}
 
-    \tiny 16 §   Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med 
+    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med 
     kundrelationen bedöms som hög, ska särskilt omfattande kontroller, bedömningar och utredningar 
     enligt 7, 8 och 10-13 §§ göras.\\
 
@@ -761,8 +772,8 @@
     Sådana åtgärder kan avse inhämtande av ytterligare information om kundens affärsverksamhet 
     eller ekonomiska situation och uppgifter om varifrån kundens ekonomiska medel kommer.\\[0.1cm]
 
-    \tiny \textbf{2 kap. 8 § första stycket PTL – Interna rutiner och riktlinjer}\\
-    \tiny 8 §   En verksamhetsutövare ska ha dokumenterade rutiner och riktlinjer avseende sina åtgärder 
+    \tiny \textbf{2 kap. 8 § 1 st. PTL – Interna rutiner och riktlinjer}\\
+    \tiny En verksamhetsutövare ska ha dokumenterade rutiner och riktlinjer avseende sina åtgärder 
     för kundkännedom, övervakning och rapportering samt för behandling av personuppgifter.\\
 
     \tiny Rutinerna och riktlinjerna ska fortlöpande anpassas efter nya och förändrade risker för 
@@ -781,8 +792,88 @@
 
   \vspace{0.2cm}
 
+   % Företagsnamn med autocomplete
+  \textbf{2. Vilket företag representerar du?}* \hspace{0.3cm} ⓘ
+  \begin{block}{Autocomplete + Hidden org.nr}
+    \tiny Börja skriva företagsnamn... (Autocomplete söker i Bolagsverkets register)\\[0.2cm]
+    
+    \tiny \textit{Exempel:} 
+    \begin{itemize}
+      \item Användaren skriver "Anderssons A"
+      \item Dropdown visar: "Anderssons Atelje AB (556789-1234)"
+      \item Väljer från listan → Org.nr fylls i automatiskt
+    \end{itemize}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{Teknisk implementation:}\\
+    \tiny • Fuzzy search i lokal Bolagsverket-FIL (600 000+ företag, <1ms lookup)\\
+    \tiny • Autocomplete-komponent (Material-UI eller React-Select)\\
+    \tiny • Organisationsnummer: \underline{\hspace{3cm}} (förifyllt, kan redigeras manuellt)\\[0.2cm]
+    
+    \tiny \textbf{UX-logik för redigering:}\\
+    \tiny • Om användaren RADERAR företagsnamnet → RENSA även org.nr (eftersom de är kopplade)\\
+    \tiny • Om användaren ÄNDRAR org.nr manuellt → BEHÅLL det (tillåt manuell override)\\
+    \tiny • Autocomplete aktiveras igen när minst 2 tecken skrivs i företagsnamn-fältet\\
+    \tiny • Visuell feedback: Grön bakgrund (bg-brand-50) när org.nr är förifyllt från autocomplete\\[0.2cm]
+    
+    \tiny \textbf{Hittar du inte ditt företag?}\\
+    \tiny → \textit{Skriv in organisationsnummer manuellt} (gör direkt API-anrop till Bolagsverket)
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 7 §  PTL – Identifiering och kontroll av kunden}\\
+    \tiny En verksamhetsutövare ska identifiera kunden och kontrollera kundens identitet
+     genom identitetshandlingar eller registerutdrag eller genom andra uppgifter och handlingar
+     från en oberoende och tillförlitlig källa.\\
+
+    \tiny När första stycket tillämpas får man använda medel för elektronisk identifiering och
+     betrodda tjänster enligt Europaparlamentets och rådets förordning (EU) nr 910/2014 av den
+     23 juli 2014 om elektronisk identifiering och betrodda tjänster för elektroniska transaktioner
+     på den inre marknaden och om upphävande av direktiv 1999/93/EG. Andra säkra identifieringsprocesser 
+     på distans eller på elektronisk väg som är reglerade, erkända, godkända eller accepterade av 
+     relevanta myndigheter får också användas.\\
+
+    \tiny Om kunden företräds av en person som uppger sig handla på kundens vägnar, ska verksamhetsutövaren
+     kontrollera den personens identitet och behörighet att företräda kunden. Lag (2019:774).
+     \vspace{0.1cm}
+    
+    \tiny \textbf{01FS 2024:20, 3 kap. 3 §  – Identifiering av kunden}\\
+    \tiny 3 § Verksamhetsutövaren ska identifiera en kund som är en fysisk person genom att begära
+     uppgifter om personens namn, personnummer, samordningsnummer eller motsvarande nummer samt adress.
+
+    \tiny Verksamhetsutövaren ska identifiera en kund som är en juridisk person genom att begära
+     uppgifter om den juridiska personens namn och organisationsnummer, registrerad adress samt företrädare.
+
+    \tiny Om kunden företräds av ett ombud eller motsvarande, ska verksamhetsutövaren
+     också identifiera den personen i enlighet med första stycket.
+    \vspace{0.1cm}
+    
+    \tiny \textbf{01FS 2024:20, 3 kap. 4 § – Kontroll av kundens identitet}\\
+    \tiny 4 § Verksamhetsutövaren ska kontrollera identiteten hos en kund som är en fysisk 
+    person samt företrädare för en kund som är en juridisk person. Om kunden företräds av ett 
+    ombud eller motsvarande, ska verksamhetsutövaren också kontrollera ombudets identitet och 
+    behörighet att företräda kunden.\\[0.1cm]
+
+    \tiny Kontrollåtgärderna ska utföras och dokumenteras på det sätt som anges i nedanstående tabell.
+    Av dokumentationen ska det även framgå när kontrollen har utförts. 
+    Identitetskontroll ska genomföras även om kunden är en offentlig person eller känd sedan tidigare.\\[0.1cm]
+
+    \tiny Kontrollåtgärderna ska utföras i enlighet med nedanstående tabell, oavsett kundens risknivå.
+    (Se content-slide "Identitetskontroll" för sammanfattning av tabellens huvuddrag, eller 
+    fullständig tabell i 01FS 2024:20, 3 kap. 4 §)\\
+    \tiny \url{https://www.lansstyrelsen.se/stockholm/om-oss/om-lansstyrelsen-stockholm/lanets-forfattningssamling/forfattningar-2024/forfattningssamling-2024/2024-06-03-01fs-202420.html}\\[0.1cm]
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Organisationsnummer är grunden för identifiering av juridisk person enligt 3 kap. 7 § PTL. 
+    Vi måste kontrollera identiteten genom oberoende källor (Bolagsverket = offentligt register = 
+    tillförlitlig källa). Denna kontroll måste dokumenteras och sparas enligt 01FS 2024:20, 
+    oavsett om vi känner kunden sedan tidigare. Systemet hämtar automatiskt företagsdata från 
+    Bolagsverket och Roaring.io för att verifiera att företaget är registrerat och aktivt.
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
   % Kundtyper (checkboxes)
-  \textbf{2. Vilka typer av kunder har företaget?}* \hspace{0.3cm} ⓘ\\
+  \textbf{3. Vilka typer av kunder har företaget?}* \hspace{0.3cm} ⓘ\\
   \tiny
   ☐ Privatpersoner \hspace{0.5cm} ☐ Företag \hspace{0.5cm} ☐ Offentlig sektor
   \begin{block}{Validering}
@@ -790,7 +881,7 @@
   \end{block}
   \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
     % 3 kap. 1 § första stycket PTL – Förbud mot affärsförbindelser och transaktioner
-    \tiny \textbf{3 kap. 1 § första stycket PTL – Förbud mot affärsförbindelser och transaktioner}\\
+    \tiny \textbf{3 kap. 1 § 1 st. PTL – Förbud mot affärsförbindelser och transaktioner}\\
 
     \tiny Otillräcklig kundkännedom\\
 
@@ -803,10 +894,10 @@
     \vspace{0.1cm}
 
     % 4 kap. 1 § PTL – Övervaknings- och rapporteringsskyldighet
-    \tiny \textbf{4 kap. 1 § första stycket PTL – Övervaknings- och rapporteringsskyldighet}\\
+    \tiny \textbf{4 kap. 1 § 1 st. PTL – Övervaknings- och rapporteringsskyldighet}\\
     \tiny Övervaknings- och rapporteringsskyldighet
 
-    \tiny 1 §   En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma enstaka 
+    \tiny En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma enstaka 
     transaktioner i syfte att upptäcka aktiviteter och transaktioner som\\
     \tiny 1. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån den kännedom om 
     kunden som verksamhetsutövaren har,\\
@@ -819,7 +910,7 @@
 
     %  2 kap. 3 § PTL – Riskbedömning av kunder
     \tiny \textbf{2 kap. 3 § PTL – Riskbedömning av kunder}\\
-    \tiny 3 §   En verksamhetsutövare ska bedöma den risk för penningtvätt eller finansiering av 
+    \tiny En verksamhetsutövare ska bedöma den risk för penningtvätt eller finansiering av 
     terrorism som kan förknippas med kundrelationen (kundens riskprofil). 
     Kundens riskprofil ska bestämmas med utgångspunkt i den allmänna riskbedömningen och 
     verksamhetsutövarens kännedom om kunden.\\
@@ -867,110 +958,545 @@
 
   \vspace{0.2cm}
 
-  % Utländska partners
-  \textbf{3. Har företaget utländska affärspartners/kunder?}* \hspace{0.3cm} ⓘ
+  % Verksamhet ändrad
+  \textbf{4. Har verksamheten ändrats under de senaste 12 månaderna?}* \hspace{0.3cm} ⓘ
   \begin{block}{Textarea}
-    \tiny Om ja, vilka länder? Om nej, skriv "Nej"
+    \tiny Om ja, beskriv ändringen. Om nej, skriv "Nej"
   \end{block}
   \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
-    \tiny \textbf{3 kap. 11 § PTL – Kontroll av högriskländer}\\
-    \tiny 11 §   En verksamhetsutövare ska kontrollera om kunden är etablerad i ett land utanför EES
-     som av Europeiska kommissionen har identifierats som ett högrisktredjeland.\\[0.1cm]
-    
-    \tiny \textbf{Juridisk kommentar:}\\
-    \tiny Redovisningsbyrån fungerar som outsourcad ekonomifunktion och ser alla klientens 
-    transaktioner i bokföringen. När klienten handlar med utländska affärspartners blir dessa 
-    transaktioner synliga för byrån. Enligt 3 kap. 12 § PTL måste byrån inhämta 
-    information om "affärsförbindelsens syfte och avsedda karaktär", vilket inkluderar att 
-    förstå var klientens affärspartners finns och varför transaktionerna sker. Om byrån ser 
-    betalningar till högriskländer utan att förstå sammanhanget kan byrån göra sig skyldig 
-    till näringspenningtvätt (Lag 2014:307 § 7).\\[0.1cm]
-    
-    \tiny \textbf{2 kap. 4 § PTL – Omständigheter som kan tyda på låg risk}\\
-    \tiny 4 §   Som omständigheter som kan tyda på att risken för penningtvätt och finansiering av
-     terrorism är låg kan verksamhetsutövaren beakta bland annat att kunden\\
-    \tiny 1. är en stat, en region, en kommun eller motsvarande eller en juridisk person över vilken en stat,
-     en region, en kommun eller motsvarande, var för sig eller tillsammans,
-     har ett direkt eller indirekt rättsligt bestämmande inflytande,\\
-    \tiny 2. har hemvist inom EES,\\
-    \tiny 3. har hemvist i en stat som har bestämmelser om åtgärder mot penningtvätt
-     och finansiering av terrorism som motsvarar dem i denna lag och som tillämpar
-     dessa bestämmelser på ett effektivt sätt,\\
-    \tiny 4. har hemvist i en stat som har en låg nivå av korruption och annan relevant brottslighet, och\\
-    \tiny 5. är ett företag vars överlåtbara värdepapper är upptagna till handel på en reglerad
-     marknad inom EES eller på en motsvarande marknad utanför EES. Lag (2019:980).
-    \vspace{0.1cm}
-    
-    \tiny \textbf{2 kap. 5 § PTL – Omständigheter som kan tyda på hög risk}\\
-    \tiny 5 §   Som omständigheter som kan tyda på att risken för penningtvätt eller finansiering av terrorism är hög kan verksamhetsutövaren beakta bland annat att
-    \tiny 1. kundens ägarstruktur framstår som ovanlig eller alltför komplicerad för dess verksamhet,\\
-    \tiny 2. kunden bedriver kontantintensiv verksamhet,\\
-    \tiny 3. kunden är en juridisk person som har nominella aktieägare eller andelar utställda på innehavaren,\\
-    \tiny 4. kunden är en juridisk person, en trust eller en liknande juridisk konstruktion som har till syfte 
-     att förvalta en viss fysisk persons tillgångar,\\
-    \tiny 5. kunden har hemvist i en stat som saknar effektiva system för bekämpning av penningtvätt
-     eller finansiering av terrorism,\\
-    \tiny 6. kunden har hemvist i en stat med betydande korruption och annan relevant brottslighet,\\
-    \tiny 7. kunden har hemvist i en stat som är föremål för sanktioner, embargon eller liknande åtgärder,\\
-    \tiny 8. kunden har hemvist i en stat som finansierar eller stöder terroristverksamhet
-     eller där terroristorganisationer är verksamma,\\
-    \tiny 9. affärsrelationer eller transaktioner sker på distans, utan användning av metoder som på ett 
-     tillförlitligt sätt kan säkerställa kundens identitet, och\\
-    \tiny 10. betalning av varor eller tjänster görs av någon som är okänd eller saknar koppling till kunden.
-    \vspace{0.1cm}
-    
-    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
-    \tiny 16 §   Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med
-     kundrelationen bedöms som hög, ska särskilt omfattande kontroller, bedömningar och utredningar
-      enligt 7, 8 och 10-13 §§ göras.\\
 
-    \tiny Åtgärderna ska i sådant fall kompletteras med de ytterligare åtgärder som krävs för att
-     motverka den höga risken för penningtvätt eller finansiering av terrorism.
-     Sådana åtgärder kan avse inhämtande av ytterligare information om kundens affärsverksamhet
-     eller ekonomiska situation och uppgifter om varifrån kundens ekonomiska medel kommer.\\[0.1cm]
-    
-    \tiny \textbf{01FS 2024:20, 3 kap. 8 § – Skärpta kundkännedomsåtgärder}\\
-    \tiny 6 § Bestämmelser om skärpta åtgärder för kundkännedom finns i 3 kap. 16 och 17 §§ lagen (2017:630)
-     om åtgärder mot penningtvätt och finansiering av terrorism.\\
+    \tiny \textbf{3 kap. 12 § PTL – Information om affärsförbindelsens syfte och art}\\
+    \tiny En verksamhetsutövare ska inhämta information om affärsförbindelsens syfte och art.\\
 
-    \tiny Allmänna råd\\
-    \tiny Utöver vad som framgår av tabellen i 3 kap. 4 § dessa föreskrifter samt med hänsyn till vad
-     som framgår av 3 kap. 16 § lagen (2017:630) om åtgärder mot penningtvätt och finansiering av
-     terrorism och risken i den enskilda kundrelationen och övriga omständigheter kan skärpta
-    åtgärder bland annat avse\\
-
-    \tiny 1. fördjupad kontroll av kundens identitet, affärsverksamhet, ekonomiska situation och ekonomiska
-     medel genom inhämtning av information om kunden och kundens historik från flera tillförlitliga
-     och oberoende källor,\\
-    \tiny 2. att inhämta ytterligare information om affärsförbindelsens eller den enstaka transaktionens
-     avsedda syfte och art, genom att ställa fler frågor till kunden och kontrollera svaren,\\
-    \tiny 3. ökad frekvens för uppdatering av kundkännedomsinformation, exempelvis så att
-     informationen uppdateras flera gånger under ett år, eller\\
-    \tiny 4. ökad frekvens och intensitet för granskning av transaktioner, exempelvis så att 
-     granskning behöver göras oavsett belopp på transaktionen. För kunder som är etablerade 
-     i ett land som har identifierats som ett högrisktredjeland av Europeiska kommissionen, 
-     finns ytterligare krav på skärpta åtgärder i 3 kap. 17 § lagen (2017:630) om åtgärder mot 
-     penningtvätt och finansiering av terrorism.
+    \tiny Informationen ska ligga till grund för en bedömning av\\
+    \tiny 1. vilka aktiviteter och transaktioner som kunden kan förväntas vidta och genomföra inom ramen för affärsförbindelsen, och
+    \tiny 2. kundens riskprofil enligt 2 kap. 3 §.
     \vspace{0.1cm}
+
+    \tiny \textbf{3 kap. 13 § 1 st. PTL – Löpande uppföljning av affärsförbindelser}\\
+    \tiny En verksamhetsutövare ska löpande och vid behov följa upp pågående affärsförbindelser
+     i syfte att säkerställa att kännedomen om kunden enligt 7, 8 och 10-12 §§ är aktuell och 
+     tillräcklig för att hantera den bedömda risken för penningtvätt eller finansiering av terrorism.\\[0.1cm]
     
-    \tiny \textbf{EU-kommissionens lista över högriskländer}\\
-    \tiny Europeiska kommissionen publicerar en officiell lista över högriskländer med strategiska
-     brister i sina system mot penningtvätt och finansiering av terrorism. Detta är den juridiskt 
-     bindande listan som svenska verksamhetsutövare måste följa enligt PTL. 
-     Se aktuell lista på: \url{https://finance.ec.europa.eu/financial-crime/high-risk-third-countries_en}\\[0.1cm]
+    \tiny \textbf{4 kap. 1 § PTL – Övervaknings- och rapporteringsskyldighet}\\
+    \tiny 1 §   En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma
+     enstaka transaktioner i syfte att upptäcka aktiviteter och transaktioner som\\
+    \tiny 1. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån
+     den kännedom om kunden som verksamhetsutövaren har,\\
+    \tiny 2. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån den
+     kännedom som verksamhetsutövaren har om sina kunder, de produkter och tjänster som tillhandahålls, 
+     de uppgifter som kunden lämnar och övriga omständigheter, eller\\
+    \tiny 3. utan att vara avvikande enligt 1 eller 2 kan antas ingå som ett led i penningtvätt eller
+     finansiering av terrorism.
+
+    \tiny Inriktningen och omfattningen av övervakningen ska bestämmas med beaktande av de risker
+     som identifierats i den allmänna riskbedömningen, den risk för penningtvätt och finansiering 
+     av terrorism som kan förknippas med kundrelationen och annan information om tillvägagångssätt 
+     för penningtvätt eller finansiering av terrorism.
+
+    \tiny \textbf{4 kap. 2 § PTL – Övervaknings- och rapporteringsskyldighet}\\
+    \tiny Om avvikelser eller misstänkta aktiviteter eller transaktioner uppmärksammas
+     enligt 1 § eller på annat sätt, ska en verksamhetsutövare genom skärpta åtgärder för 
+     kundkännedom enligt 3 kap. 16 § och andra nödvändiga åtgärder bedöma om det finns skälig grund 
+     att misstänka att det är fråga om penningtvätt eller finansiering av terrorism eller att 
+     egendom annars härrör från brottslig handling.
+
+    \tiny När en verksamhetsutövare anser att det finns skälig grund att misstänka att det är
+     fråga om penningtvätt eller finansiering av terrorism eller att egendom annars härrör 
+     från brottslig handling, behöver ytterligare åtgärder enligt första stycket inte vidtas.
+
+    \tiny \textbf{4 kap. 3 § PTL – Övervaknings- och rapporteringsskyldighet}\\
+    \tiny Om en verksamhetsutövare efter en bedömning enligt 2 § har skälig grund att 
+    misstänka penningtvätt eller finansiering av terrorism eller att egendom annars härrör 
+    från brottslig handling, ska uppgifter om alla omständigheter som kan tyda på detta utan 
+    dröjsmål rapporteras till Polismyndigheten.
+
+    \tiny En sådan rapport ska göras även om transaktioner inte genomförs liksom om det före
+     ingåendet av en affärsförbindelse eller utförandet av en transaktion uppkommer misstanke om 
+     att kunden avser att använda verksamhetsutövarens produkter eller tjänster för penningtvätt 
+     eller finansiering av terrorism.
+
+    \tiny Om den egendom som avses i rapporten till Polismyndigheten finns hos verksamhetsutövaren
+     ska detta anges särskilt, liksom i förekommande fall uppgifter om\\
+    \tiny 1. vilka tillgodohavanden kunden har hos verksamhetsutövaren,\\
+    \tiny 2. huruvida verksamhetsutövaren avstått från att genomföra en misstänkt transaktion, och\\
+    \tiny 3. mottagare av en misstänkt transaktion.\\[0.1cm]
+
+    
+    
+    \tiny \textbf{Röda flaggor vid verksamhetsändring:}\\
+    \begin{itemize}
+      \item Plötslig verksamhetsändring kombinerat med ägarskifte eller ny ledning
+      \item Branscher med högre risk (kontantintensiva, kryptovaluta, värdeöverföring)
+      \item Historiska bokföringsdata saknas eller är inkonsekvent
+      \item Ändring från lågrisverksamhet till högriskverksamhet
+    \end{itemize}
+    \vspace{0.1cm}
     
     \tiny \textbf{Varför frågar vi detta?}\\
-    \tiny Om ert företag har kunder i högriskländer påverkar det byråns riskbedömning av er som klient.
-     Vi måste kunna förklara för Länsstyrelsen (tillsynsmyndigheten) varför vi accepterade er som klient 
-     och vilka åtgärder vi vidtagit för att hantera risken. 
-     Detta är inte för att misstänkliggöra er - lagen tvingar oss att dokumentera detta 
-     enligt 3 kap. 12 § PTL (information om affärsförbindelsens syfte och art).
+    \tiny Lagen tvingar oss att \textbf{löpande} ställa uppföljningsfrågor för att säkerställa att vår
+     kännedom om er verksamhet är aktuell. Detta är inte för att vi misstänker er - det är ett
+    lagkrav enligt 3 kap. 13 § PTL. Om er verksamhet ändras måste vi uppdatera er riskprofil 
+    och bedöma om nya åtgärder krävs. Väsentliga förändringar kan indikera ökad risk som kräver 
+    fördjupad granskning.
   \end{alertblock}
 
   \vspace{0.2cm}
 
-  % Leverantörer
-  \textbf{4. Vilka är företagets största leverantörer?}* \hspace{0.3cm} ⓘ
+ 
+  % Personnummer
+  \textbf{5. Personnummer (VD/Firmatecknare):}* \underline{\hspace{4cm}} \hspace{0.3cm} ⓘ
+  \begin{block}{Format \& API-trigger}
+    \tiny YYYYMMDD-XXXX (minst 12 siffror) | Triggar Skatteverket SPAR-kontroll
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 7 §  PTL – Identifiering och kontroll av kunden}\\
+    \tiny En verksamhetsutövare ska identifiera kunden och kontrollera kundens identitet
+     genom identitetshandlingar eller registerutdrag eller genom andra uppgifter och handlingar
+     från en oberoende och tillförlitlig källa.\\
+
+    \tiny När första stycket tillämpas får man använda medel för elektronisk identifiering och
+     betrodda tjänster enligt Europaparlamentets och rådets förordning (EU) nr 910/2014 av den
+     23 juli 2014 om elektronisk identifiering och betrodda tjänster för elektroniska transaktioner
+     på den inre marknaden och om upphävande av direktiv 1999/93/EG. Andra säkra identifieringsprocesser 
+     på distans eller på elektronisk väg som är reglerade, erkända, godkända eller accepterade av 
+     relevanta myndigheter får också användas.\\
+
+    \tiny Om kunden företräds av en person som uppger sig handla på kundens vägnar, ska verksamhetsutövaren
+     kontrollera den personens identitet och behörighet att företräda kunden. Lag (2019:774).
+     \vspace{0.1cm}
+    
+    \tiny \textbf{01FS 2024:20, 3 kap. 3 §  – Identifiering av kunden}\\
+    \tiny Verksamhetsutövaren ska identifiera en kund som är en fysisk person genom att begära
+     uppgifter om personens namn, personnummer, samordningsnummer eller motsvarande nummer samt adress.
+
+    \tiny Verksamhetsutövaren ska identifiera en kund som är en juridisk person genom att begära
+     uppgifter om den juridiska personens namn och organisationsnummer, registrerad adress samt företrädare.
+
+    \tiny Om kunden företräds av ett ombud eller motsvarande, ska verksamhetsutövaren
+     också identifiera den personen i enlighet med första stycket.
+    \vspace{0.1cm}
+    
+    \tiny \textbf{01FS 2024:20, 3 kap. 4 § – Kontroll av kundens identitet}\\
+    \tiny Verksamhetsutövaren ska kontrollera identiteten hos en kund som är en fysisk 
+    person samt företrädare för en kund som är en juridisk person. Om kunden företräds av ett 
+    ombud eller motsvarande, ska verksamhetsutövaren också kontrollera ombudets identitet och 
+    behörighet att företräda kunden.\\[0.1cm]
+
+    \tiny Kontrollåtgärderna ska utföras och dokumenteras på det sätt som anges i nedanstående tabell.
+    Av dokumentationen ska det även framgå när kontrollen har utförts. 
+    Identitetskontroll ska genomföras även om kunden är en offentlig person eller känd sedan tidigare.\\[0.1cm]
+
+    \tiny Kontrollåtgärderna ska utföras i enlighet med nedanstående tabell, oavsett kundens risknivå.
+    (Se content-slide "Identitetskontroll" för sammanfattning av tabellens huvuddrag, eller 
+    fullständig tabell i 01FS 2024:20, 3 kap. 4 §)\\
+    \tiny \url{https://www.lansstyrelsen.se/stockholm/om-oss/om-lansstyrelsen-stockholm/lanets-forfattningssamling/forfattningar-2024/forfattningssamling-2024/2024-06-03-01fs-202420.html}\\[0.1cm]
+    
+    \tiny \textbf{Automatisk kontroll via API:er}\\
+    \tiny När du anger organisationsnummer hämtar systemet automatiskt uppgifter från:
+    \begin{itemize}
+      \item \textbf{Bolagsverket:} Firma, adress, styrelse, verkställande direktör, firmatecknare
+      \item \textbf{Roaring.io KYC/AML:} Verkliga huvudmän, näringsförbud, sanktionslistor (EU/OFAC/UN), PEP-screening
+    \end{itemize}
+    \vspace{0.1cm}
+    
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Personnummer är nödvändigt för att identifiera den fysiska person som företräder företaget (VD, styrelseledamot, firmatecknare) enligt 3 kap. 7 § PTL. Vi måste kontrollera att personen har behörighet att företräda kunden och att personen inte är föremål för sanktioner eller är politiskt exponerad person (PEP), vilket skulle kräva Enhanced Due Diligence. SPAR-registret = offentligt register = tillförlitlig källa enligt PTL.
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  % Verklig huvudman (endast juridisk person)
+  \textbf{6. (Om juridisk person) Är det du som är verklig huvudman?}* \hspace{0.3cm} ⓘ\\
+  \tiny
+  ◯ Ja, jag äger/kontrollerar >25\% \hspace{0.5cm} ◯ Nej \hspace{0.5cm} ◯ Ej tillämpligt (enskild firma)
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+
+    % Definition av verklig huvudman
+    \tiny \textbf{ 1 kap. 3 § Lag (2017:631) – Definition av verklig huvudman}\\
+    \tiny Verklig huvudman\\
+
+    \tiny   Med verklig huvudman avses\\
+    \tiny  1. en fysisk person som, ensam eller tillsammans med någon annan,
+     ytterst äger eller kontrollerar en juridisk person, eller
+    \tiny   2. en fysisk person till vars förmån någon annan handlar.
+
+    \tiny Om inte annat följer av omständigheterna i det enskilda fallet, ska en fysisk person
+     anses vara verklig huvudman, om han eller hon omfattas av en presumtion om kontroll enligt 4-6 §§.
+    \vspace{0.1cm}
+
+    % Presumtion om kontroll
+    \tiny \textbf{ 1 kap. 4 § Lag (2017:631) – Presumtion om kontroll}\\
+    \tiny  En fysisk person ska antas utöva den yttersta kontrollen över en juridisk person,
+     om han eller hon\\
+    \tiny   1. på grund av innehav av aktier, andra andelar eller medlemskap kontrollerar mer än 25 procent
+     av det totala antalet röster i den juridiska personen,\\
+    \tiny   2. har rätt att utse eller avsätta mer än hälften av den juridiska personens
+     styrelseledamöter eller motsvarande befattningshavare, eller\\
+    \tiny   3. på grund av avtal med ägare, medlem eller den juridiska personen,
+     föreskrift i bolagsordning, bolagsavtal och därmed jämförbara handlingar, 
+     kan utöva kontroll enligt 1 eller 2.\\
+
+    \tiny Om en fysisk person ska antas utöva den yttersta kontrollen över en eller flera
+     juridiska personer som utövar kontroll över en annan juridisk person på ett sätt som 
+     anges i första stycket, ska han eller hon antas utöva den yttersta kontrollen också 
+     över den senare juridiska personen.
+    \vspace{0.1cm}
+
+    \tiny \textbf{ 1 kap. 5 § Lag (2017:631) – Presumtion om kontroll}\\
+    \tiny  En fysisk person ska antas utöva den yttersta kontrollen över en juridisk person,
+     om han eller hon tillsammans med en eller flera närstående kan kontrollera en juridisk person 
+     enligt 4 §.\\
+
+    \tiny Med närstående avses make, registrerad partner, sambo, barn och deras make, registrerade
+     partner eller sambo samt föräldrar.\\
+    \vspace{0.1cm}
+
+    % Utredning av verklig huvudman
+    \tiny \textbf{3 kap. 8 § 1 st. PTL – Utredning av verklig huvudman}\\
+    \tiny En verksamhetsutövare ska utreda om kunden har en verklig huvudman.
+     En sådan utredning ska åtminstone avse sökning i registret över verkliga huvudmän 
+     enligt lagen (2017:631) om registrering av verkliga huvudmän. Om kunden är en 
+     juridisk person, en trust eller en liknande juridisk konstruktion, ska utredningen 
+     omfatta åtgärder för att förstå kundens ägarförhållanden och kontrollstruktur. 
+     Om kunden har en verklig huvudman, ska verksamhetsutövaren vidta åtgärder för 
+     att kontrollera den verkliga huvudmannens identitet.\\[0.1cm]
+    
+    % Alternativ verklig huvudman
+    \tiny \textbf{3 kap. 8 § 3 st. PTL – Alternativ verklig huvudman}\\
+    \tiny Om kunden är en juridisk person och det efter åtgärder enligt första stycket
+     står klart att den juridiska personen inte har en verklig huvudman, ska den person 
+     som är styrelseordförande, verkställande direktör eller motsvarande befattningshavare 
+     anses vara verklig huvudman. Detsamma gäller om verksamhets- utövaren har anledning att 
+     anta att den person som identifierats enligt första stycket inte är den verkliga huvudmannen. (2019:1254).\\[0.1cm]
+
+    % Utredning av verklig huvudman
+    \tiny \textbf{ 3 kap. 9§ PTL – Utredning av verklig huvudman}\\
+    \tiny  Kontroll av kundens och den verkliga huvudmannens identitet ska slutföras
+      innan en affärsförbindelse etableras eller en enstaka transaktion utförs.\\
+
+    \tiny Om det är nödvändigt för att inte avbryta verksamhetens normala gång, får identitetskontroll
+     med anledning av en ny affärsförbindelse göras senare än enligt första stycket, dock senast när 
+     affärsförbindelsen etableras.\\
+
+    \tiny Andra stycket får endast tillämpas om risken för penningtvätt eller finansiering av terrorism är låg.\\[0.1cm]
+
+    % Utredning av verklig huvudman om PEP
+    \tiny \textbf{ 3 kap. 10§ PTL – Utredning av verklig huvudman om PEP}\\
+    \tiny En verksamhetsutövare ska bedöma om kunden eller kundens verkliga huvudman är en person 
+     i politiskt utsatt ställning eller en familjemedlem eller känd medarbetare till en sådan person.\\[0.1cm]
+
+    % Utredning av verklig huvudman från högriskland
+    \tiny \textbf{3 kP. 17 § 1 st. PTL - Utredning av verklig huvudman från högriskland}\\
+    \tiny Skärpta åtgärder enligt 16 § ska vidtas vid affärsförbindelser eller enstaka 
+     transaktioner när kunden är etablerad i ett land utanför EES som har identifierats som ett 
+     högrisktredjeland av Europeiska kommissionen.\\[0.1cm]
+
+    % Skärpta åtgärder
+    \tiny \textbf{3 kP. 17 § 2 st. PTL - Utredning av verklig huvudman från högriskland}\\
+    \tiny Sådana åtgärder ska åtminstone avse skärpning av övervakningen av pågående affärsförbindelser och bedömningen av enstaka
+     transaktioner enligt 4 kap. 1 § och omfatta inhämtande av\\
+    \tiny 1. ytterligare information om kunden och den verkliga huvudmannen,\\
+    \tiny 2. ytterligare information om affärsförbindelsens eller den enstaka transaktionens syfte och art,\\
+    \tiny 3. information om kundens och den verkliga huvudmannens ekonomiska situation och varifrån kundens
+     och den verkliga huvudmannens ekonomiska medel kommer, och\\
+    \tiny 4. godkännande från en behörig beslutsfattare att etablera eller upprätthålla en affärsförbindelse.
+    \vspace{0.1cm}
+
+    % Kontroll av verklig huvudman enligt Länsstyrelsen Stockholm
+    \tiny \textbf{01FS 2024:20, 3 kap. 2 § – Kontroll av verklig huvudman}\\
+    \tiny Verksamhetsutövaren ska kontrollera den verkliga huvudmannens identitet på det sätt som anges i 3 kap. 4 § dessa föreskrifter (samma kontroll som för företrädare - dokumenteras och dateras).\\[0.1cm]
+    
+    \tiny \textbf{Automatisk kontroll via API:er}\\
+    \tiny Systemet hämtar automatiskt uppgifter om verkliga huvudmän från:
+    \begin{itemize}
+      \item \textbf{Bolagsverkets register över verkliga huvudmän} (enligt lag 2017:631)
+      \item \textbf{Roaring.io KYC/AML:} UBO-data, PEP-screening, sanktionslistor
+    \end{itemize}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Vi måste utreda och förstå ägarförhållanden och kontrollstruktur enligt 3 kap. 8 § PTL. Verklig huvudman är den fysiska person som ytterst kontrollerar företaget (>25\% röster, kontroll över styrelse, eller avtalskontroll). Om ingen verklig huvudman finns blir VD/styrelseordförande automatiskt verklig huvudman enligt PTL. Din bekräftelse hjälper oss verifiera korrekthet av automatiska uppgifter från Bolagsverket.
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  % PEP
+  \textbf{7. Är någon nyckelperson (VD/styrelse/ägare) politiskt exponerad person (PEP)?}* \hspace{0.3cm} ⓘ\\
+  \tiny
+  ☐ Ja, enligt PTL 1 kap 8§ 5 (t.ex. riksdagsledamot, minister, diplomat, VD i statligt bolag)
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{1 kap. 8 § punkt 5 PTL – Definition av person i politiskt utsatt ställning}\\
+    \tiny 5. person i politiskt utsatt ställning: fysisk person som har eller har haft en
+     viktig offentlig funktion i en stat eller i en internationell organisation,\\[0.1cm]
+    
+    \tiny \textbf{1 kap. 9 § PTL – Viktig offentlig funktion i en stat}\\
+    \tiny Med viktig offentlig funktion i en stat avses funktioner som\\
+    \tiny   1. stats- eller regeringschefer, ministrar samt vice och biträdande ministrar,\\
+    \tiny   2. parlamentsledamöter och ledamöter av liknande lagstiftande organ,\\
+    \tiny   3. ledamöter i styrelsen för politiska partier,\\
+    \tiny   4. domare i högsta domstol, konstitutionell domstol eller andra rättsliga organ på hög nivå vilkas beslut endast undantagsvis kan överklagas,\\
+    \tiny   5. högre tjänstemän vid revisionsmyndigheter och ledamöter i centralbankers styrande organ,\\
+    \tiny   6. ambassadörer, beskickningschefer samt höga officerare i försvarsmakten, och\\
+    \tiny   7. personer som ingår i statsägda företags förvaltnings-, lednings- eller kontrollorgan.\\
+
+    \tiny Med viktig offentlig funktion i en internationell organisation avses funktioner som direktörer, biträdande direktörer, styrelseledamöter och innehavare av liknande poster.
+          Lag (2020:51).\\[0.1cm]
+
+    % Familjemedlemmar och kända medarbetare
+    \tiny \textbf{1 kap. 10 § PTL – Familjemedlemmar och kända medarbetare}\\
+    \tiny Med familjemedlem till en person i politiskt utsatt ställning avses make,
+     registrerad partner, sambo, barn och deras makar, registrerade partner eller sambor samt föräldrar.\\
+
+    \tiny Med känd medarbetare till en person i politiskt utsatt ställning avses\\
+    \tiny  1. fysisk person som, enligt vad som är känt eller finns anledning att förmoda,
+     gemensamt med en person i politiskt utsatt ställning är verklig huvudman till en juridisk person 
+     eller juridisk konstruktion eller som på annat sätt har eller har haft nära förbindelser med en 
+     person i politiskt utsatt ställning, och\\
+    \tiny  2. fysisk person som ensam är verklig huvudman till en juridisk person eller juridisk konstruktion som, enligt vad som är känt eller finns anledning att förmoda, egentligen har upprättats till förmån för en person i politiskt utsatt ställning.
+
+    \tiny Med nära förbindelser i andra stycket 1 avses nära affärsförbindelser och andra förbindelser
+     som kan medföra att den kända medarbetaren kan förknippas med förhöjd risk för penningtvätt 
+     eller finansiering av terrorism.
+    \vspace{0.1cm}
+    
+    %Huvudman som PEP
+    \tiny \textbf{3 kap. 10 § PTL – Bedömning av PEP}\\
+    \tiny En verksamhetsutövare ska bedöma om kunden eller kundens verkliga huvudman är en person i politiskt utsatt ställning eller en familjemedlem eller känd medarbetare till en sådan person.\\[0.1cm]
+
+    %Huvudman som PEP
+    \tiny \textbf{3 kap. 19 § PTL – Åtgärder vid PEP}\\
+    \tiny Om kunden eller kundens verkliga huvudman är en person i politiskt utsatt ställning,
+     ska en verksamhetsutövare utöver åtgärder enligt 7, 8 och 10-12 §§ alltid\\
+    \tiny  1. vidta lämpliga åtgärder för att ta reda på varifrån de tillgångar som hanteras inom ramen för
+     affärsförbindelsen eller den enstaka transaktionen kommer,\\
+    \tiny  2. tillämpa skärpt fortlöpande uppföljning av affärsförbindelsen enligt 13 § och övervaka
+     aktiviteter och transaktioner enligt 4 kap. 1 § i förhöjd omfattning, och\\
+    \tiny  3. inhämta godkännande från behörig beslutsfattare inför beslut om att ingå eller
+     avbryta en affärsförbindelse.
+
+    \tiny Första stycket tillämpas också om kunden är en familjemedlem eller känd medarbetare till en
+     person i politiskt utsatt ställning.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 20 § PTL – Efter upphörande av funktion}\\
+    \tiny När en person i politiskt utsatt ställning upphör att utöva en offentlig funktion
+     enligt 1 kap. 8 § 5, ska 19 § tillämpas i 18 månader. Därefter ska åtgärder enligt 19 §
+    tillämpas om risken för penningtvätt eller finansiering av terrorism som kan förknippas 
+    med kundrelationen bedöms som hög.\\
+
+    \tinyOm åtgärder enligt 19 § inte längre ska tillämpas på en person som avses i första stycket,
+     ska sådana åtgärder inte heller tillämpas på familjemedlemmar eller kända medarbetare till 
+     en person i politiskt utsatt ställning.\\[0.1cm]
+    
+    \tiny \textbf{Automatisk PEP-screening}\\
+    \tiny Systemet screener automatiskt alla nyckelpersoner (VD, styrelse, verkliga huvudmän, företrädare) mot globala PEP-databaser via Roaring.io KYC/AML API.\\[0.1cm]
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Vi måste bedöma om kunden eller verklig huvudman är PEP enligt 3 kap. 10 § PTL. Om ja, krävs Enhanced Due Diligence (EDD) enligt 3 kap. 19 §: godkännande från företagsledning, utredning av tillgångarnas ursprung, och skärpt löpande uppföljning. PEP-status gäller även familjemedlemmar och kända medarbetare. Efter att en PEP lämnat sin funktion gäller skärpta krav i 18 månader.
+  \end{alertblock}
+
+  \vspace{0.4cm}
+  \begin{flushright}
+    \hyperlink{riskfragor-steg2}{\beamerbutton{Nästa}} \hspace{0.3cm} \beamerbutton{Avbryt}
+  \end{flushright}
+\end{frame}
+
+% API-dokumentation: Se API_Endpoints_ContentSlides.tex
+% Sektion 2 > POST /api/onboarding/riskfragor/steg1
+% Triggar: Bolagsverket API, SPAR, Roaring.io
+
+
+% ========================================================================
+% RISKFRÅGOR - STEG 2 (UTLÄNDSKA TRANSAKTIONER)
+% ========================================================================
+% Alltid visas som del av standard wizard-flödet
+% ========================================================================
+
+% Steg 2: Geografisk risk & Affärsrelationer
+\begin{frame}[label=riskfragor-steg2]
+  \frametitle{Riskfrågor – Steg 2 av 3: Geografisk risk \& Affärsrelationer}
+
+  \begin{center}
+    \textbf{Progress:} [●●○] Steg 2/3
+  \end{center}
+
+  \vspace{0.3cm}
+
+  \footnotesize
+  
+  \textbf{Bakgrund:}\\
+  \tiny PTL kräver att vi bedömer geografiska riskfaktorer (2 kap. 1 § och 2 kap. 4-5 §§) samt förstår 
+  affärsförbindelsens syfte och art (3 kap. 12 §). Denna sektion kombinerar bred kartläggning med 
+  progressiv verifikation av konkreta affärspartners.
+
+  \vspace{0.4cm}
+
+  % ============================================================
+  % BLOCK A: ALLMÄN GEOGRAFISK EXPONERING
+  % ============================================================
+  \textbf{\underline{BLOCK A: Allmän geografisk exponering}}
+
+  \vspace{0.2cm}
+
+  % Fråga 1: Utländska kunder
+  \textbf{1. Har företaget utländska kunder?}* \hspace{0.3cm} ⓘ
+  \begin{block}{Textarea}
+    \tiny Om ja, vilka länder? Om nej, skriv "Nej"
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Om ert företag har kunder i högriskländer påverkar det byråns riskbedömning av er som klient.
+    Vi måste kunna förklara för Länsstyrelsen (tillsynsmyndigheten) varför vi accepterade er som klient 
+    och vilka åtgärder vi vidtagit för att hantera risken. Detta är inte för att misstänkliggöra er - 
+    lagen tvingar oss att dokumentera detta enligt 3 kap. 12 § PTL (information om affärsförbindelsens 
+    syfte och art).
+    
+    \vspace{0.1cm}
+    \tiny \textbf{2 kap. 1 § PTL (Allmän riskbedömning):}\\
+    \tiny En verksamhetsutövare ska göra en bedömning av hur de produkter och tjänster som tillhandahålls 
+    i verksamheten kan utnyttjas för penningtvätt eller finansiering av terrorism och hur stor risken är 
+    för att detta sker (allmän riskbedömning).
+    
+    \tiny Vid den allmänna riskbedömningen ska det särskilt beaktas vilka slags produkter och tjänster som 
+    tillhandahålls, vilka kunder och distributionskanaler som finns och vilka geografiska riskfaktorer som 
+    föreligger. Hänsyn ska också tas till uppgifter som kommer fram vid verksamhetsutövarens rapportering 
+    av misstänkta aktiviteter och transaktioner samt till information om tillvägagångssätt för penningtvätt 
+    och finansiering av terrorism och andra relevanta uppgifter som myndigheter lämnar.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 11 § PTL (Kontroll av högriskländer):}\\
+    \tiny En verksamhetsutövare ska kontrollera om kunden är etablerad i ett land utanför EES som av 
+    Europeiska kommissionen har identifierats som ett högrisktredjeland.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 12 § PTL (Information om affärsförbindelsens syfte och art):}\\
+    \tiny En verksamhetsutövare ska inhämta information om affärsförbindelsens syfte och art.
+    
+    \tiny Informationen ska ligga till grund för en bedömning av
+    \begin{enumerate}
+      \item vilka aktiviteter och transaktioner som kunden kan förväntas vidta och genomföra inom ramen 
+      för affärsförbindelsen, och
+      \item kundens riskprofil enligt 2 kap. 3 §.
+    \end{enumerate}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{3 kap. 17 § 1 st. PTL (Skärpta åtgärder vid högrisktredjeland):}\\
+    \tiny Skärpta åtgärder enligt 16 § ska vidtas vid affärsförbindelser eller enstaka transaktioner 
+    när kunden är etablerad i ett land utanför EES som har identifierats som ett högrisktredjeland av 
+    Europeiska kommissionen.\\[0.1cm]
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  % Fråga 2: Omsättningsandel utland
+  \textbf{2. Ungefär hur stor andel av omsättningen kommer från utländska kunder?}* \hspace{0.3cm} ⓘ\\
+  \tiny Dropdown: [< 10\% / 10-30\% / 30-50\% / > 50\%]
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Vi måste förstå omfattningen av era utländska affärer enligt 3 kap. 12 § PTL för att bedöma 
+    er riskprofil. Detta är inte för att misstänkliggöra er - lagen kräver att vi 
+    anpassar vår granskning baserat på riskbilden.
+    
+    \vspace{0.1cm}
+    \tiny \textbf{2 kap. 3 § PTL (Riskbedömning av kunder):}\\
+    \tiny En verksamhetsutövare ska bedöma den risk för penningtvätt eller finansiering av terrorism 
+    som kan förknippas med kundrelationen (kundens riskprofil). Kundens riskprofil ska bestämmas med 
+    utgångspunkt i den allmänna riskbedömningen och verksamhetsutövarens kännedom om kunden.
+    
+    \tiny När det behövs för att bestämma kundens riskprofil ska verksamhetsutövaren beakta omständigheter 
+    som avses i 4 och 5 §§ och föreskrifter som meddelats med stöd av denna lag samt andra omständigheter 
+    som i det enskilda fallet påverkar risken som kan förknippas med kundrelationen.
+    
+    \tiny Kundens riskprofil ska följas upp under pågående affärsförbindelser och ändras när det finns 
+    anledning till det.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 12 § PTL (Information om affärsförbindelsens syfte och art):}\\
+    \tiny En verksamhetsutövare ska inhämta information om affärsförbindelsens syfte och art.
+    
+    \tiny Informationen ska ligga till grund för en bedömning av
+    \begin{enumerate}
+      \item vilka aktiviteter och transaktioner som kunden kan förväntas vidta och genomföra inom ramen 
+      för affärsförbindelsen, och
+      \item kundens riskprofil enligt 2 kap. 3 §.
+    \end{enumerate}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{3 kap. 16 § PTL (Skärpta åtgärder vid hög risk):}\\
+    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen 
+    bedöms som hög, ska särskilt omfattande kontroller, bedömningar och utredningar enligt 7, 8 och 10-13 §§ 
+    göras.
+    
+    \tiny Åtgärderna ska i sådant fall kompletteras med de ytterligare åtgärder som krävs för att motverka 
+    den höga risken för penningtvätt eller finansiering av terrorism. Sådana åtgärder kan avse inhämtande 
+    av ytterligare information om kundens affärsverksamhet eller ekonomiska situation och uppgifter om 
+    varifrån kundens ekonomiska medel kommer.\\[0.1cm]
+  \end{alertblock}
+
+  \vspace{0.2cm}
+
+  % Fråga 3: Typ av internationellt samarbete
+  \textbf{3. Typ av internationellt samarbete} \hspace{0.3cm} ⓘ\\
+  \tiny ☐ Import \hspace{0.5cm} ☐ Export \hspace{0.5cm} ☐ Konsulttjänster \hspace{0.5cm} ☐ Licensavtal
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Vi måste förstå affärsförbindelsens syfte och art enligt 3 kap. 12 § PTL för att kunna bedöma 
+    vilka transaktioner som är normala för er verksamhet. Detta hjälper oss identifiera atypiska 
+    betalningsflöden som kan tyda på penningtvätt. Om samarbetsformen innebär hög risk (t.ex. konsulttjänster 
+    med svår värdering), krävs skärpta åtgärder enligt 3 kap. 16 § PTL.
+    
+    \vspace{0.1cm}
+    \tiny \textbf{3 kap. 12 § PTL (Information om affärsförbindelsens syfte och art):}\\
+    \tiny En verksamhetsutövare ska inhämta information om affärsförbindelsens syfte och art.
+    
+    \tiny Informationen ska ligga till grund för en bedömning av
+    \begin{enumerate}
+      \item vilka aktiviteter och transaktioner som kunden kan förväntas vidta och genomföra inom ramen 
+      för affärsförbindelsen, och
+      \item kundens riskprofil enligt 2 kap. 3 §.
+    \end{enumerate}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{3 kap. 1 § PTL (Otillräcklig kundkännedom):}\\
+    \tiny En verksamhetsutövare får inte etablera eller upprätthålla en affärsförbindelse eller utföra 
+    en enstaka transaktion, om verksamhetsutövaren inte har tillräcklig kännedom om kunden för att kunna
+    \begin{enumerate}
+      \item hantera risken för penningtvätt eller finansiering av terrorism som kan förknippas med 
+      kundrelationen, och
+      \item övervaka och bedöma kundens aktiviteter och transaktioner enligt 4 kap. 1 och 2 §§.
+    \end{enumerate}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{3 kap. 16 § PTL (Skärpta åtgärder vid hög risk):}\\
+    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen 
+    bedöms som hög, ska särskilt omfattande kontroller, bedömningar och utredningar enligt 7, 8 och 10-13 §§ 
+    göras.
+    
+    \tiny Åtgärderna ska i sådant fall kompletteras med de ytterligare åtgärder som krävs för att motverka 
+    den höga risken för penningtvätt eller finansiering av terrorism. Sådana åtgärder kan avse inhämtande 
+    av ytterligare information om kundens affärsverksamhet eller ekonomiska situation och uppgifter om 
+    varifrån kundens ekonomiska medel kommer.\\[0.1cm]
+    
+    \tiny \textbf{Riskkategori per samarbetsform:}\\
+    \tiny \textbf{Import/Export:} Fysiska varor → risk för felaktig fakturering, under/överfakturering 
+    (trade-based money laundering)\\
+    \tiny \textbf{Konsulttjänster:} Immateriella tjänster → svårare att värdera, risk för ogrundade betalningar\\
+    \tiny \textbf{Licensavtal:} Royaltybetalningar → ofta gränsöverskridande, svår värdering, risk för 
+    överprissättning\\[0.1cm]
+  \end{alertblock}
+
+  \vspace{0.4cm}
+
+  % ============================================================
+  % BLOCK B: KONKRETA AFFÄRSPARTNERS (Progressiv verifikation)
+  % ============================================================
+  \textbf{\underline{BLOCK B: Konkreta affärspartners (Progressiv verifikation)}}
+
+  \vspace{0.2cm}
+
+  % Fråga 4: Tre största leverantörer
+  \textbf{4. Vilka är företagets tre största leverantörer?}* \hspace{0.3cm} ⓘ\\
+  \tiny 1. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
+  \tiny 2. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
+  \tiny 3. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}
   \begin{block}{Textarea}
     \tiny Namnge de största (om tillämpligt)
   \end{block}
@@ -989,12 +1515,13 @@
      myndigheter lämnar.\\[0.1cm]
 
     \tiny \textbf{Juridisk kommentar:}\\
-    \tiny Redovisningsbyrån ser alla klientens transaktioner med leverantörer i bokföringen. 
-    Enligt 2 kap. 1 § måste byrån bedöma geografiska riskfaktorer, vilket inkluderar att 
-    förstå var klientens leverantörer finns och om transaktionerna är rimliga för verksamheten. 
-    Om klienten betalar leverantörer i högriskländer eller leverantörer som verkar ovanliga 
-    för branschen kan detta indikera penningtvätt. Byrån måste enligt 3 kap. 12 § PTL inhämta 
-    information om "affärsförbindelsens syfte och avsedda karaktär" för att förklara 
+    \tiny Redovisningsbyrån ser alla klientens transaktioner med leverantörer i bokföringen
+    och är därför klientföretagets outsourceade ekonomienhet, därav följer fullt straffansvar för byrån
+    om klienten agerar i strid med lagen. Enligt 2 kap. 1 § måste byrån bedöma geografiska riskfaktorer, vilket inkluderar att
+    förstå var klientens leverantörer finns och om transaktionerna är rimliga för verksamheten.
+    Om klienten betalar leverantörer i högriskländer eller leverantörer som verkar ovanliga
+    för branschen kan detta indikera penningtvätt. Byrån måste enligt 3 kap. 12 § PTL inhämta
+    information om "affärsförbindelsens syfte och avsedda karaktär" för att förklara
     transaktionerna för Länsstyrelsen vid tillsyn.\\[0.1cm]
     
     \tiny \textbf{2 kap. 3 § PTL – Riskbedömning av kunder}\\
@@ -1032,469 +1559,85 @@
      Leverantörer från högriskländer, skatteparadis, eller ovanliga leverantörskedjor 
      (t.ex. shell companies utan tydlig affärsmodell) kan indikera förhöjd risk för penningtvätt 
      genom handelsbaserad penningtvätt (trade-based money laundering).\\[0.1cm]
-    
-    
   \end{alertblock}
 
   \vspace{0.2cm}
 
-  % Verksamhet ändrad
-  \textbf{5. Har verksamheten ändrats under de senaste 12 månaderna?}* \hspace{0.3cm} ⓘ
+  % Fråga 5: Tre största kunder (om B2B)
+  \textbf{5. Vilka är företagets tre största kunder?}* (om B2B) \hspace{0.3cm} ⓘ\\
+  \tiny 1. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
+  \tiny 2. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
+  \tiny 3. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}
   \begin{block}{Textarea}
-    \tiny Om ja, beskriv ändringen. Om nej, skriv "Nej"
+    \tiny Namnge de största (om tillämpligt). Om B2C, skriv "Ej tillämpligt"
   \end{block}
   \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
-
-    \tiny \textbf{3 kap. 12 § PTL – Information om affärsförbindelsens syfte och art}\\
-    \tiny 12 §   En verksamhetsutövare ska inhämta information om affärsförbindelsens syfte och art.\\
-
-    \tiny Informationen ska ligga till grund för en bedömning av\\
-    \tiny 1. vilka aktiviteter och transaktioner som kunden kan förväntas vidta och genomföra inom ramen för affärsförbindelsen, och
-    \tiny 2. kundens riskprofil enligt 2 kap. 3 §.
-    \vspace{0.1cm}
-
-    \tiny \textbf{3 kap. 13 § första stycket PTL – Löpande uppföljning av affärsförbindelser}\\
-    \tiny 13 §   En verksamhetsutövare ska löpande och vid behov följa upp pågående affärsförbindelser
-     i syfte att säkerställa att kännedomen om kunden enligt 7, 8 och 10-12 §§ är aktuell och 
-     tillräcklig för att hantera den bedömda risken för penningtvätt eller finansiering av terrorism.\\[0.1cm]
-    
-    \tiny \textbf{4 kap. 1-3 §§ PTL – Övervaknings- och rapporteringsskyldighet}\\
-    \tiny 1 §   En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma
-     enstaka transaktioner i syfte att upptäcka aktiviteter och transaktioner som\\
-    \tiny 1. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån
-     den kännedom om kunden som verksamhetsutövaren har,\\
-    \tiny 2. avviker från vad verksamhetsutövaren har anledning att räkna med utifrån den
-     kännedom som verksamhetsutövaren har om sina kunder, de produkter och tjänster som tillhandahålls, 
-     de uppgifter som kunden lämnar och övriga omständigheter, eller\\
-    \tiny 3. utan att vara avvikande enligt 1 eller 2 kan antas ingå som ett led i penningtvätt eller
-     finansiering av terrorism.
-
-    \tiny Inriktningen och omfattningen av övervakningen ska bestämmas med beaktande av de risker
-     som identifierats i den allmänna riskbedömningen, den risk för penningtvätt och finansiering 
-     av terrorism som kan förknippas med kundrelationen och annan information om tillvägagångssätt 
-     för penningtvätt eller finansiering av terrorism.
-
-    \tiny 2 §   Om avvikelser eller misstänkta aktiviteter eller transaktioner uppmärksammas
-     enligt 1 § eller på annat sätt, ska en verksamhetsutövare genom skärpta åtgärder för 
-     kundkännedom enligt 3 kap. 16 § och andra nödvändiga åtgärder bedöma om det finns skälig grund 
-     att misstänka att det är fråga om penningtvätt eller finansiering av terrorism eller att 
-     egendom annars härrör från brottslig handling.
-
-    \tiny När en verksamhetsutövare anser att det finns skälig grund att misstänka att det är
-     fråga om penningtvätt eller finansiering av terrorism eller att egendom annars härrör 
-     från brottslig handling, behöver ytterligare åtgärder enligt första stycket inte vidtas.
-
-    \tiny 3 §   Om en verksamhetsutövare efter en bedömning enligt 2 § har skälig grund att 
-    misstänka penningtvätt eller finansiering av terrorism eller att egendom annars härrör 
-    från brottslig handling, ska uppgifter om alla omständigheter som kan tyda på detta utan 
-    dröjsmål rapporteras till Polismyndigheten.
-
-    \tiny En sådan rapport ska göras även om transaktioner inte genomförs liksom om det före
-     ingåendet av en affärsförbindelse eller utförandet av en transaktion uppkommer misstanke om 
-     att kunden avser att använda verksamhetsutövarens produkter eller tjänster för penningtvätt 
-     eller finansiering av terrorism.
-
-    \tiny Om den egendom som avses i rapporten till Polismyndigheten finns hos verksamhetsutövaren
-     ska detta anges särskilt, liksom i förekommande fall uppgifter om\\
-    \tiny 1. vilka tillgodohavanden kunden har hos verksamhetsutövaren,\\
-    \tiny 2. huruvida verksamhetsutövaren avstått från att genomföra en misstänkt transaktion, och\\
-    \tiny 3. mottagare av en misstänkt transaktion.\\[0.1cm]
-
-    
-    
-    \tiny \textbf{Röda flaggor vid verksamhetsändring:}\\
-    \begin{itemize}
-      \item Plötslig verksamhetsändring kombinerat med ägarskifte eller ny ledning
-      \item Branscher med högre risk (kontantintensiva, kryptovaluta, värdeöverföring)
-      \item Historiska bokföringsdata saknas eller är inkonsekvent
-      \item Ändring från lågrisverksamhet till högriskverksamhet
-    \end{itemize}
-    \vspace{0.1cm}
-    
     \tiny \textbf{Varför frågar vi detta?}\\
-    \tiny Lagen tvingar oss att \textbf{löpande} ställa uppföljningsfrågor för att säkerställa att vår
-     kännedom om er verksamhet är aktuell. Detta är inte för att vi misstänker er - det är ett
-    lagkrav enligt 3 kap. 13 § PTL. Om er verksamhet ändras måste vi uppdatera er riskprofil 
-    och bedöma om nya åtgärder krävs. Väsentliga förändringar kan indikera ökad risk som kräver 
-    fördjupad granskning.
-  \end{alertblock}
-
-  \vspace{0.2cm}
-
-  % Org.nr
-  \textbf{6. Organisationsnummer:}* \underline{\hspace{4cm}} \hspace{0.3cm} ⓘ
-  \begin{block}{Format \& API-trigger}
-    \tiny XXXXXX-XXXX | När giltigt format anges → Backend anropar Bolagsverket API
-  \end{block}
-  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
-    \tiny \textbf{3 kap. 7 §  PTL – Identifiering och kontroll av kunden}\\
-    \tiny 7 §   En verksamhetsutövare ska identifiera kunden och kontrollera kundens identitet
-     genom identitetshandlingar eller registerutdrag eller genom andra uppgifter och handlingar
-     från en oberoende och tillförlitlig källa.\\
-
-    \tiny När första stycket tillämpas får man använda medel för elektronisk identifiering och
-     betrodda tjänster enligt Europaparlamentets och rådets förordning (EU) nr 910/2014 av den
-     23 juli 2014 om elektronisk identifiering och betrodda tjänster för elektroniska transaktioner
-     på den inre marknaden och om upphävande av direktiv 1999/93/EG. Andra säkra identifieringsprocesser 
-     på distans eller på elektronisk väg som är reglerade, erkända, godkända eller accepterade av 
-     relevanta myndigheter får också användas.\\
-
-    \tiny Om kunden företräds av en person som uppger sig handla på kundens vägnar, ska verksamhetsutövaren
-     kontrollera den personens identitet och behörighet att företräda kunden. Lag (2019:774).
-     \vspace{0.1cm}
+    \tiny Samma logik som för leverantörer: Vi måste förstå era affärsrelationer och kunna förklara transaktionsmönster
+    för Länsstyrelsen vid tillsyn. Om kunder finns i högriskländer eller är ovanliga för er bransch kan detta indikera
+    förhöjd risk för handel med stöldgods, handelsbaserad penningtvätt, eller att företaget används för att legitimera
+    brottsligor genom skenbart legitima affärer.\\[0.1cm]
     
-    \tiny \textbf{01FS 2024:20, 3 kap. 3 §  – Identifiering av kunden}\\
-    \tiny 3 § Verksamhetsutövaren ska identifiera en kund som är en fysisk person genom att begära
-     uppgifter om personens namn, personnummer, samordningsnummer eller motsvarande nummer samt adress.
-
-    \tiny Verksamhetsutövaren ska identifiera en kund som är en juridisk person genom att begära
-     uppgifter om den juridiska personens namn och organisationsnummer, registrerad adress samt företrädare.
-
-    \tiny Om kunden företräds av ett ombud eller motsvarande, ska verksamhetsutövaren
-     också identifiera den personen i enlighet med första stycket.
-    \vspace{0.1cm}
+    \tiny \textbf{2 kap. 1 § PTL (Allmän riskbedömning):}\\
+    \tiny En verksamhetsutövare ska göra en riskbedömning av i vilken utsträckning verksamhetsutövarens
+    verksamhet kan komma att utnyttjas för penningtvätt eller finansiering av terrorism. 
+    Riskbedömningen ska vara anpassad till verksamhetens storlek och art.\\
+    \tiny Riskbedömningen ska innehålla en bedömning av de risker som är förknippade med\\
+    \tiny 1. verksamhetsutövarens kunder,\\
+    \tiny 2. de länder eller geografiska områden som verksamhetsutövaren har kunder i eller affärsrelationer med,\\
+    \tiny 3. de produkter och tjänster som verksamhetsutövaren tillhandahåller, och\\
+    \tiny 4. de transaktioner och distributionskanaler som verksamhetsutövaren använder.\\[0.1cm]
     
-    \tiny \textbf{01FS 2024:20, 3 kap. 4 § – Kontroll av kundens identitet}\\
-    \tiny 4 § Verksamhetsutövaren ska kontrollera identiteten hos en kund som är en fysisk 
-    person samt företrädare för en kund som är en juridisk person. Om kunden företräds av ett 
-    ombud eller motsvarande, ska verksamhetsutövaren också kontrollera ombudets identitet och 
-    behörighet att företräda kunden.\\[0.1cm]
-
-    \tiny Kontrollåtgärderna ska utföras och dokumenteras på det sätt som anges i nedanstående tabell.
-    Av dokumentationen ska det även framgå när kontrollen har utförts. 
-    Identitetskontroll ska genomföras även om kunden är en offentlig person eller känd sedan tidigare.\\[0.1cm]
-
-    \tiny Kontrollåtgärderna ska utföras i enlighet med nedanstående tabell, oavsett kundens risknivå.
-    (Se content-slide "Identitetskontroll" för sammanfattning av tabellens huvuddrag, eller 
-    fullständig tabell i 01FS 2024:20, 3 kap. 4 §)\\
-    \tiny \url{https://www.lansstyrelsen.se/stockholm/om-oss/om-lansstyrelsen-stockholm/lanets-forfattningssamling/forfattningar-2024/forfattningssamling-2024/2024-06-03-01fs-202420.html}\\[0.1cm]
+    \tiny \textbf{2 kap. 3 § PTL (Riskbedömning av kunder):}\\
+    \tiny En verksamhetsutövare ska göra en bedömning av vilken risk för penningtvätt eller finansiering av terrorism
+    som kan förknippas med en affärsförbindelse eller en enstaka transaktion (riskbedömning av kunder).\\
+    \tiny Riskbedömningen ska göras innan affärsförbindelsen inleds eller den enstaka transaktionen genomförs.\\
+    \tiny En riskbedömning får även göras efter det att affärsförbindelsen har inletts eller den enstaka transaktionen
+    har genomförts, om detta är nödvändigt för att inte störa den normala affärsverksamheten och risken för penningtvätt
+    eller finansiering av terrorism är låg.\\[0.1cm]
     
-    \tiny \textbf{Automatisk kontroll via API:er}\\
-    \tiny När du anger organisationsnummer hämtar systemet automatiskt uppgifter från:
-    \begin{itemize}
-      \item \textbf{Bolagsverket:} Firma, adress, styrelse, verkställande direktör, firmatecknare
-      \item \textbf{Roaring.io KYC/AML:} Verkliga huvudmän, näringsförbud, sanktionslistor (EU/OFAC/UN), PEP-screening
-    \end{itemize}
-    \vspace{0.1cm}
-    
-    \tiny \textbf{Varför frågar vi detta?}\\
-    \tiny Organisationsnummer är grunden för identifiering av juridisk person enligt 3 kap. 7 § PTL. Vi måste kontrollera identiteten genom oberoende källor (Bolagsverket = offentligt register = tillförlitlig källa). Denna kontroll måste dokumenteras och sparas enligt 01FS 2024:20, oavsett om vi känner kunden sedan tidigare.
-  \end{alertblock}
-
-  \vspace{0.2cm}
-
-  % Personnummer
-  \textbf{7. Personnummer (VD/Firmatecknare):}* \underline{\hspace{4cm}} \hspace{0.3cm} ⓘ
-  \begin{block}{Format \& API-trigger}
-    \tiny YYYYMMDD-XXXX (minst 12 siffror) | Triggar Skatteverket SPAR-kontroll
-  \end{block}
-  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
-    \tiny \textbf{3 kap. 7 §  PTL – Identifiering och kontroll av kunden}\\
-    \tiny 7 §   En verksamhetsutövare ska identifiera kunden och kontrollera kundens identitet
-     genom identitetshandlingar eller registerutdrag eller genom andra uppgifter och handlingar
-     från en oberoende och tillförlitlig källa.\\
-
-    \tiny När första stycket tillämpas får man använda medel för elektronisk identifiering och
-     betrodda tjänster enligt Europaparlamentets och rådets förordning (EU) nr 910/2014 av den
-     23 juli 2014 om elektronisk identifiering och betrodda tjänster för elektroniska transaktioner
-     på den inre marknaden och om upphävande av direktiv 1999/93/EG. Andra säkra identifieringsprocesser 
-     på distans eller på elektronisk väg som är reglerade, erkända, godkända eller accepterade av 
-     relevanta myndigheter får också användas.\\
-
-    \tiny Om kunden företräds av en person som uppger sig handla på kundens vägnar, ska verksamhetsutövaren
-     kontrollera den personens identitet och behörighet att företräda kunden. Lag (2019:774).
-     \vspace{0.1cm}
-    
-    \tiny \textbf{01FS 2024:20, 3 kap. 3 §  – Identifiering av kunden}\\
-    \tiny 3 § Verksamhetsutövaren ska identifiera en kund som är en fysisk person genom att begära
-     uppgifter om personens namn, personnummer, samordningsnummer eller motsvarande nummer samt adress.
-
-    \tiny Verksamhetsutövaren ska identifiera en kund som är en juridisk person genom att begära
-     uppgifter om den juridiska personens namn och organisationsnummer, registrerad adress samt företrädare.
-
-    \tiny Om kunden företräds av ett ombud eller motsvarande, ska verksamhetsutövaren
-     också identifiera den personen i enlighet med första stycket.
-    \vspace{0.1cm}
-    
-    \tiny \textbf{01FS 2024:20, 3 kap. 4 § – Kontroll av kundens identitet}\\
-    \tiny 4 § Verksamhetsutövaren ska kontrollera identiteten hos en kund som är en fysisk 
-    person samt företrädare för en kund som är en juridisk person. Om kunden företräds av ett 
-    ombud eller motsvarande, ska verksamhetsutövaren också kontrollera ombudets identitet och 
-    behörighet att företräda kunden.\\[0.1cm]
-
-    \tiny Kontrollåtgärderna ska utföras och dokumenteras på det sätt som anges i nedanstående tabell.
-    Av dokumentationen ska det även framgå när kontrollen har utförts. 
-    Identitetskontroll ska genomföras även om kunden är en offentlig person eller känd sedan tidigare.\\[0.1cm]
-
-    \tiny Kontrollåtgärderna ska utföras i enlighet med nedanstående tabell, oavsett kundens risknivå.
-    (Se content-slide "Identitetskontroll" för sammanfattning av tabellens huvuddrag, eller 
-    fullständig tabell i 01FS 2024:20, 3 kap. 4 §)\\
-    \tiny \url{https://www.lansstyrelsen.se/stockholm/om-oss/om-lansstyrelsen-stockholm/lanets-forfattningssamling/forfattningar-2024/forfattningssamling-2024/2024-06-03-01fs-202420.html}\\[0.1cm]
-    
-    \tiny \textbf{Automatisk kontroll via API:er}\\
-    \tiny När du anger organisationsnummer hämtar systemet automatiskt uppgifter från:
-    \begin{itemize}
-      \item \textbf{Bolagsverket:} Firma, adress, styrelse, verkställande direktör, firmatecknare
-      \item \textbf{Roaring.io KYC/AML:} Verkliga huvudmän, näringsförbud, sanktionslistor (EU/OFAC/UN), PEP-screening
-    \end{itemize}
-    \vspace{0.1cm}
-    
-    
-    \tiny \textbf{Varför frågar vi detta?}\\
-    \tiny Personnummer är nödvändigt för att identifiera den fysiska person som företräder företaget (VD, styrelseledamot, firmatecknare) enligt 3 kap. 7 § PTL. Vi måste kontrollera att personen har behörighet att företräda kunden och att personen inte är föremål för sanktioner eller är politiskt exponerad person (PEP), vilket skulle kräva Enhanced Due Diligence. SPAR-registret = offentligt register = tillförlitlig källa enligt PTL.
-  \end{alertblock}
-
-  \vspace{0.2cm}
-
-  % Verklig huvudman (endast juridisk person)
-  \textbf{8. (Om juridisk person) Är det du som är verklig huvudman?}* \hspace{0.3cm} ⓘ\\
-  \tiny
-  ◯ Ja, jag äger/kontrollerar >25\% \hspace{0.5cm} ◯ Nej \hspace{0.5cm} ◯ Ej tillämpligt (enskild firma)
-  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
-    \tiny \textbf{3 kap. 8 § första stycket PTL – Utredning av verklig huvudman}\\
-    \tiny En verksamhetsutövare ska utreda om kunden har en verklig huvudman. En sådan utredning ska åtminstone avse sökning i registret över verkliga huvudmän enligt lagen (2017:631) om registrering av verkliga huvudmän. Om kunden är en juridisk person ska utredningen omfatta åtgärder för att \textbf{förstå kundens ägarförhållanden och kontrollstruktur}. Om kunden har en verklig huvudman, ska verksamhetsutövaren vidta åtgärder för att kontrollera den verkliga huvudmannens identitet.\\[0.1cm]
-    
-    \tiny \textbf{3 kap. 8 § tredje stycket PTL – Alternativ verklig huvudman}\\
-    \tiny Om kunden är en juridisk person och det efter åtgärder står klart att den juridiska personen inte har en verklig huvudman, ska den person som är \textbf{styrelseordförande, verkställande direktör eller motsvarande befattningshavare} anses vara verklig huvudman.\\[0.1cm]
-    
-    \tiny \textbf{Lag (2017:631) 1 kap. 3 § – Definition av verklig huvudman}\\
-    \tiny Med verklig huvudman avses:
+    \tiny \textbf{3 kap. 12 § PTL (Information om affärsförbindelsens syfte och art):}\\
+    \tiny En verksamhetsutövare ska inhämta information om affärsförbindelsens syfte och art.
+    Informationen ska ligga till grund för en bedömning av
     \begin{enumerate}
-      \item en fysisk person som, ensam eller tillsammans med någon annan, \textbf{ytterst äger eller kontrollerar} en juridisk person, eller
-      \item en fysisk person till vars förmån någon annan handlar.
+      \item vilka aktiviteter och transaktioner som kunden kan förväntas vidta och genomföra inom ramen för affärsförbindelsen, och
+      \item kundens riskprofil enligt 2 kap. 3 §.
     \end{enumerate}
     \vspace{0.1cm}
     
-    \tiny \textbf{Lag (2017:631) 1 kap. 4 § – Presumtion om kontroll}\\
-    \tiny En fysisk person ska antas utöva den yttersta kontrollen över en juridisk person, om han eller hon:
-    \begin{enumerate}
-      \item på grund av innehav av aktier, andra andelar eller medlemskap kontrollerar \textbf{mer än 25 procent} av det totala antalet röster i den juridiska personen,
-      \item har rätt att utse eller avsätta \textbf{mer än hälften} av den juridiska personens styrelseledamöter eller motsvarande befattningshavare, eller
-      \item på grund av avtal med ägare, medlem eller den juridiska personen, föreskrift i bolagsordning, bolagsavtal och därmed jämförbara handlingar, kan utöva kontroll enligt 1 eller 2.
-    \end{enumerate}
-    \vspace{0.1cm}
-    
-    \tiny Om en fysisk person ska antas utöva den yttersta kontrollen över en eller flera juridiska personer som utövar kontroll över en annan juridisk person på ett sätt som anges ovan, ska han eller hon antas utöva den yttersta kontrollen också över den senare juridiska personen (indirekt kontroll).\\[0.1cm]
-    
-    \tiny \textbf{01FS 2024:20, 3 kap. 2 § – Kontroll av verklig huvudman}\\
-    \tiny Verksamhetsutövaren ska kontrollera den verkliga huvudmannens identitet på det sätt som anges i 3 kap. 4 § dessa föreskrifter (samma kontroll som för företrädare - dokumenteras och dateras).\\[0.1cm]
-    
-    \tiny \textbf{Automatisk kontroll via API:er}\\
-    \tiny Systemet hämtar automatiskt uppgifter om verkliga huvudmän från:
-    \begin{itemize}
-      \item \textbf{Bolagsverkets register över verkliga huvudmän} (enligt lag 2017:631)
-      \item \textbf{Roaring.io KYC/AML:} UBO-data, PEP-screening, sanktionslistor
-    \end{itemize}
-    \vspace{0.1cm}
-    
-    \tiny \textbf{Varför frågar vi detta?}\\
-    \tiny Vi måste utreda och förstå ägarförhållanden och kontrollstruktur enligt 3 kap. 8 § PTL. Verklig huvudman är den fysiska person som ytterst kontrollerar företaget (>25\% röster, kontroll över styrelse, eller avtalskontroll). Om ingen verklig huvudman finns blir VD/styrelseordförande automatiskt verklig huvudman enligt PTL. Din bekräftelse hjälper oss verifiera korrekthet av automatiska uppgifter från Bolagsverket.
-  \end{alertblock}
-
-  \vspace{0.2cm}
-
-  % PEP
-  \textbf{9. Är någon nyckelperson (VD/styrelse/ägare) politiskt exponerad person (PEP)?}* \hspace{0.3cm} ⓘ\\
-  \tiny
-  ☐ Ja, enligt PTL 1 kap 8§ 5 (t.ex. riksdagsledamot, minister, diplomat, VD i statligt bolag)
-  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
-    \tiny \textbf{1 kap. 8 § punkt 5 PTL – Definition av person i politiskt utsatt ställning}\\
-    \tiny Person i politiskt utsatt ställning: fysisk person som har eller har haft en \textbf{viktig offentlig funktion} i en stat eller i en internationell organisation.\\[0.1cm]
-    
-    \tiny \textbf{1 kap. 9 § PTL – Viktig offentlig funktion i en stat}\\
-    \tiny Med viktig offentlig funktion i en stat avses funktioner som:
-    \begin{enumerate}
-      \item stats- eller regeringschefer, ministrar samt vice och biträdande ministrar
-      \item parlamentsledamöter och ledamöter av liknande lagstiftande organ
-      \item ledamöter i styrelsen för politiska partier
-      \item domare i högsta domstol, konstitutionell domstol eller andra rättsliga organ på hög nivå vilkas beslut endast undantagsvis kan överklagas
-      \item högre tjänstemän vid revisionsmyndigheter och ledamöter i centralbankers styrande organ
-      \item ambassadörer, beskickningschefer samt höga officerare i försvarsmakten
-      \item personer som ingår i statsägda företags förvaltnings-, lednings- eller kontrollorgan
-    \end{enumerate}
-    \vspace{0.1cm}
-    
-    \tiny Med viktig offentlig funktion i en \textbf{internationell organisation} avses funktioner som direktörer, biträdande direktörer, styrelseledamöter och innehavare av liknande poster.\\[0.1cm]
-    
-    \tiny \textbf{1 kap. 10 § PTL – Familjemedlemmar och kända medarbetare}\\
-    \tiny Med \textbf{familjemedlem} till en person i politiskt utsatt ställning avses make, registrerad partner, sambo, barn och deras makar, registrerade partner eller sambor samt föräldrar.\\[0.1cm]
-    
-    \tiny Med \textbf{känd medarbetare} avses:
-    \begin{enumerate}
-      \item fysisk person som gemensamt med en PEP är verklig huvudman till en juridisk person eller som på annat sätt har eller har haft nära förbindelser med en PEP
-      \item fysisk person som ensam är verklig huvudman till en juridisk person som egentligen har upprättats till förmån för en PEP
-    \end{enumerate}
-    \vspace{0.1cm}
-    
-    \tiny \textbf{3 kap. 10 § PTL – Bedömning av PEP}\\
-    \tiny En verksamhetsutövare ska bedöma om kunden eller kundens verkliga huvudman är en person i politiskt utsatt ställning eller en familjemedlem eller känd medarbetare till en sådan person.\\[0.1cm]
-    
-    \tiny \textbf{3 kap. 19 § PTL – Åtgärder vid PEP}\\
-    \tiny Om kunden eller kundens verkliga huvudman är en person i politiskt utsatt ställning, ska en verksamhetsutövare utöver åtgärder enligt 7, 8 och 10-12 §§ alltid:
-    \begin{enumerate}
-      \item vidta lämpliga åtgärder för att \textbf{ta reda på varifrån de tillgångar} som hanteras inom ramen för affärsförbindelsen eller den enstaka transaktionen kommer
-      \item tillämpa \textbf{skärpt fortlöpande uppföljning} av affärsförbindelsen och övervaka aktiviteter och transaktioner i förhöjd omfattning
-      \item inhämta \textbf{godkännande från behörig beslutsfattare} inför beslut om att ingå eller avbryta en affärsförbindelse
-    \end{enumerate}
-    \vspace{0.1cm}
-    
-    \tiny Första stycket tillämpas också om kunden är en \textbf{familjemedlem eller känd medarbetare} till en person i politiskt utsatt ställning.\\[0.1cm]
-    
-    \tiny \textbf{3 kap. 20 § PTL – Efter upphörande av funktion}\\
-    \tiny När en person i politiskt utsatt ställning upphör att utöva en offentlig funktion, ska 19 § tillämpas i \textbf{18 månader}. Därefter ska åtgärder enligt 19 § tillämpas om risken bedöms som hög.\\[0.1cm]
-    
-    \tiny \textbf{Automatisk PEP-screening}\\
-    \tiny Systemet screener automatiskt alla nyckelpersoner (VD, styrelse, verkliga huvudmän, företrädare) mot globala PEP-databaser via Roaring.io KYC/AML API.\\[0.1cm]
-    
-    \tiny \textbf{Varför frågar vi detta?}\\
-    \tiny Vi måste bedöma om kunden eller verklig huvudman är PEP enligt 3 kap. 10 § PTL. Om ja, krävs Enhanced Due Diligence (EDD) enligt 3 kap. 19 §: godkännande från företagsledning, utredning av tillgångarnas ursprung, och skärpt löpande uppföljning. PEP-status gäller även familjemedlemmar och kända medarbetare. Efter att en PEP lämnat sin funktion gäller skärpta krav i 18 månader.
+    \tiny \textbf{Progressiv verifikation:}\\
+    \tiny Jämför svar från BLOCK A (allmän geografisk kartläggning) med konkreta kundnamn här.
+    Om inkonsistens → flagga för manuell granskning.
   \end{alertblock}
 
   \vspace{0.4cm}
-  \begin{flushright}
-    \hyperlink{riskfragor-steg2}{\beamerbutton{Nästa}} \hspace{0.3cm} \beamerbutton{Avbryt}
-  \end{flushright}
-\end{frame}
 
-% API-dokumentation: Se API_Endpoints_ContentSlides.tex
-% Sektion 2 > POST /api/onboarding/riskfragor/steg1
-% Triggar: Bolagsverket API, SPAR, Roaring.io
+  % ============================================================
+  % BLOCK C: GRÄNSÖVERSKRIDANDE TRANSAKTIONER
+  % ============================================================
+  \textbf{\underline{BLOCK C: Gränsöverskridande transaktioner}}
 
+  \vspace{0.2cm}
 
-% ========================================================================
-% RISKFRÅGOR - STEG 2 (UTLÄNDSKA TRANSAKTIONER)
-% ========================================================================
-% Alltid visas som del av standard wizard-flödet
-% ========================================================================
-
-% Steg 2: Utländska transaktioner
-\begin{frame}[label=riskfragor-steg2]
-  \frametitle{Riskfrågor – Steg 2 av 4: Utländska transaktioner}
-
-  \begin{center}
-    \textbf{Progress:} [●●○○] Steg 2/4
-  \end{center}
-
-  \vspace{0.5cm}
-
-  \footnotesize
-
-  \textbf{1. Vilka länder har företaget affärspartners/kunder i?}* \hspace{0.3cm} ⓘ
-  \begin{block}{Textarea + Dropdown}
-    \tiny Dropdown med FATF-klassificering | Högriskländer flaggas automatiskt\\
-    Exempel: Norge (Lågrisk), Ryssland (Högrisk), Nigeria (Högrisk)
-  \end{block}
-  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
-    \tiny \textbf{3 kap. 11 § PTL – Kontroll av högriskländer}\\
-    \tiny En verksamhetsutövare ska kontrollera om kunden är etablerad i ett land utanför EES som av \textbf{Europeiska kommissionen} har identifierats som ett högrisktredjeland.\\[0.1cm]
-    
-    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
-    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen bedöms som hög, ska särskilt omfattande kontroller, bedömningar och utredningar enligt 7, 8 och 10-13 §§ göras.\\[0.1cm]
-    
-    \tiny Åtgärderna ska i sådant fall kompletteras med de ytterligare åtgärder som krävs för att motverka den höga risken för penningtvätt eller finansiering av terrorism. Sådana åtgärder kan avse inhämtande av ytterligare information om kundens affärsverksamhet eller ekonomiska situation och uppgifter om varifrån kundens ekonomiska medel kommer.\\[0.1cm]
-    
-    \tiny \textbf{3 kap. 17 § första stycket PTL – Skärpta åtgärder vid högrisktredjeland}\\
-    \tiny Skärpta åtgärder enligt 16 § ska vidtas vid affärsförbindelser eller enstaka transaktioner när kunden är etablerad i ett land utanför EES som har identifierats som ett högrisktredjeland av Europeiska kommissionen.\\[0.1cm]
-    
-    \tiny \textbf{FATF High-Risk Jurisdictions}\\
-    \tiny Financial Action Task Force (FATF) publicerar listor över högriskländer med strategiska brister i sina system mot penningtvätt och finansiering av terrorism. EU-kommissionen baserar sin högrisklista delvis på FATF:s bedömningar. Aktuell FATF-lista: \url{https://www.fatf-gafi.org/en/countries/black-and-grey-lists.html}\\[0.1cm]
-    
-    \tiny \textbf{Varför frågar vi detta?}\\
-    \tiny Vi måste kontrollera om ert företags affärspartners är i högriskländer enligt 3 kap. 11 § PTL. Om ja, krävs skärpta åtgärder enligt 3 kap. 16 § och 3 kap. 17 §: ytterligare information om kundens affärsverksamhet och ekonomiska situation, uppgifter om varifrån kundens ekonomiska medel kommer, och särskilt omfattande kontroller. Detta är EU-kommissionens lista över högriskländer, baserat delvis på FATF:s bedömningar.
-  \end{alertblock}
-
-  \vspace{0.3cm}
-
-  \textbf{2. Typ av samarbete} \hspace{0.3cm} ⓘ\\
-  ☐ Import \hspace{0.5cm} ☐ Export \hspace{0.5cm} ☐ Konsulttjänster \hspace{0.5cm} ☐ Licensavtal
-  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
-    \tiny \textbf{3 kap. 12 § PTL – Information om affärsförbindelsens syfte och art}\\
-    \tiny En verksamhetsutövare ska inhämta information om affärsförbindelsens syfte och art. Informationen ska ligga till grund för en bedömning av:
-    \begin{enumerate}
-      \item vilka aktiviteter och transaktioner som kunden kan förväntas vidta och genomföra inom ramen för affärsförbindelsen, och
-      \item kundens riskprofil enligt 2 kap. 3 §
-    \end{enumerate}
-    \vspace{0.1cm}
-    
-    \tiny \textbf{3 kap. 1 § 1 st. PTL – Otillräcklig kundkännedom}\\
-    \tiny En verksamhetsutövare får inte etablera eller upprätthålla en affärsförbindelse om verksamhetsutövaren inte har tillräcklig kännedom om kunden för att kunna hantera risken för penningtvätt eller finansiering av terrorism.\\[0.1cm]
-    
-    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
-    \tiny Olika samarbetsformer innebär olika risknivåer:
-    \begin{itemize}
-      \item \textbf{Import/Export:} Fysiska varor → risk för felaktig fakturering, under/överfakturering (trade-based money laundering)
-      \item \textbf{Konsulttjänster:} Immateriella tjänster → svårare att värdera, risk för ogrundade betalningar
-      \item \textbf{Licensavtal:} Royaltybetalningar → ofta gränsöverskridande, svår värdering, risk för överprissättning
-    \end{itemize}
-    \vspace{0.1cm}
-    
-    \tiny \textbf{Varför frågar vi detta?}\\
-    \tiny Vi måste förstå affärsförbindelsens syfte och art enligt 3 kap. 12 § PTL för att kunna bedöma vilka transaktioner som är normala för er verksamhet. Detta hjälper oss identifiera atypiska betalningsflöden som kan tyda på penningtvätt. Om samarbetsformen innebär hög risk (t.ex. konsulttjänster med svår värdering), krävs skärpta åtgärder enligt 3 kap. 16 § PTL.
-  \end{alertblock}
-
-  \vspace{0.3cm}
-
-  \textbf{3. Ungefär hur stor andel av omsättningen kommer från utländska kunder?}* \hspace{0.3cm} ⓘ\\
-  Dropdown: [< 10\% / 10-30\% / 30-50\% / > 50\%]
-  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
-    \tiny \textbf{3 kap. 12 § PTL – Information om affärsförbindelsens syfte och art}\\
-    \tiny En verksamhetsutövare ska inhämta information om affärsförbindelsens syfte och art. Informationen ska ligga till grund för en bedömning av:
-    \begin{enumerate}
-      \item vilka aktiviteter och transaktioner som kunden kan förväntas vidta och genomföra inom ramen för affärsförbindelsen, och
-      \item kundens riskprofil enligt 2 kap. 3 §
-    \end{enumerate}
-    \vspace{0.1cm}
-    
-    \tiny \textbf{3 kap. 1 § 1 st. PTL – Otillräcklig kundkännedom}\\
-    \tiny En verksamhetsutövare får inte etablera eller upprätthålla en affärsförbindelse om verksamhetsutövaren inte har tillräcklig kännedom om kunden för att kunna hantera risken för penningtvätt eller finansiering av terrorism.\\[0.1cm]
-    
-    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
-    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen bedöms som hög, ska särskilt omfattande kontroller göras. Hög andel omsättning från högriskländer innebär förhöjd risk som kräver:
-    \begin{itemize}
-      \item Fördjupad granskning av affärsförbindelsen
-      \item Dokumentation av medlens ursprung
-      \item Ytterligare information om kundens affärsverksamhet och ekonomiska situation
-      \item Ökad frekvens av löpande uppföljning
-    \end{itemize}
-    \vspace{0.1cm}
-    
-    \tiny \textbf{Varför frågar vi detta?}\\
-    \tiny Vi måste förstå omfattningen av era utländska affärer enligt 3 kap. 12 § PTL för att bedöma er riskprofil. Om en stor andel (>50\%) av omsättningen kommer från högriskländer, krävs skärpta åtgärder enligt 3 kap. 16 § PTL. Detta är inte för att misstänkliggöra er - lagen kräver att vi anpassar vår granskning baserat på riskbilden.
-  \end{alertblock}
-
-  \vspace{0.3cm}
-
-  \textbf{4. Tar företaget emot betalningar i utländsk valuta?} \hspace{0.3cm} ⓘ\\
-  ◯ Ja \hspace{0.3cm} ◯ Nej\\
-  Om Ja → Vilka valutor? \underline{\hspace{6cm}}
-  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
-    \tiny \textbf{4 kap. 1 § 1 st. PTL – Övervakningsskyldighet}\\
-    \tiny En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma enstaka transaktioner för att säkerställa att transaktioner som görs överensstämmer med den kännedom som verksamhetsutövaren har om kunden, kundens verksamhet och riskprofil.\\[0.1cm]
-    
-    \tiny \textbf{2 kap. 5 § punkt 5 PTL – Geografisk risk}\\
-    \tiny Som omständigheter som kan tyda på att risken är hög kan verksamhetsutövaren beakta att kunden har hemvist i en stat som saknar effektiva system för bekämpning av penningtvätt. Betalningar i valutor från länder med svaga bankkontroller (även inom Europa) utgör förhöjd risk.\\[0.1cm]
-    
-    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
-    \tiny Om risken bedöms som hög ska särskilt omfattande kontroller göras, t.ex. inhämtande av ytterligare information om kundens affärsverksamhet eller ekonomiska situation och uppgifter om varifrån kundens ekonomiska medel kommer.\\[0.1cm]
-    
-    \tiny \textbf{Varför frågar vi detta?}\\
-    \tiny Vi måste övervaka att transaktioner överensstämmer med er verksamhet enligt 4 kap. 1 § PTL. Betalningar i valutor från länder med svaga bankkontroller (där banker inte ställer frågor om pengarnas ursprung) utgör förhöjd risk enligt 2 kap. 5 § punkt 5 PTL. Vi behöver veta vilka valutor som är normala för er verksamhet för att kunna identifiera avvikande transaktioner och vid behov tillämpa skärpta åtgärder enligt 3 kap. 16 § PTL.
-  \end{alertblock}
-
-  \vspace{0.3cm}
-
-  \textbf{5. Förekommer överföringar till/från utländska bankkonton?} \hspace{0.3cm} ⓘ\\
+  % Fråga 6: Utländska bankkonton
+  \textbf{6. Förekommer överföringar till/från utländska bankkonton?} \hspace{0.3cm} ⓘ\\
   ◯ Ja, regelbundet \hspace{0.3cm} ◯ Ja, ibland \hspace{0.3cm} ◯ Nej\\
   Om Ja → Vilka länder? \underline{\hspace{6cm}}
   \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
-    \tiny \textbf{4 kap. 1 § 1 st. PTL – Övervakningsskyldighet}\\
-    \tiny En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma enstaka transaktioner för att säkerställa att transaktioner som görs överensstämmer med den kännedom som verksamhetsutövaren har om kunden, kundens verksamhet och riskprofil.\\[0.1cm]
+    \tiny \textbf{4 kap. 1 § PTL – Övervakningsskyldighet}\\
+    \tiny En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma enstaka transaktioner
+    för att säkerställa att transaktioner som görs överensstämmer med den kännedom som verksamhetsutövaren
+    har om kunden, kundens verksamhet och riskprofil.\\[0.1cm]
     
-    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
-    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen bedöms som hög, ska särskilt omfattande kontroller göras. Transaktioner via banker i högriskländer eller länder med svaga AML-kontroller utgör förhöjd risk som kräver skärpta åtgärder.\\[0.1cm]
+    \tiny \textbf{3 kap. 16 § PTL – Skärpta åtgärder vid hög risk}\\
+    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen
+    bedöms som hög, ska särskilt omfattande kontroller göras. Transaktioner via banker i högriskländer
+    eller länder med svaga AML-kontroller utgör förhöjd risk som kräver skärpta åtgärder.\\[0.1cm]
     
     \tiny \textbf{2 kap. 5 § punkt 5 PTL – Geografisk risk}\\
-    \tiny Som omständigheter som kan tyda på att risken är hög kan verksamhetsutövaren beakta att kunden har hemvist i en stat som saknar effektiva system för bekämpning av penningtvätt. Utländska bankkonton i länder med svaga bankkontroller utgör förhöjd risk.\\[0.1cm]
+    \tiny Som omständigheter som kan tyda på att risken är hög kan verksamhetsutövaren beakta att kunden
+    har hemvist i en stat som saknar effektiva system för bekämpning av penningtvätt. Utländska bankkonton
+    i länder med svaga bankkontroller utgör förhöjd risk.\\[0.1cm]
     
     \tiny \textbf{01FS 2024:20, 3 kap. 8 § – Skärpt kundkännedom}\\
     \tiny Vid utländska bankkonton i högriskländer ska verksamhetsutövaren:
@@ -1506,10 +1649,14 @@
     \vspace{0.1cm}
     
     \tiny \textbf{Omvänd penningtvätt (Marie Wallin sid. 38)}\\
-    \tiny Utländska bankkonton kan användas för omvänd penningtvätt: vita pengar från Sverige överförs till utländskt konto för att dölja pengar, undvika skatt, eller betala svarta löner utomlands.\\[0.1cm]
+    \tiny Utländska bankkonton kan användas för omvänd penningtvätt: vita pengar från Sverige överförs
+    till utländskt konto för att dölja pengar, undvika skatt, eller betala svarta löner utomlands.\\[0.1cm]
     
     \tiny \textbf{Varför frågar vi detta?}\\
-    \tiny Vi måste övervaka att transaktioner överensstämmer med er verksamhet enligt 4 kap. 1 § PTL. Utländska bankkonton utgör förhöjd risk för BÅDE traditionell penningtvätt (svarta pengar in till Sverige) OCH omvänd penningtvätt (vita pengar ut för att betala svarta kostnader utomlands). Om kontona finns i högriskländer krävs skärpta åtgärder enligt 3 kap. 16 § PTL.
+    \tiny Vi måste övervaka att transaktioner överensstämmer med er verksamhet enligt 4 kap. 1 § PTL.
+    Utländska bankkonton utgör förhöjd risk för BÅDE traditionell penningtvätt (svarta pengar in till Sverige)
+    OCH omvänd penningtvätt (vita pengar ut för att betala svarta kostnader utomlands). Om kontona finns
+    i högriskländer krävs skärpta åtgärder enligt 3 kap. 16 § PTL.
   \end{alertblock}
 
   \vspace{0.5cm}
@@ -1518,92 +1665,30 @@
   \end{flushright}
 \end{frame}
 
-% Steg 3: Kunder & Affärspartners
+% ========================================================================
+% RISKFRÅGOR - STEG 3 (BETALNINGSFLÖDEN & TRANSAKTIONSMÖNSTER)
+% ========================================================================
+
+% Steg 3: Betalningsflöden & Transaktionsmönster
 \begin{frame}[label=riskfragor-steg3]
-  \frametitle{Riskfrågor – Steg 3 av 4: Kunder \& Affärspartners}
+  \frametitle{Riskfrågor – Steg 3 av 3: Betalningsflöden \& Transaktionsmönster}
 
   \begin{center}
-    \textbf{Progress:} [●●●○] Steg 3/4
+    \textbf{Progress:} [●●●] Steg 3/3
   \end{center}
 
   \vspace{0.3cm}
 
   \footnotesize
+  
+  \textbf{Bakgrund:}\\
+  \tiny PTL kräver att vi bedömer risker förknippade med olika betalningsmetoder (3 kap. 4-6 §§) 
+  och övervakar transaktionsmönster (4 kap. 1 §). Betalningsmetod påverkar när kundkännedom krävs, 
+  hur omfattande övervakning behövs, och om skärpta åtgärder måste vidtas.
 
-  \textbf{1. Har företaget återkommande affärspartners utanför Sverige?} \hspace{0.3cm} ⓘ\\
-  ◯ Ja \hspace{0.5cm} ◯ Nej\\
-  Om Ja → Beskriv: \underline{\hspace{6cm}}\\
-  \tiny (Vilka länder? Typ av samarbete? Ungefär hur stor andel av omsättningen?)
-  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
-    \tiny \textbf{3 kap. 13 § 1 st. PTL – Löpande uppföljning}\\
-    \tiny Verksamhetsutövare ska vidta lämpliga åtgärder för att säkerställa att den kännedom som inhämtats i samband med kundkännedom hålls \textit{aktuell} och är tillräcklig.\\[0.1cm]
-    \tiny \textbf{4 kap. 1 § 1 st. PTL – Övervakningsskyldighet}\\
-    \tiny En verksamhetsutövare ska löpande övervaka att transaktioner som genomförs inom ramen för en affärsförbindelse överensstämmer med den kännedom som verksamhetsutövaren har om kunden, kundens verksamhet och riskprofil.\\[0.1cm]
-    \tiny \textbf{3 kap. 12 § PTL – Information om affärsförbindelsens art}\\
-    \tiny Vi ska inhämta information om affärsförbindelsens syfte och art, samt vilka transaktioner som kan \textit{förväntas} i förhållande till kundens verksamhet.\\[0.1cm]
-    \tiny \textbf{Varför frågar vi detta?}\\
-    \tiny För att göra en \textit{temporal riskbedömning}: Är era utländska affärspartners \textit{återkommande} (strukturella affärsrelationer) eller \textit{periodiska} (suspekta mönster vid vissa tidpunkter)? Om ni tidigare uppgav att 40\% av omsättningen kommer från utlandet, behöver vi förstå när detta mönster började för att avgöra om det är en naturlig del av verksamheten eller en nyligen uppkommen förändring. Detta är inte misstänksamhet – det är ett lagkrav på \textit{aktuell} kännedom (3 kap. 13 §).
-  \end{alertblock}
+  \vspace{0.4cm}
 
-  \vspace{0.3cm}
-
-  \textbf{2. Vilka är företagets tre största leverantörer?} \hspace{0.3cm} ⓘ\\
-  1. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
-  2. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
-  3. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}
-  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
-    \tiny \textbf{3 kap. 12 § PTL – Information om affärsförbindelsens syfte och art}\\
-    \tiny Vi ska inhämta information om affärsförbindelsens syfte och art, \textit{samt} information om vilka transaktioner som kan förväntas i förhållande till kundens verksamhet. Genom att be om \textit{de tre största} leverantörerna får vi en koncentrerad bild av var merparten av era inköp kommer ifrån, vilket är avgörande för att bedöma risk och betalningsflöden.\\[0.1cm]
-    \tiny \textbf{PTL 2 kap. 2 § – Riskbaserat tillvägagångssätt}\\
-    \tiny Verksamhetsutövaren ska bedöma och dokumentera de risker för penningtvätt som är förknippade med affärsförbindelsen.\\[0.1cm]
-    \tiny \textbf{Röda flaggor – leverantörer:}\\
-    \begin{itemize}
-      \item Leverantörer i högriskländer (FATF-listan)
-      \item Leverantörer utan tydlig affärsmodell
-      \item Ovanligt stora leveranser från okända företag
-      \item Betalningar till tredje part istället för till leverantören
-      \item Priset avviker avsevärt från marknadspris (över-/underfakturering)
-    \end{itemize}
-    \vspace{0.1cm}
-    \tiny \textbf{Varför frågar vi detta?}\\
-    \tiny För att göra en \textit{progressiv verifikation}: I tidigare steg frågade vi generellt om ni har utländska leverantörer. Nu ber vi om \textit{konkreta namn och länder} för att verifiera konsistens och identifiera specifika risker kopplade till \textit{trade-based money laundering} (penningtvätt via handel). Om svaren här skiljer sig från era tidigare uppgifter, kan det tyda på bristande intern kontroll eller medveten vilseledning – båda situationer som kräver skärpta åtgärder enligt 3 kap. 16 § PTL.
-  \end{alertblock}
-
-  \vspace{0.3cm}
-
-  \textbf{3. Vilka är företagets tre största kunder?} (om B2B) \hspace{0.3cm} ⓘ\\
-  1. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
-  2. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}\\
-  3. \underline{\hspace{5cm}} Land: \underline{\hspace{2cm}}
-  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
-    \tiny \textbf{3 kap. 12 § PTL – Information om affärsförbindelsens syfte och art}\\
-    \tiny Vi ska inhämta information om affärsförbindelsens syfte och art, samt information om vilka transaktioner som kan förväntas i förhållande till kundens verksamhet. Genom att be om \textit{de tre största} kunderna får vi en koncentrerad bild av var merparten av era intäkter kommer ifrån.\\[0.1cm]
-    \tiny \textbf{PTL 3 kap. 1 § 1 st. – Förbud vid otillräcklig kundkännedom}\\
-    \tiny En verksamhetsutövare får inte etablera en affärsförbindelse eller genomföra en transaktion om verksamhetsutövaren inte kan fullgöra de skyldigheter som följer av detta kapitel.\\[0.1cm]
-    \tiny \textbf{3 kap. 16 § 1 st. PTL – Skärpta åtgärder vid hög risk}\\
-    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen bedöms som hög, ska särskilt omfattande kontroller göras. Om huvudsakliga kunder är i högriskländer föreligger förhöjd risk som kräver skärpt kundkännedom.\\[0.1cm]
-    \tiny \textbf{Varför frågar vi detta?}\\
-    \tiny För att göra en \textit{progressiv verifikation och konsistenskontroll}: I tidigare steg frågade vi generellt om ni har utländska kunder. Nu ber vi om \textit{konkreta namn och länder} för era tre största kunder för att verifiera konsistens och bedöma om ni har exponering mot högriskländer eller koncentrationsrisk (beroende av enskilda aktörer). Om en eller flera av era största kunder är från tredje land med strategiska brister enligt FATF, eller om svaren här skiljer sig från era tidigare uppgifter, måste vi vidta skärpta åtgärder enligt 3 kap. 16 § PTL. Detta är inte misstänksamhet – det är verifiering av \textit{aktuell} kännedom som krävs enligt 3 kap. 13 § PTL.
-  \end{alertblock}
-
-  \vspace{0.5cm}
-  \begin{flushright}
-    \hyperlink{riskfragor-steg2}{\beamerbutton{Tillbaka}} \hspace{0.3cm} \hyperlink{riskfragor-steg4}{\beamerbutton{Nästa}}
-  \end{flushright}
-\end{frame}
-
-% Steg 4: Betalningar & Transaktioner
-\begin{frame}[label=riskfragor-steg4]
-  \frametitle{Riskfrågor – Steg 4 av 4: Betalningar \& Transaktioner}
-
-  \begin{center}
-    \textbf{Progress:} [●●●●] Steg 4/4
-  \end{center}
-
-  \vspace{0.3cm}
-
-  \footnotesize
-
+  % Fråga 1: Betalningsmetoder
   \textbf{1. Hur tar företaget betalt från kunder?}* \hspace{0.3cm} ⓘ\\
   ☐ Banköverföring/Swish \hspace{0.3cm} ☐ Kortbetalning \hspace{0.3cm} ☐ Faktura\\
   ☐ Kontanter \hspace{0.3cm} ☐ Kryptovaluta
@@ -1915,79 +2000,338 @@
 
   \vspace{0.5cm}
   \begin{flushright}
-    \hyperlink{riskfragor-steg3}{\beamerbutton{Tillbaka}} \hspace{0.3cm} \hyperlink{identitetskontroll}{\beamerbutton{Slutför \& Nästa}}
+    \hyperlink{riskfragor-steg3}{\beamerbutton{Tillbaka}} \hspace{0.3cm} \hyperlink{riskfragor-steg4}{\beamerbutton{Slutför \& Nästa}}
   \end{flushright}
 \end{frame}
 
 % ========================================================================
-% RISKFRÅGOR WIZARD-STRUKTUR
+% STEG 4: FÖRDJUPAD RISKBEDÖMNING (ENHANCED DUE DILIGENCE - EDD)
 % ========================================================================
-% Steg 1-4: ALLTID visas (statiska steg)
-%   - Steg 1: Grundläggande information (RiskFragorSlide.jsx)
-%   - Steg 2: Utländska transaktioner
-%   - Steg 3: Kunder & Affärspartners
-%   - Steg 4: Betalningar & Transaktioner
+% KONDITIONELL SLIDE - Visas ENDAST om backend returnerar requiresEDD: true
+% Triggers: Högriskland, >30% utlandsomsättning, kontanter >20%, krypto,
+%          tredjepartsbetalningar, PEP, verksamhetsändring + högrisk
+% ========================================================================
+
+\begin{frame}[label=riskfragor-steg4]
+  \frametitle{Steg 4: Fördjupad riskbedömning (Enhanced Due Diligence)}
+  
+  \small
+  \textbf{Progress:} [●●●●] Steg 4/4 - Fördjupad bedömning
+  
+  \vspace{0.3cm}
+  
+  \begin{alertblock}{Varför visas denna sida?}
+    \tiny Baserat på era svar i steg 1-3 har systemet identifierat förhöjd risk för penningtvätt eller finansiering av terrorism.
+    Enligt \textbf{3 kap. 16 § PTL} krävs därför särskilt omfattande kontroller, bedömningar och utredningar (Enhanced Due Diligence).\\[0.1cm]
+    \tiny Detta är ett lagkrav - inte något vi uppfinner själva. Tack för att ni tar er tid att svara på dessa extra frågor.
+  \end{alertblock}
+
+  \vspace{0.4cm}
+
+  % ============================================================
+  % EDD-FRÅGOR
+  % ============================================================
+
+  % Fråga 1: Fördjupad beskrivning av affärsförbindelsen
+  \textbf{1. Beskriv affärsförbindelsens syfte mer detaljerat} \hspace{0.3cm} ⓘ\\
+  \begin{block}{Textarea}
+    \tiny Vilken konkret tjänst/produkt tillhandahålls? Vem är slutkund? 
+    Varför är just era högriskkunder/länder relevanta för er affärsmodell?
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 16 § PTL (Skärpta åtgärder vid hög risk):}\\
+    \tiny Om risken för penningtvätt eller finansiering av terrorism som kan förknippas med kundrelationen
+    bedöms som hög, ska särskilt omfattande kontroller, bedömningar och utredningar enligt 7, 8 och 10-13 §§ göras.\\
+    \tiny En verksamhetsutövare ska vidta de åtgärder som är nödvändiga för att hantera risken.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 12 § PTL (Information om affärsförbindelsens syfte och art):}\\
+    \tiny En verksamhetsutövare ska inhämta information om affärsförbindelsens syfte och art.
+    Informationen ska ligga till grund för en bedömning av
+    \begin{enumerate}
+      \item vilka aktiviteter och transaktioner som kunden kan förväntas vidta och genomföra inom ramen för affärsförbindelsen, och
+      \item kundens riskprofil enligt 2 kap. 3 §.
+    \end{enumerate}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{01FS 2024:20, 3 kap. 8 § (Skärpt kundkännedom):}\\
+    \tiny Vid hög risk ska verksamhetsutövaren särskilt:
+    \begin{itemize}
+      \item Inhämta ytterligare information om kundens verksamhet och planerade transaktioner
+      \item Förstå affärsförbindelsens ekonomiska syfte
+      \item Identifiera varifrån medel kommer och vart de ska
+      \item Övervaka affärsförbindelsen mer frekvent och noggrant
+    \end{itemize}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Vid högrisk räcker inte standardfrågor. Vi måste förstå den \emph{faktiska ekonomiska grunden} för era affärer
+    för att kunna förklara detta för Länsstyrelsen vid tillsyn och för att upptäcka avvikande transaktioner enligt 4 kap. 1 § PTL.
+  \end{alertblock}
+
+  \vspace{0.4cm}
+
+  % Fråga 2: Startkapital
+  \textbf{2. Varifrån kommer ert startkapital och hur finansieras verksamheten?} \hspace{0.3cm} ⓘ\\
+  \begin{block}{Textarea}
+    \tiny Eget kapital, banklån, investerare, externa lån? Specificera källor.
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 13 § PTL (Kontroll av medlens ursprung):}\\
+    \tiny Verksamhetsutövaren ska granska och dokumentera ursprunget till de tillgångar och medel som
+    används i affärsförbindelsen eller i den enstaka transaktionen.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 16 § PTL (Skärpta åtgärder vid hög risk):}\\
+    \tiny Vid högrisk krävs särskilt omfattande kontroller av medlens ursprung. Detta inkluderar att verifiera
+    att tillgångar inte kommer från brottslig verksamhet.\\[0.1cm]
+    
+    \tiny \textbf{01FS 2024:20, 3 kap. 8 § (Skärpt kundkännedom):}\\
+    \tiny Verksamhetsutövaren ska inhämta information om varifrån kundens medel kommer och hur verksamheten finansieras.
+    Vid stora belopp eller ovanliga finansieringskällor krävs dokumentation från oberoende källor (t.ex. bokslut, bankbesked).\\[0.1cm]
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny För att säkerställa att ert företag inte används för att legitimera (\"tvätta\") brottsligt förvärvade medel.
+    Enligt 1 kap. 5 § PTL definieras penningtvätt som att \emph{ta emot, använda eller befatta sig med egendom
+    som härrör från brott}. Kontroll av startkapitalets ursprung är därför central i vår riskbedömning.
+  \end{alertblock}
+
+  \vspace{0.5cm}
+  \begin{flushright}
+    \hyperlink{riskfragor-steg3}{\beamerbutton{Tillbaka}} \hspace{0.3cm} \hyperlink{riskfragor-steg4-fortsattning}{\beamerbutton{Nästa}}
+  \end{flushright}
+\end{frame}
+
+% ========================================================================
+% STEG 4 (FORTSÄTTNING): Frågor 3-6
+% ========================================================================
+
+\begin{frame}[label=riskfragor-steg4-fortsattning]
+  \frametitle{Steg 4: Fördjupad riskbedömning (forts.)}
+  
+  \small
+  \textbf{Progress:} [●●●●] Steg 4/4 - Fördjupad bedömning (forts.)
+
+  \vspace{0.4cm}
+
+  % Fråga 3: Dokumentation av affärsrelationer
+  \textbf{3. Kan ni tillhandahålla dokumentation av era affärsrelationer?} \hspace{0.3cm} ⓘ\\
+  \begin{block}{Upload + Textarea}
+    \tiny Ladda upp: Avtal, kontrakt, fakturor, orderbekräftelser, eller motsvarande\\
+    \tiny Alternativt beskriv: Varför dokumentation saknas (muntliga avtal, branschtradition, etc.)
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 16 § PTL (Skärpta åtgärder vid hög risk):}\\
+    \tiny Vid högrisk ska särskilt omfattande \emph{bedömningar och utredningar} göras. Detta inkluderar att
+    verifiera affärsrelationer genom oberoende källor eller dokumentation.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 12 § PTL (Information om affärsförbindelsens syfte och art):}\\
+    \tiny Verksamhetsutövaren ska inhämta information om affärsförbindelsens syfte och art. Vid högrisk räcker
+    inte kundens egna uppgifter - vi behöver verifiering från oberoende källor (t.ex. kontrakt, fakturor).\\[0.1cm]
+    
+    \tiny \textbf{01FS 2024:20, 3 kap. 8 § (Skärpt kundkännedom):}\\
+    \tiny Vid skärpta åtgärder ska verksamhetsutövaren:
+    \begin{itemize}
+      \item Inhämta ytterligare information från oberoende källor
+      \item Verifiera att uppgifter om affärsrelationer stämmer
+      \item Dokumentera alla väsentliga affärsförbindelser
+    \end{itemize}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny För att verifiera att era affärsrelationer är genuina. Fiktiva affärsrelationer är en vanlig metod vid
+    handelsbaserad penningtvätt (trade-based money laundering), där företag använder över-/underfakturering
+    för att flytta värde över gränser. Dokumentation hjälper oss särskilja legitima företag från skalbolag.
+  \end{alertblock}
+
+  \vspace{0.4cm}
+
+  % Fråga 4: Förklaring av ovanliga transaktionsmönster
+  \textbf{4. Hur förklarar ni era transaktionsmönster?} \hspace{0.3cm} ⓘ\\
+  \begin{block}{Textarea}
+    \tiny T.ex: Varför stora kontantinbetalningar? Varför transaktioner till högriskländer? 
+    Varför oregelbundna betalningar?
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{4 kap. 1 § PTL (Övervakningsskyldighet):}\\
+    \tiny En verksamhetsutövare ska övervaka pågående affärsförbindelser och bedöma enstaka transaktioner
+    för att säkerställa att transaktioner som görs överensstämmer med den kännedom som verksamhetsutövaren
+    har om kunden, kundens verksamhet och riskprofil.\\
+    \tiny Om transaktioner avviker från förväntat mönster ska verksamhetsutövaren utreda orsakerna.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 16 § PTL (Skärpta åtgärder vid hög risk):}\\
+    \tiny Vid högrisk ska verksamhetsutövaren vidta de åtgärder som är nödvändiga för att hantera risken.
+    Detta inkluderar att få förklaring för ovanliga transaktionsmönster innan transaktioner godkänns.\\[0.1cm]
+    
+    \tiny \textbf{01FS 2024:20, 3 kap. 8 § (Skärpt kundkännedom):}\\
+    \tiny Vid hög risk ska transaktioner analyseras mer noggrant. Verksamhetsutövaren ska förstå:
+    \begin{itemize}
+      \item Varför vissa transaktioner är ovanligt stora eller frekventa
+      \item Varför geografiska destinationer avviker från kundens normala verksamhet
+      \item Varför betalningsmetoder är ovanliga för branschen
+    \end{itemize}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Ovanliga transaktionsmönster är enligt 2 kap. 5 § PTL en riskindikator. Vi måste kunna förklara
+    för Länsstyrelsen varför era transaktioner ser ut som de gör. Detta skyddar både er och oss vid framtida tillsyn.
+  \end{alertblock}
+
+  \vspace{0.4cm}
+
+  % Fråga 5: Ytterligare information om verkliga huvudmän
+  \textbf{5. Ytterligare information om verkliga huvudmän} \hspace{0.3cm} ⓘ\\
+  \begin{block}{Textarea}
+    \tiny Om verklig huvudman är utländsk medborgare, PEP, eller från högriskland: 
+    Förklara relationen och varför denna person är involverad.
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 6 § PTL (Identifiering av verkliga huvudmän):}\\
+    \tiny En verksamhetsutövare ska ta reda på om det finns en eller flera verkliga huvudmän och vidta
+    skäliga åtgärder för att identifiera och verifiera identiteten hos var och en av dessa.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 19 § PTL (Åtgärder vid politiskt utsatt person - PEP):}\\
+    \tiny Om kunden eller den verkliga huvudmannen är en politiskt utsatt person ska verksamhetsutövaren,
+    utöver de åtgärder som ska vidtas enligt 1-18 §§:
+    \begin{enumerate}
+      \item inhämta uppgifter om personens förmögenhets- och inkomstförhållanden,
+      \item fastställa varifrån de tillgångar och medel som används i affärsförbindelsen eller den enstaka transaktionen kommer, och
+      \item särskilt noggrant övervaka affärsförbindelsen.
+    \end{enumerate}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{3 kap. 16 § PTL (Skärpta åtgärder vid hög risk):}\\
+    \tiny Vid verklig huvudman från högriskland eller med PEP-status krävs skärpta åtgärder inklusive
+    fördjupad kontroll av ägarstrukturen och medlens ursprung.\\[0.1cm]
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny PEP utgör förhöjd risk för korruption och förskingring av offentliga medel (se 2 kap. 5 § punkt 4 PTL).
+    Utländska verkliga huvudmän från högriskländer kan indikera att företaget används för att dölja brottsligt förvärvade medel.
+    Vi måste förstå \emph{varför} denna person är involverad och \emph{varifrån} dennes medel kommer.
+  \end{alertblock}
+
+  \vspace{0.4cm}
+
+  % Fråga 6: Ursprung för stora inbetalningar
+  \textbf{6. Förklara ursprunget för eventuella stora inbetalningar} \hspace{0.3cm} ⓘ\\
+  \begin{block}{Textarea}
+    \tiny Om företaget mottagit stora engångsbelopp (>150 000 kr): Varifrån kom pengarna? 
+    Lån, investering, försäljning, annat?
+  \end{block}
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
+    \tiny \textbf{3 kap. 13 § PTL (Kontroll av medlens ursprung):}\\
+    \tiny Verksamhetsutövaren ska granska och dokumentera ursprunget till de tillgångar och medel som
+    används i affärsförbindelsen eller i den enstaka transaktionen.\\[0.1cm]
+    
+    \tiny \textbf{3 kap. 4 § PTL (Identifiering vid enstaka transaktioner):}\\
+    \tiny Kundkännedomsåtgärder ska vidtas vid enstaka transaktioner om transaktionsbeloppet uppgår till
+    minst 15 000 euro eller motsvarande belopp i annan valuta. Vid kontanttransaktioner gäller tröskel på 5 000 euro (3 kap. 6 §).\\[0.1cm]
+    
+    \tiny \textbf{4 kap. 1 § PTL (Övervakningsskyldighet):}\\
+    \tiny Verksamhetsutövaren ska övervaka pågående affärsförbindelser i syfte att upptäcka avvikande transaktioner.
+    Stora inbetalningar som avviker från kundens normala omsättning utgör en avvikelse som måste utredas.\\[0.1cm]
+    
+    \tiny \textbf{Varför frågar vi detta?}\\
+    \tiny Stora inbetalningar kan vara ett tecken på \"placement\" (första steget i penningtvätt) där brottsliga medel
+    förs in i det finansiella systemet. Enligt 5 kap. 1 § PTL måste vi anmäla till FIU-Sverige om vi misstänker
+    att en transaktion \emph{kan ha samband med penningtvätt eller finansiering av terrorism}.
+    Genom att förstå ursprunget kan vi bedöma om transaktionen är legitim.
+  \end{alertblock}
+
+  \vspace{0.5cm}
+  \begin{flushright}
+    \hyperlink{riskfragor-steg4}{\beamerbutton{Tillbaka}} \hspace{0.3cm} \hyperlink{identitetskontroll}{\beamerbutton{Slutför \& Nästa}}
+  \end{flushright}
+\end{frame}
+
+% ========================================================================
+% RISKFRÅGOR WIZARD-STRUKTUR (NY 3-STEGS + KONDITIONELL EDD)
+% ========================================================================
+% Steg 1-3: ALLTID visas (statiska bassteg)
+%   - Steg 1: Grundläggande information (VD, verklig huvudman, PEP)
+%   - Steg 2: Geografisk risk & Affärsrelationer (BLOCK A/B/C)
+%   - Steg 3: Betalningsflöden & Transaktionsmönster
 %
-% Steg 5+: KONFIGURERBARA steg via config.json
-%   - Byrån laddar ner config.json från Settings-sidan
-%   - Lägger till custom riskfrågor i config
-%   - Laddar upp uppdaterad config.json
-%   - Extra steg visas automatiskt baserat på config
+% Steg 4: KONDITIONELLT (Enhanced Due Diligence - EDD)
+%   - Visas ENDAST om backend returnerar requiresEDD: true
+%   - Triggers: Högriskland, >30% utlandsomsättning, kontanter >20%,
+%               krypto, tredjepartsbetalningar, PEP, verksamhetsändring + högrisk
+%   - Route: /onboarding/{id}/riskfragor/enhanced
+%   - Backend endpoint: GET /api/onboarding/{id}/risk-assessment
 %
-% Backend endpoints:
-%   - POST /api/onboarding/{id}/riskfragor/steg1 - Sparar steg 1
-%   - POST /api/onboarding/{id}/riskfragor/steg2 - Sparar steg 2
-%   - POST /api/onboarding/{id}/riskfragor/steg3 - Sparar steg 3
-%   - POST /api/onboarding/{id}/riskfragor/steg4 - Sparar steg 4
-%   - POST /api/onboarding/{id}/riskfragor/custom - Sparar steg 5+ (från config)
+% Steg 5+: DYNAMISKA STEG (FRAMTIDA IMPLEMENTATION)
+%   - Branschspecifika frågor som byråchefen konfigurerar via config.json
+%   - Laddar dynamiskt från backend: GET /api/onboarding/{id}/custom-steps
+%   - Varje byrå kan definiera egna frågor med tillhörande lagtexter
+%   - Frontend renderar dessa EFTER steg 4 (eller steg 3 om ej EDD)
+%   - OBS: Dokumenteras i API_Endpoints_ContentSlides.tex, ej här
+%   - Se: docs/specifications/CONFIG_STRUCTURE.md för konfiguration
 %
-% OBS: PEP-frågor finns i separat slide "PEP-Kontroll" efter Identitetskontroll
+% Frontend routing:
+%   POST /api/onboarding/{id}/riskfragor/steg1
+%   POST /api/onboarding/{id}/riskfragor/steg2
+%   POST /api/onboarding/{id}/riskfragor/steg3
+%   GET  /api/onboarding/{id}/risk-assessment → { requiresEDD: boolean }
+%   POST /api/onboarding/{id}/riskfragor/enhanced (om requiresEDD: true)
+%   GET  /api/onboarding/{id}/custom-steps → { steps: [...] } (framtida)
+%
+% Navigation:
+%   - Lågriskkund: Steg 1 → 2 → 3 → [Dynamiska steg 5+] → Identitetskontroll
+%   - Högriskund: Steg 1 → 2 → 3 → 4 (EDD) → [Dynamiska steg 5+] → Identitetskontroll
+%
+% OBS: PEP-frågor finns i Steg 1 (fråga 7)
 % Verkliga huvudmän hämtas automatiskt från Roaring.io i Steg 1
 % ========================================================================
 
 % SAMMANFATTNINGSSIDA: Backend-endpoints för Riskfrågor
 \begin{frame}[label=riskfragor-api]
-  \frametitle{Backend API-endpoints för Riskfrågor}
+  \frametitle{Backend API-endpoints för Riskfrågor (Uppdaterad struktur)}
 
   \footnotesize
 
-  \textbf{Steg 1:} POST /api/onboarding/verify-identity\\
+  \textbf{Steg 1: Grundläggande information}\\
+  \tiny POST /api/onboarding/{id}/riskfragor/steg1\\
+  \tiny → Sparar affärsidé, kundtyper, verksamhetsändring, VD-personnummer, verklig huvudman, PEP\\
   \tiny → Anropar Roaring.io + Bolagsverket → Returnerar företagsnamn, SNI-kod, ägare
 
   \vspace{0.3cm}
 
-  \textbf{Steg 2:} POST /api/onboarding/business-description\\
-  \tiny → Sparar verksamhetsbeskrivning → Jämför SNI-kod med Bolagsverket → Flaggar avvikelser
+  \textbf{Steg 2: Geografisk risk \& Affärsrelationer}\\
+  \tiny POST /api/onboarding/{id}/riskfragor/steg2\\
+  \tiny → Sparar BLOCK A (utländska kunder, omsättningsandel, typ av samarbete)\\
+  \tiny → Sparar BLOCK B (leverantörer, kunder med namn och länder)\\
+  \tiny → Sparar BLOCK C (utländska bankkonton)\\
+  \tiny → Jämför BLOCK A (allmänna svar) med BLOCK B (specifika namn) → Flaggar inkonsistenser\\
+  \tiny → Kontrollerar högriskländer mot EU-kommissionens lista + FATF
 
   \vspace{0.3cm}
 
-  \textbf{Steg 3:} POST /api/onboarding/business-relationships\\
-  \tiny → Sparar kunder/leverantörer → Kontrollerar högriskländer (FATF-listan)
+  \textbf{Steg 3: Betalningsflöden \& Transaktionsmönster}\\
+  \tiny POST /api/onboarding/{id}/riskfragor/steg3\\
+  \tiny → Sparar betalningsmetoder, kontantandel, utländsk valuta, transaktioner >150k, tredjepartsbetalningar\\
+  \tiny → Flaggar högrisk: kontanter >20\%, kryptovaluta, tredjepartsbetalningar
 
   \vspace{0.3cm}
 
-  \textbf{Steg 4:} POST /api/onboarding/payment-methods\\
-  \tiny → Sparar betalningsmetoder → Flaggar högrisk (kontanter >20\%, kryptovaluta)
+  \textbf{Riskbedömning (Konditionell trigger)}\\
+  \tiny GET /api/onboarding/{id}/risk-assessment\\
+  \tiny → Returnerar: \{ riskScore: 0-100, requiresEDD: boolean, riskLevel: 'low'|'medium'|'high' \}\\
+  \tiny → Triggers för requiresEDD: Högriskland, >30\% utlandsomsättning, kontanter >20\%, krypto, tredjepartsbetalningar, PEP
 
   \vspace{0.3cm}
 
-  \textbf{Steg 5:} POST /api/onboarding/ownership-pep\\
-  \tiny → Sparar ägarstruktur → Jämför med Roaring.io → PEP-kontroll → Sanktionslistkontroll
+  \textbf{Steg 4: Enhanced Due Diligence (EDD) - KONDITIONELLT}\\
+  \tiny POST /api/onboarding/{id}/riskfragor/enhanced\\
+  \tiny → Visas ENDAST om requiresEDD: true\\
+  \tiny → Sparar fördjupade svar: Affärsförbindelse, startkapital, dokumentation, transaktionsmönster, huvudmän, stora inbetalningar
 
-  \vspace{0.5cm}
+  \vspace{0.3cm}
 
   \begin{alertblock}{Databas}
-    \tiny All data sparas i \texttt{client\_onboarding\_data.csv} (eller PostgreSQL i production)\\
-    Externa API-svar sparas i \texttt{roaring\_data.csv} och \texttt{bolagsverket\_data.csv}
+    \tiny All data sparas i PostgreSQL (production) eller \texttt{client\_onboarding\_data.csv} (dev)\\
+    Externa API-svar: \texttt{roaring\_data.csv}, \texttt{bolagsverket\_data.csv}\\
+    Riskflaggor: \texttt{risk\_flags.csv}
   \end{alertblock}
-
-  \vspace{0.3cm}
-
-  \begin{block}{Korsvalidering}
-    \tiny Backend jämför automatiskt klientens svar med officiell data från Roaring.io/Bolagsverket.\\
-    Avvikelser sparas i \texttt{risk\_flags.csv} och visas senare i Riskbedömning-sliden.
-  \end{block}
 \end{frame}
+
 
 
 

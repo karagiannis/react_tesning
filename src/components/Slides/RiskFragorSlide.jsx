@@ -1,7 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Info } from 'lucide-react';
+import { searchCompanies, getCompanyByOrgNr } from '../../data/mockCompanyAutocomplete';
+import StepIndicator from '../Shared/StepIndicator';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange }) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useLocalStorage('onboarding-wizard-steg1', {
     affarsIde: '',
     kundTyper: {
       privatpersoner: false,
@@ -11,14 +15,38 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     utlandskaPartners: '',
     storaLeverantorer: '',
     verksamhetAndrad: '',
+    foretagsnamn: '',
     organisationsnummer: '',
     personnummer: '',
     isPEP: false,
   });
 
+  // Autocomplete state
+  const [companyQuery, setCompanyQuery] = useState('');
+  const [companySuggestions, setCompanySuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  const autocompleteRef = useRef(null);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleChange = (field, value) => {
     const newFormData = { ...formData, [field]: value };
     setFormData(newFormData);
+    
+    // Om användaren manuellt ändrar org.nr → ta bort selectedCompany (manuell override)
+    if (field === 'organisationsnummer' && selectedCompany) {
+      setSelectedCompany(null);
+    }
     
     // Notify parent immediately when org/pers nummer changes
     if ((field === 'organisationsnummer' || field === 'personnummer') && onFormDataChange) {
@@ -34,6 +62,51 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
       ...prev,
       kundTyper: { ...prev.kundTyper, [field]: checked }
     }));
+  };
+
+  const handleCompanySearch = (query) => {
+    setCompanyQuery(query);
+    
+    // Om användaren raderar företagsnamnet → rensa även org.nr och selectedCompany
+    if (query.trim() === '') {
+      setSelectedCompany(null);
+      setFormData(prev => ({
+        ...prev,
+        foretagsnamn: '',
+        organisationsnummer: ''
+      }));
+      setCompanySuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    
+    if (query.length >= 2) {
+      const results = searchCompanies(query);
+      setCompanySuggestions(results);
+      setShowSuggestions(true);
+    } else {
+      setCompanySuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleCompanySelect = (company) => {
+    setSelectedCompany(company);
+    setCompanyQuery(company.name);
+    setFormData(prev => ({
+      ...prev,
+      foretagsnamn: company.name,
+      organisationsnummer: company.orgNr
+    }));
+    setShowSuggestions(false);
+    
+    // Notify parent
+    if (onFormDataChange) {
+      onFormDataChange({
+        organisationsnummer: company.orgNr,
+        personnummer: formData.personnummer
+      });
+    }
   };
 
   const isFormValid = () => {
@@ -52,6 +125,9 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
           Frågor som stödjer riskbedömning
         </h1>
         
+        {/* Step Indicator */}
+        <StepIndicator currentStep={1} completedSteps={0} />
+        
         <p className="text-sm text-brand-700 mb-6">
           Flera av dessa frågor har lagstöd och hjälper oss att bedöma risken:
         </p>
@@ -69,6 +145,60 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
               rows={3}
               placeholder="Beskriv kort företagets verksamhet..."
             />
+          </div>
+
+          {/* Företagsnamn med Autocomplete */}
+          <div ref={autocompleteRef} className="relative">
+            <label className="block text-sm font-medium text-brand-800 mb-2 flex items-center gap-2">
+              Vilket företag representerar du? *
+              <Info className="w-4 h-4 text-brand-600 cursor-help" title="Sök efter ditt företag så hämtar vi automatiskt organisationsnummer från Bolagsverket" />
+            </label>
+            <input
+              type="text"
+              value={companyQuery}
+              onChange={(e) => handleCompanySearch(e.target.value)}
+              onFocus={() => companyQuery.length >= 2 && setShowSuggestions(true)}
+              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              placeholder="Börja skriva företagsnamn..."
+            />
+            {showSuggestions && companySuggestions.length > 0 && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-brand-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                {companySuggestions.map((company) => (
+                  <button
+                    key={company.id}
+                    onClick={() => handleCompanySelect(company)}
+                    className="w-full px-4 py-2 text-left hover:bg-brand-50 transition-colors border-b border-brand-100 last:border-b-0"
+                  >
+                    <div className="font-medium text-brand-900">{company.name}</div>
+                    <div className="text-xs text-brand-600">
+                      Org.nr: {company.orgNr} • {company.stad}, {company.lan}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-brand-600 mt-1">
+              Autocomplete söker i Bolagsverkets register (600 000+ företag)
+            </p>
+          </div>
+
+          {/* Organisationsnummer */}
+          <div>
+            <label className="block text-sm font-medium text-brand-800 mb-2">
+              Organisationsnummer *
+            </label>
+            <input
+              type="text"
+              value={formData.organisationsnummer}
+              onChange={(e) => handleChange('organisationsnummer', e.target.value)}
+              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-brand-50"
+              placeholder="XXXXXX-XXXX"
+            />
+            <p className="text-xs text-brand-600 mt-1">
+              {selectedCompany 
+                ? '✓ Förifyllt från Bolagsverket (kan redigeras manuellt)' 
+                : 'Välj företag ovan eller skriv in organisationsnummer manuellt'}
+            </p>
           </div>
 
           {/* Kundtyper */}
@@ -147,23 +277,6 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
               rows={2}
               placeholder="Beskriv eventuella förändringar..."
             />
-          </div>
-
-          {/* Organisationsnummer */}
-          <div>
-            <label className="block text-sm font-medium text-brand-800 mb-2">
-              Organisationsnummer *
-            </label>
-            <input
-              type="text"
-              value={formData.organisationsnummer}
-              onChange={(e) => handleChange('organisationsnummer', e.target.value)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-              placeholder="XXXXXX-XXXX"
-            />
-            <p className="text-xs text-brand-600 mt-1">
-              Organisationsnumret används för att hämta officiell information från Bolagsverket eller Roaring.io.
-            </p>
           </div>
 
           {/* Personnummer */}

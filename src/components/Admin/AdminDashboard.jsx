@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 import Icon from '../Shared/Icon';
+
+const MySwal = withReactContent(Swal.mixin({
+  customClass: {
+    confirmButton: 'bg-brand-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-brand-700 mr-2',
+    cancelButton: 'bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-400'
+  },
+  buttonsStyling: false
+}));
 
 // Mock data för demonstration
 const mockStats = {
@@ -126,6 +136,17 @@ const mockInvoices = [
   },
 ];
 
+const mockAllUsers = [
+  { id: 1, name: 'Anna Andersson', email: 'anna@revisionstockholm.se', company: 'Revision Stockholm AB', role: 'Admin', status: 'active', lastLogin: '2025-10-30 14:23' },
+  { id: 2, name: 'Johan Svensson', email: 'johan@revisionstockholm.se', company: 'Revision Stockholm AB', role: 'User', status: 'active', lastLogin: '2025-10-29 09:45' },
+  { id: 3, name: 'Maria Karlsson', email: 'maria@revisionstockholm.se', company: 'Revision Stockholm AB', role: 'User', status: 'active', lastLogin: '2025-10-28 16:12' },
+  { id: 4, name: 'Erik Eriksson', email: 'erik@ekonomibyran.se', company: 'Ekonomibyrån Väst', role: 'Admin', status: 'active', lastLogin: '2025-10-30 11:34' },
+  { id: 5, name: 'Sofia Andersson', email: 'sofia@ekonomibyran.se', company: 'Ekonomibyrån Väst', role: 'User', status: 'inactive', lastLogin: '2025-09-15 08:20' },
+  { id: 6, name: 'Karin Berg', email: 'karin@nordiskrevision.se', company: 'Nordisk Revision', role: 'Admin', status: 'active', lastLogin: '2025-10-30 13:56' },
+  { id: 7, name: 'Per Nilsson', email: 'per@nordiskrevision.se', company: 'Nordisk Revision', role: 'User', status: 'pending', lastLogin: null },
+  { id: 8, name: 'Lisa Johansson', email: 'lisa@nordiskrevision.se', company: 'Nordisk Revision', role: 'User', status: 'suspended', lastLogin: '2025-10-10 19:45' },
+];
+
 const fraudCategories = [
   { name: 'Verksamhetskongruens', count: 38, percent: 30, color: 'bg-red-500' },
   { name: 'Privatkonsumtion', count: 57, percent: 45, color: 'bg-orange-500' },
@@ -135,13 +156,21 @@ const fraudCategories = [
 ];
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview'); // overview, fraud, support, invoices, email
+  const [activeTab, setActiveTab] = useState('overview'); // overview, fraud, support, invoices, email, users
   const [emailForm, setEmailForm] = useState({
     to: '',
     subject: '',
     message: '',
     type: 'single', // single or mass
   });
+
+  // User management state
+  const [users, setUsers] = useState(mockAllUsers.map(u => ({ ...u, isSelected: false, show: true })));
+  const [searchValue, setSearchValue] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const selectedUsersIds = users.filter(u => u.isSelected).map(u => u.id);
+  const totalUsers = users.length;
+  const allSelected = selectedUsersIds.length === totalUsers;
 
   const getRiskColor = (score) => {
     if (score >= 80) return 'text-red-600 bg-red-50';
@@ -186,6 +215,68 @@ const AdminDashboard = () => {
     );
   };
 
+  // User management functions (from Themesberg)
+  const changeSearchValue = (e) => {
+    const newSearchValue = e.target.value;
+    const newUsers = users.map(u => ({
+      ...u,
+      show: u.name.toLowerCase().includes(newSearchValue.toLowerCase()) ||
+            u.email.toLowerCase().includes(newSearchValue.toLowerCase()) ||
+            u.company.toLowerCase().includes(newSearchValue.toLowerCase())
+    }));
+    setSearchValue(newSearchValue);
+    setUsers(newUsers);
+  };
+
+  const changeStatusFilter = (e) => {
+    const newStatusFilter = e.target.value;
+    const newUsers = users.map(u => ({
+      ...u,
+      show: u.status === newStatusFilter || newStatusFilter === 'all'
+    }));
+    setStatusFilter(newStatusFilter);
+    setUsers(newUsers);
+  };
+
+  const selectAllUsers = () => {
+    const newUsers = selectedUsersIds.length === totalUsers
+      ? users.map(u => ({ ...u, isSelected: false }))
+      : users.map(u => ({ ...u, isSelected: true }));
+    setUsers(newUsers);
+  };
+
+  const selectUser = (id) => {
+    const newUsers = users.map(u => u.id === id ? ({ ...u, isSelected: !u.isSelected }) : u);
+    setUsers(newUsers);
+  };
+
+  const deleteUsers = async (ids) => {
+    const usersToBeDeleted = ids ? ids : selectedUsersIds;
+    const usersNr = usersToBeDeleted.length;
+    const textMessage = usersNr === 1
+      ? 'Är du säker på att du vill radera denna användare?'
+      : `Är du säker på att du vill radera dessa ${usersNr} användare?`;
+
+    const result = await MySwal.fire({
+      icon: 'error',
+      title: 'Bekräfta radering',
+      text: textMessage,
+      showCancelButton: true,
+      confirmButtonText: 'Ja, radera',
+      cancelButtonText: 'Avbryt'
+    });
+
+    if (result.isConfirmed) {
+      const newUsers = users.filter(f => !usersToBeDeleted.includes(f.id));
+      const confirmMessage = usersNr === 1
+        ? 'Användaren har raderats.'
+        : 'Användarna har raderats.';
+
+      setUsers(newUsers);
+      await MySwal.fire('Raderad!', confirmMessage, 'success');
+    }
+  };
+
   const handleSendEmail = (e) => {
     e.preventDefault();
     alert(`Email skickat till: ${emailForm.to}\nÄmne: ${emailForm.subject}`);
@@ -209,9 +300,10 @@ const AdminDashboard = () => {
           </div>
 
           {/* Tabs */}
-          <div className="flex space-x-8 border-t border-gray-200">
+          <div className="flex space-x-8 border-t border-gray-200 overflow-x-auto">
             {[
               { id: 'overview', label: 'Översikt', icon: 'chart' },
+              { id: 'users', label: 'Användare', icon: 'users' },
               { id: 'fraud', label: 'Fraud Detection', icon: 'alert' },
               { id: 'support', label: 'Support', icon: 'help' },
               { id: 'invoices', label: 'Fakturering', icon: 'document' },
@@ -355,6 +447,183 @@ const AdminDashboard = () => {
                   >
                     Visa alla support-ärenden →
                   </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Users Tab */}
+        {activeTab === 'users' && (
+          <div className="space-y-6">
+            {/* Users Header with Actions */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Användarhantering</h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Hantera alla användare i systemet
+                  </p>
+                </div>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => alert('Lägg till ny användare')}
+                    className="bg-brand-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-brand-700 transition-colors flex items-center space-x-2"
+                  >
+                    <span>+</span>
+                    <span>Ny användare</span>
+                  </button>
+                  {selectedUsersIds.length > 0 && (
+                    <button
+                      onClick={() => deleteUsers()}
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center space-x-2"
+                    >
+                      <span>Radera ({selectedUsersIds.length})</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Search and Filter */}
+              <div className="flex flex-col md:flex-row gap-4 mb-6">
+                <div className="flex-1">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Sök användare (namn, e-post, företag)..."
+                      value={searchValue}
+                      onChange={changeSearchValue}
+                      className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    />
+                    <svg
+                      className="absolute left-3 top-3 h-5 w-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div className="w-full md:w-48">
+                  <select
+                    value={statusFilter}
+                    onChange={changeStatusFilter}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  >
+                    <option value="all">Alla statusar</option>
+                    <option value="active">Aktiv</option>
+                    <option value="inactive">Inaktiv</option>
+                    <option value="pending">Väntande</option>
+                    <option value="suspended">Avstängd</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Users Table */}
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left">
+                        <input
+                          type="checkbox"
+                          checked={allSelected}
+                          onChange={selectAllUsers}
+                          className="h-4 w-4 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
+                        />
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Användare
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Företag
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Roll
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Senaste inloggning
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Åtgärder
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {users.filter(u => u.show).map((user) => (
+                      <tr key={user.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          <input
+                            type="checkbox"
+                            checked={user.isSelected}
+                            onChange={() => selectUser(user.id)}
+                            className="h-4 w-4 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                            <div className="text-xs text-gray-500">{user.email}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="text-sm text-gray-900">{user.company}</span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                            user.role === 'Admin'
+                              ? 'bg-purple-100 text-purple-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {user.role}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(user.status)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {user.lastLogin || 'Aldrig'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => alert(`Redigera ${user.name}`)}
+                            className="text-brand-600 hover:text-brand-900 mr-4"
+                          >
+                            Redigera
+                          </button>
+                          <button
+                            onClick={() => deleteUsers([user.id])}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Radera
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Stats Footer */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <span>
+                    Visar {users.filter(u => u.show).length} av {totalUsers} användare
+                  </span>
+                  {selectedUsersIds.length > 0 && (
+                    <span className="text-brand-600 font-medium">
+                      {selectedUsersIds.length} användare valda
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

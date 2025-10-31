@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { legalTexts } from '../../data/legalTexts';
+import StepIndicator from '../Shared/StepIndicator';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 export default function RiskFragorSteg4Slide({ onNext }) {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useLocalStorage('onboarding-wizard-steg4', {
     betalmetoder: {
       bankoverföring: false,
       kortbetalning: false,
@@ -48,20 +51,12 @@ export default function RiskFragorSteg4Slide({ onNext }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
       <div className="max-w-3xl w-full bg-white rounded-2xl shadow-2xl p-10">
-        {/* Progress indicator */}
-        <div className="mb-6">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="w-3 h-3 rounded-full bg-brand-600"></div>
-            <div className="w-3 h-3 rounded-full bg-brand-600"></div>
-            <div className="w-3 h-3 rounded-full bg-brand-600"></div>
-            <div className="w-3 h-3 rounded-full bg-brand-600"></div>
-          </div>
-          <p className="text-center text-sm text-brand-600 font-medium">Steg 4 av 4</p>
-        </div>
-
-        <h1 className="text-3xl font-bold text-brand-900 mb-6">
+        <h1 className="text-3xl font-bold text-brand-900 mb-2">
           Riskfrågor – Betalningar & Transaktioner
         </h1>
+        
+        {/* Step Indicator */}
+        <StepIndicator currentStep={4} completedSteps={3} />
 
         <div className="space-y-6">
           {/* 1. Betalmetoder */}
@@ -142,51 +137,20 @@ export default function RiskFragorSteg4Slide({ onNext }) {
               </select>
               
               {showKontanterWarning && (
-                <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="mt-3 bg-yellow-50 border border-yellow-300 rounded-lg p-4">
                   <p className="text-sm text-yellow-800 font-medium mb-2">
-                    ⚠️ Lagkrav: Kontanthanteringslagen
+                    ⚠️ {legalTexts.kontanttransaktioner.law}
                   </p>
                   <p className="text-xs text-yellow-700 mb-2">
-                    Kontanthantering över 20% av omsättningen kräver tillstånd från Skatteverket.
+                    {legalTexts.kontanttransaktioner.shortText}
                   </p>
-                  <label className="block text-sm text-yellow-800 mb-1">
-                    Har företaget tillstånd från Skatteverket?
-                  </label>
-                  <div className="space-y-1">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="kontanthanteringstillstand"
-                        value="ja"
-                        checked={formData.kontanthanteringstillstand === 'ja'}
-                        onChange={(e) => handleChange('kontanthanteringstillstand', e.target.value)}
-                        className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
-                      />
-                      <span className="text-yellow-800">Ja</span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="kontanthanteringstillstand"
-                        value="nej"
-                        checked={formData.kontanthanteringstillstand === 'nej'}
-                        onChange={(e) => handleChange('kontanthanteringstillstand', e.target.value)}
-                        className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
-                      />
-                      <span className="text-yellow-800">Nej</span>
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="kontanthanteringstillstand"
-                        value="pagar"
-                        checked={formData.kontanthanteringstillstand === 'pagar'}
-                        onChange={(e) => handleChange('kontanthanteringstillstand', e.target.value)}
-                        className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
-                      />
-                      <span className="text-yellow-800">Pågår ansökan</span>
-                    </label>
-                  </div>
+                  <p className="text-xs text-yellow-600 italic mt-1">
+                    Referens: [{legalTexts.kontanttransaktioner.id}] - Se Appendix för fullständig lagtext
+                  </p>
+                  <p className="text-xs text-yellow-700 mt-2 bg-yellow-100 p-2 rounded">
+                    💡 <strong>Observera:</strong> Kontanthantering kräver särskild dokumentation för riskbedömning enligt 01FS 2024:20, 2 kap. 4 §.
+                    Vi kommer att behöva fördjupad information om affärsmodellen och transaktionsmönster.
+                  </p>
                 </div>
               )}
             </div>

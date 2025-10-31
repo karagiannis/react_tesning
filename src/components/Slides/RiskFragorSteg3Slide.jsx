@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import StepIndicator from '../Shared/StepIndicator';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 export default function RiskFragorSteg3Slide({ onNext }) {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useLocalStorage('onboarding-wizard-steg3', {
     aterkommandePartners: '',
     partnersLander: '',
     leverantorer: [
@@ -48,20 +50,12 @@ export default function RiskFragorSteg3Slide({ onNext }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
       <div className="max-w-3xl w-full bg-white rounded-2xl shadow-2xl p-10">
-        {/* Progress indicator */}
-        <div className="mb-6">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="w-3 h-3 rounded-full bg-brand-600"></div>
-            <div className="w-3 h-3 rounded-full bg-brand-600"></div>
-            <div className="w-3 h-3 rounded-full bg-brand-600"></div>
-            <div className="w-3 h-3 rounded-full bg-brand-300"></div>
-          </div>
-          <p className="text-center text-sm text-brand-600 font-medium">Steg 3 av 4</p>
-        </div>
-
-        <h1 className="text-3xl font-bold text-brand-900 mb-6">
+        <h1 className="text-3xl font-bold text-brand-900 mb-2">
           Riskfrågor – Kunder & Affärspartners
         </h1>
+        
+        {/* Step Indicator */}
+        <StepIndicator currentStep={3} completedSteps={2} />
 
         <div className="space-y-6">
           {/* 1. Återkommande affärspartners */}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { legalTexts } from '../../data/legalTexts';
 
 export default function SkyldigheterSlide({ onNext, onBack }) {
   const [acknowledged, setAcknowledged] = useState(false);
@@ -190,12 +191,15 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
                 className="mt-1 w-5 h-5 text-red-600 rounded focus:ring-red-500"
               />
               <div className="flex-1">
-                <p className="font-semibold text-gray-900">Kontanthantering utan tillstånd</p>
+                <p className="font-semibold text-gray-900">Kontanttransaktioner kräver kundkännedom</p>
                 <p className="text-sm text-gray-700 mt-1">
-                  Det är <strong>OTILLÅTET att hantera kontanter</strong> utan särskilt tillstånd från Skatteverket. 
-                  Alla betalningar ska ske via bank/Swish med full spårbarhet.
+                  {legalTexts.kontanttransaktioner.shortText} Redovisningsbyrån måste dokumentera och övervaka
+                  kontanttransaktioner enligt <strong>01FS 2024:20, 2 kap. 4-5 §§</strong> för att kunna förklara
+                  transaktionsmönster vid tillsyn från Länsstyrelsen.
                 </p>
-                <p className="text-xs text-red-700 mt-1 italic">Lag: Skatteförfarandelagen 39 kap</p>
+                <p className="text-xs text-red-700 mt-1 italic">
+                  Lag: {legalTexts.kontanttransaktioner.law} [{legalTexts.kontanttransaktioner.id}]
+                </p>
               </div>
             </div>
 

@@ -2,7 +2,7 @@
 
 **Princip:** Det som inte finns i detta index FINNS INTE!
 **Skapad:** 2025-10-26
-**Senast uppdaterad:** 2025-10-27
+**Senast uppdaterad:** 2025-01-29
 
 ---
 
@@ -125,7 +125,7 @@ specifications/
 
 ---
 
-## 4. Configuration Specifications
+## 4. Configuration & Construction Documentation
 
 ### CONFIG_STRUCTURE.md (5KB)
 
@@ -148,6 +148,35 @@ specifications/
 - Frontend: WelcomeSlide.jsx, SupportSlide.jsx
 - Mock data: `/src/data/mockFirmConfig.js`
 
+### LEGAL_TEXTS_STRUCTURE.md (12KB) ⭐ NYT!
+
+**Skapad:** 2025-10-31
+**Typ:** Konstruktionsdokument
+**Status:** ✅ Aktiv konstruktionsspecifikation
+
+**Innehåll:**
+- Struktur för centraliserad lagtext-databas (`/src/data/legalTexts.js`)
+- Mappning av riskfrågor → lagtexter (Steg 2-4)
+- Helper function: `getLegalTextsForQuestion(step, questionKey)`
+- Namnkonventioner för lagtext-nycklar (`ptl_X_Y`, `lansstyrelsen_X_Y`)
+- React-användningsmönster (Pattern 1: Info-knapp, Pattern 2: Varningar)
+- Guide för att lägga till nya lagtexter
+
+**Syfte:**
+- Undvika hårdkodning av lagtexter i React-komponenter
+- Eliminera "avrundningsfel" (verbatim errors)
+- Centraliserad uppdatering av lagtexter
+- PDF Appendix-generering med `id` och `fullText`
+
+**Användning:**
+- Frontend: RiskFragorSteg2/3/4Slide.jsx
+- Data: `/src/data/legalTexts.js`
+- 18+ PTL citations + 01FS 2024:20 föreskrifter
+
+**Relaterad:**
+- `LEGAL_TEXT_CORRECTIONS.md` - Historik av lagtextfel och korrigeringar
+- `Onboarding_app_ny.tex` - UI-specifikation (användarfokus)
+
 **Relation till LaTeX-specs:**
 - Refererar till slides 28-30 i Onboarding_app_ny.tex
 - KYC-frågor definierade i RISKFRAGOR_NY_STRUKTUR.md
@@ -155,7 +184,29 @@ specifications/
 
 ---
 
-## 5. Implementation Notes (Markdown)
+## 5. PDF Generation & Legal Texts
+
+### `PDF_GENERATION_GUIDE.md` (13KB)
+- **Skapad:** 2025-01-29
+- **Syfte:** Guide för PDF-generering med lagtexter och Appendix
+- **Innehåll:**
+  - Struktur för PDF-rapporter (Huvuddel + Appendix)
+  - Användning av `legalTexts.js` för centraliserad lagtext-hantering
+  - Implementation med React-PDF
+  - Exempel på komplett PDF-struktur
+- **Status:** ✅ Dokumenterad
+- **Användning:**
+  - Frontend: `/src/data/legalTexts.js`
+  - PDF-generering för byråchef och klient
+  - Tillsynsdokumentation för Länsstyrelsen
+
+**Relaterad kod:**
+- `/src/data/legalTexts.js` - Centraliserad lagtext-databas med alla lagtexter från 01FS 2024:20 och PTL
+- Komponenter använder: `import { legalTexts } from '../../data/legalTexts';`
+
+---
+
+## 6. Implementation Notes (Markdown)
 
 ### Arkitektur och Design
 
@@ -234,7 +285,7 @@ specifications/
 
 ---
 
-## 6. Build Artifacts
+## 7. Build Artifacts
 
 ### Sökväg: `build/`
 
@@ -258,7 +309,7 @@ specifications/
 
 ---
 
-## 7. Status per dokument
+## 8. Status per dokument
 
 | Document | Source (LaTeX) | PDF | Status | Senast uppdaterad |
 |----------|---------------|-----|--------|-------------------|
@@ -275,7 +326,7 @@ specifications/
 
 ---
 
-## 8. Build Process
+## 9. Build Process
 
 ### Kompilera LaTeX till PDF
 
@@ -306,7 +357,7 @@ mv *.aux *.log *.out *.toc build/
 
 ---
 
-## 9. Relation till Implementation
+## 10. Relation till Implementation
 
 ### UI Components → LaTeX Specs
 
@@ -337,7 +388,7 @@ mv *.aux *.log *.out *.toc build/
 
 ---
 
-## 10. Nästa steg
+## 11. Nästa steg
 
 1. ✅ **INDEX.md uppdaterad för specifications/** (2025-10-27)
 2. ✅ **latex/ mapp avskaffad** - Innehåll flyttat till specifications/ (2025-10-27)
@@ -352,7 +403,7 @@ mv *.aux *.log *.out *.toc build/
 
 ---
 
-## 11. Relaterade dokument
+## 12. Relaterade dokument
 
 **Compliance:**
 - [docs/compliance/](../compliance/) - KYC/AML compliance documentation

@@ -2,7 +2,7 @@
 
 **Princip:** Det som inte finns i detta index FINNS INTE!
 **Skapad:** 2025-10-26
-**Senast uppdaterad:** 2025-10-28
+**Senast uppdaterad:** 2025-10-29
 
 ---
 
@@ -14,7 +14,45 @@ Denna mapp innehåller strategiska dokument för Celestial Onboarding App - lån
 
 ## Strategidokument
 
-### 1. BYOK_API_SPECIFICATION.md
+### 1. RISKFRÅGOR_3STEGS_STRUKTUR.md
+
+**Skapad:** 2025-10-29
+**Status:** 🟢 COMPLETED - LaTeX-specifikation uppdaterad
+**Prioritet:** 🔴 CRITICAL (Core onboarding flow)
+
+**Syfte:**
+Dokumentation av omstrukturering från 4-stegs till 3-stegs riskfrågor med tydligare tematik och eliminerad duplicering.
+
+**Innehåll:**
+- **Gammal struktur:** 4 steg med duplicering (leverantörer/kunder split, bankkonto-fråga duplicerad)
+- **Ny struktur:** 
+  - **Steg 2:** Geografisk risk & Affärsrelationer (6 frågor, 3 block)
+  - **Steg 3:** Betalningsflöden & Transaktionsmönster (5 frågor)
+  - **Steg 4:** Konditionell fördjupad riskbedömning (EDD - endast vid högrisk)
+- **Pedagogisk progression:**
+  - Steg 2: Bred kartläggning → Kvantifiera → Progressiv verifikation (namnge konkreta partners)
+  - Steg 3: Betalningsmetoder (oberoende av geografi)
+- **Risk scoring algorithm:** Triggers för EDD (högriskland, >30% utland, kontanter >20%, krypto, PEP)
+- **Teknisk implementation:** Backend endpoints, frontend routing, databas migration
+- **Fördelar:** Ingen duplicering, tydliga teman (VAR vs HUR), kortare standardflöde (18 frågor)
+
+**Lagstöd:**
+- Steg 2: 2 kap. 1 §, 2 kap. 4-5 §§, 3 kap. 11-17 §§ PTL
+- Steg 3: 3 kap. 4-6 §§, 3 kap. 31-32 §§, 4 kap. 1 § PTL
+
+**Nästa steg:**
+- [ ] Fylla på lagtexter i placeholders (Steg 3, frågor 3-5)
+- [ ] Implementera konditionellt Steg 4 (EDD)
+- [ ] Backend risk scoring
+- [ ] Frontend React-komponenter
+- [ ] Databas migration
+
+**Relaterad fil:**
+`/docs/specifications/Onboarding_app_ny.tex` (LaTeX-spec där ändringarna gjordes)
+
+---
+
+### 2. BYOK_API_SPECIFICATION.md
 
 **Skapad:** 2025-10-28
 **Status:** SPECIFICATION - Implementation pending
@@ -79,7 +117,7 @@ Tillåt stora redovisningsbyråer (PwC, Ludvig & Co, Grant Thornton) att använd
 
 ---
 
-### 3. DATAKÄLLOR_STRATEGI.md (23K)
+### 4. DATAKÄLLOR_STRATEGI.md (23K)
 
 **Skapad:** 2025-10-21
 **Status:** REFERENSDOKUMENT - Vissa delar föråldrade efter beslut om betallösning

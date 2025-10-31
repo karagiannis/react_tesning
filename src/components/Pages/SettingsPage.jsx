@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDropzone } from 'react-dropzone';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -8,6 +9,7 @@ const SettingsPage = () => {
   const [activeSection, setActiveSection] = useState('firm');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
+  const [logoFile, setLogoFile] = useState(null);
   
   // Mock data för firmakonfiguration
   const [firmConfig, setFirmConfig] = useState({
@@ -36,6 +38,31 @@ const SettingsPage = () => {
     amount: 5000,
     paymentMethod: 'Faktura'
   };
+
+  // Notifications state
+  const [notifications, setNotifications] = useState({
+    emailNewOnboarding: true,
+    emailRiskAlert: true,
+    emailWeeklyReport: false,
+    emailMonthlyInvoice: true,
+    systemMaintenanceAlerts: true
+  });
+
+  // Dropzone för logotyp
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    accept: {
+      'image/*': ['.png', '.jpg', '.jpeg', '.svg']
+    },
+    maxFiles: 1,
+    onDrop: (acceptedFiles) => {
+      if (acceptedFiles.length > 0) {
+        const file = acceptedFiles[0];
+        setLogoFile(Object.assign(file, {
+          preview: URL.createObjectURL(file)
+        }));
+      }
+    }
+  });
 
   // Mock data för fakturahistorik
   const invoices = [
@@ -75,6 +102,7 @@ const SettingsPage = () => {
           {[
             { id: 'firm', label: 'Firmakonfiguration' },
             { id: 'users', label: 'Användare' },
+            { id: 'notifications', label: 'Notifikationer' },
             { id: 'tests', label: 'Risktester' },
             { id: 'subscription', label: 'Prenumeration' },
             { id: 'danger', label: 'Ta bort konto' }
@@ -103,6 +131,65 @@ const SettingsPage = () => {
               <p className="text-brand-700 mb-6">
                 Dessa uppgifter används för att automatiskt fylla i kontaktinformation i avtal, rapporter och kommunikation med klienter.
               </p>
+
+              {/* Logotyp Upload Section */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-brand-900 mb-2">
+                  Företagslogotyp
+                </label>
+                <div
+                  {...getRootProps()}
+                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                    isDragActive
+                      ? 'border-brand-500 bg-brand-50'
+                      : 'border-brand-300 hover:border-brand-400 hover:bg-brand-50'
+                  }`}
+                >
+                  <input {...getInputProps()} />
+                  {logoFile ? (
+                    <div className="space-y-3">
+                      <img
+                        src={logoFile.preview}
+                        alt="Logo preview"
+                        className="mx-auto h-24 w-auto object-contain"
+                      />
+                      <p className="text-sm text-brand-700">{logoFile.name}</p>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setLogoFile(null);
+                        }}
+                        className="text-sm text-red-600 hover:text-red-800"
+                      >
+                        Ta bort
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <svg
+                        className="mx-auto h-12 w-12 text-brand-400"
+                        stroke="currentColor"
+                        fill="none"
+                        viewBox="0 0 48 48"
+                      >
+                        <path
+                          d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <p className="mt-2 text-sm text-brand-600">
+                        {isDragActive
+                          ? 'Släpp filen här...'
+                          : 'Dra och släpp en bild här, eller klicka för att välja'}
+                      </p>
+                      <p className="text-xs text-brand-500 mt-1">PNG, JPG, SVG upp till 5MB</p>
+                    </div>
+                  )}
+                </div>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -269,6 +356,132 @@ const SettingsPage = () => {
                 <p className="text-brand-700 text-sm">
                   Användare kan återställa sitt lösenord via inloggningssidan. En säker återställningslänk skickas till deras e-post.
                 </p>
+              </div>
+            </div>
+          )}
+
+          {/* NOTIFIKATIONER */}
+          {activeSection === 'notifications' && (
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-2xl font-bold text-brand-900 mb-4">Notifikationsinställningar</h2>
+              <p className="text-brand-700 mb-6">
+                Välj vilka typer av aviseringar du vill ta emot via e-post.
+              </p>
+
+              <div className="space-y-4">
+                {/* E-post notifikationer */}
+                <div className="border-b border-brand-200 pb-4">
+                  <h3 className="text-lg font-semibold text-brand-900 mb-4">E-postaviseringar</h3>
+
+                  <div className="space-y-3">
+                    <label className="flex items-start gap-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={notifications.emailNewOnboarding}
+                        onChange={(e) => setNotifications({...notifications, emailNewOnboarding: e.target.checked})}
+                        className="mt-1 h-5 w-5 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
+                      />
+                      <div>
+                        <div className="font-medium text-brand-900 group-hover:text-brand-700">
+                          Ny onboarding startad
+                        </div>
+                        <div className="text-sm text-brand-600">
+                          Få meddelande när en ny kund påbörjar onboarding-processen
+                        </div>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start gap-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={notifications.emailRiskAlert}
+                        onChange={(e) => setNotifications({...notifications, emailRiskAlert: e.target.checked})}
+                        className="mt-1 h-5 w-5 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
+                      />
+                      <div>
+                        <div className="font-medium text-brand-900 group-hover:text-brand-700">
+                          Riskvarningar
+                        </div>
+                        <div className="text-sm text-brand-600">
+                          Kritiska varningar om högrisk-kunder, PEP-träffar eller fusk-indikationer
+                        </div>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start gap-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={notifications.emailWeeklyReport}
+                        onChange={(e) => setNotifications({...notifications, emailWeeklyReport: e.target.checked})}
+                        className="mt-1 h-5 w-5 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
+                      />
+                      <div>
+                        <div className="font-medium text-brand-900 group-hover:text-brand-700">
+                          Veckorapport
+                        </div>
+                        <div className="text-sm text-brand-600">
+                          Sammanfattning av nya kunder, avslutade onboardings och flaggade ärenden
+                        </div>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start gap-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={notifications.emailMonthlyInvoice}
+                        onChange={(e) => setNotifications({...notifications, emailMonthlyInvoice: e.target.checked})}
+                        className="mt-1 h-5 w-5 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
+                      />
+                      <div>
+                        <div className="font-medium text-brand-900 group-hover:text-brand-700">
+                          Fakturor
+                        </div>
+                        <div className="text-sm text-brand-600">
+                          E-post när ny faktura skapas eller betalning är förfallen
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* System notifikationer */}
+                <div className="pt-2">
+                  <h3 className="text-lg font-semibold text-brand-900 mb-4">Systemaviseringar</h3>
+
+                  <div className="space-y-3">
+                    <label className="flex items-start gap-3 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={notifications.systemMaintenanceAlerts}
+                        onChange={(e) => setNotifications({...notifications, systemMaintenanceAlerts: e.target.checked})}
+                        className="mt-1 h-5 w-5 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
+                      />
+                      <div>
+                        <div className="font-medium text-brand-900 group-hover:text-brand-700">
+                          Underhåll och uppdateringar
+                        </div>
+                        <div className="text-sm text-brand-600">
+                          Viktiga meddelanden om systemunderhåll, nya funktioner och säkerhetsuppdateringar
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-brand-50 rounded-lg border-l-4 border-brand-500">
+                <p className="text-brand-800 text-sm">
+                  <strong>OBS:</strong> Kritiska säkerhetsvarningar och lagstadgade meddelanden kan inte stängas av.
+                </p>
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => alert('Notifikationsinställningar sparade!')}
+                  className="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-3 rounded-lg font-medium hover:from-brand-700 hover:to-brand-800 transition-all shadow-md hover:shadow-lg"
+                >
+                  Spara ändringar
+                </button>
               </div>
             </div>
           )}
