@@ -2,7 +2,44 @@
 
 **Princip:** Det som inte finns i detta index FINNS INTE!
 **Skapad:** 2025-10-26
-**Senast uppdaterad:** 2025-10-26 23:26
+**Senast uppdaterad:** 2025-11-01 18:35
+
+---
+
+## 🆕 NYA DOKUMENT (2025-11-01)
+
+### SIE_spec_OCR_2025-11-01.md (1845 rader, ~85K)
+**Skapad:** 2025-11-01 18:30
+**Syfte:** OCR-extraherad SIE-specification ver 4B (37 sidor)
+**Plats:** `../SIE_spec_OCR_2025-11-01.md`
+**Innehåll:**
+- Komplett SIE4-filformat dokumentation
+- #DIM, #OBJEKT, #UNDERDIM syntax och exempel
+- Hierarkiska dimensioner (avdelning → underavdelning)
+- Reserverade dimensionsnummer (1-19)
+- Använd för korrekt SIE-parsing i VBA→Python migration
+
+**Teknisk info:**
+- Extraherad med olmOCR-2-7B på Google Colab Pro A100 (80GB VRAM)
+- ~10 minuter processing-tid
+- Markdown-formaterad för AI-konsumtion
+
+### EXTENSIONS_CLAUDE_HANDOFF.md (568 rader, ~27K)
+**Skapad:** 2025-11-01 14:47
+**Uppdaterad:** 2025-11-01 18:35
+**Syfte:** Handoff-dokument för Extensions-Claude migration work
+**Plats:** `./EXTENSIONS_CLAUDE_HANDOFF.md`
+**Innehåll:**
+- VBA→Python migration plan (51 moduler, 513 KB)
+- Settings Page implementation spec
+- Funktionsmatrix template
+- TDD approach och test data
+- Referens till SIE_spec_OCR_2025-11-01.md
+
+### EXTENSIONS_CLAUDE_QUICK_START.md (50 rader, ~2K)
+**Skapad:** 2025-11-01 14:47
+**Syfte:** Entry point för Extensions-Claude
+**Plats:** `./EXTENSIONS_CLAUDE_QUICK_START.md`
 
 ---
 

@@ -1308,6 +1308,69 @@
 
 
 % ========================================================================
+% POPUP 1: BEKRÄFTELSE AV STATISK KYC-KOSTNAD
+% ========================================================================
+% Visas automatiskt när användaren klickar "Nästa" efter Steg 1
+% Användaren måste bekräfta betalning INNAN externa API-anrop görs
+% ========================================================================
+
+\begin{frame}[label=popup-kyc-kostnad]
+  \frametitle{Bekräfta externa API-anrop}
+  
+  \vspace{0.3cm}
+  
+  \begin{alertblock}{Kostnadsinformation}
+    För att genomföra KYC-kontroller (Know Your Customer) behöver vi göra följande externa API-anrop:
+  \end{alertblock}
+  
+  \vspace{0.5cm}
+  
+  \begin{columns}[T]
+    \begin{column}{0.65\textwidth}
+      \textbf{Externa tjänster:}
+      \begin{itemize}
+        \item Bolagsverket företagskontroll
+        \item PEP-screening (Politiskt Exponerad Person)
+        \item Sanktionslistor (EU/UN)
+        \item Hanteringsavgift (täcker Stripe + avtalsgenerering)
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.3\textwidth}
+      \textbf{Kostnad:}
+      \begin{itemize}
+        \item 2 kr
+        \item 5 kr
+        \item 5 kr
+        \item 6 kr
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  
+  \vspace{0.5cm}
+  
+  \begin{block}{Totalt}
+    \Large\textbf{18 kr} exkl. moms (22,50 kr inkl. moms)
+  \end{block}
+  
+  \vspace{0.5cm}
+  
+  \begin{alertblock}{Betalningsalternativ}
+    \footnotesize
+    \textbullet\ \textbf{Trial-användare:} Betala via Stripe (kort/Swish) innan anropet görs\\
+    \textbullet\ \textbf{Abonnenter:} Kostnaden loggas och faktureras i slutet av månaden\\
+    \textbullet\ \textbf{Verifierade fakturabetalare:} Kostnaden faktureras (30 dagar)\\
+    \textbullet\ \textbf{Ej verifierade fakturabetalare:} Betala via Stripe (krediteras senare)
+  \end{alertblock}
+  
+  \vspace{0.5cm}
+  
+  \begin{flushright}
+    \beamerbutton{Betala och fortsätt} \hspace{0.3cm} \beamerbutton{Avbryt}
+  \end{flushright}
+\end{frame}
+
+
+% ========================================================================
 % RISKFRÅGOR - STEG 2 (UTLÄNDSKA TRANSAKTIONER)
 % ========================================================================
 % Alltid visas som del av standard wizard-flödet
@@ -2808,9 +2871,83 @@
   
   \vspace{0.3cm}
   \begin{flushright}
-    \hyperlink{likviditet}{\beamerbutton{Nästa}}
+    \hyperlink{popup-layering-kostnad}{\beamerbutton{Nästa}}
   \end{flushright}
 \end{frame}
+
+
+% ========================================================================
+% POPUP 2: BEKRÄFTELSE AV LAYERING-ANALYS KOSTNAD
+% ========================================================================
+% Visas automatiskt när användaren klickar "Nästa" efter SIE-fil uppladdning
+% Användaren kan välja tidsperiod (3/5/7 år) och måste bekräfta betalning
+% ========================================================================
+
+\begin{frame}[label=popup-layering-kostnad]
+  \frametitle{Bekräfta layering-analys och forensisk granskning}
+  
+  \vspace{0.3cm}
+  
+  \begin{alertblock}{Kostnadsinformation}
+    Baserat på antal transaktioner (15 342 st) rekommenderas en layering-analys för att upptäcka penningtvättsmönster.
+  \end{alertblock}
+  
+  \vspace{0.5cm}
+  
+  \textbf{Välj tidsperiod för analys:}
+  
+  \vspace{0.3cm}
+  
+  \begin{columns}[T]
+    \begin{column}{0.55\textwidth}
+      \textbf{Tjänster som ingår:}
+      \begin{itemize}
+        \item Layering-analys (valt antal år)
+        \item Forensisk bokföringsanalys
+        \item AI-granskning av verifikationer
+        \item Hanteringsavgift (täcker Stripe ~4\%)
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \textbf{Kostnad per tidsperiod:}\\
+      \vspace{0.2cm}
+      ○ \textbf{3 år:} 1 500 kr + 60 kr\\
+      ○ \textbf{5 år:} 2 000 kr + 80 kr\\
+      ● \textbf{7 år:} 2 500 kr + 100 kr\\
+      \vspace{0.2cm}
+      \tiny (● = Rekommenderat)
+    \end{column}
+  \end{columns}
+  
+  \vspace{0.5cm}
+  
+  \begin{block}{Totalt (7 år)}
+    \Large\textbf{2 600 kr} exkl. moms (3 250 kr inkl. moms)
+  \end{block}
+  
+  \vspace{0.3cm}
+  
+  \textbf{Dropdown:} [▼ Välj tidsperiod] → \textit{Standard: 7 år}
+  
+  \vspace{0.5cm}
+  
+  \begin{alertblock}{Betalningsalternativ}
+    \footnotesize
+    \textbullet\ \textbf{Trial-användare:} Betala via Stripe (kort/Swish) innan anropet görs\\
+    \textbullet\ \textbf{Abonnenter:} Kostnaden loggas och faktureras i slutet av månaden\\
+    \textbullet\ \textbf{Verifierade fakturabetalare:} Kostnaden faktureras (30 dagar)\\
+    \textbullet\ \textbf{Ej verifierade fakturabetalare:} Betala via Stripe (krediteras senare)
+  \end{alertblock}
+  
+  \vspace{0.5cm}
+  
+  \begin{flushright}
+    \hyperlink{likviditet}{\beamerbutton{Betala och fortsätt}} \hspace{0.3cm} 
+    \hyperlink{likviditet}{\beamerbutton{Hoppa över}} \hspace{0.3cm} 
+    \beamerbutton{Avbryt}
+  \end{flushright}
+\end{frame}
+
 
 % ═══════════════════════════════════════════════════════════════════════
 % EKONOMISK RÅDGIVNING (Slides 11-14)

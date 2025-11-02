@@ -286,7 +286,7 @@ specifications/
 - **Status:** ✅ COMPLETED
 - **Senast uppdaterad:** 2025-10-31
 
-#### `SettingsPage.md` (24KB)
+#### `SettingsPage.md` (24KB) - LEGACY
 - **Syfte:** Konstruktionsdokument för Settings-sidan med Themesberg-inspiration
 - **Innehåll:**
   - Sidebar navigation struktur
@@ -297,7 +297,40 @@ specifications/
   - API-nycklar (BYOK)
   - Access code generation (word-1234 format)
   - Database schemas och API endpoints
-- **Status:** ✅ COMPLETED - Awaiting implementation
+- **Status:** ⚠️ LEGACY - Se SettingsPage_v2.md för uppdaterad version
+
+#### `SettingsPage_v2.md` (40KB) ⭐ NYT!
+- **Syfte:** Iteration 2 - Settings-sidan baserad på Volt Pro Dashboard-inspektion
+- **Skapad:** 2025-10-31
+- **Senast uppdaterad:** 2025-11-01
+- **Status:** ✅ AKTIV SPECIFIKATION
+- **Innehåll:**
+  - **Navigationsflöde:** "← Tillbaka till Dashboard"-knapp (Volt Pro-pattern)
+  - **1. Användare:** Tabell med sök/filter, lägg till användare (Admin/User/Granskning roller)
+  - **2. Åtkomst:**
+    - 2.1 Fjärronboarding-sessioner (access codes, JWT links)
+    - 2.2 Kollega-inlogg (NY) - Shadowing för nyanställda/praktikanter (read-only access)
+  - **3. Byråinställningar:**
+    - 3.1 Kontaktuppgifter (läsläge med Edit-knapp)
+    - 3.2 Prislista (NY) - Default pricing med override-möjlighet
+    - 3.3 Avtalsmall (NY) - LaTeX-upload med placeholders (auto-compilation test)
+    - 3.4 Egna frågor (NY) - config.json-upload för custom KYC-frågor
+  - **4. Prenumeration:**
+    - 4.1 Översikt (plan, status, payment method)
+    - 4.2 Fakturor (tabell med dubbelklick-modal, Volt Pro-pattern)
+    - 4.3 Fakturering och rörliga API-kostnader (policy) - B2B payment model, popups, per-onboarding PDF, verifieringsflöde
+  - **5. Danger Zone:** Ta bort konto (soft delete)
+- **Nytt sedan v1:**
+  - Kollega-inlogg för utbildningssyfte
+  - LaTeX-mall upload med automatic compilation (pdflatex/xelatex/lualatex)
+  - config.json för custom KYC-frågor (UI-hjälptexter, placeholder-koncept)
+  - B2B payment policy (NO API-counter i Settings, popup före dyra anrop)
+  - Fakturatabell med dubbelklick-modal
+- **Baserat på:** LaTeX spec (rad 3850-3950) + Volt Pro Dashboard + B2B payment discussion
+- **Implementation notes:**
+  - Återanvänder Volt Pro-komponenter (Users.js, Transactions.js, Invoice.js, SweetAlert2)
+  - React Router navigation patterns
+  - Sidebar structure med subsections
 - **Senast uppdaterad:** 2025-10-31
 
 ### Slide Structure och Organization

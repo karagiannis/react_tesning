@@ -41,7 +41,8 @@ import OngoingRoutinesSlide from './components/Slides/OngoingRoutinesSlide';
 import SupportSlide from './components/Slides/SupportSlide';
 import UnauthorizedPage from './components/Pages/UnauthorizedPage';
 import ServerErrorPage from './components/Pages/ServerErrorPage';
-import SettingsPage from './components/Pages/SettingsPage';
+//import SettingsPage from './components/Pages/SettingsPage';
+import SettingsPageV2 from './components/Pages/SettingsPageV2';
 import AdminDashboard from './components/Admin/AdminDashboard';
 // import FraudDetectionDemo from './components/Demo/FraudDetectionDemo'; // KOMMENTERAD: Innehåller verklig klientdata (RS MekService A308)
 import Sidebar from './components/Layout/Sidebar';
@@ -178,16 +179,21 @@ export default function App() {
     );
   }
 
+  // Settings page has its own sidebar, don't render app sidebar/header
+  const isSettingsPage = location.pathname === '/settings' || location.pathname === '/settings-v2';
+
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar 
-        currentPath={location.pathname}
-        onNavigate={(path) => navigate(path)}
-        hasRoaringData={roaringData !== null}
-        isDemoMode={isDemoMode}
-      />
+      {!isSettingsPage && (
+        <Sidebar 
+          currentPath={location.pathname}
+          onNavigate={(path) => navigate(path)}
+          hasRoaringData={roaringData !== null}
+          isDemoMode={isDemoMode}
+        />
+      )}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header onPanelToggle={setActivePanel} isDemoMode={isDemoMode} />
+        {!isSettingsPage && <Header onPanelToggle={setActivePanel} isDemoMode={isDemoMode} />}
         <MainContent hasPanel={activePanel !== null}>
           <Routes>
             <Route path="/" element={<HeroSlide onNext={() => navigate('/login')} onLogin={() => navigate('/login')} onRegister={() => navigate('/register')} onDemo={handleDemo} />} />
@@ -294,7 +300,9 @@ export default function App() {
             <Route path="/support" element={<SupportSlide onNext={() => navigate('/')} onBack={() => navigate('/rutiner')} />} />
             
             {/* Settings, Admin & Error pages */}
-            <Route path="/settings" element={<SettingsPage />} />
+            {/* OLD: <Route path="/settings" element={<SettingsPage />} /> */}
+            <Route path="/settings" element={<SettingsPageV2 />} />
+            <Route path="/settings-v2" element={<SettingsPageV2 />} />
             <Route path="/admin" element={<AdminDashboard />} />
             {/* KOMMENTERAD: Fraud Detection Demo innehåller verklig klientdata som inte får exponeras publikt */}
             {/* <Route path="/demo/fraud-detection" element={<FraudDetectionDemo />} /> */}

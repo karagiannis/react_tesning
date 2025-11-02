@@ -12,6 +12,7 @@ Denna mapp innehåller all integration med externa API:er som används i Celesti
 
 **Inkluderade API:er:**
 - **Roaring.io** - Komplett KYC/AML-dataplattform (sanctions, UBO, PEP, etc.)
+- **Scrive** - E-signering med BankID för avtalshantering
 - **Bolagsverket** - Företagsinformation och Värdefulladatamängder
 - **SCB** - Statistik, SNI-koder och NIX-reklamspärr
 - **Skatteverket** - Skatteuppgifter och bokföringsdata
@@ -52,30 +53,30 @@ Denna mapp innehåller all integration med externa API:er som används i Celesti
 
 ---
 
-### 2. Bolagsverket
-**Sökväg:** [Bolagsverket/](Bolagsverket/)
-**Status:** 🟡 Testdata samlat, integration pending
-**Dokumentation:** [Bolagsverket/INDEX.md](Bolagsverket/INDEX.md) *(ska skapas)*
+### 2. Scrive (E-Signature & BankID)
+**Sökväg:** [scrive/](scrive/)
+**Status:** 🟢 Vald leverantör för Agreement Management
+**Dokumentation:** [scrive/INDEX.md](scrive/INDEX.md)
 
-**Syfte:** Gratis API för företagsinformation från Bolagsverket
+**Syfte:** BankID-signering för avtal (trial, subscription, assignment)
 
-**Undermappar:**
-- **Företagsinformation/** - API-dokumentation för företagsuppgifter
-- **Värdefulladatamängder/** - Gratis API, anslutningsguider och testdata
+**Prissättning:** Pay-as-you-go, ~70 kr/signering
 
-**Viktigt innehåll:**
-- `API_SCHEMAS.md` - API-scheman och endpoints
-- `KODLISTOR_BOLAGSVERKET.md` - Kodlistor (bolagsformer, etc.)
-- `README.md` - Översikt över Bolagsverket-integration
+**Varför Scrive?**
+- ✅ BankID-integration inkluderad (ingen egen BankID-setup)
+- ✅ PDF-generering och lagring (GDPR-compliant)
+- ✅ Webhooks för asynkron hantering
+- ✅ Billigare än egen BankID-integration (201,000 kr besparing år 1)
 
-**Viktighet:** 🟡 IMPORTANT - Kompletterande datakälla (gratis)
+**Viktighet:** 🔴 CRITICAL - Krävs för Agreement Management
 
-**Credentials:** Ingen autentisering krävs (öppet API)
+**Credentials:** TBD (kontakta Scrive sales)
 
 **Nästa steg:**
-1. Skapa INDEX.md för Bolagsverket
-2. Testa Värdefulladatamängder API
-3. Dokumentera endpoints och response structure
+1. Kontakta Scrive för pay-as-you-go-avtal
+2. Få sandbox API-credentials
+3. Implementera backend webhook listener
+4. Testa med sandbox BankID
 
 ---
 
@@ -115,7 +116,34 @@ Denna mapp innehåller all integration med externa API:er som används i Celesti
 
 ---
 
-### 4. Skatteverket
+### 4. Bolagsverket
+**Sökväg:** [Bolagsverket/](Bolagsverket/)
+**Status:** 🟡 Testdata samlat, integration pending
+**Dokumentation:** [Bolagsverket/INDEX.md](Bolagsverket/INDEX.md) *(ska skapas)*
+
+**Syfte:** Gratis API för företagsinformation från Bolagsverket
+
+**Undermappar:**
+- **Företagsinformation/** - API-dokumentation för företagsuppgifter
+- **Värdefulladatamängder/** - Gratis API, anslutningsguider och testdata
+
+**Viktigt innehåll:**
+- `API_SCHEMAS.md` - API-scheman och endpoints
+- `KODLISTOR_BOLAGSVERKET.md` - Kodlistor (bolagsformer, etc.)
+- `README.md` - Översikt över Bolagsverket-integration
+
+**Viktighet:** 🟡 IMPORTANT - Kompletterande datakälla (gratis)
+
+**Credentials:** Ingen autentisering krävs (öppet API)
+
+**Nästa steg:**
+1. Skapa INDEX.md för Bolagsverket
+2. Testa Värdefulladatamängder API
+3. Dokumentera endpoints och response structure
+
+---
+
+### 5. Skatteverket
 **Sökväg:** [Skatteverket/](Skatteverket/)
 **Status:** 🟡 Produktionskrav under utredning
 **Dokumentation:** [Skatteverket/INDEX.md](Skatteverket/INDEX.md) *(ska skapas)*

@@ -16,13 +16,71 @@ Vi har ett fungerande Excel-baserat bokföringsprogram (Book19.xlsm) utvecklat m
 
 ## Källfiler
 
-### 1. Book19.xlsm
-**Sökväg:** `/home/lasse/Documents/Onboarding_App/Excel_bokforingsprogram/Book19.xlsm`  
-**Storlek:** 1.4 MB  
+### 1. Book18.xlsm
+**Sökväg:** `/home/lasse/Documents/Onboarding_App/Excel_bokforingsprogram/Book18.xlsm`  
+**Storlek:** 1.0 MB  
 **Skapad:** December 2024  
-**Utvecklingspartner:** ChatGPT (sommaren 2024)
+**Utvecklingspartner:** ChatGPT GPT-o3 (sommaren 2024)
 
-**Funktionalitet:**
+**⚠️ VIKTIGT: Scope för migrering**
+
+**INKLUDERA ENDAST dessa flikar/moduler:**
+
+✅ **Företagsinformation** - Parsas från SIE-filens header (#FNAMN, #ORGNR, #FNR, etc.)
+
+✅ **Konteringsinfo2** - Projekt och kostnadsställen/resultatenheter från SIE (#DIM, #OBJEKT)
+
+✅ **Verifikationslista2** - Resultat av SIE-import (SIE-gruppens exempelfil)
+- Verifikationslista3 är samma som Verifikationslista2 (kan ignoreras)
+
+✅ **Bokföring** - Användarinterface med samma kolumner som Verifikationslista
+- Vid `BokföringKnapp_Click`: Rader kopieras till Verifikationslista från rad 2
+- Headers kopieras från Bokföring-fliken till Verifikationslista
+
+✅ **Inställningar** - Verifikationsseriens symboler och senaste nummer
+- Exempel: A=59 → nästa bokföring med serie A får Ver_nr=60 → räknas upp i Inställningar
+
+✅ **Momskoder** - Svenska momskoder Fortnox-style:
+- MP1 = Momspliktig försäljning exkl. moms 25% (ruta 05 momsdeklaration)
+- MP2 = Momspliktig försäljning exkl. moms 12% (ruta 05)
+- MP3 = 6% (ruta 05), etc.
+
+✅ **BAS2024** - BAS-kontoplanen som hämtad från BAS (utan modifikationer)
+
+✅ **BASKontoplan** - BAS2024 med Fortnox momskoder ifyllda i kolumn "Moms"
+
+✅ **Kontoplan** - Resultat av programmets parsning av SIE-filen (SIE-gruppens exempelfil)
+
+✅ **Resultatrapport** - Genererad från SIE-gruppens exempelfil
+
+✅ **Balansrapport** - Genererad från parsning av samma fil från SIE-gruppen
+
+✅ **Huvudbok** - Genererad från parsning av SIE-gruppens exempelfil
+
+✅ **Momsrapport** - Genererad från parsning av SIE-gruppens exempelfil
+
+✅ **Rapporter** - Interface där användaren sätter kryss i matris för önskade rapporter
+
+**❌ IGNORERA (EJ I SCOPE):**
+
+❌ **Artikelbokföring** - Lagerreskontra-system (Sheet12, ModuleLagerreskontra, 1018 rader)
+
+❌ **Kundreskontra** - Fakturabokföring (ModuleKundreskontra, 326 rader, KundfakturaVerlista)
+
+❌ **Leverantörsreskontra** - Leverantörsfakturor (ModuleLeverantörsreskontra, 1 rad)
+
+❌ **Objekt och Dimensioner** - Halvfärdigt försök att vidareutveckla Konteringsinfo2
+
+❌ **Artikelrelaterade flikar:**
+- ArtikelkontoplanArtikelregister
+- ArtikelkontoplanLeverantörer  
+- Artikelverifikationslista
+- FakturaKundbokforing / FakturaKundbokföring
+- Leverantörsbokföring
+
+**FOKUS:** Core bokföringssystem (SIE import/export, verifikationer, rapporter) - INTE reskontrasystem.
+
+**Funktionalitet (in scope):**
 - **SIE-import:** Läser SIE4-filer och importerar verifikationer
 - **SIE-export:** Exporterar bokföringsdata till SIE4-format
 - **Resultatrapport:** Bygger resultatrapport från bokföringsdata
@@ -36,8 +94,8 @@ Vi har ett fungerande Excel-baserat bokföringsprogram (Book19.xlsm) utvecklat m
 
 **Teknisk struktur:**
 - `.xlsm` = Excel Macro-enabled Workbook
-- Innehåller VBA-makron (moduler, formulär)
-- Flera Excel-ark (Bokföring, Verifikationslista, Resultatrapport, etc.)
+- Innehåller VBA-makron (51 moduler totalt, men ~15 moduler in scope)
+- Flera Excel-ark (30 sheets totalt, men ~12 sheets in scope)
 
 ### 2. Node/Express SIE-projekt
 **Sökväg:** ??? (behöver lokaliseras)  
@@ -55,41 +113,89 @@ Vi har ett fungerande Excel-baserat bokföringsprogram (Book19.xlsm) utvecklat m
 
 ## VBA-kod Extrahering
 
-### Metod 1: Manuell extraktion (snabbast)
+### ✅ Status: KOMPLETT
+
+VBA-makron och CSV-data har extraherats från Book18.xlsm:
+
+**📂 CSV-data (30 filer, 720 KB):**
 ```bash
-# Öppna Excel-filen
-# Tryck Alt+F11 → VBA Editor
-# Kopiera varje modul till .vbs eller .txt-fil
-# Spara i docs/MIGRATION/vba_modules/
+/home/lasse/Documents/Onboarding_App/Excel_bokforingsprogram/csv_exports/
 ```
 
-### Metod 2: Programmatisk extraktion (Python)
+**📂 VBA-moduler (51 filer, 513 KB):**
 ```bash
-cd /home/lasse/Documents/Onboarding_App/tic-tac-toe-server
-
-# Installera oletools
-pip install oletools python-oletools
-
-# Extrahera VBA-kod
-python extract_vba.py ../Excel_bokforingsprogram/Book19.xlsm
+/home/lasse/Documents/Onboarding_App/Excel_bokforingsprogram/vba_extracted/
 ```
 
-**Script: extract_vba.py**
+**Viktiga moduler (in scope):**
+- `Module1.bas.vba` (483 rader, 22 KB) - Core bokföringslogik
+- `ModuleImportSIE4.bas.vba` (836 rader, 33 KB) - SIE4-import
+- `ModuleExportSIE4.bas.vba` (488 rader, 18 KB) - SIE4-export
+- `ModuleGenerateReports.bas.vba` (4507 rader, 204 KB) - Alla rapporter
+- `ModuleCRC.bas.vba` (198 rader, 6 KB) - CRC-checksummor
+- `Module2.bas.vba` (179 rader, 7 KB) - Initieringar
+- `JsonConverter.bas.vba` (1123 rader, 45 KB) - JSON-hantering
+
+**Ignorera (out of scope):**
+- `ModuleLagerreskontra.bas.vba` (1018 rader) - ❌ Lagerreskontra
+- `ModuleKundreskontra.bas.vba` (326 rader) - ❌ Kundreskontra
+- `ModuleLeverantörsreskontra.bas.vba` (1 rad) - ❌ Leverantörsreskontra
+- `Sheet12.cls.vba` (235 rader) - ❌ Artikelbokföring
+
+**📄 Dokumentation:**
+```bash
+/home/lasse/Documents/Onboarding_App/Excel_bokforingsprogram/csv_exports/Dokumentation.csv
+```
+245 rader med komplett funktionsdokumentation (skriven med ChatGPT GPT-o3).
+
+### Extraktionsscript
+
+**extract_sheets_to_csv.py** (✅ kördes 2025-10-31)
 ```python
-import oletools.olevba as olevba
-import sys
+import openpyxl
+import csv
 import os
 
-def extract_vba_from_xlsm(xlsm_path, output_dir='vba_extracted'):
+def extract_all_sheets_to_csv(xlsm_file, output_dir='csv_exports'):
+    workbook = openpyxl.load_workbook(xlsm_file, data_only=True)
     os.makedirs(output_dir, exist_ok=True)
     
-    vba = olevba.VBA_Parser(xlsm_path)
-    
-    if vba.detect_vba_macros():
-        print(f"VBA macros found in {xlsm_path}")
+    for sheet_name in workbook.sheetnames:
+        sheet = workbook[sheet_name]
+        csv_filename = os.path.join(output_dir, f"{sheet_name}.csv")
         
-        for (filename, stream_path, vba_filename, vba_code) in vba.extract_macros():
-            output_file = os.path.join(output_dir, f"{vba_filename}.vba")
+        with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            for row in sheet.iter_rows(values_only=True):
+                if any(cell is not None for cell in row):
+                    csv_writer.writerow(row)
+```
+
+**extract_vba_macros.py** (✅ kördes 2025-10-31)
+```python
+from oletools.olevba import VBA_Parser
+import os
+
+def extract_vba_macros(xlsm_file, output_dir='vba_extracted'):
+    os.makedirs(output_dir, exist_ok=True)
+    vba_parser = VBA_Parser(xlsm_file)
+    
+    if not vba_parser.detect_vba_macros():
+        print("❌ No VBA macros found!")
+        return
+    
+    for (filename, stream_path, vba_filename, vba_code) in vba_parser.extract_macros():
+        safe_filename = vba_filename.replace('/', '_').replace('\\', '_')
+        output_file = os.path.join(output_dir, f"{safe_filename}.vba")
+        
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(f"' Source: {filename}\n")
+            f.write(f"' Stream: {stream_path}\n")
+            f.write(f"' Module: {vba_filename}\n\n")
+            f.write(vba_code)
+```
+
+### Metod 1: Manuell extraktion (inte längre nödvändig)
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write(vba_code)
             print(f"Extracted: {output_file}")
@@ -107,28 +213,55 @@ if __name__ == '__main__':
 
 ## Migrations-plan (TDD-approach)
 
+### Fas 0: Förberedelser (KOMPLETT ✅)
+**Tid:** 1 timme  
+**Utfört:** 2025-10-31
+
+1. ✅ **Extraherade VBA-kod** från Book18.xlsm (51 moduler, 513 KB)
+2. ✅ **Extraherade CSV-data** från Book18.xlsm (30 sheets, 720 KB)
+3. ✅ **Dokumentation tillgänglig** i `Dokumentation.csv` (245 rader)
+4. ✅ **Scope definierad** (core bokföring, INTE reskontror)
+5. ✅ **Migrationsplan skapad** (detta dokument)
+
+**Nästa:** Väntar på Extensions-Claude (rate limit reset ~01:00 svensk tid)
+
 ### Fas 1: Kodgranskning och dokumentation (Extensions-Claude)
 **Tid:** 1-2 timmar
 
-1. **Extrahera VBA-kod** från Book19.xlsm
-2. **Dokumentera funktioner:**
-   - Lista alla Sub/Function i VBA
-   - Identifiera indata/utdata för varje funktion
-   - Kartlägg beroenden mellan funktioner
+1. ✅ **Extrahera VBA-kod** från Book18.xlsm (KLART)
+2. **Läs Dokumentation.csv:**
+   - 245 rader med funktionsbeskrivningar
+   - Alla Sub/Function redan dokumenterade
+   - Dependencies identifierade
 3. **Skapa funktionsmatris:**
    ```
-   VBA Function          | Python Equivalent      | Dependencies | Status
-   ---------------------|------------------------|--------------|--------
-   ImportSIE()          | sie_parser.import_sie() | None         | TODO
-   ExportSIE()          | sie_exporter.export()   | None         | TODO
-   GenerateResults()    | reports.generate_result_report() | SIE data | TODO
-   GenerateBalance()    | reports.generate_balance_sheet() | SIE data | TODO
-   PostTransaction()    | ledger.post_transaction() | None        | TODO
-   CalculateMoms()      | tax.calculate_vat()     | Transactions | TODO
+   VBA Function (Module)                    | Python Equivalent                  | Dependencies           | Priority | Status
+   -----------------------------------------|------------------------------------|------------------------|----------|--------
+   BokforingKnapp_Click (Module1)          | ledger.post_transaction()          | None                   | HIGH     | TODO
+   ImportKontoplanAndBalancesFromSIE (*)   | sie_parser.import_chart_of_accounts() | File parsing        | HIGH     | TODO
+   ImportTransactionsFromSIE (*)           | sie_parser.import_transactions()   | Kontoplan              | HIGH     | TODO
+   ExportToSIE4 (ModuleExportSIE4)         | sie_exporter.export_sie4()         | All data               | MEDIUM   | TODO
+   GenerateResultatrapport (**)            | reports.generate_income_statement() | Verifikationslista    | HIGH     | TODO
+   GenerateBalansrapport (**)              | reports.generate_balance_sheet()   | Verifikationslista    | HIGH     | TODO
+   GenerateMomsrapport (**)                | reports.generate_vat_report()      | Verifikationslista    | HIGH     | TODO
+   GenerateHuvudbokRapp (**)               | reports.generate_ledger()          | Verifikationslista    | MEDIUM   | TODO
+   CalculateAllChecksums (ModuleCRC)       | integrity.calculate_crc32()        | Row data               | LOW      | TODO
+   GetBenamning (multiple)                 | kontoplan.get_account_name()       | Kontoplan              | HIGH     | TODO
+   UppdateraVerifikationslista (Module1)   | ledger.update_transaction_list()   | Bokföring sheet        | HIGH     | TODO
+   
+   (*) ModuleImportSIE4
+   (**) ModuleGenerateReports
    ```
 
-4. **Granska Node/Express-kod:**
-   - Lokalisera projektet
+4. **IGNORERA dessa moduler:**
+   - ❌ ModuleLagerreskontra (1018 rader) - Lagerreskontra
+   - ❌ ModuleKundreskontra (326 rader) - Kundreskontra  
+   - ❌ ModuleLeverantörsreskontra (1 rad) - Leverantörsreskontra
+   - ❌ Sheet12 Artikelbokföring (235 rader)
+   - ❌ Alla artikelrelaterade funktioner i Dokumentation.csv
+
+5. **Granska Node/Express-kod:**
+   - Lokalisera projektet (om det finns)
    - Identifiera SIE-parsing logik
    - Identifiera gRPC-anrop till Python
    - Dokumentera räknelogik som redan finns i Python

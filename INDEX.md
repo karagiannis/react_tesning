@@ -1,8 +1,26 @@
-# INDEX - Frontend Structure (tic-tac-toe-app)
+# INDEX - Frontend Structure (tic-tac-toe-frontend)
 
 **Princip:** Detta dokument ger en översikt av hela frontend-projektet
 **Skapad:** 2025-10-29
-**Senast uppdaterad:** 2025-01-29
+**Senast uppdaterad:** 2025-11-02 20:15
+
+**VIKTIGT:** Backend-koden har flyttats till `tic-tac-toe-server/app/accounting/`
+
+---
+
+## 🆕 SENASTE UPPDATERINGAR (2025-11-01)
+
+**SIE Specification OCR:** `docs/SIE_spec_OCR_2025-11-01.md` (1845 rader)
+- Extraherad med olmOCR-2-7B på Google Colab A100
+- Komplett SIE4-filformat dokumentation (#DIM, #OBJEKT, hierarkier)
+- För Extensions-Claude VBA→Python migration
+
+**Extensions-Claude Handoff:** `docs/PROJECT/EXTENSIONS_CLAUDE_HANDOFF.md` (568 rader)
+- VBA→Python migration plan (51 moduler från Excel-bokföringssystem)
+- Settings page implementation spec
+- Uppdaterad med referens till SIE-spec OCR
+
+**PROJECT INDEX:** `docs/PROJECT/INDEX.md` - Uppdaterat med nya dokument
 
 ---
 
