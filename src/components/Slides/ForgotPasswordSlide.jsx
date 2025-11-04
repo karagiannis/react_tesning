@@ -59,7 +59,7 @@ export default function ForgotPasswordSlide({ onNext, onBack }) {
               />
             </div>
 
-            <div className="bg-white border border-blue-300 rounded-lg p-4">
+            <div className="bg-white border border-brand-300 rounded-lg p-4">
               <p className="text-xs text-gray-700">
                 <strong>Information:</strong><br />
                 En 6-siffrig kod kommer skickas till din e-post. 

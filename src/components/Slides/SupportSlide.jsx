@@ -108,11 +108,11 @@ export default function SupportSlide({ onNext, onBack }) {
 
   const colorClasses = {
     blue: {
-      bg: 'bg-blue-50',
-      border: 'border-blue-200',
-      icon: 'bg-blue-100',
-      text: 'text-blue-800',
-      badge: 'bg-blue-500'
+      bg: 'bg-brand-50',
+      border: 'border-brand-200',
+      icon: 'bg-brand-100',
+      text: 'text-brand-800',
+      badge: 'bg-brand-500'
     },
     green: {
       bg: 'bg-green-50',

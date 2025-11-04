@@ -235,7 +235,7 @@ const MoneyFlowMapWidget = () => {
             <span className="text-gray-700">RISK - Privat hyra</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white"></div>
+            <div className="w-4 h-4 rounded-full bg-brand-500 border-2 border-white"></div>
             <span className="text-gray-700">Leverantörer</span>
           </div>
           <div className="flex items-center space-x-2">
@@ -441,9 +441,9 @@ const MoneyFlowMapWidget = () => {
             {filteredData.filter(d => d.type === 'rent_residential').length}
           </div>
         </div>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg shadow p-4">
-          <div className="text-sm text-blue-700 mb-1">Leverantörer</div>
-          <div className="text-2xl font-bold text-blue-600">
+        <div className="bg-brand-50 border border-brand-200 rounded-lg shadow p-4">
+          <div className="text-sm text-brand-700 mb-1">Leverantörer</div>
+          <div className="text-2xl font-bold text-brand-600">
             {filteredData.filter(d => d.type === 'supplier').length}
           </div>
         </div>

@@ -34,7 +34,7 @@ export default function IntroSlide({ onNext }) {
       </div>
 
       {/* Info box - Varför dessa frågor? */}
-      <div className="bg-white border-l-4 border-blue-500 p-4 mb-8 shadow-sm">
+      <div className="bg-white border-l-4 border-brand-500 p-4 mb-8 shadow-sm">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
           Varför måste vi ställa dessa frågor?
         </h3>

@@ -215,8 +215,8 @@ export default function IdentitetskontrollSlide({ onNext }) {
         </div>
 
         {/* Legal Reference */}
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded mb-6">
-          <p className="text-xs text-blue-800">
+        <div className="bg-brand-50 border-l-4 border-brand-500 p-4 rounded mb-6">
+          <p className="text-xs text-brand-800">
             <strong>Lagstöd:</strong> Länsstyrelsen Stockholms författningssamling 01FS 2024:20, 3 kap. 4 § och tabell 1 
             samt Lagen (2017:630) om åtgärder mot penningtvätt och finansiering av terrorism.
           </p>

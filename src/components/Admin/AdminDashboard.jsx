@@ -152,7 +152,7 @@ const fraudCategories = [
   { name: 'Verksamhetskongruens', count: 38, percent: 30, color: 'bg-red-500' },
   { name: 'Privatkonsumtion', count: 57, percent: 45, color: 'bg-orange-500' },
   { name: 'Cirkulära betalningar', count: 19, percent: 15, color: 'bg-yellow-500' },
-  { name: 'Konkurskontroll', count: 8, percent: 6, color: 'bg-blue-500' },
+  { name: 'Konkurskontroll', count: 8, percent: 6, color: 'bg-brand-500' },
   { name: 'Leveransadress', count: 5, percent: 4, color: 'bg-purple-500' },
 ];
 
@@ -181,7 +181,7 @@ const AdminDashboard = () => {
 
   const getStatusBadge = (status) => {
     const styles = {
-      ny: 'bg-blue-100 text-blue-800',
+      ny: 'bg-brand-100 text-brand-800',
       under_granskning: 'bg-yellow-100 text-yellow-800',
       under_behandling: 'bg-yellow-100 text-yellow-800',
       avslutad: 'bg-green-100 text-green-800',
@@ -352,8 +352,8 @@ const AdminDashboard = () => {
                     <p className="text-sm font-medium text-gray-600">Aktiva Onboardings</p>
                     <p className="text-3xl font-bold text-gray-900 mt-2">{mockStats.activeOnboardings}</p>
                   </div>
-                  <div className="bg-blue-100 rounded-full p-3">
-                    <Icon name="clock" className="w-6 h-6 text-blue-600" />
+                  <div className="bg-brand-100 rounded-full p-3">
+                    <Icon name="clock" className="w-6 h-6 text-brand-600" />
                   </div>
                 </div>
               </div>
@@ -983,8 +983,8 @@ const AdminDashboard = () => {
                 </form>
 
                 {/* Info Box */}
-                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-800">
+                <div className="mt-6 p-4 bg-brand-50 border border-brand-200 rounded-lg">
+                  <p className="text-sm text-brand-800">
                     <strong>OBS:</strong> För produktionsmiljö kommer detta att integreras med SendGrid API.
                     Massutskick skickas till alla {mockStats.totalUsers} användare.
                   </p>

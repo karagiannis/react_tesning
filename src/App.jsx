@@ -45,12 +45,16 @@ import ServerErrorPage from './components/Pages/ServerErrorPage';
 import SettingsPageV2 from './components/Pages/SettingsPageV2';
 import AdminDashboard from './components/Admin/AdminDashboard';
 // import FraudDetectionDemo from './components/Demo/FraudDetectionDemo'; // KOMMENTERAD: Innehåller verklig klientdata (RS MekService A308)
+import AccountingReviewPage from './pages/AccountingReviewPage';
+import AccountingAnalysisWizard from './pages/AccountingAnalysisWizard';
+import VoucherDetailPage from './pages/VoucherDetailPage';
 import Sidebar from './components/Layout/Sidebar';
 import Header from './components/Layout/Header';
 import MainContent from './components/Layout/MainContent';
 import LLMPanel from './components/Panels/LLMPanel';
 import DocumentationPanel from './components/Panels/DocumentationPanel';
 import SupportPanel from './components/Panels/SupportPanel';
+import { AgreementProvider } from './contexts/AgreementContext';
 
 export default function App() {
   const navigate = useNavigate();
@@ -181,21 +185,25 @@ export default function App() {
 
   // Settings page has its own sidebar, don't render app sidebar/header
   const isSettingsPage = location.pathname === '/settings' || location.pathname === '/settings-v2';
+  
+  // Voucher detail pages open in separate windows without sidebar/header
+  const isVoucherPage = location.pathname.startsWith('/voucher/');
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {!isSettingsPage && (
-        <Sidebar 
-          currentPath={location.pathname}
-          onNavigate={(path) => navigate(path)}
-          hasRoaringData={roaringData !== null}
-          isDemoMode={isDemoMode}
-        />
-      )}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {!isSettingsPage && <Header onPanelToggle={setActivePanel} isDemoMode={isDemoMode} />}
-        <MainContent hasPanel={activePanel !== null}>
-          <Routes>
+    <AgreementProvider>
+      <div className="flex h-screen overflow-hidden">
+        {!isSettingsPage && !isVoucherPage && (
+          <Sidebar 
+            currentPath={location.pathname}
+            onNavigate={(path) => navigate(path)}
+            hasRoaringData={roaringData !== null}
+            isDemoMode={isDemoMode}
+          />
+        )}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {!isSettingsPage && !isVoucherPage && <Header onPanelToggle={setActivePanel} isDemoMode={isDemoMode} />}
+          <MainContent hasPanel={activePanel !== null}>
+            <Routes>
             <Route path="/" element={<HeroSlide onNext={() => navigate('/login')} onLogin={() => navigate('/login')} onRegister={() => navigate('/register')} onDemo={handleDemo} />} />
             <Route path="/login" element={<LoginSlide onNext={handleLogin} onRegister={() => navigate('/register')} />} />
             <Route path="/register" element={<RegisterSlide onNext={() => navigate('/verify')} onLogin={() => navigate('/login')} />} />
@@ -281,7 +289,7 @@ export default function App() {
             <Route path="/bransch" element={<BranschjamforelseSlide onNext={() => navigate('/bokanalys')} onBack={() => navigate('/resultat')} />} />
             
             {/* Djupgranskning och beslut (slides 15-20) */}
-            <Route path="/bokanalys" element={<BokforingsanalysSlide onNext={() => navigate('/penningflodes')} onBack={() => navigate('/bransch')} />} />
+            <Route path="/bokanalys" element={<AccountingAnalysisWizard />} />
             <Route path="/penningflodes" element={<PenningflodesanalysSlide onNext={() => navigate('/riskbedomning')} onBack={() => navigate('/bokanalys')} />} />
             <Route path="/riskbedomning" element={<RiskbedomningSlide onNext={() => navigate('/skyldigheter')} onBack={() => navigate('/penningflodes')} />} />
             <Route path="/skyldigheter" element={<SkyldigheterSlide onNext={() => navigate('/avtal')} onBack={() => navigate('/riskbedomning')} />} />
@@ -306,6 +314,13 @@ export default function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             {/* KOMMENTERAD: Fraud Detection Demo innehåller verklig klientdata som inte får exponeras publikt */}
             {/* <Route path="/demo/fraud-detection" element={<FraudDetectionDemo />} /> */}
+            
+            {/* Verifikationsvy i separat fönster */}
+            <Route path="/voucher/:voucherId" element={<VoucherDetailPage />} />
+            
+            {/* Bokföringsanalys OLD (Mock Fortnox-stil rapporter) - Bevaras för referens */}
+            <Route path="/accounting-review" element={<AccountingReviewPage />} />
+            
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             <Route path="/server-error" element={<ServerErrorPage />} />
             
@@ -328,5 +343,6 @@ export default function App() {
       </div>
       {renderPanel()}
     </div>
+    </AgreementProvider>
   );
 }

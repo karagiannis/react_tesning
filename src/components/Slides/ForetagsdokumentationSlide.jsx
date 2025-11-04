@@ -225,8 +225,8 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
                 onDrop={(e) => handleDrop('registreringsbevis', e)}
                 className={`relative border-2 border-dashed rounded-lg p-12 text-center transition-all ${
                   isDragging.registreringsbevis
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-300 bg-white hover:border-blue-400 hover:bg-blue-50/50'
+                    ? 'border-brand-500 bg-brand-50'
+                    : 'border-gray-300 bg-white hover:border-brand-400 hover:bg-brand-50/50'
                 }`}
               >
                 <input
@@ -253,7 +253,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
               <div className="border-2 border-green-200 bg-green-50 rounded-lg p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <FileText className="w-8 h-8 text-blue-600" />
+                    <FileText className="w-8 h-8 text-brand-600" />
                     <div>
                       <p className="font-medium text-gray-900">{formData.registreringsbevis.name}</p>
                       <p className="text-sm text-gray-500">

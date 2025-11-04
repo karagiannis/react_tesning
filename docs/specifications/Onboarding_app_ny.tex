@@ -352,6 +352,55 @@
 % De utgör själva onboarding-processen där företagsdata samlas in steg för steg.
 % ========================================================================
 
+% ========================================================================
+% SLIDE: Bokföringsanalys (NY)
+% ========================================================================
+% Denna sektion beskriver hur Bokföringsanalys-sliden fungerar i Onboarding-appen.
+% Syfte: Ge byråchefen snabb, klickbar åtkomst till balans-/resultatrapporter,
+% huvudbok och verifikationslistor per räkenskapsår, och från huvudbok/verifikation
+% kunna öppna tillhörande underlagsdokument (PDF, fakturor, kvitton).
+%
+% Navigationsmodell (kan visas i UI som breadcrumb eller klickbara knappar):
+%  - Balansrapport -> Huvudbok -> Bokföringspost -> Bokföringsunderlag
+%  - Resultatrapport -> Huvudbok -> Bokföringspost -> Bokföringsunderlag
+%  - Verifikationslista -> Bokföringspost -> Bokföringsunderlag
+%
+% Implementation note: I appen genereras PDF-rapporter server-side och
+% serverns URL-parameter kan styras så att varje rapport blir en unik, bokmärkningsbar
+% länk (samma idé som Fortnox). Vi kompletterar detta med en HTML-driven
+% drill-down för snabbare interaktiv analys och möjlighet att visa matchade
+% underlag inline.
+
+\section{Bokföringsanalys}
+
+\begin{frame}
+  \frametitle{Bokföringsanalys — Multi-stage Wizard}
+  \begin{block}{Översikt}
+    Bokföringsanalysen är en 5-stegs wizard som validerar och jämför bokföring från SIE-filer mot företagets inlämnade rapporter.
+  \end{block}
+
+  \vspace{0.3cm}
+  \textbf{Wizard-steg:}
+  \begin{enumerate}
+    \item \textbf{Forensisk analys:} Flagga problematiska verifikationer (privata inköp, aggregeringar)
+    \item \textbf{Rapportarkiv:} Balans, Resultat, Huvudbok, Verifikationslista per räkenskapsår
+    \item \textbf{Momsavstämning:} Jämför framräknade vs inlämnade momsrapporter
+    \item \textbf{Deklarationsjämförelse:} Jämför framräknad INK2 vs inlämnad (SRU-mappning)
+    \item \textbf{Årsredovisning:} Jämför framräknat bokslut vs Bolagsverkets årsredovisning
+  \end{enumerate}
+
+  \vspace{0.3cm}
+  \begin{alertblock}{Fullständig Specifikation}
+    Detaljerad beskrivning finns i:\\
+    \texttt{docs/specifications/Bokföringsanalys.md}
+  \end{alertblock}
+\end{frame}
+
+% ========================================================================
+% SLUT: Bokföringsanalys (NY)
+% ========================================================================
+
+
 % --- Kommentar: Inloggad vy med vänster sidebar och ikoner ---
 % När användaren är inloggad visas följande layout:
 %

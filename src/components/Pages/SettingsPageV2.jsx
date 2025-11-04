@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
+import { useAgreements } from '../../contexts/AgreementContext';
 
 const SettingsPageV2 = () => {
   const navigate = useNavigate();
+  const { platformAgreement, setPlatformAgreement } = useAgreements();
   
   // Active section state
   const [activeSection, setActiveSection] = useState('users');
@@ -144,12 +146,30 @@ const SettingsPageV2 = () => {
     foretagsforsaljning: null // Offert
   });
 
-  // Mock data för avtalsmall (Byråinställningar)
-  const [contractTemplate, setContractTemplate] = useState({
-    hasCustomTemplate: false,
-    customTemplateFile: null,
-    useDefaultTemplate: true
+  // Mock data för LaTeX avtalsmall (Byråinställningar)
+  const [latexTemplate, setLatexTemplate] = useState({
+    templateId: 'default',
+    filename: 'uppdragsavtal_template.tex',
+    uploadedAt: null,
+    previewPdfUrl: '/uppdragsavtal_exempel.pdf',
+    placeholders: [
+      '{{FÖRETAGSNAMN}}',
+      '{{ORGNUMMER}}',
+      '{{KONTAKTPERSON}}',
+      '{{EMAIL}}',
+      '{{TELEFON}}',
+      '{{ADRESS}}',
+      '{{MÅNADSPRIS}}',
+      '{{STARTDATUM}}',
+      '{{BYRÅNAMN}}',
+      '{{BYRÅ_ORGNR}}'
+    ],
+    isUploading: false,
+    uploadError: null
   });
+
+  // Byrå-avtal state hämtas från Context (delas med RiskSlide)
+  // const { platformAgreement, setPlatformAgreement } = useAgreements(); // Redan i toppen
 
   // Mock data för fjärronboarding-sessioner
   const [remoteSessions] = useState([
@@ -245,6 +265,7 @@ const SettingsPageV2 = () => {
       subsections: [
         { id: 'firm-info', label: 'Kontaktuppgifter' },
         { id: 'firm-pricing', label: 'Prislista' },
+        { id: 'firm-sign-agreement', label: 'Teckna avtal med oss' },
         { id: 'firm-contract', label: 'Avtalsmall' },
         { id: 'firm-questions', label: 'Egna frågor' }
       ]
@@ -571,7 +592,7 @@ const SettingsPageV2 = () => {
                             </td>
                             <td className="px-4 py-3">
                               <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                shadow.shadowType === 'colleague' ? 'bg-blue-100 text-blue-800' :
+                                shadow.shadowType === 'colleague' ? 'bg-brand-100 text-brand-800' :
                                 shadow.shadowType === 'support' ? 'bg-purple-100 text-purple-800' :
                                 'bg-red-100 text-red-800'
                               }`}>
@@ -1149,14 +1170,14 @@ const SettingsPageV2 = () => {
                 </div>
 
                 {/* Info-box */}
-                <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="mt-6 bg-brand-50 border border-brand-200 rounded-lg p-4">
                   <div className="flex gap-3">
-                    <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-brand-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <div className="text-sm text-blue-900">
+                    <div className="text-sm text-brand-900">
                       <p className="font-semibold mb-1">Prissättning i onboarding-flödet</p>
-                      <ul className="list-disc list-inside space-y-1 text-blue-800">
+                      <ul className="list-disc list-inside space-y-1 text-brand-800">
                         <li><strong>Uppdragsval:</strong> Klienten väljer tjänster och ser automatiskt beräknat pris från denna prislista</li>
                         <li><strong>Riskbedömning:</strong> Du kan justera och överrida priserna individuellt per kund baserat på riskanalys</li>
                         <li><strong>Företagsförsäljning/succession:</strong> Visas som "Offert" och kräver individuell prissättning</li>
@@ -1177,7 +1198,225 @@ const SettingsPageV2 = () => {
               </div>
             )}
 
-            {/* Byråinställningar - Avtalsmall */}
+            {/* Byråinställningar - Teckna avtal med oss */}
+            {activeSection === 'firm-sign-agreement' && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold text-brand-900 mb-2 flex items-center gap-2">
+                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Teckna avtal med oss
+                  </h2>
+                  <p className="text-gray-600 text-sm">
+                    För att kunna använda plattformen måste ni teckna ett avtal med oss. 
+                    Avtalet signeras digitalt med BankID.
+                  </p>
+                </div>
+
+                {/* Status overview */}
+                <div className={`mb-6 p-5 rounded-lg border-2 ${
+                  platformAgreement.isSigned 
+                    ? 'bg-green-50 border-green-400' 
+                    : 'bg-yellow-50 border-yellow-400'
+                }`}>
+                  <div className="flex items-start gap-4">
+                    {platformAgreement.isSigned ? (
+                      <>
+                        <div className="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                          <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-green-900 text-lg mb-2">Avtalet är signerat!</h3>
+                          <div className="bg-white p-3 rounded border border-green-300 text-sm">
+                            <p className="text-gray-700"><strong>Avtalsnummer:</strong> {platformAgreement.agreementNumber}</p>
+                            <p className="text-gray-700"><strong>Signerad av:</strong> {platformAgreement.signerName}</p>
+                            <p className="text-gray-700"><strong>Personnummer:</strong> {platformAgreement.signerPersonnr}</p>
+                            <p className="text-gray-700"><strong>Signeringsdatum:</strong> {new Date(platformAgreement.signedAt).toLocaleString('sv-SE')}</p>
+                            <p className="text-gray-700"><strong>Månadskostnad:</strong> {platformAgreement.monthlyFee} SEK (exkl. moms)</p>
+                            <p className="text-gray-700"><strong>Status:</strong> <span className="text-green-700 font-semibold">{platformAgreement.status}</span></p>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex-shrink-0 w-12 h-12 bg-yellow-600 rounded-full flex items-center justify-center">
+                          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-yellow-900 text-lg mb-2">Avtalet är inte signerat ännu</h3>
+                          <p className="text-yellow-800 text-sm mb-3">
+                            För att använda plattformen med faktura i efterskott måste ni teckna ett företagsavtal. 
+                            Tills avtalet är signerat och godkänt måste enskilda användare betala direkt för API-anrop via Stripe.
+                          </p>
+                          <div className="bg-white p-3 rounded border border-yellow-300 text-sm space-y-2">
+                            <p className="text-gray-700"><strong>Månadskostnad:</strong> {platformAgreement.monthlyFee} SEK (exkl. moms)</p>
+                            <p className="text-gray-700"><strong>Inkluderar:</strong> Obegränsade onboardings, lagring, API-åtkomst</p>
+                            <p className="text-gray-700"><strong>Betalningsvillkor:</strong> 30 dagars kredit, faktura i efterskott</p>
+                            <div className="border-t border-yellow-200 pt-2 mt-2">
+                              <p className="text-yellow-900 font-semibold">Vill endast testa?</p>
+                              <p className="text-gray-700">Företagsanvändare kan teckna <strong>engångs-testavtal</strong> vid första onboarding. Kostar endast självkostnadspris för API-anrop + avtalsteckning. <span className="text-yellow-800 font-semibold">OBS: Erbjuds endast en gång.</span></p>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* PDF Container - Avtalet */}
+                {!platformAgreement.isSigned && (
+                  <>
+                    <div className="mb-6 border-2 border-gray-300 rounded-lg overflow-hidden">
+                      <div className="bg-gray-100 p-3 border-b border-gray-300 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                          </svg>
+                          <span className="text-sm font-semibold text-gray-700">plattformsavtal_redovisningsbyra.pdf</span>
+                        </div>
+                        <a 
+                          href="/plattformsavtal_redovisningsbyra.pdf" 
+                          download
+                          className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                          Ladda ner
+                        </a>
+                      </div>
+                      
+                      <div 
+                        className="bg-white"
+                        style={{ height: '400px', overflowY: 'auto' }}
+                      >
+                        <iframe
+                          src="/plattformsavtal_redovisningsbyra.pdf"
+                          className="w-full h-full"
+                          title="Plattformsavtal"
+                        />
+                      </div>
+                    </div>
+
+                    {/* BankID Signing Section */}
+                    <div className="mb-6 p-5 bg-brand-50 border-2 border-brand-200 rounded-lg">
+                      <h3 className="font-bold text-brand-900 mb-3 flex items-center gap-2">
+                        <svg className="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                        Signera avtalet med BankID
+                      </h3>
+                      
+                      <p className="text-sm text-brand-900 mb-4">
+                        Genom att signera godkänner du villkoren och bekräftar att uppgifterna är korrekta. 
+                        En QR-kod kommer att visas som du skannar med BankID-appen.
+                      </p>
+
+                      <button
+                        onClick={() => {
+                          setPlatformAgreement({...platformAgreement, isSigningInProgress: true});
+                          
+                          // Mock BankID signing (5s delay)
+                          setTimeout(() => {
+                            setPlatformAgreement({
+                              isSigned: true,
+                              agreementNumber: 'PLAT-2025-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+                              signedAt: new Date().toISOString(),
+                              signerName: 'Lasse Karagiannis',
+                              signerPersonnr: '19XXXXXX-XXXX',
+                              monthlyFee: 1995,
+                              status: 'Under verifiering',
+                              isSigningInProgress: false
+                            });
+                          }, 5000);
+                        }}
+                        disabled={platformAgreement.isSigningInProgress}
+                        className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-lg transition-all font-semibold text-lg ${
+                          platformAgreement.isSigningInProgress
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-brand-600 text-white hover:bg-brand-700 shadow-lg'
+                        }`}
+                      >
+                        {platformAgreement.isSigningInProgress ? (
+                          <>
+                            <svg className="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Skanna QR-koden med BankID...</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            Signera med BankID
+                          </>
+                        )}
+                      </button>
+
+                      {platformAgreement.isSigningInProgress && (
+                        <div className="mt-4 p-4 bg-white border-2 border-brand-400 rounded-lg">
+                          <div className="flex items-center justify-center mb-3">
+                            <div className="w-48 h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                              <div className="text-center">
+                                <svg className="w-32 h-32 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/>
+                                </svg>
+                                <p className="text-xs text-gray-600">Mock QR-kod</p>
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-sm text-center text-gray-700">
+                            <strong>Skanna QR-koden med BankID-appen</strong><br/>
+                            eller öppna BankID på denna enhet
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Info box - Payment warning */}
+                    <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-300">
+                      <div className="flex items-start gap-3">
+                        <svg className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div>
+                          <p className="text-sm text-yellow-900 font-semibold mb-1">
+                            Betalningsvillkor utan godkänt företagsavtal
+                          </p>
+                          <p className="text-sm text-yellow-800 mb-2">
+                            Tills företagsavtalet är godkänt måste enskilda användare betala direkt för API-anrop via Stripe 
+                            (Skatteverket, Bolagsverket, etc.) vid varje onboarding.
+                          </p>
+                          <p className="text-sm text-yellow-800">
+                            <strong>Med godkänt avtal:</strong> 30 dagars betalningsvillkor, faktura i efterskott för alla API-kostnader.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Success message after signing */}
+                {platformAgreement.isSigned && platformAgreement.status === 'Under verifiering' && (
+                  <div className="p-4 bg-brand-50 rounded-lg border border-brand-300">
+                    <p className="text-sm text-brand-900">
+                      <strong>Tack för er signering!</strong> Vi verifierar nu er byrå. 
+                      Ni kommer att få ett e-postmeddelande när verifieringen är klar (normalt 1-2 arbetsdagar). 
+                      Under tiden kan ni redan börja sätta upp era inställningar och testa funktioner.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Byråinställningar - Avtalsmall (LaTeX) */}
             {activeSection === 'firm-contract' && (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="mb-6">
@@ -1185,136 +1424,198 @@ const SettingsPageV2 = () => {
                     <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    Avtalsmall
+                    Avtalsmall (LaTeX)
                   </h2>
                   <p className="text-gray-600 text-sm">
-                    Ladda upp din egen avtalsmall med placeholders som fylls i automatiskt vid onboarding, 
-                    eller använd vår standardmall.
+                    Settings lagrar alltid EN LaTeX-mall som används för alla onboarding-sessioner. 
+                    Vid upload kompileras mallen omedelbart för förhandsgranskning.
                   </p>
                 </div>
 
-                {/* Val: Egen mall eller standard */}
-                <div className="mb-6 space-y-4">
-                  <label className={`flex items-start gap-4 p-5 rounded-lg border-2 cursor-pointer transition-all ${
-                    contractTemplate.useDefaultTemplate ? 'border-brand-500 bg-brand-50' : 'border-gray-200 hover:border-brand-300'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="templateChoice"
-                      checked={contractTemplate.useDefaultTemplate}
-                      onChange={() => setContractTemplate({...contractTemplate, useDefaultTemplate: true, hasCustomTemplate: false})}
-                      className="w-5 h-5 mt-1"
-                    />
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900 mb-1">Använd standardmall</div>
-                      <p className="text-sm text-gray-600 mb-3">
-                        Vår färdiga uppdragsavtalsmall med alla nödvändiga placeholders. 
-                        Fylls automatiskt med data från onboardingen.
-                      </p>
+                {/* Nuvarande mall info */}
+                <div className="mb-6 p-5 bg-brand-50 border-2 border-brand-200 rounded-lg">
+                  <h3 className="font-semibold text-brand-900 mb-3 flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Nuvarande mall
+                  </h3>
+                  
+                  <div className="bg-white rounded-lg p-4 mb-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{latexTemplate.filename}</p>
+                        <p className="text-xs text-gray-500">
+                          {latexTemplate.uploadedAt 
+                            ? `Uppladdad: ${new Date(latexTemplate.uploadedAt).toLocaleString('sv-SE')}` 
+                            : 'Standard mall (ingår i systemet)'}
+                        </p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        latexTemplate.templateId === 'default' 
+                          ? 'bg-gray-100 text-gray-700' 
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        {latexTemplate.templateId === 'default' ? 'Standard' : 'Egen mall'}
+                      </span>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button 
+                        className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 text-sm flex items-center justify-center gap-2"
+                        onClick={() => {
+                          // Mock download - In production: GET /api/settings/latex-template/download?templateId={id}
+                          const downloadUrl = latexTemplate.templateId === 'default' 
+                            ? '/uppdragsavtal_template.tex' 
+                            : `/api/firms/contract-templates/${latexTemplate.templateId}.tex`;
+                          
+                          // Create mock download
+                          const link = document.createElement('a');
+                          link.href = downloadUrl;
+                          link.download = latexTemplate.filename;
+                          link.click();
+                        }}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Ladda ner .tex
+                      </button>
                       <a 
-                        href="/uppdragsavtal_exempel.pdf" 
+                        href={latexTemplate.previewPdfUrl} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-brand-600 hover:text-brand-700 text-sm inline-flex items-center gap-1"
+                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm flex items-center justify-center gap-2"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
-                        Förhandsgranska standardmall
+                        Förhandsgranska PDF
                       </a>
                     </div>
-                  </label>
+                  </div>
 
-                  <label className={`flex items-start gap-4 p-5 rounded-lg border-2 cursor-pointer transition-all ${
-                    contractTemplate.hasCustomTemplate ? 'border-brand-500 bg-brand-50' : 'border-gray-200 hover:border-brand-300'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="templateChoice"
-                      checked={contractTemplate.hasCustomTemplate}
-                      onChange={() => setContractTemplate({...contractTemplate, useDefaultTemplate: false, hasCustomTemplate: true})}
-                      className="w-5 h-5 mt-1"
-                    />
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900 mb-1">Ladda upp egen mall</div>
-                      <p className="text-sm text-gray-600">
-                        Använd din egen avtalsmall med anpassade villkor och placeholders.
+                  <div className="bg-brand-50 border border-brand-200 rounded-lg p-3">
+                    <p className="text-sm text-brand-900 mb-2 flex items-center gap-2">
+                      <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                      <strong>Så anpassar du mallen:</strong>
+                    </p>
+                    <ol className="text-sm text-brand-900 ml-4 space-y-1 list-decimal">
+                      <li>Klicka "Ladda ner .tex" för att få vår standardmall</li>
+                      <li>Öppna .tex-filen i valfri texteditor (Notepad, VS Code, etc.)</li>
+                      <li>Redigera texten men behåll <code className="bg-brand-100 px-1 rounded">{`{{PLACEHOLDERS}}`}</code> – systemet fyller dem automatiskt med kundens data</li>
+                      <li>Ladda upp den modifierade .tex-filen nedan</li>
+                      <li>Systemet kompilerar automatiskt och visar förhandsvisning</li>
+                    </ol>
+                    <div className="mt-3 p-2 bg-white border border-brand-200 rounded text-xs">
+                      <p className="text-brand-900 mb-1"><strong>Exempel:</strong></p>
+                      <p className="text-gray-700 font-mono">
+                        "Detta avtal gäller <span className="text-brand-600 font-bold">{`{{FÖRETAGSNAMN}}`}</span> till ett pris av <span className="text-brand-600 font-bold">{`{{MÅNADSPRIS}}`}</span> kr/mån"
                       </p>
+                      <p className="text-gray-600 mt-1">→ Blir: "Detta avtal gäller <strong>Acme AB</strong> till ett pris av <strong>4 500</strong> kr/mån"</p>
                     </div>
-                  </label>
+                    <p className="text-xs text-brand-800 mt-2 border-t border-brand-200 pt-2 flex items-start gap-2">
+                      <svg className="w-4 h-4 text-brand-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span><strong>Original förblir orörd:</strong> Vid varje onboarding skapas en temp-kopia där placeholders ersätts med kundens data.</span>
+                    </p>
+                  </div>
                 </div>
 
-                {/* Upload-sektion för egen mall */}
-                {contractTemplate.hasCustomTemplate && (
-                  <div className="mb-6 p-5 bg-blue-50 border-2 border-blue-200 rounded-lg">
-                    <h3 className="font-semibold text-blue-900 mb-3">Ladda upp din avtalsmall</h3>
-                    
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-900 mb-2">
-                        Avtalsmall (PDF eller DOCX) <span className="text-red-600">*</span>
-                      </label>
-                      <input
-                        type="file"
-                        accept=".pdf,.docx"
-                        onChange={(e) => {
-                          if (e.target.files && e.target.files[0]) {
-                            setContractTemplate({
-                              ...contractTemplate,
-                              customTemplateFile: e.target.files[0]
-                            });
-                          }
-                        }}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                      />
-                      {contractTemplate.customTemplateFile && (
-                        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
-                          <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span className="text-sm text-green-800">{contractTemplate.customTemplateFile.name} uppladdad</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Info om placeholders */}
-                    <div className="bg-white border border-blue-300 rounded-lg p-4">
-                      <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Placeholders för dynamisk data
-                      </h4>
-                      <p className="text-sm text-gray-600 mb-3">
-                        Använd följande placeholders i din mall (omgivna av dubbla klammerparenteser):
-                      </p>
-                      <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-gray-50 p-3 rounded">
-                        <div><code className="text-brand-600">{`{{FÖRETAGSNAMN}}`}</code></div>
-                        <div><code className="text-brand-600">{`{{ORGNUMMER}}`}</code></div>
-                        <div><code className="text-brand-600">{`{{KONTAKTPERSON}}`}</code></div>
-                        <div><code className="text-brand-600">{`{{EMAIL}}`}</code></div>
-                        <div><code className="text-brand-600">{`{{TELEFON}}`}</code></div>
-                        <div><code className="text-brand-600">{`{{ADRESS}}`}</code></div>
-                        <div><code className="text-brand-600">{`{{MÅNADSPRIS}}`}</code></div>
-                        <div><code className="text-brand-600">{`{{STARTDATUM}}`}</code></div>
-                        <div><code className="text-brand-600">{`{{BYRÅNAMN}}`}</code></div>
-                        <div><code className="text-brand-600">{`{{BYRÅ_ORGNR}}`}</code></div>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-3">
-                        Om en placeholder inte fylls i dynamiskt ersätts den automatiskt med whitespace.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Spara-knapp */}
-                <div className="mt-6 flex justify-end">
-                  <button className="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-medium flex items-center gap-2">
+                {/* Upload ny mall */}
+                <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
-                    Spara avtalsmall
-                  </button>
+                    Ladda upp ny LaTeX-mall (.tex)
+                  </h3>
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      Välj .tex-fil <span className="text-red-600">*</span>
+                    </label>
+                    <input
+                      type="file"
+                      accept=".tex"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          const file = e.target.files[0];
+                          // Mock upload - i production: POST /api/settings/contract-template/upload
+                          setLatexTemplate({
+                            ...latexTemplate,
+                            isUploading: true
+                          });
+                          
+                          // Simulate upload delay
+                          setTimeout(() => {
+                            setLatexTemplate({
+                              templateId: 'firma-uuid-123',
+                              filename: file.name,
+                              uploadedAt: new Date().toISOString(),
+                              previewPdfUrl: '/uppdragsavtal_exempel.pdf', // Mock preview
+                              placeholders: latexTemplate.placeholders,
+                              isUploading: false,
+                              uploadError: null
+                            });
+                            alert('✅ LaTeX-mall uppladdad och kompilerad!\n\n(Mock - backend krävs för faktisk kompilering)');
+                          }, 1500);
+                        }
+                      }}
+                      disabled={latexTemplate.isUploading}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 disabled:bg-gray-100"
+                    />
+                    {latexTemplate.isUploading && (
+                      <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center gap-2">
+                        <svg className="w-5 h-5 text-yellow-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span className="text-sm text-yellow-800">Laddar upp och kompilerar...</span>
+                      </div>
+                    )}
+                    {latexTemplate.uploadError && (
+                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+                        <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-sm text-red-800">{latexTemplate.uploadError}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-4">
+                    <p className="text-sm text-yellow-900">
+                      <strong>⚠️ Viktigt:</strong> Vid upload ersätts den nuvarande mallen. Original förblir orörd 
+                      och används för alla nya onboarding-sessioner.
+                    </p>
+                  </div>
+
+                  {/* Placeholders info */}
+                  <div className="bg-white border border-gray-300 rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                      <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Tillgängliga placeholders
+                    </h4>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Använd i din LaTeX-mall (dubbla klammerparenteser):
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-gray-50 p-3 rounded max-h-40 overflow-y-auto">
+                      {latexTemplate.placeholders.map((ph, idx) => (
+                        <div key={idx}>
+                          <code className="text-brand-600">{ph}</code>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-3">
+                      Om en placeholder inte fylls i ersätts den automatiskt med whitespace vid generering.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}

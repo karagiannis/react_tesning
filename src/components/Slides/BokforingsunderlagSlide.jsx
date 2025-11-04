@@ -343,7 +343,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
                   }`}
                 >
                   <div className="flex flex-col items-center gap-2">
-                    <CloudIcon className="w-8 h-8 text-blue-600" />
+                    <CloudIcon className="w-8 h-8 text-brand-600" />
                     <span className="font-medium text-gray-900">Dropbox</span>
                   </div>
                 </button>
@@ -358,7 +358,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
                   }`}
                 >
                   <div className="flex flex-col items-center gap-2">
-                    <CloudIcon className="w-8 h-8 text-blue-500" />
+                    <CloudIcon className="w-8 h-8 text-brand-500" />
                     <span className="font-medium text-gray-900">OneDrive</span>
                   </div>
                 </button>

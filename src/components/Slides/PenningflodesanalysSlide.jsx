@@ -14,11 +14,11 @@ export default function PenningflodesanalysSlide({ onNext, onBack }) {
       <div className="flex-1 px-8 py-6 overflow-y-auto">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Intro text */}
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-            <h3 className="text-lg font-semibold text-blue-900 mb-2">
+          <div className="bg-brand-50 border-l-4 border-brand-500 p-4 rounded">
+            <h3 className="text-lg font-semibold text-brand-900 mb-2">
               Forensisk Bokföringsanalys
             </h3>
-            <p className="text-sm text-blue-800">
+            <p className="text-sm text-brand-800">
               Baserat på IBAN-numret och SIE-filerna har vi analyserat penningflöden och mottagare.
               Kartan visar geografisk fördelning av leverantörer, kunder och potentiella varningsflaggningar.
             </p>

@@ -107,14 +107,14 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
         </div>
 
         {/* Info Banner */}
-        <div className="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
+        <div className="mb-6 p-4 bg-brand-50 border-l-4 border-brand-500 rounded-r-lg">
           <div className="flex items-start gap-3">
-            <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-6 h-6 text-brand-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
             <div>
-              <p className="text-blue-900 font-semibold">Viktigt att veta</p>
-              <p className="text-blue-800 text-sm mt-1">
+              <p className="text-brand-900 font-semibold">Viktigt att veta</p>
+              <p className="text-brand-800 text-sm mt-1">
                 Dessa skyldigheter regleras i uppdragsavtalet och enligt lag. De säkerställer ett smidigt samarbete och efterlevnad av redovisningskrav.
               </p>
             </div>
@@ -380,10 +380,10 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
 
             <div className="p-6">
               {/* Info about config.json */}
-              <div className="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg">
-                <p className="text-blue-900 font-semibold mb-2">💡 Funktionalitet under utveckling</p>
-                <p className="text-sm text-blue-800">
-                  Denna funktion låter redovisningsbyrån lägga till egna branschspecifika kontrollfrågor via <code className="bg-blue-100 px-1 rounded">config.json</code>.
+              <div className="mb-6 p-4 bg-brand-50 border-l-4 border-brand-500 rounded-r-lg">
+                <p className="text-brand-900 font-semibold mb-2">💡 Funktionalitet under utveckling</p>
+                <p className="text-sm text-brand-800">
+                  Denna funktion låter redovisningsbyrån lägga till egna branschspecifika kontrollfrågor via <code className="bg-brand-100 px-1 rounded">config.json</code>.
                   Kunden måste bekräfta alla frågor innan onboarding kan slutföras.
                 </p>
               </div>

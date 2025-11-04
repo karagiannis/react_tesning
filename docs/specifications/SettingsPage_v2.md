@@ -1,8 +1,139 @@
 # Settings Page - Iteration 2 Update
 
-**Datum:** 2025-10-31  
-**Status:** 🔄 Uppdaterad med nya krav från Volt Pro-inspektion  
-**Baserat på:** LaTeX spec (rad 3850-3950) + Volt Pro Dashboard
+**Datum:** 2025-11-03  
+**Status:** 🔄 Uppdaterad med Agreement Context + Modal implementation  
+**Baserat på:** LaTeX spec (rad 3850-3950) + Volt Pro Dashboard + Agreement workflow
+
+---
+
+## 🆕 NYTT: Agreement Context + Modal (2025-11-03)
+
+### Översikt
+Implementation av avtalssystem med delad state mellan Settings och onboarding-flöde. 
+Modal blockerar fortsättning av onboarding tills avtal (företag ELLER engång) är tecknat.
+
+### Teknisk arkitektur
+
+**AgreementContext.jsx** (`/src/contexts/AgreementContext.jsx`)
+- Global state för avtal
+- Delas mellan SettingsPageV2 och RiskFragorSlide
+- Två typer av avtal:
+  1. **platformAgreement**: Företagsavtal (tecknas i Settings)
+  2. **oneTimeAgreement**: Engångsavtal (tecknas i RiskSlide popup)
+
+**AgreementModal.jsx** (`/src/components/Modals/AgreementModal.jsx`)
+- Blockerar onboarding när kritisk data finns
+- Tre val: Gå till Settings, Teckna engångsavtal, Avbryt
+- `backdrop="static"` - kan inte stängas utan val
+
+**Trigger i RiskFragorSlide:**
+```javascript
+useEffect(() => {
+  const hasCompanyName = formData.foretagsnamn.trim() !== '';
+  const hasOrgNr = formData.organisationsnummer.trim() !== '';
+  const hasPersonNr = formData.personnummer.trim() !== '';
+  const hasBusinessDescription = formData.affarsIde.trim() !== '';
+  
+  const allCriticalDataFilled = 
+    hasCompanyName && hasOrgNr && hasPersonNr && hasBusinessDescription;
+  
+  if (allCriticalDataFilled && !hasAnyAgreement()) {
+    setShowAgreementModal(true); // Blockera!
+  }
+}, [formData, hasAnyAgreement]);
+```
+
+### Flöde
+
+#### Scenario 1: Användare tecknar företagsavtal
+```
+RiskSlide → Modal visas → Klicka "Gå till Inställningar"
+    ↓
+Modal stängs temporärt
+    ↓
+Navigate to /settings?section=firm-sign-agreement
+    ↓
+User signerar företagsavtal (BankID mock 5s)
+    ↓
+Context uppdateras: platformAgreement.isSigned = true
+    ↓
+User navigerar tillbaka till /risk
+    ↓
+useEffect triggas → hasAnyAgreement() returnerar TRUE
+    ↓
+Modal visas INTE → Onboarding fortsätter normalt
+```
+
+#### Scenario 2: Användare tecknar engångsavtal
+```
+RiskSlide → Modal visas → Klicka "Teckna engångsavtal"
+    ↓
+BankID mock (3s) i modal
+    ↓
+Context uppdateras: oneTimeAgreement.isSigned = true
+    ↓
+Modal stängs automatiskt
+    ↓
+Onboarding fortsätter → StaticKYCSlide → Betalnings-popup (Stripe)
+```
+
+#### Scenario 3: Användare avbryter
+```
+RiskSlide → Modal visas → Klicka "Avbryt onboarding"
+    ↓
+Navigate to /
+    ↓
+Onboarding resettas
+```
+
+### State struktur
+
+**AgreementContext:**
+```javascript
+{
+  platformAgreement: {
+    isSigned: false,
+    agreementNumber: 'PLAT-2025-XXXXX',
+    signedAt: ISO-8601,
+    signerName: 'Lasse Karagiannis',
+    signerPersonnr: '19XXXXXX-XXXX',
+    monthlyFee: 1995,
+    status: 'Ej signerat' | 'Under verifiering' | 'Godkänt',
+    isSigningInProgress: boolean
+  },
+  oneTimeAgreement: {
+    isSigned: false,
+    agreementNumber: 'ONETIME-2025-XXXXX',
+    signedAt: ISO-8601,
+    signerName: 'Testanvändare',
+    signerPersonnr: '19XXXXXX-XXXX',
+    totalCost: 0, // Räknas efter API-anrop
+    isSigningInProgress: boolean
+  },
+  hasAnyAgreement: () => platformAgreement.isSigned || oneTimeAgreement.isSigned
+}
+```
+
+### Filer skapade/modifierade
+
+**Nya filer:**
+- `/src/contexts/AgreementContext.jsx` (Context provider)
+- `/src/components/Modals/AgreementModal.jsx` (Popup med 3 val)
+
+**Modifierade filer:**
+- `/src/App.jsx` - Wrappad med `<AgreementProvider>`
+- `/src/components/Pages/SettingsPageV2.jsx` - Använder `useAgreements()` istället för lokal state
+- `/src/components/Slides/RiskFragorSlide.jsx` - Trigger för modal, visar `<AgreementModal>`
+
+### Edge cases hanterade
+
+| **Scenario** | **Beteende** |
+|-------------|--------------|
+| User går till Settings men signerar inte | Modal visas igen när user kommer tillbaka till RiskSlide |
+| User signerar i Settings medan modal är öppen | Modal försvinner automatiskt (useEffect dependency) |
+| User har redan företagsavtal | Modal visas aldrig |
+| User har redan engångsavtal | Modal visas aldrig |
+| User fyller i data partiellt | Modal visas INTE (alla 4 fält krävs) |
 
 ---
 
@@ -43,6 +174,7 @@
 │  🏢 Byråinställningar   │                                   │
 │    ├─ Kontaktuppgifter  │                                   │
 │    ├─ Prislista         │   (NY)                            │
+│    ├─ Teckna avtal med oss │ (NY - Plattformsavtal)        │
 │    ├─ Avtalsmall        │   (NY - LaTeX upload)             │
 │    └─ Egna frågor       │   (NY - config.json)              │
 │                         │                                   │
@@ -281,7 +413,150 @@ return (
 
 **Syfte:** Dessa uppgifter auto-fylls i avtal, rapporter, och kommunikation med klienter. Läsläge förhindrar oavsiktliga ändringar.
 
-### 3.2 Prislista (NY FUNKTION)
+### 3.2 Teckna avtal med oss (NY FUNKTION)
+
+**Datum:** 2025-11-03  
+**Syfte:** Byråchef tecknar plattformsavtal för att använda tjänsten med faktura i efterskott. Utan signerat avtal måste enskilda användare betala direkt för API-anrop via Stripe.
+
+**Betalningsmodeller:**
+
+| **Avtalsstatus** | **Betalningsvillkor** | **Vem betalar** | **Metod** |
+|------------------|----------------------|-----------------|-----------|
+| **Inget avtal** | Direktbetalning | Enskild användare | Stripe (per onboarding) |
+| **Signerat avtal** | 30 dagars kredit | Företaget (byrån) | Faktura i efterskott |
+| **Engångs-testavtal** | Direktbetalning (självkostnad) | Enskild användare | Stripe (endast en gång) |
+
+---
+
+#### UI - Status: Ej signerat avtal
+
+```
+┌────────────────────────────────────────────────────────┐
+│  Teckna avtal med oss                                   │
+│                                                         │
+│  ⚠️ Avtalet är inte signerat ännu                       │
+│                                                         │
+│  För att använda plattformen med faktura i efterskott   │
+│  måste ni teckna ett företagsavtal. Tills avtalet är    │
+│  signerat och godkänt måste enskilda användare betala   │
+│  direkt för API-anrop via Stripe.                       │
+│                                                         │
+│  Månadskostnad: 1995 SEK (exkl. moms)                   │
+│  Inkluderar: Obegränsade onboardings, lagring,          │
+│              API-åtkomst                                │
+│  Betalningsvillkor: 30 dagars kredit, faktura i         │
+│                     efterskott                          │
+│                                                         │
+│  ─────────────────────────────────────────────────────  │
+│  Vill endast testa?                                     │
+│                                                         │
+│  Företagsanvändare kan teckna engångs-testavtal vid     │
+│  första onboarding. Kostar endast självkostnadspris     │
+│  för API-anrop + avtalsteckning.                        │
+│  ⚠️ OBS: Erbjuds endast en gång.                        │
+│  ─────────────────────────────────────────────────────  │
+│                                                         │
+│  [📄 PDF Viewer - plattformsavtal_redovisningsbyra.pdf] │
+│                                                         │
+│  [📥 Ladda ner PDF]                                     │
+│                                                         │
+│  [✍️ Signera med BankID]                                │
+│                                                         │
+│  ⚠️ Betalningsvillkor utan godkänt företagsavtal        │
+│  Tills företagsavtalet är godkänt måste enskilda        │
+│  användare betala direkt för API-anrop via Stripe       │
+│  (Skatteverket, Bolagsverket, etc.) vid varje           │
+│  onboarding.                                            │
+│                                                         │
+│  Med godkänt avtal: 30 dagars betalningsvillkor,        │
+│  faktura i efterskott för alla API-kostnader.           │
+└────────────────────────────────────────────────────────┘
+```
+
+**Mock BankID-signering:**
+- Visar QR-kod (fejk) i 5 sekunder
+- Status uppdateras till "Under verifiering"
+- Efter "godkännande" (manuell uppdatering): Status = "Signerat"
+
+---
+
+#### UI - Status: Signerat avtal
+
+```
+┌────────────────────────────────────────────────────────┐
+│  Teckna avtal med oss                                   │
+│                                                         │
+│  ✅ Avtalet är signerat!                                │
+│                                                         │
+│  Avtalsnummer: PLAT-2025-A3F2B1                         │
+│  Signerad av: Lasse Karagiannis                         │
+│  Personnummer: 19XXXXXX-XXXX                            │
+│  Signeringsdatum: 2025-11-03 14:32:00                   │
+│  Månadskostnad: 1995 SEK (exkl. moms)                   │
+│  Status: Under verifiering / Godkänt                    │
+│                                                         │
+│  [📥 Ladda ner signerat avtal]                          │
+│                                                         │
+│  ─────────────────────────────────────────────────────  │
+│  ℹ️ Tack för er signering!                              │
+│  Vi verifierar nu er byrå. Ni kommer att få ett         │
+│  e-postmeddelande när verifieringen är klar (normalt    │
+│  1-2 arbetsdagar). Under tiden kan ni redan börja       │
+│  sätta upp era inställningar och testa funktioner.      │
+└────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### Integration med onboarding (popup)
+
+**Trigger:** Företagsanvändare når RiskSlide och har fyllt i:
+- Företagsnamn (→ org.nr via autocomplete)
+- Verksamhetsbeskrivning
+- Personnummer (firmatecknare)
+
+**Popup visas:**
+```
+┌────────────────────────────────────────────────────────┐
+│  Betalning krävs för att fortsätta                      │
+│                                                         │
+│  Företagsanvändare betalar i efterskott efter signerat  │
+│  avtal.                                                 │
+│                                                         │
+│  Med godkänt avtal: 30 dagars betalningsvillkor,        │
+│  faktura i efterskott.                                  │
+│                                                         │
+│  Tills avtalet är godkänt måste enskild användare       │
+│  betala direkt för API-anrop via Stripe.                │
+│                                                         │
+│  ─────────────────────────────────────────────────────  │
+│  Välj alternativ:                                       │
+│                                                         │
+│  [ ] Teckna företagsavtal i "Inställningar → Teckna     │
+│      avtal med oss"                                     │
+│                                                         │
+│  [ ] Om du endast vill testa, teckna engångsavtal       │
+│      med oss till en kostnad av API-anrop +             │
+│      avtalsteckning till ett självkostnadspris.         │
+│      ⚠️ OBS: Erbjuds endast en gång.                    │
+│                                                         │
+│  [Gå till Inställningar]  [Teckna engångsavtal]         │
+│  [Avbryt onboarding]                                    │
+└────────────────────────────────────────────────────────┘
+```
+
+**Om "Teckna engångsavtal":**
+- Visar BankID-signering (mock)
+- Efter signering: Fortsätt till StaticKYCSlide
+- Efter StaticKYCSlide: Visa betalnings-popup (Stripe)
+
+**Om "Gå till Inställningar":**
+- Navigera till `/settings` → Byråinställningar → Teckna avtal med oss
+- Onboarding pausas, fortsätts senare
+
+---
+
+### 3.3 Prislista (NY FUNKTION)
 
 **Syfte:** Fast prislista som kan overridas av byråchefen i appens prisförslag-input
 
@@ -335,7 +610,7 @@ PUT /api/settings/pricing
 - Byråchefen kan också manuellt overrida i input-fält när prisförslag visas
 - Popup med kostnadsuppskattning för layering-analys baserat på transaktionslista
 
-### 3.3 Avtalsmall (LaTeX-baserat arbetsflöde)
+### 3.4 Avtalsmall (LaTeX-baserat arbetsflöde)
 
 **Status:** 📝 DOKUMENTERAD (2025-11-03) - Implementation nästa steg
 
@@ -872,7 +1147,7 @@ Om vi modifierar LaTeX-filen direkt vid varje onboarding → placeholders ersät
 
 ---
 
-### 3.4 Egna frågor (config.json - framtida)
+### 3.5 Egna frågor (config.json - framtida)
 
 **Status:** ⏳ PLANERAD - EJ IMPLEMENTERAD
 1. Byråchefen väljer: **Standardmall** (vår färdiga) ELLER **Egen mall** (ladda upp PDF/DOCX)
@@ -1287,7 +1562,7 @@ POST /api/contracts/generate
 - Felhantering om .tex-fil inte kan kompileras
 - Förhandsvisning av genererad PDF innan användning
 
-### 3.4 Egna frågor (NY FUNKTION - config.json)
+### 3.5 Egna frågor (NY FUNKTION - config.json)
 
 **Syfte:** Ladda upp egna KYC-frågor genom config.json
 

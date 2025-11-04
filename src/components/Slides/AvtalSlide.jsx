@@ -1,10 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
   const [hasReadContract, setHasReadContract] = useState(false);
   const [isSigningInProgress, setIsSigningInProgress] = useState(false);
   const [isSigned, setIsSigned] = useState(false);
   const [signatureData, setSignatureData] = useState(null);
+  
+  // LaTeX template state
+  const [contractTemplate, setContractTemplate] = useState(null);
+  const [isLoadingTemplate, setIsLoadingTemplate] = useState(true);
+  const [finalContractUrl, setFinalContractUrl] = useState(null);
+  const [isGeneratingContract, setIsGeneratingContract] = useState(false);
+
+  // Fetch LaTeX template from Settings on mount
+  useEffect(() => {
+    const fetchContractTemplate = async () => {
+      setIsLoadingTemplate(true);
+      
+      // Mock API call - In production: GET /api/settings/contract-template
+      setTimeout(() => {
+        const mockTemplate = {
+          templateId: 'default',
+          filename: 'uppdragsavtal_template.tex',
+          uploadedAt: null,
+          previewPdfUrl: '/uppdragsavtal_exempel.pdf',
+          placeholders: [
+            '{{FÖRETAGSNAMN}}', '{{ORGNUMMER}}', '{{KONTAKTPERSON}}',
+            '{{EMAIL}}', '{{TELEFON}}', '{{ADRESS}}',
+            '{{MÅNADSPRIS}}', '{{STARTDATUM}}', '{{BYRÅNAMN}}', '{{BYRÅ_ORGNR}}'
+          ]
+        };
+        
+        setContractTemplate(mockTemplate);
+        setIsLoadingTemplate(false);
+      }, 800);
+    };
+    
+    fetchContractTemplate();
+  }, []);
 
   // Mock customer data
   const mockCustomerData = {
@@ -19,7 +52,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
     
     // Simulate BankID process
     // In production, this would call a backend API that initiates BankID signing
-    setTimeout(() => {
+    setTimeout(async () => {
       // Mock successful signing
       const mockSignature = {
         personalNumber: 'XXXXXX-XXXX',
@@ -31,7 +64,53 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
       setSignatureData(mockSignature);
       setIsSigned(true);
       setIsSigningInProgress(false);
+      
+      // Trigger final PDF generation after successful signing
+      await generateFinalContract(mockSignature);
     }, 3000); // 3 second delay to simulate BankID app interaction
+  };
+
+  // Generate final contract with customer data
+  const generateFinalContract = async (signature) => {
+    setIsGeneratingContract(true);
+    
+    // Mock API call - In production: POST /api/contracts/generate
+    // Backend will:
+    // 1. Fetch original .tex from /storage/firms/{firmId}/contract_template.tex
+    // 2. Create temp copy in /tmp/session-{sessionId}-{timestamp}.tex
+    // 3. Replace placeholders: {{FÖRETAGSNAMN}} → mockCustomerData.companyName
+    // 4. Compile with pdflatex
+    // 5. Save to /storage/sessions/{sessionId}/contract_final.pdf
+    // 6. Delete temp .tex
+    // 7. Return final PDF URL
+    
+    const requestPayload = {
+      sessionId: 'session-' + Date.now(),
+      templateId: contractTemplate?.templateId,
+      customerData: {
+        företagsnamn: mockCustomerData.companyName,
+        orgnummer: mockCustomerData.orgNumber,
+        kontaktperson: mockCustomerData.signatoryName,
+        email: customerData.email || 'anna@företag.se',
+        telefon: customerData.phone || '070-123 45 67',
+        adress: customerData.address || 'Storgatan 1, 123 45 Stockholm',
+        månadspris: mockCustomerData.monthlyPrice + ' SEK',
+        startdatum: new Date().toLocaleDateString('sv-SE'),
+        byrånamn: 'Redovisningsbyrån AB',
+        byrå_orgnr: '556000-0000'
+      },
+      signature: signature
+    };
+    
+    console.log('📄 Generating final contract with data:', requestPayload);
+    
+    setTimeout(() => {
+      // Mock: Return unique final PDF URL
+      const finalPdfUrl = `/contracts/session-${requestPayload.sessionId}-final.pdf`;
+      setFinalContractUrl(finalPdfUrl);
+      setIsGeneratingContract(false);
+      console.log('✅ Final contract generated:', finalPdfUrl);
+    }, 2000);
   };
 
   return (
@@ -71,10 +150,22 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
               <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
               </svg>
-              <span className="text-sm font-semibold text-gray-700">uppdragsavtal_exempel.pdf</span>
+              <span className="text-sm font-semibold text-gray-700">
+                {isLoadingTemplate 
+                  ? 'Laddar avtal...' 
+                  : finalContractUrl 
+                    ? `uppdragsavtal_signerat_${mockCustomerData.companyName.replace(/\s+/g, '_')}.pdf`
+                    : contractTemplate?.filename.replace('.tex', '.pdf') || 'uppdragsavtal_exempel.pdf'
+                }
+              </span>
+              {isSigned && finalContractUrl && (
+                <span className="ml-2 px-2 py-0.5 bg-green-200 text-green-800 text-xs font-semibold rounded">
+                  SIGNERAD
+                </span>
+              )}
             </div>
             <a 
-              href="/uppdragsavtal_exempel.pdf" 
+              href={finalContractUrl || contractTemplate?.previewPdfUrl || '/uppdragsavtal_exempel.pdf'} 
               download
               className="text-sm text-brand-600 hover:text-brand-700 flex items-center gap-1"
             >
@@ -87,14 +178,38 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
           
           {/* Embedded PDF */}
           <div 
-            className="bg-white"
+            className="bg-white relative"
             style={{ height: '500px', overflowY: 'auto' }}
           >
-            <iframe
-              src="/uppdragsavtal_exempel.pdf"
-              className="w-full h-full"
-              title="Uppdragsavtal"
-            />
+            {isLoadingTemplate ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <svg className="w-12 h-12 text-brand-600 animate-spin mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <p className="text-gray-600 font-medium">Hämtar avtalsmall från Settings...</p>
+                </div>
+              </div>
+            ) : isGeneratingContract ? (
+              <div className="flex items-center justify-center h-full bg-yellow-50">
+                <div className="text-center p-6">
+                  <svg className="w-16 h-16 text-yellow-600 animate-pulse mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <p className="text-gray-900 font-bold text-lg mb-2">Genererar slutligt avtal...</p>
+                  <p className="text-gray-600 text-sm">
+                    Skapar temp-kopia av LaTeX → Ersätter placeholders → Kompilerar PDF
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <iframe
+                src={finalContractUrl || contractTemplate?.previewPdfUrl || '/uppdragsavtal_exempel.pdf'}
+                className="w-full h-full"
+                title="Uppdragsavtal"
+                key={finalContractUrl || contractTemplate?.previewPdfUrl} // Force reload when URL changes
+              />
+            )}
           </div>
           
           {/* Read confirmation - replaced scroll indicator */}
@@ -138,7 +253,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
                 </p>
                 
                 <div className="flex items-center gap-3 mb-4 p-3 bg-white rounded border border-gray-300">
-                  <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-6 h-6 text-brand-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clipRule="evenodd" />
                   </svg>
                   <div className="flex-1">
@@ -154,7 +269,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
               disabled={!hasReadContract || isSigningInProgress}
               className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-lg transition-all font-semibold text-lg ${
                 hasReadContract && !isSigningInProgress
-                  ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg'
+                  ? 'bg-brand-600 text-white hover:bg-brand-700 shadow-lg'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
@@ -202,11 +317,25 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
         )}
 
         {/* Info Box */}
-        {isSigned && (
-          <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-300">
-            <p className="text-sm text-blue-900">
+        {isSigned && finalContractUrl && (
+          <div className="mb-6 p-4 bg-brand-50 rounded-lg border border-brand-300">
+            <p className="text-sm text-brand-900">
               📧 En kopia av det signerade avtalet har skickats till er registrerade e-postadress. 
               Nästa steg är att koppla ihop ert Fortnox-konto med vår byrå.
+            </p>
+          </div>
+        )}
+        
+        {!isSigned && contractTemplate && (
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-300">
+            <p className="text-sm text-gray-700 flex items-center gap-2">
+              <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>
+                <strong>Förhandsgranskning:</strong> Detta är en preview av avtalsmallen med placeholders. 
+                Efter signering genereras slutligt avtal med era uppgifter.
+              </span>
             </p>
           </div>
         )}

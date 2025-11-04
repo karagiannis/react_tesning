@@ -3,8 +3,13 @@ import { Info } from 'lucide-react';
 import { searchCompanies, getCompanyByOrgNr } from '../../data/mockCompanyAutocomplete';
 import StepIndicator from '../Shared/StepIndicator';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { useAgreements } from '../../contexts/AgreementContext';
+import AgreementModal from '../Modals/AgreementModal';
 
 export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange }) {
+  const { hasAnyAgreement } = useAgreements();
+  const [showAgreementModal, setShowAgreementModal] = useState(false);
+  
   const [formData, setFormData] = useLocalStorage('onboarding-wizard-steg1', {
     affarsIde: '',
     kundTyper: {
@@ -38,6 +43,23 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Kolla om agreement krävs när kritisk data finns
+  useEffect(() => {
+    const hasCompanyName = formData.foretagsnamn && formData.foretagsnamn.trim() !== '';
+    const hasOrgNr = formData.organisationsnummer && formData.organisationsnummer.trim() !== '';
+    const hasPersonNr = formData.personnummer && formData.personnummer.trim() !== '';
+    const hasBusinessDescription = formData.affarsIde && formData.affarsIde.trim() !== '';
+    
+    // Alla 3 kritiska fält är ifyllda
+    const allCriticalDataFilled = hasCompanyName && hasOrgNr && hasPersonNr && hasBusinessDescription;
+    
+    if (allCriticalDataFilled && !hasAnyAgreement()) {
+      setShowAgreementModal(true);
+    } else {
+      setShowAgreementModal(false);
+    }
+  }, [formData.foretagsnamn, formData.organisationsnummer, formData.personnummer, formData.affarsIde, hasAnyAgreement]);
 
   const handleChange = (field, value) => {
     const newFormData = { ...formData, [field]: value };
@@ -335,6 +357,12 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
           Nästa
         </button>
       </div>
+      
+      {/* Agreement Modal */}
+      <AgreementModal 
+        show={showAgreementModal} 
+        onClose={() => setShowAgreementModal(false)} 
+      />
     </div>
   );
 }
