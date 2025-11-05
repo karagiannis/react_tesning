@@ -116,7 +116,7 @@ export default function UppdragsvalsSlide({ onNext }) {
       </div>
 
       {/* Section 1: Service Selection (FIRST - Customer-centric!) */}
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-box shadow-md border border-gray-200 p-6 mb-6">
         <div className="flex items-center gap-3 mb-5">
           <span className="flex items-center justify-center w-8 h-8 bg-brand-600 text-white rounded-full font-bold text-sm">
             1
@@ -144,7 +144,7 @@ export default function UppdragsvalsSlide({ onNext }) {
           ].map((service) => (
             <label
               key={service.key}
-              className="flex items-start gap-3 p-4 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+              className="flex items-start gap-3 p-4 border border-gray-300 rounded-box hover:bg-gray-50 cursor-pointer transition-colors"
             >
               <input
                 type="checkbox"
@@ -170,13 +170,13 @@ export default function UppdragsvalsSlide({ onNext }) {
             onChange={(e) => handleServiceChange('annat', e.target.value)}
             placeholder="T.ex. Succession till nästa generation, företagsanalys, etc."
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
           />
         </div>
       </div>
 
       {/* Section 2: Why we need to ask tough questions */}
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-box shadow-md border border-gray-200 p-6 mb-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
@@ -237,7 +237,7 @@ export default function UppdragsvalsSlide({ onNext }) {
       </div>
 
       {/* Section 3: Sanctions */}
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
+      <div className="bg-white rounded-box shadow-md border border-gray-200 p-6 mb-8">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
@@ -330,7 +330,7 @@ export default function UppdragsvalsSlide({ onNext }) {
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="px-8 py-3 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-400 text-white font-semibold rounded-lg shadow-md transition-colors"
+          className="px-8 py-3 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-400 text-white font-semibold rounded-box shadow-md transition-colors"
         >
           {loading ? 'Sparar...' : 'Fortsätt →'}
         </button>

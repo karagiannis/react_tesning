@@ -143,10 +143,10 @@ export default function FortnoxPackageSlide({ onNext, onBack }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
-      <div className="max-w-7xl w-full bg-white rounded-2xl shadow-2xl p-10">
+      <div className="max-w-7xl w-full bg-white rounded-card shadow-2xl p-10">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-brand-900 mb-2 flex items-center gap-3">
+          <h1 className="text-page-title text-brand-900 mb-2 flex items-center gap-3">
             <svg className="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -155,7 +155,7 @@ export default function FortnoxPackageSlide({ onNext, onBack }) {
           <p className="text-brand-700 text-lg">
             Vi använder Fortnox som bokföringsprogram. Du behöver ett eget abonnemang.
           </p>
-          <div className="mt-3 p-4 bg-brand-50 rounded-lg border-l-4 border-brand-600">
+          <div className="mt-3 p-4 bg-brand-50 rounded-box border-l-4 border-brand-600">
             <p className="text-sm text-brand-800 italic">
               💬 <strong>Din redovisningskonsult:</strong> "Vi rekommenderar våra klienter att köpa <strong>Mini</strong> eller <strong>Mellan</strong>. 
               Om du gör beställningen med en gång kan jag koppla upp dig direkt till vårt företagskonto."
@@ -167,7 +167,7 @@ export default function FortnoxPackageSlide({ onNext, onBack }) {
         <div className="flex gap-4 mb-6">
           <button
             onClick={() => setSelectedCategory('single')}
-            className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
+            className={`flex-1 py-3 px-6 rounded-box font-semibold transition-all ${
               selectedCategory === 'single'
                 ? 'bg-brand-600 text-white shadow-lg'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -177,7 +177,7 @@ export default function FortnoxPackageSlide({ onNext, onBack }) {
           </button>
           <button
             onClick={() => setSelectedCategory('employees')}
-            className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
+            className={`flex-1 py-3 px-6 rounded-box font-semibold transition-all ${
               selectedCategory === 'employees'
                 ? 'bg-brand-600 text-white shadow-lg'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -192,7 +192,7 @@ export default function FortnoxPackageSlide({ onNext, onBack }) {
           {packages.map((pkg) => (
             <div
               key={pkg.name}
-              className={`relative border-2 rounded-xl p-5 transition-all hover:shadow-xl ${
+              className={`relative border-2 rounded-card p-5 transition-all hover:shadow-xl ${
                 pkg.recommended
                   ? 'border-brand-600 bg-brand-50'
                   : 'border-gray-200 bg-white'
@@ -206,7 +206,7 @@ export default function FortnoxPackageSlide({ onNext, onBack }) {
               )}
 
               {/* Package Name */}
-              <h3 className="text-2xl font-bold text-brand-900 mb-2">{pkg.name}</h3>
+              <h3 className="text-page-title text-brand-900 mb-2">{pkg.name}</h3>
               
               {/* For Who */}
               {pkg.forWho && (
@@ -244,7 +244,7 @@ export default function FortnoxPackageSlide({ onNext, onBack }) {
                 href="https://www.fortnox.se/paket"
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`block w-full py-2 px-4 rounded-lg text-center font-semibold transition-all ${
+                className={`block w-full py-2 px-4 rounded-box text-center font-semibold transition-all ${
                   pkg.recommended
                     ? 'bg-brand-600 text-white hover:bg-brand-700'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -257,7 +257,7 @@ export default function FortnoxPackageSlide({ onNext, onBack }) {
         </div>
 
         {/* Startup Offer */}
-        <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
+        <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-box">
           <div className="flex items-start gap-3">
             <svg className="w-6 h-6 text-yellow-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -285,15 +285,15 @@ export default function FortnoxPackageSlide({ onNext, onBack }) {
 
         {/* Additional Info */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="p-4 bg-brand-50 rounded-lg">
+          <div className="p-4 bg-brand-50 rounded-box">
             <h4 className="font-semibold text-brand-900 mb-2">✓ 30 dagar öppet köp</h4>
             <p className="text-sm text-brand-700">Testa utan risk</p>
           </div>
-          <div className="p-4 bg-brand-50 rounded-lg">
+          <div className="p-4 bg-brand-50 rounded-box">
             <h4 className="font-semibold text-brand-900 mb-2">✓ Fri support</h4>
             <p className="text-sm text-brand-700">Via telefon och chatt</p>
           </div>
-          <div className="p-4 bg-brand-50 rounded-lg">
+          <div className="p-4 bg-brand-50 rounded-box">
             <h4 className="font-semibold text-brand-900 mb-2">✓ Trygg i molnet</h4>
             <p className="text-sm text-brand-700">Alltid uppdaterad</p>
           </div>
@@ -303,7 +303,7 @@ export default function FortnoxPackageSlide({ onNext, onBack }) {
         <div className="flex justify-between items-center pt-6 border-t border-gray-200">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all font-semibold"
+            className="flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 rounded-box hover:bg-gray-300 transition-all font-semibold"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -313,7 +313,7 @@ export default function FortnoxPackageSlide({ onNext, onBack }) {
 
           <button
             onClick={onNext}
-            className="flex items-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-all font-semibold shadow-lg"
+            className="flex items-center gap-2 px-6 py-3 bg-brand-600 text-white rounded-box hover:bg-brand-700 transition-all font-semibold shadow-lg"
           >
             Nästa: Bankkoppling
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

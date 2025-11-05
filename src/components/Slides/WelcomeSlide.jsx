@@ -86,19 +86,19 @@ export default function WelcomeSlide({ onBack }) {
         </div>
 
         {/* Completed Steps Summary */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-8 border border-brand-100">
+        <div className="bg-white rounded-card shadow-lg p-8 mb-8 border border-brand-100">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-green-100 rounded-box flex items-center justify-center">
+              <svg className="w-icon-md h-icon-md text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-brand-900">Genomförda steg</h2>
+            <h2 className="text-page-title text-brand-900">Genomförda steg</h2>
           </div>
           
           <div className="grid md:grid-cols-2 gap-4">
             {completedSteps.map((step, index) => (
-              <div key={index} className="flex items-center gap-3 p-4 bg-brand-50 rounded-lg">
+              <div key={index} className="flex items-center gap-3 p-4 bg-brand-50 rounded-box">
                 <span className="text-green-600 font-bold text-xl">{step.icon}</span>
                 <span className="text-brand-900 font-medium">{step.label}</span>
               </div>
@@ -107,14 +107,14 @@ export default function WelcomeSlide({ onBack }) {
         </div>
 
         {/* Next Steps */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-8 border border-brand-100">
+        <div className="bg-white rounded-card shadow-lg p-8 mb-8 border border-brand-100">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-brand-100 rounded-lg flex items-center justify-center">
-              <svg className="w-7 h-7 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-brand-100 rounded-box flex items-center justify-center">
+              <svg className="w-icon-md h-icon-md text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 9l3 3m0 0l-3 3m3-3H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-brand-900">Nästa steg</h2>
+            <h2 className="text-page-title text-brand-900">Nästa steg</h2>
           </div>
 
           <div className="space-y-6">
@@ -139,19 +139,19 @@ export default function WelcomeSlide({ onBack }) {
         </div>
 
         {/* Contact Information */}
-        <div className="bg-gradient-to-br from-brand-600 to-brand-700 rounded-xl shadow-xl p-8 mb-8 text-white">
+        <div className="bg-gradient-to-br from-brand-600 to-brand-700 rounded-card shadow-xl p-8 mb-8 text-white">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-white/20 rounded-box flex items-center justify-center">
+              <svg className="w-icon-md h-icon-md text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold">Kontaktinformation</h2>
+            <h2 className="text-page-title">Kontaktinformation</h2>
           </div>
 
           <div className="space-y-6">
             {/* Assigned Consultant */}
-            <div className="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
+            <div className="bg-white/10 rounded-box p-6 backdrop-blur-sm">
               <div className="flex items-center gap-4 mb-3">
                 {config.assignedConsultant.photo ? (
                   <img 
@@ -160,13 +160,13 @@ export default function WelcomeSlide({ onBack }) {
                     className="w-16 h-16 rounded-full object-cover border-2 border-white/30"
                   />
                 ) : (
-                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl font-bold">
+                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-page-title">
                     {config.assignedConsultant.name.charAt(0)}
                   </div>
                 )}
                 <div>
                   <p className="text-sm font-medium text-white/80 mb-1">Din redovisningskonsult:</p>
-                  <p className="text-xl font-bold">{config.assignedConsultant.name}</p>
+                  <p className="text-section-title">{config.assignedConsultant.name}</p>
                 </div>
               </div>
               <div className="space-y-2 ml-20">
@@ -190,7 +190,7 @@ export default function WelcomeSlide({ onBack }) {
             </div>
 
             {/* Firm Support */}
-            <div className="bg-white/10 rounded-lg p-6 backdrop-blur-sm">
+            <div className="bg-white/10 rounded-box p-6 backdrop-blur-sm">
               <p className="font-semibold mb-3 text-lg">Byråns support:</p>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
@@ -211,7 +211,7 @@ export default function WelcomeSlide({ onBack }) {
             </div>
 
             {/* Emergency Contact */}
-            <div className="bg-yellow-500/20 border-2 border-yellow-300/50 rounded-lg p-6 backdrop-blur-sm">
+            <div className="bg-yellow-500/20 border-2 border-yellow-300/50 rounded-box p-6 backdrop-blur-sm">
               <div className="flex items-start gap-3">
                 <svg className="w-6 h-6 text-yellow-300 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -227,7 +227,7 @@ export default function WelcomeSlide({ onBack }) {
 
         {/* Closing Message */}
         <div className="text-center mb-8">
-          <h3 className="text-2xl font-bold text-brand-900 mb-3">
+          <h3 className="text-page-title text-brand-900 mb-3">
             Tack för ditt förtroende!
           </h3>
           <p className="text-lg text-gray-600 italic">
@@ -239,7 +239,7 @@ export default function WelcomeSlide({ onBack }) {
         <div className="flex justify-between items-center gap-4">
           <button
             onClick={onBack}
-            className="px-6 py-3 border-2 border-brand-300 text-brand-700 rounded-lg hover:bg-brand-50 transition-colors font-semibold flex items-center gap-2"
+            className="px-6 py-3 border-2 border-brand-300 text-brand-700 rounded-box hover:bg-brand-50 transition-colors font-semibold flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -249,7 +249,7 @@ export default function WelcomeSlide({ onBack }) {
 
           <button
             onClick={handleGoToDashboard}
-            className="px-8 py-4 bg-gradient-to-r from-brand-600 to-brand-700 text-white rounded-lg hover:from-brand-700 hover:to-brand-800 transition-all font-bold text-lg shadow-lg flex items-center gap-2"
+            className="px-8 py-4 bg-gradient-to-r from-brand-600 to-brand-700 text-white rounded-box hover:from-brand-700 hover:to-brand-800 transition-all font-bold text-lg shadow-lg flex items-center gap-2"
           >
             Gå till Min Sida
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

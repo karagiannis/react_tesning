@@ -222,7 +222,7 @@ const DocumentSetupSlide = () => {
             {/* Dropbox */}
             <button
               onClick={() => setSelectedProvider('dropbox')}
-              className={`p-6 border-2 rounded-lg transition-all ${
+              className={`p-6 border-2 rounded-box transition-all ${
                 selectedProvider === 'dropbox'
                   ? 'border-brand-600 bg-brand-50 shadow-md'
                   : 'border-gray-200 hover:border-gray-300'
@@ -231,7 +231,7 @@ const DocumentSetupSlide = () => {
               <div className="flex flex-col items-center">
                 <div className="w-16 h-16 mb-4 flex items-center justify-center">
                   {/* Dropbox logo placeholder */}
-                  <div className="w-full h-full bg-brand-600 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
+                  <div className="w-full h-full bg-brand-600 rounded-box flex items-center justify-center text-white text-page-title">
                     D
                   </div>
                 </div>
@@ -248,7 +248,7 @@ const DocumentSetupSlide = () => {
             {/* Google Drive */}
             <button
               onClick={() => setSelectedProvider('google')}
-              className={`p-6 border-2 rounded-lg transition-all ${
+              className={`p-6 border-2 rounded-box transition-all ${
                 selectedProvider === 'google'
                   ? 'border-brand-600 bg-brand-50 shadow-md'
                   : 'border-gray-200 hover:border-gray-300'
@@ -257,7 +257,7 @@ const DocumentSetupSlide = () => {
               <div className="flex flex-col items-center">
                 <div className="w-16 h-16 mb-4 flex items-center justify-center">
                   {/* Google Drive logo placeholder */}
-                  <div className="w-full h-full bg-gradient-to-br from-brand-500 via-green-500 to-yellow-500 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
+                  <div className="w-full h-full bg-gradient-to-br from-brand-500 via-green-500 to-yellow-500 rounded-box flex items-center justify-center text-white text-page-title">
                     G
                   </div>
                 </div>
@@ -274,7 +274,7 @@ const DocumentSetupSlide = () => {
             {/* OneDrive */}
             <button
               onClick={() => setSelectedProvider('onedrive')}
-              className={`p-6 border-2 rounded-lg transition-all ${
+              className={`p-6 border-2 rounded-box transition-all ${
                 selectedProvider === 'onedrive'
                   ? 'border-brand-600 bg-brand-50 shadow-md'
                   : 'border-gray-200 hover:border-gray-300'
@@ -283,7 +283,7 @@ const DocumentSetupSlide = () => {
               <div className="flex flex-col items-center">
                 <div className="w-16 h-16 mb-4 flex items-center justify-center">
                   {/* OneDrive logo placeholder */}
-                  <div className="w-full h-full bg-brand-600 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
+                  <div className="w-full h-full bg-brand-600 rounded-box flex items-center justify-center text-white text-page-title">
                     O
                   </div>
                 </div>
@@ -300,7 +300,7 @@ const DocumentSetupSlide = () => {
         </div>
 
         {/* Setup Instructions based on selected provider */}
-        <div className="bg-white border rounded-lg shadow-sm p-6 mb-8">
+        <div className="bg-white border rounded-box shadow-sm p-6 mb-8">
           {selectedProvider === 'dropbox' && (
             <>
               <h3 className="text-xl font-semibold mb-4">Dropbox-setup</h3>
@@ -331,7 +331,7 @@ const DocumentSetupSlide = () => {
                 {authStatus === 'not_started' && (
                   <button
                     onClick={handleDropboxAuth}
-                    className="w-full bg-brand-600 text-white px-6 py-3 rounded-lg hover:bg-brand-700 transition-colors font-semibold flex items-center justify-center gap-2"
+                    className="w-full bg-brand-600 text-white px-6 py-3 rounded-box hover:bg-brand-700 transition-colors font-semibold flex items-center justify-center gap-2"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 10.5v-2a.5.5 0 01.5-.5h3a.5.5 0 010 1h-2.5v1.5a.5.5 0 01-1 0z"/>
@@ -348,7 +348,7 @@ const DocumentSetupSlide = () => {
                 )}
 
                 {authStatus === 'success' && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="bg-green-50 border border-green-200 rounded-box p-4">
                     <div className="flex items-start">
                       <svg className="w-6 h-6 text-green-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
@@ -377,7 +377,7 @@ const DocumentSetupSlide = () => {
                 )}
 
                 {authStatus === 'error' && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="bg-red-50 border border-red-200 rounded-box p-4">
                     <div className="flex items-start">
                       <svg className="w-6 h-6 text-red-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/>
@@ -437,7 +437,7 @@ const DocumentSetupSlide = () => {
                 {authStatus === 'not_started' && (
                   <button
                     onClick={handleGoogleDriveAuth}
-                    className="w-full bg-gradient-to-r from-brand-600 to-green-600 text-white px-6 py-3 rounded-lg hover:from-brand-700 hover:to-green-700 transition-all font-semibold flex items-center justify-center gap-2"
+                    className="w-full bg-gradient-to-r from-brand-600 to-green-600 text-white px-6 py-3 rounded-box hover:from-brand-700 hover:to-green-700 transition-all font-semibold flex items-center justify-center gap-2"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 10.5v-2a.5.5 0 01.5-.5h3a.5.5 0 010 1h-2.5v1.5a.5.5 0 01-1 0z"/>
@@ -477,7 +477,7 @@ const DocumentSetupSlide = () => {
                 {authStatus === 'not_started' && (
                   <button
                     onClick={handleOneDriveAuth}
-                    className="w-full bg-brand-600 text-white px-6 py-3 rounded-lg hover:bg-brand-700 transition-colors font-semibold flex items-center justify-center gap-2"
+                    className="w-full bg-brand-600 text-white px-6 py-3 rounded-box hover:bg-brand-700 transition-colors font-semibold flex items-center justify-center gap-2"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 10.5v-2a.5.5 0 01.5-.5h3a.5.5 0 010 1h-2.5v1.5a.5.5 0 01-1 0z"/>
@@ -494,7 +494,7 @@ const DocumentSetupSlide = () => {
 
         {/* Scanner setup guide (collapsible) */}
         {authStatus === 'success' && (
-          <div className="bg-gray-50 border rounded-lg p-6 mb-8">
+          <div className="bg-gray-50 border rounded-box p-6 mb-8">
             <h3 className="text-lg font-semibold mb-4">📱 Bonus: Konfigurera din skanner (valfritt)</h3>
             <p className="text-sm text-gray-600 mb-4">
               Vill du att din skanner automatiskt sparar dokument till molnet? Här är snabbguider för populära skannermärken:
@@ -562,7 +562,7 @@ const DocumentSetupSlide = () => {
           {authStatus === 'success' && testStatus === 'success' && (
             <button
               onClick={handleContinue}
-              className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold flex items-center gap-2"
+              className="bg-green-600 text-white px-8 py-3 rounded-box hover:bg-green-700 transition-colors font-semibold flex items-center gap-2"
             >
               Fortsätt
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">

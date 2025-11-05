@@ -22,9 +22,9 @@ export default function PEPSlide({ onNext, onBack }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
-      <div className="max-w-3xl w-full bg-white rounded-2xl shadow-2xl p-10">
+      <div className="max-w-3xl w-full bg-white rounded-card shadow-2xl p-10">
         <div className="bg-red-100 border-l-4 border-red-600 p-4 rounded mb-6">
-          <h1 className="text-3xl font-bold text-red-900 mb-2 flex items-center gap-2">
+          <h1 className="text-page-title text-red-900 mb-2 flex items-center gap-2">
             ⚠️ Skärpt kundkännedom – PEP
           </h1>
           <p className="text-sm text-red-800">
@@ -55,7 +55,7 @@ export default function PEPSlide({ onNext, onBack }) {
             <textarea
               value={formData.medlensUrsprung}
               onChange={(e) => handleChange('medlensUrsprung', e.target.value)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               rows={3}
               placeholder="Beskriv tydligt varifrån medlen kommer (t.ex. lön, arv, företagsvinst, försäljning av tillgångar...)"
             />
@@ -69,7 +69,7 @@ export default function PEPSlide({ onNext, onBack }) {
             <textarea
               value={formData.affarsverksamhet}
               onChange={(e) => handleChange('affarsverksamhet', e.target.value)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               rows={3}
               placeholder="Vad gör företaget? Vilka tjänster eller produkter erbjuds? Vilka är kunderna?"
             />
@@ -83,7 +83,7 @@ export default function PEPSlide({ onNext, onBack }) {
             <textarea
               value={formData.ekonomiskaResurser}
               onChange={(e) => handleChange('ekonomiskaResurser', e.target.value)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               rows={3}
               placeholder="Beskriv företagets finansiella situation, kapitaltillgång, krediter, etc."
             />
@@ -97,7 +97,7 @@ export default function PEPSlide({ onNext, onBack }) {
             <textarea
               value={formData.dokumentation}
               onChange={(e) => handleChange('dokumentation', e.target.value)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               rows={2}
               placeholder="T.ex. kontoutdrag, arvsskiften, köpekontrakt, årsredovisningar..."
             />
@@ -114,7 +114,7 @@ export default function PEPSlide({ onNext, onBack }) {
             <textarea
               value={formData.hogrisklander}
               onChange={(e) => handleChange('hogrisklander', e.target.value)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               rows={2}
               placeholder="Om ja, ange vilka länder och typen av affärsrelation..."
             />
@@ -131,7 +131,7 @@ export default function PEPSlide({ onNext, onBack }) {
             <textarea
               value={formData.andraOmstandigheter}
               onChange={(e) => handleChange('andraOmstandigheter', e.target.value)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               rows={2}
               placeholder="T.ex. tidigare juridiska problem, ovanliga transaktionsmönster, etc."
             />
@@ -150,14 +150,14 @@ export default function PEPSlide({ onNext, onBack }) {
         <div className="flex gap-4">
           <button
             onClick={onBack}
-            className="w-1/3 px-8 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
+            className="w-1/3 px-8 py-3 bg-gray-200 text-gray-700 rounded-box hover:bg-gray-300 transition-colors font-semibold"
           >
             Tillbaka
           </button>
           <button
             onClick={onNext}
             disabled={!isFormValid()}
-            className={`w-2/3 px-8 py-3 rounded-lg font-semibold transition-all ${
+            className={`w-2/3 px-8 py-3 rounded-box font-semibold transition-all ${
               isFormValid()
                 ? 'bg-brand-600 hover:bg-brand-700 text-white cursor-pointer'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'

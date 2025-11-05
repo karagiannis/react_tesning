@@ -34,6 +34,28 @@ export default {
           900: '#6b1f10',  // Mörkast terracotta
         }
       },
+      // CENTRALISERAD TYPOGRAFI - Fortnox-inspirerad professionell design
+      fontSize: {
+        // Content-slide huvudrubriker (h1) - Fortnox: ~16-18px
+        'page-title': ['1.125rem', { lineHeight: '1.75rem', fontWeight: '600' }],  // 18px semibold
+        // Sektionsrubriker (h2) - Fortnox kolumnrubriker: ~13px
+        'section-title': ['0.875rem', { lineHeight: '1.25rem', fontWeight: '600' }],  // 14px semibold
+        // Underrubriker (h3)
+        'subsection-title': ['0.8125rem', { lineHeight: '1.125rem', fontWeight: '500' }],  // 13px medium
+        // Statistik/KPI-siffror (får vara lite större än vanlig text)
+        'stat-value': ['1.25rem', { lineHeight: '1.75rem', fontWeight: '700' }],  // 20px bold
+      },
+      borderRadius: {
+        'box': '0.5rem',        // 8px - Centraliserad box-radius (lagom professionell)
+        'box-sm': '0.375rem',   // 6px - Inputs (mer mjuk än 4px)
+        'card': '0.75rem',      // 12px - Större kort/containers
+      },
+      spacing: {
+        // Centraliserade ikonstorlekar
+        'icon-sm': '1.25rem',   // 20px (för små ikoner)
+        'icon-md': '1.75rem',   // 28px (för rubrikikoner)
+        'icon-lg': '2rem',      // 32px (för stora ikoner)
+      },
     },
   },
   plugins: [],

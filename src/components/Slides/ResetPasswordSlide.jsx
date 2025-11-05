@@ -53,8 +53,8 @@ export default function ResetPasswordSlide({ onNext, onResendCode }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-10">
-        <h1 className="text-3xl font-bold text-brand-900 mb-2 text-center">
+      <div className="max-w-md w-full bg-white rounded-card shadow-2xl p-10">
+        <h1 className="text-page-title text-brand-900 mb-2 text-center">
           Ange nytt lösenord
         </h1>
         
@@ -63,7 +63,7 @@ export default function ResetPasswordSlide({ onNext, onResendCode }) {
         </p>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+          <div className="bg-red-50 border border-red-200 rounded-box p-3 mb-4">
             <p className="text-red-800 text-sm"><strong>✗</strong> {error}</p>
           </div>
         )}
@@ -79,7 +79,7 @@ export default function ResetPasswordSlide({ onNext, onResendCode }) {
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               required
               maxLength={6}
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-center text-2xl tracking-widest font-mono"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent text-center text-2xl tracking-widest font-mono"
               placeholder="000000"
             />
           </div>
@@ -93,7 +93,7 @@ export default function ResetPasswordSlide({ onNext, onResendCode }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               placeholder="••••••••••••"
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -110,7 +110,7 @@ export default function ResetPasswordSlide({ onNext, onResendCode }) {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               placeholder="••••••••••••"
             />
           </div>
@@ -118,7 +118,7 @@ export default function ResetPasswordSlide({ onNext, onResendCode }) {
           <button
             type="submit"
             disabled={loading || !code || !password || !confirmPassword}
-            className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold transition-all"
+            className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-gray-400 text-white px-8 py-3 rounded-box font-semibold transition-all"
           >
             {loading ? 'Återställer...' : 'Återställ lösenord'}
           </button>

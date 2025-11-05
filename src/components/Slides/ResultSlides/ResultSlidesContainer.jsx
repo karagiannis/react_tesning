@@ -47,7 +47,7 @@ export default function ResultSlidesContainer({ onNext, onBack }) {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <button
             onClick={onBack}
-            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium flex items-center shadow-md"
+            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-box hover:bg-gray-300 transition-colors font-medium flex items-center shadow-md"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -60,7 +60,7 @@ export default function ResultSlidesContainer({ onNext, onBack }) {
           </div>
           <button
             onClick={onNext}
-            className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-500 text-white rounded-lg hover:from-brand-600 hover:to-brand-600 transition-colors font-medium flex items-center shadow-md"
+            className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-500 text-white rounded-box hover:from-brand-600 hover:to-brand-600 transition-colors font-medium flex items-center shadow-md"
           >
             Fortsätt
             <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

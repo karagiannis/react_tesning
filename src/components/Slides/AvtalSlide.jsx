@@ -115,10 +115,10 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
-      <div className="max-w-6xl w-full bg-white rounded-2xl shadow-2xl p-10">
+      <div className="max-w-6xl w-full bg-white rounded-card shadow-2xl p-10">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-brand-900 mb-2 flex items-center gap-3">
+          <h1 className="text-page-title text-brand-900 mb-2 flex items-center gap-3">
             <svg className="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -130,7 +130,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
         </div>
 
         {/* Contract Info */}
-        <div className="mb-4 p-4 bg-gray-50 border border-gray-300 rounded-lg">
+        <div className="mb-4 p-4 bg-gray-50 border border-gray-300 rounded-box">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-gray-700"><strong>Företag:</strong> {mockCustomerData.companyName}</p>
@@ -144,7 +144,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
         </div>
 
         {/* PDF Container */}
-        <div className="mb-6 border-2 border-gray-300 rounded-lg overflow-hidden">
+        <div className="mb-6 border-2 border-gray-300 rounded-box overflow-hidden">
           <div className="bg-gray-100 p-3 border-b border-gray-300 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
@@ -230,7 +230,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
 
         {/* Signature Section */}
         {!isSigned ? (
-          <div className={`mb-6 p-5 rounded-lg border-2 transition-all ${
+          <div className={`mb-6 p-5 rounded-box border-2 transition-all ${
             hasReadContract 
               ? 'bg-green-50 border-green-400' 
               : 'bg-gray-100 border-gray-300'
@@ -267,7 +267,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
             <button
               onClick={handleBankIDSign}
               disabled={!hasReadContract || isSigningInProgress}
-              className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-lg transition-all font-semibold text-lg ${
+              className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-box transition-all font-semibold text-lg ${
                 hasReadContract && !isSigningInProgress
                   ? 'bg-brand-600 text-white hover:bg-brand-700 shadow-lg'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -293,7 +293,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
           </div>
         ) : (
           /* Signature Confirmation */
-          <div className="mb-6 p-5 bg-green-100 border-2 border-green-500 rounded-lg">
+          <div className="mb-6 p-5 bg-green-100 border-2 border-green-500 rounded-box">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
                 <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -318,7 +318,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
 
         {/* Info Box */}
         {isSigned && finalContractUrl && (
-          <div className="mb-6 p-4 bg-brand-50 rounded-lg border border-brand-300">
+          <div className="mb-6 p-4 bg-brand-50 rounded-box border border-brand-300">
             <p className="text-sm text-brand-900">
               📧 En kopia av det signerade avtalet har skickats till er registrerade e-postadress. 
               Nästa steg är att koppla ihop ert Fortnox-konto med vår byrå.
@@ -327,7 +327,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
         )}
         
         {!isSigned && contractTemplate && (
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-300">
+          <div className="mb-6 p-4 bg-gray-50 rounded-box border border-gray-300">
             <p className="text-sm text-gray-700 flex items-center gap-2">
               <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -344,7 +344,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
         <div className="flex justify-between items-center pt-6 border-t border-gray-200">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all font-semibold"
+            className="flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 rounded-box hover:bg-gray-300 transition-all font-semibold"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -355,7 +355,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
           <button
             onClick={onNext}
             disabled={!isSigned}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all font-semibold shadow-lg ${
+            className={`flex items-center gap-2 px-6 py-3 rounded-box transition-all font-semibold shadow-lg ${
               isSigned
                 ? 'bg-brand-600 text-white hover:bg-brand-700'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'

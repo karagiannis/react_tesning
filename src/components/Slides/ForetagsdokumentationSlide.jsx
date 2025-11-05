@@ -170,7 +170,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
       <div className="max-w-4xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-brand-900 mb-3">
+          <h2 className="text-page-title text-brand-900 mb-3">
             Företagsdokumentation
           </h2>
           <p className="text-lg text-gray-600">
@@ -179,7 +179,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
         </div>
 
         {/* Info Box */}
-        <div className="mb-8 p-6 bg-gray-50 border border-gray-200 rounded-lg">
+        <div className="mb-8 p-6 bg-gray-50 border border-gray-200 rounded-box">
           <div className="flex items-start gap-3">
             <AlertCircleIcon className="w-6 h-6 text-gray-600 flex-shrink-0 mt-0.5" />
             <div>
@@ -223,7 +223,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
                 onDragOver={(e) => handleDragOver('registreringsbevis', e)}
                 onDragLeave={() => handleDragLeave('registreringsbevis')}
                 onDrop={(e) => handleDrop('registreringsbevis', e)}
-                className={`relative border-2 border-dashed rounded-lg p-12 text-center transition-all ${
+                className={`relative border-2 border-dashed rounded-box p-12 text-center transition-all ${
                   isDragging.registreringsbevis
                     ? 'border-brand-500 bg-brand-50'
                     : 'border-gray-300 bg-white hover:border-brand-400 hover:bg-brand-50/50'
@@ -250,7 +250,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
                 </div>
               </div>
             ) : (
-              <div className="border-2 border-green-200 bg-green-50 rounded-lg p-6">
+              <div className="border-2 border-green-200 bg-green-50 rounded-box p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <FileText className="w-8 h-8 text-brand-600" />
@@ -327,7 +327,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
                 onDragOver={(e) => handleDragOver('arsredovisning', e)}
                 onDragLeave={() => handleDragLeave('arsredovisning')}
                 onDrop={(e) => handleDrop('arsredovisning', e)}
-                className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-all ${
+                className={`relative border-2 border-dashed rounded-box p-8 text-center transition-all ${
                   isDragging.arsredovisning
                     ? 'border-gray-400 bg-gray-50'
                     : 'border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50'
@@ -351,7 +351,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
                 </div>
               </div>
             ) : (
-              <div className="border-2 border-gray-200 bg-gray-50 rounded-lg p-4">
+              <div className="border-2 border-gray-200 bg-gray-50 rounded-box p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <FileText className="w-6 h-6 text-gray-600" />
@@ -379,7 +379,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
           </div>
 
           {/* What happens with the documents */}
-          <div className="mb-8 p-6 bg-brand-50 border border-brand-200 rounded-lg">
+          <div className="mb-8 p-6 bg-brand-50 border border-brand-200 rounded-box">
             <h3 className="font-semibold text-brand-900 mb-2">
               Vad händer med dokumenten?
             </h3>
@@ -399,13 +399,13 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
             <button
               type="button"
               onClick={onBack}
-              className="px-6 py-3 text-gray-700 bg-white border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="px-6 py-3 text-gray-700 bg-white border-2 border-gray-300 rounded-box hover:bg-gray-50 transition-colors font-medium"
             >
               ← Tillbaka
             </button>
             <button
               type="submit"
-              className="px-8 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-3 bg-brand-600 text-white rounded-box hover:bg-brand-700 transition-colors font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!formData.registreringsbevis}
             >
               Nästa →

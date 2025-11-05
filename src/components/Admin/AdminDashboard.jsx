@@ -6,8 +6,8 @@ import MoneyFlowMapWidget from './MoneyFlowMapWidget';
 
 const MySwal = withReactContent(Swal.mixin({
   customClass: {
-    confirmButton: 'bg-brand-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-brand-700 mr-2',
-    cancelButton: 'bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-400'
+    confirmButton: 'bg-brand-600 text-white px-4 py-2 rounded-box font-medium hover:bg-brand-700 mr-2',
+    cancelButton: 'bg-gray-300 text-gray-700 px-4 py-2 rounded-box font-medium hover:bg-gray-400'
   },
   buttonsStyling: false
 }));
@@ -294,7 +294,7 @@ const AdminDashboard = () => {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
-            <h1 className="text-3xl font-bold text-gray-900">Administratörspanel</h1>
+            <h1 className="text-page-title text-gray-900">Administratörspanel</h1>
             <p className="mt-2 text-sm text-gray-600">
               Övervaka användare, fraud detection, support och fakturering
             </p>
@@ -334,11 +334,11 @@ const AdminDashboard = () => {
           <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-box shadow p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Totalt Användare</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{mockStats.totalUsers}</p>
+                    <p className="text-page-title text-gray-900 mt-2">{mockStats.totalUsers}</p>
                   </div>
                   <div className="bg-brand-100 rounded-full p-3">
                     <Icon name="users" className="w-6 h-6 text-brand-600" />
@@ -346,11 +346,11 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-box shadow p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Aktiva Onboardings</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{mockStats.activeOnboardings}</p>
+                    <p className="text-page-title text-gray-900 mt-2">{mockStats.activeOnboardings}</p>
                   </div>
                   <div className="bg-brand-100 rounded-full p-3">
                     <Icon name="clock" className="w-6 h-6 text-brand-600" />
@@ -358,11 +358,11 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-box shadow p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Flaggade Ärenden</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{mockStats.flaggedCases}</p>
+                    <p className="text-page-title text-gray-900 mt-2">{mockStats.flaggedCases}</p>
                   </div>
                   <div className="bg-red-100 rounded-full p-3">
                     <Icon name="alert" className="w-6 h-6 text-red-600" />
@@ -370,11 +370,11 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-box shadow p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Nya Ansökningar</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-2">{mockStats.newApplications}</p>
+                    <p className="text-page-title text-gray-900 mt-2">{mockStats.newApplications}</p>
                   </div>
                   <div className="bg-green-100 rounded-full p-3">
                     <Icon name="checkList" className="w-6 h-6 text-green-600" />
@@ -386,14 +386,14 @@ const AdminDashboard = () => {
             {/* Recent Activity */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recent Fraud Alerts */}
-              <div className="bg-white rounded-lg shadow">
+              <div className="bg-white rounded-box shadow">
                 <div className="px-6 py-4 border-b border-gray-200">
                   <h2 className="text-lg font-semibold text-gray-900">Senaste Fraud Alerts</h2>
                 </div>
                 <div className="p-6">
                   <div className="space-y-4">
                     {mockFraudAlerts.slice(0, 3).map((alert) => (
-                      <div key={alert.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <div key={alert.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-box">
                         <div className="flex-shrink-0">
                           <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${getRiskColor(alert.riskScore)}`}>
                             {alert.riskScore}
@@ -420,14 +420,14 @@ const AdminDashboard = () => {
               </div>
 
               {/* Recent Support Tickets */}
-              <div className="bg-white rounded-lg shadow">
+              <div className="bg-white rounded-box shadow">
                 <div className="px-6 py-4 border-b border-gray-200">
                   <h2 className="text-lg font-semibold text-gray-900">Senaste Support-ärenden</h2>
                 </div>
                 <div className="p-6">
                   <div className="space-y-4">
                     {mockSupportTickets.slice(0, 3).map((ticket) => (
-                      <div key={ticket.id} className="p-3 bg-gray-50 rounded-lg">
+                      <div key={ticket.id} className="p-3 bg-gray-50 rounded-box">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <p className="text-sm font-medium text-gray-900">{ticket.subject}</p>
@@ -458,10 +458,10 @@ const AdminDashboard = () => {
         {activeTab === 'users' && (
           <div className="space-y-6">
             {/* Users Header with Actions */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-box shadow p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Användarhantering</h2>
+                  <h2 className="text-page-title text-gray-900">Användarhantering</h2>
                   <p className="text-sm text-gray-600 mt-1">
                     Hantera alla användare i systemet
                   </p>
@@ -469,7 +469,7 @@ const AdminDashboard = () => {
                 <div className="flex space-x-3">
                   <button
                     onClick={() => alert('Lägg till ny användare')}
-                    className="bg-brand-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-brand-700 transition-colors flex items-center space-x-2"
+                    className="bg-brand-600 text-white px-4 py-2 rounded-box font-medium hover:bg-brand-700 transition-colors flex items-center space-x-2"
                   >
                     <span>+</span>
                     <span>Ny användare</span>
@@ -477,7 +477,7 @@ const AdminDashboard = () => {
                   {selectedUsersIds.length > 0 && (
                     <button
                       onClick={() => deleteUsers()}
-                      className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center space-x-2"
+                      className="bg-red-600 text-white px-4 py-2 rounded-box font-medium hover:bg-red-700 transition-colors flex items-center space-x-2"
                     >
                       <span>Radera ({selectedUsersIds.length})</span>
                     </button>
@@ -494,7 +494,7 @@ const AdminDashboard = () => {
                       placeholder="Sök användare (namn, e-post, företag)..."
                       value={searchValue}
                       onChange={changeSearchValue}
-                      className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                     />
                     <svg
                       className="absolute left-3 top-3 h-5 w-5 text-gray-400"
@@ -515,7 +515,7 @@ const AdminDashboard = () => {
                   <select
                     value={statusFilter}
                     onChange={changeStatusFilter}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   >
                     <option value="all">Alla statusar</option>
                     <option value="active">Aktiv</option>
@@ -635,7 +635,7 @@ const AdminDashboard = () => {
         {activeTab === 'fraud' && (
           <div className="space-y-6">
             {/* Fraud Stats */}
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-box shadow p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Fraud Detection Översikt</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center">
@@ -679,7 +679,7 @@ const AdminDashboard = () => {
               <div className="mt-8 pt-6 border-t border-gray-200">
                 <button
                   onClick={handleExportReport}
-                  className="w-full bg-brand-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-brand-700 transition-colors flex items-center justify-center space-x-2"
+                  className="w-full bg-brand-600 text-white py-3 px-4 rounded-box font-semibold hover:bg-brand-700 transition-colors flex items-center justify-center space-x-2"
                 >
                   <Icon name="document" className="w-5 h-5" />
                   <span>Generera Rapport för Finanspolisen (PDF)</span>
@@ -694,7 +694,7 @@ const AdminDashboard = () => {
             <MoneyFlowMapWidget />
 
             {/* Fraud Alerts List */}
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-white rounded-box shadow">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">Alla Fraud Alerts</h2>
               </div>
@@ -760,14 +760,14 @@ const AdminDashboard = () => {
         {/* Support Tab */}
         {activeTab === 'support' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-white rounded-box shadow">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">Support-ärenden</h2>
               </div>
               <div className="p-6">
                 <div className="space-y-4">
                   {mockSupportTickets.map((ticket) => (
-                    <div key={ticket.id} className="border border-gray-200 rounded-lg p-4 hover:border-brand-300 transition-colors">
+                    <div key={ticket.id} className="border border-gray-200 rounded-box p-4 hover:border-brand-300 transition-colors">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-3 mb-2">
@@ -785,7 +785,7 @@ const AdminDashboard = () => {
                         </div>
                         <button
                           onClick={() => setActiveTab('email')}
-                          className="ml-4 px-4 py-2 bg-brand-600 text-white text-sm rounded-lg hover:bg-brand-700 transition-colors"
+                          className="ml-4 px-4 py-2 bg-brand-600 text-white text-sm rounded-box hover:bg-brand-700 transition-colors"
                         >
                           Svara
                         </button>
@@ -801,7 +801,7 @@ const AdminDashboard = () => {
         {/* Invoices Tab */}
         {activeTab === 'invoices' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-white rounded-box shadow">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">Fakturering</h2>
               </div>
@@ -868,7 +868,7 @@ const AdminDashboard = () => {
                       {mockInvoices.reduce((sum, inv) => sum + inv.amount, 0).toLocaleString('sv-SE')} kr
                     </span>
                   </p>
-                  <button className="px-4 py-2 bg-brand-600 text-white text-sm rounded-lg hover:bg-brand-700 transition-colors">
+                  <button className="px-4 py-2 bg-brand-600 text-white text-sm rounded-box hover:bg-brand-700 transition-colors">
                     Exportera till Excel
                   </button>
                 </div>
@@ -880,7 +880,7 @@ const AdminDashboard = () => {
         {/* Email Tab */}
         {activeTab === 'email' && (
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-white rounded-box shadow">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">Skicka Email</h2>
               </div>
@@ -928,7 +928,7 @@ const AdminDashboard = () => {
                         value={emailForm.to}
                         onChange={(e) => setEmailForm({ ...emailForm, to: e.target.value })}
                         placeholder="mottagare@example.com"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                         required
                       />
                     </div>
@@ -944,7 +944,7 @@ const AdminDashboard = () => {
                       value={emailForm.subject}
                       onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
                       placeholder="Email-ämne"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                       required
                     />
                   </div>
@@ -959,7 +959,7 @@ const AdminDashboard = () => {
                       onChange={(e) => setEmailForm({ ...emailForm, message: e.target.value })}
                       placeholder="Skriv ditt meddelande här..."
                       rows={8}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                       required
                     />
                   </div>
@@ -968,14 +968,14 @@ const AdminDashboard = () => {
                   <div className="flex space-x-4">
                     <button
                       type="submit"
-                      className="flex-1 bg-brand-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-brand-700 transition-colors"
+                      className="flex-1 bg-brand-600 text-white py-3 px-4 rounded-box font-semibold hover:bg-brand-700 transition-colors"
                     >
                       Skicka Email
                     </button>
                     <button
                       type="button"
                       onClick={() => setEmailForm({ to: '', subject: '', message: '', type: 'single' })}
-                      className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                      className="px-6 py-3 border border-gray-300 text-gray-700 rounded-box font-semibold hover:bg-gray-50 transition-colors"
                     >
                       Rensa
                     </button>
@@ -983,7 +983,7 @@ const AdminDashboard = () => {
                 </form>
 
                 {/* Info Box */}
-                <div className="mt-6 p-4 bg-brand-50 border border-brand-200 rounded-lg">
+                <div className="mt-6 p-4 bg-brand-50 border border-brand-200 rounded-box">
                   <p className="text-sm text-brand-800">
                     <strong>OBS:</strong> För produktionsmiljö kommer detta att integreras med SendGrid API.
                     Massutskick skickas till alla {mockStats.totalUsers} användare.

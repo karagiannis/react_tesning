@@ -77,8 +77,8 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
-      <div className="max-w-4xl w-full bg-white rounded-2xl shadow-2xl p-10">
-        <h1 className="text-3xl font-bold text-brand-900 mb-2">
+      <div className="max-w-4xl w-full bg-white rounded-card shadow-2xl p-10">
+        <h1 className="text-page-title text-brand-900 mb-2">
           Steg 2: Geografisk risk & Affärsrelationer
         </h1>
         
@@ -90,12 +90,12 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
           {/* BLOCK A: ALLMÄN GEOGRAFISK EXPONERING */}
           {/* ============================================================ */}
           <div className="border-l-4 border-brand-500 pl-4">
-            <h2 className="text-xl font-bold text-brand-800 mb-4">
+            <h2 className="text-section-title text-brand-800 mb-4">
               BLOCK A: Allmän geografisk exponering
             </h2>
 
             {/* Fråga 1: Har företaget utländska kunder? */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+            <div className="mb-6 p-4 bg-gray-50 rounded-box border border-gray-200 relative">
               {/* Info button - övre höger */}
               <button
                 onClick={() => toggleInfo('blockA_question1')}
@@ -137,14 +137,14 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                   type="text"
                   value={formData.utlandskaLander}
                   onChange={(e) => handleChange('utlandskaLander', e.target.value)}
-                  className="mt-2 w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+                  className="mt-2 w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500"
                   placeholder="Vilka länder? (T.ex. Norge, Tyskland, Polen)"
                 />
               )}
               
               {/* Expandable info */}
               {expandedInfo.blockA_question1 && (
-                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg">
+                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box">
                   <p className="text-xs text-brand-700 mb-2">
                     För att bedöma geografisk risk enligt PTL 2 kap. Högriskländer enligt EU-kommissionen och FATF kräver skärpta åtgärder.
                   </p>
@@ -159,7 +159,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
             </div>
 
             {/* Fråga 2: Omsättningsandel */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+            <div className="mb-6 p-4 bg-gray-50 rounded-box border border-gray-200 relative">
               <button
                 onClick={() => toggleInfo('blockA_question2')}
                 className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
@@ -174,7 +174,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
               <select
                 value={formData.andelOmsattning}
                 onChange={(e) => handleChange('andelOmsattning', e.target.value)}
-                className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+                className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500"
               >
                 <option value="">Välj...</option>
                 <option value="<10%">Mindre än 10%</option>
@@ -184,7 +184,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
               </select>
 
               {expandedInfo.blockA_question2 && (
-                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg text-xs">
+                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs">
                   <p className="font-semibold text-brand-900 mb-2">Varför frågar vi detta?</p>
                   <p className="text-gray-700 mb-3">
                     För att kvantifiera geografisk exponering och avgöra om skärpta åtgärder krävs enligt PTL 3 kap. 16 §.
@@ -204,7 +204,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
             </div>
 
             {/* Fråga 3: Typ av samarbete */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+            <div className="mb-6 p-4 bg-gray-50 rounded-box border border-gray-200 relative">
               <button
                 onClick={() => toggleInfo('blockA_question3')}
                 className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
@@ -256,7 +256,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
               </div>
 
               {expandedInfo.blockA_question3 && (
-                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg text-xs">
+                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs">
                   <p className="font-semibold text-brand-900 mb-2">Varför frågar vi detta?</p>
                   <p className="text-gray-700 mb-3">
                     Olika typer av samarbete har olika riskprofiler. Import/Export kan innebära trade-based money laundering, konsulttjänster är svårvärderade, och licensavtal kan användas för värdeöverföring.
@@ -280,12 +280,12 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
           {/* BLOCK B: KONKRETA AFFÄRSPARTNERS */}
           {/* ============================================================ */}
           <div className="border-l-4 border-brand-500 pl-4">
-            <h2 className="text-xl font-bold text-brand-800 mb-4">
+            <h2 className="text-section-title text-brand-800 mb-4">
               BLOCK B: Konkreta affärspartners (Progressiv verifikation)
             </h2>
 
             {/* Fråga 4: Leverantörer */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+            <div className="mb-6 p-4 bg-gray-50 rounded-box border border-gray-200 relative">
               <button
                 onClick={() => toggleInfo('blockB_question4')}
                 className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
@@ -303,21 +303,21 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                     type="text"
                     value={lev.namn}
                     onChange={(e) => handleArrayChange('leverantorer', index, 'namn', e.target.value)}
-                    className="flex-1 px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+                    className="flex-1 px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500"
                     placeholder={`Leverantör ${index + 1} (namn)`}
                   />
                   <input
                     type="text"
                     value={lev.land}
                     onChange={(e) => handleArrayChange('leverantorer', index, 'land', e.target.value)}
-                    className="w-32 px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+                    className="w-32 px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500"
                     placeholder="Land"
                   />
                 </div>
               ))}
 
               {expandedInfo.blockB_question4 && (
-                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg text-xs">
+                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs">
                   <p className="font-semibold text-brand-900 mb-2">Varför frågar vi detta?</p>
                   <p className="text-gray-700 mb-3">
                     Progressiv verifikation: Jämför svar från BLOCK A med konkreta leverantörsnamn här. Leverantörer från högriskländer kan indikera förhöjd risk.
@@ -337,7 +337,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
             </div>
 
             {/* Fråga 5: Kunder */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+            <div className="mb-6 p-4 bg-gray-50 rounded-box border border-gray-200 relative">
               <button
                 onClick={() => toggleInfo('blockC_question5')}
                 className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
@@ -379,14 +379,14 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                     type="text"
                     value={kund.namn}
                     onChange={(e) => handleArrayChange('kunder', index, 'namn', e.target.value)}
-                    className="flex-1 px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+                    className="flex-1 px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500"
                     placeholder={`Kund ${index + 1} (namn)`}
                   />
                   <input
                     type="text"
                     value={kund.land}
                     onChange={(e) => handleArrayChange('kunder', index, 'land', e.target.value)}
-                    className="w-32 px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+                    className="w-32 px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500"
                     placeholder="Land"
                   />
                 </div>
@@ -396,7 +396,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
               )}
 
               {expandedInfo.blockC_question5 && (
-                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg text-xs">
+                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs">
                   <p className="font-semibold text-brand-900 mb-2">Varför frågar vi detta?</p>
                   <p className="text-gray-700 mb-3">
                     Samma logik som för leverantörer: Vi måste förstå era affärsrelationer och kunna förklara transaktionsmönster.
@@ -420,12 +420,12 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
           {/* BLOCK C: GRÄNSÖVERSKRIDANDE TRANSAKTIONER */}
           {/* ============================================================ */}
           <div className="border-l-4 border-brand-500 pl-4">
-            <h2 className="text-xl font-bold text-brand-800 mb-4">
+            <h2 className="text-section-title text-brand-800 mb-4">
               BLOCK C: Gränsöverskridande transaktioner
             </h2>
 
             {/* Fråga 6: Utländska bankkonton */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+            <div className="mb-6 p-4 bg-gray-50 rounded-box border border-gray-200 relative">
               <button
                 onClick={() => toggleInfo('blockC_question6')}
                 className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
@@ -477,13 +477,13 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                   type="text"
                   value={formData.bankkontosLander}
                   onChange={(e) => handleChange('bankkontosLander', e.target.value)}
-                  className="mt-2 w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500"
+                  className="mt-2 w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500"
                   placeholder="Vilka länder?"
                 />
               )}
 
               {expandedInfo.blockC_question6 && (
-                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg text-xs">
+                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs">
                   <p className="font-semibold text-brand-900 mb-2">Varför frågar vi detta?</p>
                   <p className="text-gray-700 mb-3">
                     Transaktioner via banker i högriskländer utgör förhöjd risk och kräver skärpta åtgärder enligt PTL 3 kap. 16 §.
@@ -508,13 +508,13 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
         <div className="mt-8 flex gap-4">
           <button
             onClick={handleBack}
-            className="flex-1 px-6 py-3 bg-brand-100 text-brand-800 rounded-lg hover:bg-brand-200 transition-colors font-medium"
+            className="flex-1 px-6 py-3 bg-brand-100 text-brand-800 rounded-box hover:bg-brand-200 transition-colors font-medium"
           >
             Tillbaka
           </button>
           <button
             onClick={handleNext}
-            className="flex-1 px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium"
+            className="flex-1 px-6 py-3 bg-brand-600 text-white rounded-box hover:bg-brand-700 transition-colors font-medium"
           >
             Nästa
           </button>

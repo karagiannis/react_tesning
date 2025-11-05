@@ -93,12 +93,12 @@ const SettingsPage = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-brand-900">Inställningar</h1>
+          <h1 className="text-page-title text-brand-900">Inställningar</h1>
           <p className="text-brand-700 mt-2">Hantera ditt konto och firmans grundinformation</p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="bg-white rounded-lg shadow-sm mb-6 p-2 flex gap-2 overflow-x-auto">
+        <div className="bg-white rounded-box shadow-sm mb-6 p-2 flex gap-2 overflow-x-auto">
           {[
             { id: 'firm', label: 'Firmakonfiguration' },
             { id: 'users', label: 'Användare' },
@@ -110,7 +110,7 @@ const SettingsPage = () => {
             <button
               key={tab.id}
               onClick={() => setActiveSection(tab.id)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
+              className={`px-4 py-2 rounded-box font-medium transition-colors whitespace-nowrap ${
                 activeSection === tab.id
                   ? 'bg-brand-600 text-white'
                   : 'text-brand-700 hover:bg-brand-100'
@@ -126,8 +126,8 @@ const SettingsPage = () => {
           
           {/* FIRMAKONFIGURATION */}
           {activeSection === 'firm' && (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold text-brand-900 mb-4">Firmakonfiguration</h2>
+            <div className="bg-white rounded-box shadow-md p-6">
+              <h2 className="text-page-title text-brand-900 mb-4">Firmakonfiguration</h2>
               <p className="text-brand-700 mb-6">
                 Dessa uppgifter används för att automatiskt fylla i kontaktinformation i avtal, rapporter och kommunikation med klienter.
               </p>
@@ -139,7 +139,7 @@ const SettingsPage = () => {
                 </label>
                 <div
                   {...getRootProps()}
-                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                  className={`border-2 border-dashed rounded-box p-6 text-center cursor-pointer transition-colors ${
                     isDragActive
                       ? 'border-brand-500 bg-brand-50'
                       : 'border-brand-300 hover:border-brand-400 hover:bg-brand-50'
@@ -200,7 +200,7 @@ const SettingsPage = () => {
                     type="text"
                     value={firmConfig.companyName}
                     onChange={(e) => setFirmConfig({...firmConfig, companyName: e.target.value})}
-                    className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
                 </div>
 
@@ -212,7 +212,7 @@ const SettingsPage = () => {
                     type="text"
                     value={firmConfig.orgNumber}
                     onChange={(e) => setFirmConfig({...firmConfig, orgNumber: e.target.value})}
-                    className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
                 </div>
 
@@ -224,7 +224,7 @@ const SettingsPage = () => {
                     type="email"
                     value={firmConfig.supportEmail}
                     onChange={(e) => setFirmConfig({...firmConfig, supportEmail: e.target.value})}
-                    className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
                 </div>
 
@@ -236,7 +236,7 @@ const SettingsPage = () => {
                     type="tel"
                     value={firmConfig.supportPhone}
                     onChange={(e) => setFirmConfig({...firmConfig, supportPhone: e.target.value})}
-                    className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
                 </div>
 
@@ -248,7 +248,7 @@ const SettingsPage = () => {
                     type="text"
                     value={firmConfig.complianceOfficer}
                     onChange={(e) => setFirmConfig({...firmConfig, complianceOfficer: e.target.value})}
-                    className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
                 </div>
 
@@ -260,7 +260,7 @@ const SettingsPage = () => {
                     type="email"
                     value={firmConfig.complianceEmail}
                     onChange={(e) => setFirmConfig({...firmConfig, complianceEmail: e.target.value})}
-                    className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
                 </div>
 
@@ -272,7 +272,7 @@ const SettingsPage = () => {
                     type="text"
                     value={firmConfig.taxOffice}
                     onChange={(e) => setFirmConfig({...firmConfig, taxOffice: e.target.value})}
-                    className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
                 </div>
 
@@ -284,7 +284,7 @@ const SettingsPage = () => {
                     type="text"
                     value={firmConfig.auditor}
                     onChange={(e) => setFirmConfig({...firmConfig, auditor: e.target.value})}
-                    className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -292,7 +292,7 @@ const SettingsPage = () => {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={handleSaveFirmConfig}
-                  className="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-3 rounded-lg font-medium hover:from-brand-700 hover:to-brand-800 transition-all shadow-md hover:shadow-lg"
+                  className="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-3 rounded-box font-medium hover:from-brand-700 hover:to-brand-800 transition-all shadow-md hover:shadow-lg"
                 >
                   Spara ändringar
                 </button>
@@ -302,15 +302,15 @@ const SettingsPage = () => {
 
           {/* ANVÄNDARHANTERING */}
           {activeSection === 'users' && (
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-box shadow-md p-6">
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-brand-900">Användarhantering</h2>
+                  <h2 className="text-page-title text-brand-900">Användarhantering</h2>
                   <p className="text-brand-700 mt-1">Hantera åtkomst till systemet</p>
                 </div>
                 <button
                   onClick={() => setShowUserModal(true)}
-                  className="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-4 py-2 rounded-lg font-medium hover:from-brand-700 hover:to-brand-800 transition-all"
+                  className="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-4 py-2 rounded-box font-medium hover:from-brand-700 hover:to-brand-800 transition-all"
                 >
                   + Bjud in användare
                 </button>
@@ -351,7 +351,7 @@ const SettingsPage = () => {
                 </table>
               </div>
 
-              <div className="mt-6 p-4 bg-brand-50 rounded-lg border-l-4 border-brand-500">
+              <div className="mt-6 p-4 bg-brand-50 rounded-box border-l-4 border-brand-500">
                 <h3 className="font-semibold text-brand-900 mb-2">Glömt lösenord</h3>
                 <p className="text-brand-700 text-sm">
                   Användare kan återställa sitt lösenord via inloggningssidan. En säker återställningslänk skickas till deras e-post.
@@ -362,8 +362,8 @@ const SettingsPage = () => {
 
           {/* NOTIFIKATIONER */}
           {activeSection === 'notifications' && (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold text-brand-900 mb-4">Notifikationsinställningar</h2>
+            <div className="bg-white rounded-box shadow-md p-6">
+              <h2 className="text-page-title text-brand-900 mb-4">Notifikationsinställningar</h2>
               <p className="text-brand-700 mb-6">
                 Välj vilka typer av aviseringar du vill ta emot via e-post.
               </p>
@@ -469,7 +469,7 @@ const SettingsPage = () => {
                 </div>
               </div>
 
-              <div className="mt-6 p-4 bg-brand-50 rounded-lg border-l-4 border-brand-500">
+              <div className="mt-6 p-4 bg-brand-50 rounded-box border-l-4 border-brand-500">
                 <p className="text-brand-800 text-sm">
                   <strong>OBS:</strong> Kritiska säkerhetsvarningar och lagstadgade meddelanden kan inte stängas av.
                 </p>
@@ -478,7 +478,7 @@ const SettingsPage = () => {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => alert('Notifikationsinställningar sparade!')}
-                  className="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-3 rounded-lg font-medium hover:from-brand-700 hover:to-brand-800 transition-all shadow-md hover:shadow-lg"
+                  className="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-3 rounded-box font-medium hover:from-brand-700 hover:to-brand-800 transition-all shadow-md hover:shadow-lg"
                 >
                   Spara ändringar
                 </button>
@@ -488,8 +488,8 @@ const SettingsPage = () => {
 
           {/* RISKTESTER */}
           {activeSection === 'tests' && (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold text-brand-900 mb-4">Risktester och validering</h2>
+            <div className="bg-white rounded-box shadow-md p-6">
+              <h2 className="text-page-title text-brand-900 mb-4">Risktester och validering</h2>
               
               <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
                 <div>
@@ -502,7 +502,7 @@ const SettingsPage = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="p-4 bg-brand-50 rounded-lg">
+                <div className="p-4 bg-brand-50 rounded-box">
                   <h3 className="font-semibold text-brand-900 mb-2">
                     SIE-filintegritet
                   </h3>
@@ -511,7 +511,7 @@ const SettingsPage = () => {
                   </p>
                 </div>
 
-                <div className="p-4 bg-brand-50 rounded-lg">
+                <div className="p-4 bg-brand-50 rounded-box">
                   <h3 className="font-semibold text-brand-900 mb-2">
                     Bokföringskompetens
                   </h3>
@@ -520,7 +520,7 @@ const SettingsPage = () => {
                   </p>
                 </div>
 
-                <div className="p-4 bg-brand-50 rounded-lg">
+                <div className="p-4 bg-brand-50 rounded-box">
                   <h3 className="font-semibold text-brand-900 mb-2">
                     Fuskindikationer
                   </h3>
@@ -529,7 +529,7 @@ const SettingsPage = () => {
                   </p>
                 </div>
 
-                <div className="p-4 bg-brand-50 rounded-lg">
+                <div className="p-4 bg-brand-50 rounded-box">
                   <h3 className="font-semibold text-brand-900 mb-2">
                     Penningtvätt & Bedrägeri
                   </h3>
@@ -557,8 +557,8 @@ const SettingsPage = () => {
           {activeSection === 'subscription' && (
             <div className="space-y-6">
               {/* Prenumerationsstatus */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold text-brand-900 mb-6">Prenumeration</h2>
+              <div className="bg-white rounded-box shadow-md p-6">
+                <h2 className="text-page-title text-brand-900 mb-6">Prenumeration</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
@@ -601,18 +601,18 @@ const SettingsPage = () => {
                 </div>
 
                 <div className="flex gap-4">
-                  <button className="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-3 rounded-lg font-medium hover:from-brand-700 hover:to-brand-800 transition-all">
+                  <button className="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-3 rounded-box font-medium hover:from-brand-700 hover:to-brand-800 transition-all">
                     Förnya nu
                   </button>
-                  <button className="border-2 border-red-600 text-red-600 px-6 py-3 rounded-lg font-medium hover:bg-red-50 transition-all">
+                  <button className="border-2 border-red-600 text-red-600 px-6 py-3 rounded-box font-medium hover:bg-red-50 transition-all">
                     Avsluta prenumeration
                   </button>
                 </div>
               </div>
 
               {/* Fakturahistorik */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold text-brand-900 mb-4">Fakturahistorik</h2>
+              <div className="bg-white rounded-box shadow-md p-6">
+                <h2 className="text-page-title text-brand-900 mb-4">Fakturahistorik</h2>
                 <p className="text-brand-700 mb-6">
                   Fakturor skickas per e-post till företagets inkorg och arkiveras hos Fortnox.
                 </p>
@@ -662,7 +662,7 @@ const SettingsPage = () => {
                   </table>
                 </div>
 
-                <div className="mt-4 p-4 bg-brand-50 rounded-lg border-l-4 border-brand-500">
+                <div className="mt-4 p-4 bg-brand-50 rounded-box border-l-4 border-brand-500">
                   <p className="text-brand-800 text-sm">
                     <strong>OBS:</strong> Fakturor skickas automatiskt per e-post från noreply@celestial.se. PDF-filer lagras inte lokalt hos oss utan arkiveras hos Fortnox.
                   </p>
@@ -673,8 +673,8 @@ const SettingsPage = () => {
 
           {/* TA BORT KONTO */}
           {activeSection === 'danger' && (
-            <div className="bg-white rounded-lg shadow-md p-6 border-2 border-red-300">
-              <h2 className="text-2xl font-bold text-red-900 mb-4">Danger Zone - Ta bort konto</h2>
+            <div className="bg-white rounded-box shadow-md p-6 border-2 border-red-300">
+              <h2 className="text-page-title text-red-900 mb-4">Danger Zone - Ta bort konto</h2>
               
               <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
                 <div className="flex items-start">
@@ -697,7 +697,7 @@ const SettingsPage = () => {
 
               <button
                 onClick={() => setShowDeleteModal(true)}
-                className="bg-red-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-700 transition-all"
+                className="bg-red-600 text-white px-6 py-3 rounded-box font-medium hover:bg-red-700 transition-all"
               >
                 Radera mitt konto permanent
               </button>
@@ -708,12 +708,12 @@ const SettingsPage = () => {
         {/* Modal: Bjud in användare */}
         {showUserModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-              <h3 className="text-xl font-bold text-brand-900 mb-4">Bjud in ny användare</h3>
+            <div className="bg-white rounded-box shadow-xl max-w-md w-full p-6">
+              <h3 className="text-section-title text-brand-900 mb-4">Bjud in ny användare</h3>
               <input
                 type="email"
                 placeholder="E-postadress"
-                className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent mb-4"
+                className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent mb-4"
                 onKeyPress={(e) => {
                   if (e.key === 'Enter' && e.target.value) {
                     handleInviteUser(e.target.value);
@@ -723,7 +723,7 @@ const SettingsPage = () => {
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={() => setShowUserModal(false)}
-                  className="px-4 py-2 border border-brand-300 rounded-lg text-brand-700 hover:bg-brand-50"
+                  className="px-4 py-2 border border-brand-300 rounded-box text-brand-700 hover:bg-brand-50"
                 >
                   Avbryt
                 </button>
@@ -732,7 +732,7 @@ const SettingsPage = () => {
                     const email = document.querySelector('input[type="email"]').value;
                     if (email) handleInviteUser(email);
                   }}
-                  className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700"
+                  className="px-4 py-2 bg-brand-600 text-white rounded-box hover:bg-brand-700"
                 >
                   Skicka inbjudan
                 </button>
@@ -744,21 +744,21 @@ const SettingsPage = () => {
         {/* Modal: Bekräfta radering */}
         {showDeleteModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-              <h3 className="text-xl font-bold text-red-900 mb-4">Bekräfta kontoradering</h3>
+            <div className="bg-white rounded-box shadow-xl max-w-md w-full p-6">
+              <h3 className="text-section-title text-red-900 mb-4">Bekräfta kontoradering</h3>
               <p className="text-brand-700 mb-6">
                 Är du helt säker? Skriv "<strong>RADERA</strong>" för att bekräfta.
               </p>
               <input
                 type="text"
                 placeholder="Skriv RADERA"
-                className="w-full px-4 py-2 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent mb-4"
+                className="w-full px-4 py-2 border border-red-300 rounded-box focus:ring-2 focus:ring-red-500 focus:border-transparent mb-4"
                 id="deleteConfirmInput"
               />
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={() => setShowDeleteModal(false)}
-                  className="px-4 py-2 border border-brand-300 rounded-lg text-brand-700 hover:bg-brand-50"
+                  className="px-4 py-2 border border-brand-300 rounded-box text-brand-700 hover:bg-brand-50"
                 >
                   Avbryt
                 </button>
@@ -771,7 +771,7 @@ const SettingsPage = () => {
                       alert('Du måste skriva exakt "RADERA" för att bekräfta.');
                     }
                   }}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  className="px-4 py-2 bg-red-600 text-white rounded-box hover:bg-red-700"
                 >
                   Radera permanent
                 </button>

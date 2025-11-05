@@ -60,8 +60,8 @@ export default function RiskFragorSteg3Slide({ onNext }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
-      <div className="max-w-3xl w-full bg-white rounded-2xl shadow-2xl p-10">
-        <h1 className="text-3xl font-bold text-brand-900 mb-2">
+      <div className="max-w-3xl w-full bg-white rounded-card shadow-2xl p-10">
+        <h1 className="text-page-title text-brand-900 mb-2">
           Steg 3: Betalningsflöden & Transaktionsmönster
         </h1>
         
@@ -74,7 +74,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
 
         <div className="space-y-6">
           {/* 1. Betalmetoder */}
-          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+          <div className="p-4 bg-gray-50 rounded-box border border-gray-200 relative">
             <button
               onClick={() => toggleInfo('question1')}
               className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
@@ -140,7 +140,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
             )}
 
             {expandedInfo.question1 && (
-              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg text-xs space-y-2">
+              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs space-y-2">
                 {getLegalTextsForQuestion('steg3', 'question1').map((lagtext, idx) => (
                   <div key={idx}>
                     <p className="font-semibold text-brand-900">{lagtext.law}</p>
@@ -154,7 +154,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
 
           {/* 2. Kontanterandel (conditional) */}
           {showKontanterFollowUp && (
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+            <div className="p-4 bg-gray-50 rounded-box border border-gray-200 relative">
               <button
                 onClick={() => toggleInfo('question2')}
                 className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
@@ -169,7 +169,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
               <select
                 value={formData.kontanterAndel}
                 onChange={(e) => handleChange('kontanterAndel', e.target.value)}
-                className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               >
                 <option value="">Välj...</option>
                 <option value="<5%">Mindre än 5%</option>
@@ -179,7 +179,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
               </select>
               
               {showKontanterWarning && (
-                <div className="mt-3 bg-yellow-50 border border-yellow-300 rounded-lg p-4">
+                <div className="mt-3 bg-yellow-50 border border-yellow-300 rounded-box p-4">
                   <p className="text-sm text-yellow-800 font-medium mb-2">
                     ⚠️ {legalTexts.kontanttransaktioner.law}
                   </p>
@@ -197,7 +197,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
               )}
 
               {expandedInfo.question2 && (
-                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg text-xs space-y-2">
+                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs space-y-2">
                   {getLegalTextsForQuestion('steg3', 'question2').map((lagtext, idx) => (
                     <div key={idx}>
                       <p className="font-semibold text-brand-900">{lagtext.law}</p>
@@ -211,7 +211,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
           )}
 
           {/* 3. Stora transaktioner */}
-          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+          <div className="p-4 bg-gray-50 rounded-box border border-gray-200 relative">
             <button
               onClick={() => toggleInfo('question3')}
               className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
@@ -263,7 +263,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
             </p>
 
             {expandedInfo.question3 && (
-              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg text-xs space-y-2">
+              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs space-y-2">
                 {getLegalTextsForQuestion('steg3', 'question3').map((lagtext, idx) => (
                   <div key={idx}>
                     <p className="font-semibold text-brand-900">{lagtext.law}</p>
@@ -276,7 +276,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
           </div>
 
           {/* 4. Tredjepartsbetalningar */}
-          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+          <div className="p-4 bg-gray-50 rounded-box border border-gray-200 relative">
             <button
               onClick={() => toggleInfo('question4')}
               className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
@@ -322,7 +322,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
             )}
 
             {expandedInfo.question4 && (
-              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg text-xs space-y-2">
+              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs space-y-2">
                 {getLegalTextsForQuestion('steg3', 'question4').map((lagtext, idx) => (
                   <div key={idx}>
                     <p className="font-semibold text-brand-900">{lagtext.law}</p>
@@ -335,7 +335,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
           </div>
 
           {/* 5. Utländska överföringar */}
-          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 relative">
+          <div className="p-4 bg-gray-50 rounded-box border border-gray-200 relative">
             <button
               onClick={() => toggleInfo('question5')}
               className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
@@ -387,13 +387,13 @@ export default function RiskFragorSteg3Slide({ onNext }) {
                 type="text"
                 value={formData.utlandskaLander}
                 onChange={(e) => handleChange('utlandskaLander', e.target.value)}
-                className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 placeholder="Vilka länder?"
               />
             )}
 
             {expandedInfo.question5 && (
-              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-lg text-xs space-y-2">
+              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs space-y-2">
                 {getLegalTextsForQuestion('steg3', 'question5').map((lagtext, idx) => (
                   <div key={idx}>
                     <p className="font-semibold text-brand-900">{lagtext.law}</p>
@@ -410,13 +410,13 @@ export default function RiskFragorSteg3Slide({ onNext }) {
         <div className="mt-8 flex gap-4">
           <button
             onClick={handleBack}
-            className="flex-1 px-6 py-3 bg-brand-100 text-brand-800 rounded-lg hover:bg-brand-200 transition-colors font-medium"
+            className="flex-1 px-6 py-3 bg-brand-100 text-brand-800 rounded-box hover:bg-brand-200 transition-colors font-medium"
           >
             Tillbaka
           </button>
           <button
             onClick={handleNext}
-            className="flex-1 px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium"
+            className="flex-1 px-6 py-3 bg-brand-600 text-white rounded-box hover:bg-brand-700 transition-colors font-medium"
           >
             Slutför & Nästa
           </button>

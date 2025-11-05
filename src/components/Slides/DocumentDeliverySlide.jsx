@@ -93,10 +93,10 @@ export default function DocumentDeliverySlide({ onNext, onBack, customerData = {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
-      <div className="max-w-5xl w-full bg-white rounded-2xl shadow-2xl p-10">
+      <div className="max-w-5xl w-full bg-white rounded-card shadow-2xl p-10">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-brand-900 mb-2 flex items-center gap-3">
+          <h1 className="text-page-title text-brand-900 mb-2 flex items-center gap-3">
             <svg className="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
@@ -137,9 +137,9 @@ export default function DocumentDeliverySlide({ onNext, onBack, customerData = {
               {documents.map((doc, index) => (
                 <div
                   key={index}
-                  className="flex items-start gap-4 p-4 bg-gray-50 border border-gray-300 rounded-lg hover:shadow-md transition-all"
+                  className="flex items-start gap-4 p-4 bg-gray-50 border border-gray-300 rounded-box hover:shadow-md transition-all"
                 >
-                  <div className="flex-shrink-0 w-12 h-12 bg-brand-600 text-white rounded-lg flex items-center justify-center">
+                  <div className="flex-shrink-0 w-12 h-12 bg-brand-600 text-white rounded-box flex items-center justify-center">
                     {doc.icon}
                   </div>
                   <div className="flex-1">
@@ -155,7 +155,7 @@ export default function DocumentDeliverySlide({ onNext, onBack, customerData = {
 
         {/* Email input section */}
         {!isSent ? (
-          <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
+          <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-box">
             <div className="flex items-center gap-2 mb-4">
               <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -173,7 +173,7 @@ export default function DocumentDeliverySlide({ onNext, onBack, customerData = {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="din.epost@foretagets.se"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-brand-600 focus:outline-none"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-box focus:border-brand-600 focus:outline-none"
                   disabled={isSending}
                 />
               </div>
@@ -187,7 +187,7 @@ export default function DocumentDeliverySlide({ onNext, onBack, customerData = {
                   value={confirmEmail}
                   onChange={(e) => setConfirmEmail(e.target.value)}
                   placeholder="Ange e-postadressen igen"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-brand-600 focus:outline-none"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-box focus:border-brand-600 focus:outline-none"
                   disabled={isSending}
                 />
               </div>
@@ -202,7 +202,7 @@ export default function DocumentDeliverySlide({ onNext, onBack, customerData = {
             <button
               onClick={handleSendDocuments}
               disabled={isSending}
-              className={`w-full mt-4 flex items-center justify-center gap-3 px-6 py-4 rounded-lg transition-all font-semibold text-lg ${
+              className={`w-full mt-4 flex items-center justify-center gap-3 px-6 py-4 rounded-box transition-all font-semibold text-lg ${
                 isSending
                   ? 'bg-gray-400 text-gray-200 cursor-wait'
                   : 'bg-brand-600 text-white hover:bg-brand-700 shadow-lg'
@@ -228,7 +228,7 @@ export default function DocumentDeliverySlide({ onNext, onBack, customerData = {
           </div>
         ) : (
           /* Success confirmation */
-          <div className="mb-6 p-6 bg-green-100 border-2 border-green-500 rounded-lg">
+          <div className="mb-6 p-6 bg-green-100 border-2 border-green-500 rounded-box">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
                 <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -260,7 +260,7 @@ export default function DocumentDeliverySlide({ onNext, onBack, customerData = {
         )}
 
         {/* Security note */}
-        <div className="mb-6 p-4 bg-gray-100 rounded-lg border border-gray-300">
+        <div className="mb-6 p-4 bg-gray-100 rounded-box border border-gray-300">
           <div className="flex items-start gap-3">
             <svg className="w-5 h-5 text-gray-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
@@ -276,7 +276,7 @@ export default function DocumentDeliverySlide({ onNext, onBack, customerData = {
         <div className="flex justify-between items-center pt-6 border-t border-gray-200">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all font-semibold"
+            className="flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 rounded-box hover:bg-gray-300 transition-all font-semibold"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -287,7 +287,7 @@ export default function DocumentDeliverySlide({ onNext, onBack, customerData = {
           <button
             onClick={handleContinue}
             disabled={!isSent}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all font-semibold shadow-lg ${
+            className={`flex items-center gap-2 px-6 py-3 rounded-box transition-all font-semibold shadow-lg ${
               isSent
                 ? 'bg-brand-600 text-white hover:bg-brand-700'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'

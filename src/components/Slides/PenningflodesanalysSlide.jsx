@@ -6,7 +6,7 @@ export default function PenningflodesanalysSlide({ onNext, onBack }) {
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-white flex flex-col">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-8 py-6">
-        <h1 className="text-3xl font-bold text-gray-900">Penningflödesanalys</h1>
+        <h1 className="text-page-title text-gray-900">Penningflödesanalys</h1>
         <p className="text-gray-600 mt-2">Geografisk visualisering av transaktioner och mottagare</p>
       </div>
 
@@ -59,13 +59,13 @@ export default function PenningflodesanalysSlide({ onNext, onBack }) {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <button
             onClick={onBack}
-            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-6 py-2 border border-gray-300 rounded-box text-gray-700 hover:bg-gray-50 transition-colors"
           >
             ← Tillbaka
           </button>
           <button
             onClick={onNext}
-            className="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
+            className="px-6 py-2 bg-brand-600 text-white rounded-box hover:bg-brand-700 transition-colors"
           >
             Nästa →
           </button>

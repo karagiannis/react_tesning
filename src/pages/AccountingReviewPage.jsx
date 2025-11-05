@@ -118,7 +118,7 @@ function AccountingReviewPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold">Bokföringsanalys</h1>
+              <h1 className="text-page-title">Bokföringsanalys</h1>
               <p className="text-brandLight-100 mt-1">
                 Interaktiv rapportvisning med drill-down navigation
               </p>
@@ -127,7 +127,7 @@ function AccountingReviewPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => toggleViewMode('screen')}
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                className={`px-4 py-2 rounded-box font-medium transition-all ${
                   viewMode === 'screen'
                     ? 'bg-white text-brandGreen-600'
                     : 'bg-brandGreen-700 text-white hover:bg-brandGreen-800'
@@ -137,7 +137,7 @@ function AccountingReviewPage() {
               </button>
               <button
                 onClick={() => toggleViewMode('pdf')}
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                className={`px-4 py-2 rounded-box font-medium transition-all ${
                   viewMode === 'pdf'
                     ? 'bg-white text-brandGreen-600'
                     : 'bg-brandGreen-700 text-white hover:bg-brandGreen-800'
@@ -173,7 +173,7 @@ function AccountingReviewPage() {
       
       {/* Rapport iframe/container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+        <div className="bg-white rounded-box shadow-xl overflow-hidden">
           {reportHtml ? (
             <iframe
               srcDoc={reportHtml}
@@ -194,7 +194,7 @@ function AccountingReviewPage() {
         </div>
         
         {/* Info-panel */}
-        <div className="mt-6 bg-brandLight-50 border border-brandLight-200 rounded-lg p-6">
+        <div className="mt-6 bg-brandLight-50 border border-brandLight-200 rounded-box p-6">
           <h3 className="text-lg font-semibold text-brandGreen-600 mb-3">
             💡 Hur navigeringen fungerar
           </h3>
@@ -220,7 +220,7 @@ function AccountingReviewPage() {
             <li className="flex items-start gap-2">
               <span className="text-brandGreen-600 font-bold">4.</span>
               <span>
-                <strong>Forensisk analys:</strong> Verifikation A308 visar exempel på automatisk detektion av privata inköp
+                <strong>Forensisk analys:</strong> Verifikation B123 visar exempel på automatisk detektion av privata inköp
               </span>
             </li>
           </ul>
@@ -228,7 +228,7 @@ function AccountingReviewPage() {
           <div className="mt-4 pt-4 border-t border-brandLight-200">
             <p className="text-xs text-brandText-500">
               <strong>Testexempel:</strong> Navigera från Balansrapport → Konto 2510 (Skatteskulder) → Verifikation A3 
-              för normal post, eller → Verifikation A308 för fraudexempel med 49 dokument.
+              för normal post, eller → Verifikation B123 för fraudexempel med 49 dokument.
             </p>
           </div>
         </div>

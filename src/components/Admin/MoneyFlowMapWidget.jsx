@@ -204,7 +204,7 @@ const MoneyFlowMapWidget = () => {
   return (
     <div className="space-y-4">
       {/* Filter Controls */}
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className="bg-white rounded-box shadow p-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Penningflödesanalys - Geografisk karta</h3>
           <div className="flex items-center space-x-2">
@@ -212,7 +212,7 @@ const MoneyFlowMapWidget = () => {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500"
+              className="px-3 py-1 border border-gray-300 rounded-box text-sm focus:ring-2 focus:ring-brand-500"
             >
               <option value="all">Alla transaktioner</option>
               <option value="client_address">Klientadress</option>
@@ -246,7 +246,7 @@ const MoneyFlowMapWidget = () => {
       </div>
 
       {/* Map */}
-      <div className="bg-white rounded-lg shadow overflow-hidden" style={{ height: '600px' }}>
+      <div className="bg-white rounded-box shadow overflow-hidden" style={{ height: '600px' }}>
         <MapContainer
           center={[59.3293, 18.0686]} // Center on Stockholm
           zoom={6}
@@ -340,7 +340,7 @@ const MoneyFlowMapWidget = () => {
 
       {/* Selected Marker Details */}
       {selectedMarker && (
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-box shadow p-6">
           <div className="flex items-start justify-between mb-4">
             <div>
               <h4 className="text-lg font-bold text-gray-900">{selectedMarker.name}</h4>
@@ -431,25 +431,25 @@ const MoneyFlowMapWidget = () => {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white rounded-box shadow p-4">
           <div className="text-sm text-gray-600 mb-1">Totalt analyserade platser</div>
-          <div className="text-2xl font-bold text-gray-900">{filteredData.length}</div>
+          <div className="text-page-title text-gray-900">{filteredData.length}</div>
         </div>
-        <div className="bg-red-50 border border-red-200 rounded-lg shadow p-4">
+        <div className="bg-red-50 border border-red-200 rounded-box shadow p-4">
           <div className="text-sm text-red-700 mb-1">Misstänkta hyresbetalningar</div>
-          <div className="text-2xl font-bold text-red-600">
+          <div className="text-page-title text-red-600">
             {filteredData.filter(d => d.type === 'rent_residential').length}
           </div>
         </div>
-        <div className="bg-brand-50 border border-brand-200 rounded-lg shadow p-4">
+        <div className="bg-brand-50 border border-brand-200 rounded-box shadow p-4">
           <div className="text-sm text-brand-700 mb-1">Leverantörer</div>
-          <div className="text-2xl font-bold text-brand-600">
+          <div className="text-page-title text-brand-600">
             {filteredData.filter(d => d.type === 'supplier').length}
           </div>
         </div>
-        <div className="bg-purple-50 border border-purple-200 rounded-lg shadow p-4">
+        <div className="bg-purple-50 border border-purple-200 rounded-box shadow p-4">
           <div className="text-sm text-purple-700 mb-1">Kunder</div>
-          <div className="text-2xl font-bold text-purple-600">
+          <div className="text-page-title text-purple-600">
             {filteredData.filter(d => d.type === 'customer').length}
           </div>
         </div>

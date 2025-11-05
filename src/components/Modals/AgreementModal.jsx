@@ -30,10 +30,10 @@ export default function AgreementModal({ show, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full mx-4">
+      <div className="bg-white rounded-card shadow-2xl p-8 max-w-2xl w-full mx-4">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-brand-900 mb-2 flex items-center gap-2">
-            <svg className="w-7 h-7 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <h2 className="text-page-title text-brand-900 mb-2 flex items-center gap-2">
+            <svg className="w-icon-md h-icon-md text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             Betalning krävs för att fortsätta
@@ -45,7 +45,7 @@ export default function AgreementModal({ show, onClose }) {
 
         {/* Info boxes */}
         <div className="space-y-4 mb-6">
-          <div className="p-4 bg-brand-50 border-2 border-brand-200 rounded-lg">
+          <div className="p-4 bg-brand-50 border-2 border-brand-200 rounded-box">
             <p className="text-sm text-brand-900 mb-2">
               <strong>Företagsanvändare betalar i efterskott efter signerat avtal</strong>
             </p>
@@ -57,7 +57,7 @@ export default function AgreementModal({ show, onClose }) {
             </p>
           </div>
 
-          <div className="p-4 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
+          <div className="p-4 bg-yellow-50 border-2 border-yellow-300 rounded-box">
             <p className="text-sm text-yellow-900 mb-2">
               <strong>Vill endast testa?</strong>
             </p>
@@ -78,7 +78,7 @@ export default function AgreementModal({ show, onClose }) {
                 navigate('/settings?section=firm-sign-agreement');
                 onClose();
               }}
-              className="w-full px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-semibold flex items-center justify-center gap-2"
+              className="w-full px-6 py-3 bg-brand-600 text-white rounded-box hover:bg-brand-700 font-semibold flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -88,7 +88,7 @@ export default function AgreementModal({ show, onClose }) {
 
             <button
               onClick={handleSignOneTimeAgreement}
-              className="w-full px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 font-semibold flex items-center justify-center gap-2"
+              className="w-full px-6 py-3 bg-yellow-600 text-white rounded-box hover:bg-yellow-700 font-semibold flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -98,7 +98,7 @@ export default function AgreementModal({ show, onClose }) {
 
             <button
               onClick={() => navigate('/')}
-              className="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold"
+              className="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-box hover:bg-gray-300 font-semibold"
             >
               Avbryt onboarding
             </button>
@@ -122,7 +122,7 @@ export default function AgreementModal({ show, onClose }) {
         )}
 
         {/* Info footer */}
-        <div className="mt-6 p-3 bg-brand-50 border border-brand-200 rounded-lg">
+        <div className="mt-6 p-3 bg-brand-50 border border-brand-200 rounded-box">
           <p className="text-xs text-brand-900">
             <strong>ℹ️ Varför krävs detta?</strong> Externa API-anrop (Skatteverket, Bolagsverket, etc.) kostar pengar. 
             Med företagsavtal faktureras byrån i efterskott. Utan avtal måste enskild användare betala direkt via Stripe.

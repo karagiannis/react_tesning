@@ -103,7 +103,7 @@ export default function Sidebar({ currentPath, hasRoaringData = false }) {
                 disabled={isLocked}
                 title={!isExpanded ? slide.title : ''}
                 className={`
-                  w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all
+                  w-full flex items-center gap-3 px-4 py-3 rounded-box text-left transition-all
                   ${isActive
                     ? 'bg-gradient-to-r from-brand-500 to-brand-500 text-white shadow-md'
                     : isLocked

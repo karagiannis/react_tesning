@@ -51,8 +51,8 @@ export default function VerifySlide({ onNext }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-10">
-        <h1 className="text-3xl font-bold text-brand-900 mb-6 text-center">
+      <div className="max-w-md w-full bg-white rounded-card shadow-2xl p-10">
+        <h1 className="text-page-title text-brand-900 mb-6 text-center">
           Verifiera din registrering
         </h1>
         
@@ -73,7 +73,7 @@ export default function VerifySlide({ onNext }) {
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={handlePaste}
-                className="w-12 h-14 text-center text-2xl font-bold border-2 border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                className="w-12 h-14 text-center text-page-title border-2 border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               />
             ))}
           </div>
@@ -88,7 +88,7 @@ export default function VerifySlide({ onNext }) {
         <button
           onClick={onNext}
           disabled={!isCodeComplete}
-          className={`w-full px-8 py-3 rounded-lg font-semibold transition-all ${
+          className={`w-full px-8 py-3 rounded-box font-semibold transition-all ${
             isCodeComplete
               ? 'bg-brand-600 hover:bg-brand-700 text-white cursor-pointer'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'

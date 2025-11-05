@@ -200,21 +200,21 @@ export default function OngoingRoutinesSlide({ onNext, onBack }) {
             return (
               <div
                 key={routine.id}
-                className={`bg-white rounded-xl shadow-md border-2 transition-all ${
+                className={`bg-white rounded-card shadow-md border-2 transition-all ${
                   isExpanded ? colors.border : 'border-gray-200'
                 }`}
               >
                 {/* Header - Always Visible */}
                 <button
                   onClick={() => toggleSection(routine.id)}
-                  className="w-full p-6 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-xl"
+                  className="w-full p-6 flex items-center justify-between hover:bg-gray-50 transition-colors rounded-card"
                 >
                   <div className="flex items-center gap-4 flex-1">
-                    <div className={`w-14 h-14 ${colors.icon} rounded-lg flex items-center justify-center text-2xl flex-shrink-0`}>
+                    <div className={`w-14 h-14 ${colors.icon} rounded-box flex items-center justify-center text-2xl flex-shrink-0`}>
                       {routine.icon}
                     </div>
                     <div className="text-left flex-1">
-                      <h3 className="text-xl font-bold text-brand-900 mb-1">
+                      <h3 className="text-section-title text-brand-900 mb-1">
                         {routine.title}
                       </h3>
                       <p className="text-sm text-gray-600">
@@ -255,7 +255,7 @@ export default function OngoingRoutinesSlide({ onNext, onBack }) {
                       </div>
 
                       {/* Timeline */}
-                      <div className={`${colors.bg} p-4 rounded-lg`}>
+                      <div className={`${colors.bg} p-4 rounded-box`}>
                         <div className="flex items-start gap-2">
                           <svg className={`w-5 h-5 ${colors.text} mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -275,15 +275,15 @@ export default function OngoingRoutinesSlide({ onNext, onBack }) {
         </div>
 
         {/* Bottom CTA */}
-        <div className="bg-gradient-to-r from-brand-600 to-brand-700 rounded-xl shadow-xl p-8 mb-8 text-white">
+        <div className="bg-gradient-to-r from-brand-600 to-brand-700 rounded-card shadow-xl p-8 mb-8 text-white">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-white/20 rounded-box flex items-center justify-center flex-shrink-0">
+              <svg className="w-icon-md h-icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div>
-              <h3 className="text-xl font-bold mb-2">Vi håller koll på allt detta åt dig</h3>
+              <h3 className="text-section-title mb-2">Vi håller koll på allt detta åt dig</h3>
               <p className="text-white/90">
                 Du får automatiska påminnelser via e-post innan varje deadline. 
                 Fokusera på din verksamhet – vi sköter administrationen.
@@ -296,7 +296,7 @@ export default function OngoingRoutinesSlide({ onNext, onBack }) {
         <div className="flex justify-between items-center gap-4">
           <button
             onClick={onBack}
-            className="px-6 py-3 border-2 border-brand-300 text-brand-700 rounded-lg hover:bg-brand-50 transition-colors font-semibold flex items-center gap-2"
+            className="px-6 py-3 border-2 border-brand-300 text-brand-700 rounded-box hover:bg-brand-50 transition-colors font-semibold flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -306,7 +306,7 @@ export default function OngoingRoutinesSlide({ onNext, onBack }) {
 
           <button
             onClick={onNext}
-            className="px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-semibold flex items-center gap-2"
+            className="px-6 py-3 bg-brand-600 text-white rounded-box hover:bg-brand-700 transition-colors font-semibold flex items-center gap-2"
           >
             Nästa: Support & kontakt
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -58,7 +58,7 @@ Mvh
             Serverfel 500
           </div>
           
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          <h1 className="text-page-title text-gray-900 mb-4">
             Oj! Något gick fel
           </h1>
           
@@ -72,7 +72,7 @@ Mvh
         </div>
 
         {/* Error Tracking Card */}
-        <div className="bg-white rounded-xl shadow-lg border-2 border-red-200 p-6 mb-6">
+        <div className="bg-white rounded-card shadow-lg border-2 border-red-200 p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +92,7 @@ Mvh
             </button>
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-4">
+          <div className="bg-gray-50 rounded-box p-4">
             <div className="flex items-start gap-2">
               <svg className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -110,7 +110,7 @@ Mvh
             <div className="mt-4">
               <button
                 onClick={() => setShowDetails(!showDetails)}
-                className="w-full flex items-center justify-between p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="w-full flex items-center justify-between p-3 bg-gray-100 rounded-box hover:bg-gray-200 transition-colors"
               >
                 <span className="text-sm font-semibold text-gray-700">Teknisk information</span>
                 <svg 
@@ -124,7 +124,7 @@ Mvh
               </button>
               
               {showDetails && (
-                <div className="mt-2 p-3 bg-gray-900 rounded-lg overflow-auto">
+                <div className="mt-2 p-3 bg-gray-900 rounded-box overflow-auto">
                   <pre className="text-xs text-green-400 font-mono whitespace-pre-wrap">
                     {error.stack || error.message || JSON.stringify(error, null, 2)}
                   </pre>
@@ -135,7 +135,7 @@ Mvh
         </div>
 
         {/* Action Suggestions */}
-        <div className="bg-white rounded-xl shadow-lg border-2 border-brand-200 p-6 mb-6">
+        <div className="bg-white rounded-card shadow-lg border-2 border-brand-200 p-6 mb-6">
           <h3 className="font-bold text-brand-900 mb-4 flex items-center gap-2">
             <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -178,7 +178,7 @@ Mvh
         <div className="grid md:grid-cols-2 gap-4 mb-6">
           <button
             onClick={handleRetry}
-            className="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-4 rounded-lg hover:from-brand-700 hover:to-brand-800 transition-all font-bold shadow-lg flex items-center justify-center gap-2"
+            className="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-4 rounded-box hover:from-brand-700 hover:to-brand-800 transition-all font-bold shadow-lg flex items-center justify-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -188,7 +188,7 @@ Mvh
 
           <button
             onClick={handleGoHome}
-            className="bg-white border-2 border-brand-300 text-brand-700 px-6 py-4 rounded-lg hover:bg-brand-50 transition-colors font-semibold flex items-center justify-center gap-2"
+            className="bg-white border-2 border-brand-300 text-brand-700 px-6 py-4 rounded-box hover:bg-brand-50 transition-colors font-semibold flex items-center justify-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -200,7 +200,7 @@ Mvh
         {/* Report Error Button */}
         <button
           onClick={handleReportError}
-          className="w-full bg-red-50 border-2 border-red-200 text-red-700 px-6 py-3 rounded-lg hover:bg-red-100 transition-colors font-semibold flex items-center justify-center gap-2"
+          className="w-full bg-red-50 border-2 border-red-200 text-red-700 px-6 py-3 rounded-box hover:bg-red-100 transition-colors font-semibold flex items-center justify-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

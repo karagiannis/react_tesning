@@ -89,8 +89,8 @@ export default function IdentitetskontrollSlide({ onNext }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
-      <div className="max-w-4xl w-full bg-white rounded-2xl shadow-2xl p-10">
-        <h1 className="text-3xl font-bold text-brand-900 mb-6">
+      <div className="max-w-4xl w-full bg-white rounded-card shadow-2xl p-10">
+        <h1 className="text-page-title text-brand-900 mb-6">
           Identitetskontroll och dokumentation
         </h1>
 
@@ -124,8 +124,8 @@ export default function IdentitetskontrollSlide({ onNext }) {
         </div>
 
         {/* Camera Section */}
-        <div className="bg-gray-100 rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-bold text-brand-900 mb-4">
+        <div className="bg-gray-100 rounded-box p-6 mb-6">
+          <h2 className="text-section-title text-brand-900 mb-4">
             Ta foto med webbkamera
           </h2>
           <p className="text-sm text-brand-700 mb-4">
@@ -135,7 +135,7 @@ export default function IdentitetskontrollSlide({ onNext }) {
           {!isCameraActive && !capturedImage && (
             <button
               onClick={startCamera}
-              className="w-full bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+              className="w-full bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-box font-semibold transition-all flex items-center justify-center gap-2"
             >
               Starta webbkamera
             </button>
@@ -143,7 +143,7 @@ export default function IdentitetskontrollSlide({ onNext }) {
 
           {isCameraActive && (
             <div className="space-y-4">
-              <div className="relative bg-black rounded-lg overflow-hidden" style={{ minHeight: '400px' }}>
+              <div className="relative bg-black rounded-box overflow-hidden" style={{ minHeight: '400px' }}>
                 <video
                   ref={videoRef}
                   autoPlay
@@ -166,13 +166,13 @@ export default function IdentitetskontrollSlide({ onNext }) {
                 <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
                   <button
                     onClick={capturePhoto}
-                    className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-lg font-semibold transition-all shadow-lg"
+                    className="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-box font-semibold transition-all shadow-lg"
                   >
                     📸 Ta foto
                   </button>
                   <button
                     onClick={stopCamera}
-                    className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-semibold transition-all shadow-lg"
+                    className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-box font-semibold transition-all shadow-lg"
                   >
                     Avbryt
                   </button>
@@ -183,7 +183,7 @@ export default function IdentitetskontrollSlide({ onNext }) {
 
           {capturedImage && (
             <div className="space-y-4">
-              <div className="relative bg-black rounded-lg overflow-hidden">
+              <div className="relative bg-black rounded-box overflow-hidden">
                 <img
                   src={capturedImage}
                   alt="Captured ID"
@@ -193,7 +193,7 @@ export default function IdentitetskontrollSlide({ onNext }) {
               <div className="flex gap-4">
                 <button
                   onClick={retakePhoto}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-box font-semibold transition-all"
                 >
                   🔄 Ta om foto
                 </button>
@@ -202,7 +202,7 @@ export default function IdentitetskontrollSlide({ onNext }) {
                     // I produktion: skicka capturedImage till backend
                     alert('Foto sparat! (I produktion skickas detta till backend)');
                   }}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-box font-semibold transition-all"
                 >
                   ✅ Godkänn foto
                 </button>
@@ -226,7 +226,7 @@ export default function IdentitetskontrollSlide({ onNext }) {
         <button
           onClick={onNext}
           disabled={!capturedImage}
-          className={`w-full px-8 py-3 rounded-lg font-semibold transition-all ${
+          className={`w-full px-8 py-3 rounded-box font-semibold transition-all ${
             capturedImage
               ? 'bg-brand-600 hover:bg-brand-700 text-white cursor-pointer'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'

@@ -16,7 +16,7 @@ export default function LegalTextExpansion({ legalTexts = [], explanation = '' }
   if (!legalTexts || legalTexts.length === 0) return null;
 
   return (
-    <div className="mt-3 border border-brand-300 bg-brand-50 rounded-lg overflow-hidden">
+    <div className="mt-3 border border-brand-300 bg-brand-50 rounded-box overflow-hidden">
       {/* Expansion knapp - SMALARE */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}

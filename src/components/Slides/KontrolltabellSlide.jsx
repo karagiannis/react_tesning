@@ -1,8 +1,8 @@
 export default function KontrolltabellSlide({ onNext }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
-      <div className="max-w-6xl w-full bg-white rounded-2xl shadow-2xl p-10">
-        <h1 className="text-3xl font-bold text-brand-900 mb-4">
+      <div className="max-w-6xl w-full bg-white rounded-card shadow-2xl p-10">
+        <h1 className="text-page-title text-brand-900 mb-4">
           Identitetskontroll – sammanfattande tabell
         </h1>
         
@@ -124,7 +124,7 @@ export default function KontrolltabellSlide({ onNext }) {
 
         <button
           onClick={onNext}
-          className="w-full bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-lg font-semibold transition-all"
+          className="w-full bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-box font-semibold transition-all"
         >
           Nästa
         </button>

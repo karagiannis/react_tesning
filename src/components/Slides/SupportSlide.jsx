@@ -171,15 +171,15 @@ export default function SupportSlide({ onNext, onBack }) {
             return (
               <div
                 key={category.id}
-                className={`bg-white rounded-xl shadow-lg border-2 ${colors.border} p-6 hover:shadow-xl transition-shadow`}
+                className={`bg-white rounded-card shadow-lg border-2 ${colors.border} p-6 hover:shadow-xl transition-shadow`}
               >
                 {/* Header */}
                 <div className="flex items-start gap-4 mb-4">
-                  <div className={`w-14 h-14 ${colors.icon} rounded-lg flex items-center justify-center text-2xl flex-shrink-0`}>
+                  <div className={`w-14 h-14 ${colors.icon} rounded-box flex items-center justify-center text-2xl flex-shrink-0`}>
                     {category.icon}
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-brand-900 mb-1">
+                    <h3 className="text-section-title text-brand-900 mb-1">
                       {category.title}
                     </h3>
                     <p className="text-sm text-gray-600">
@@ -189,7 +189,7 @@ export default function SupportSlide({ onNext, onBack }) {
                 </div>
 
                 {/* Contact Info */}
-                <div className={`${colors.bg} rounded-lg p-4 mb-4 space-y-2`}>
+                <div className={`${colors.bg} rounded-box p-4 mb-4 space-y-2`}>
                   <div className="flex items-center gap-2 text-sm">
                     <svg className="w-5 h-5 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -237,14 +237,14 @@ export default function SupportSlide({ onNext, onBack }) {
         </div>
 
         {/* Escalation Flow */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-8 border-2 border-brand-200">
+        <div className="bg-white rounded-card shadow-lg p-8 mb-8 border-2 border-brand-200">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-brand-100 rounded-lg flex items-center justify-center">
-              <svg className="w-7 h-7 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-brand-100 rounded-box flex items-center justify-center">
+              <svg className="w-icon-md h-icon-md text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-brand-900">Eskaleringsprocess</h2>
+            <h2 className="text-page-title text-brand-900">Eskaleringsprocess</h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -281,15 +281,15 @@ export default function SupportSlide({ onNext, onBack }) {
         </div>
 
         {/* FAQ & Resources */}
-        <div className="bg-gradient-to-r from-brand-600 to-brand-700 rounded-xl shadow-xl p-8 mb-8 text-white">
+        <div className="bg-gradient-to-r from-brand-600 to-brand-700 rounded-card shadow-xl p-8 mb-8 text-white">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-white/20 rounded-box flex items-center justify-center">
+              <svg className="w-icon-md h-icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
             <div>
-              <h2 className="text-2xl font-bold mb-2">Självhjälpsresurser</h2>
+              <h2 className="text-page-title mb-2">Självhjälpsresurser</h2>
               <p className="text-white/90">
                 Många vanliga frågor har vi redan besvarat i vår kunskapsbas
               </p>
@@ -299,7 +299,7 @@ export default function SupportSlide({ onNext, onBack }) {
           <div className="grid md:grid-cols-2 gap-4">
             <a
               href="/faq"
-              className="flex items-center gap-3 p-4 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+              className="flex items-center gap-3 p-4 bg-white/10 rounded-box hover:bg-white/20 transition-colors"
             >
               <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -312,7 +312,7 @@ export default function SupportSlide({ onNext, onBack }) {
 
             <a
               href="/guides"
-              className="flex items-center gap-3 p-4 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+              className="flex items-center gap-3 p-4 bg-white/10 rounded-box hover:bg-white/20 transition-colors"
             >
               <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -325,7 +325,7 @@ export default function SupportSlide({ onNext, onBack }) {
 
             <a
               href="/videos"
-              className="flex items-center gap-3 p-4 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+              className="flex items-center gap-3 p-4 bg-white/10 rounded-box hover:bg-white/20 transition-colors"
             >
               <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -339,7 +339,7 @@ export default function SupportSlide({ onNext, onBack }) {
 
             <a
               href="/compliance-docs"
-              className="flex items-center gap-3 p-4 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+              className="flex items-center gap-3 p-4 bg-white/10 rounded-box hover:bg-white/20 transition-colors"
             >
               <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -356,7 +356,7 @@ export default function SupportSlide({ onNext, onBack }) {
         <div className="flex justify-between items-center gap-4">
           <button
             onClick={onBack}
-            className="px-6 py-3 border-2 border-brand-300 text-brand-700 rounded-lg hover:bg-brand-50 transition-colors font-semibold flex items-center gap-2"
+            className="px-6 py-3 border-2 border-brand-300 text-brand-700 rounded-box hover:bg-brand-50 transition-colors font-semibold flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -366,7 +366,7 @@ export default function SupportSlide({ onNext, onBack }) {
 
           <button
             onClick={onNext}
-            className="px-8 py-4 bg-gradient-to-r from-brand-600 to-brand-700 text-white rounded-lg hover:from-brand-700 hover:to-brand-800 transition-all font-bold text-lg shadow-lg flex items-center gap-2"
+            className="px-8 py-4 bg-gradient-to-r from-brand-600 to-brand-700 text-white rounded-box hover:from-brand-700 hover:to-brand-800 transition-all font-bold text-lg shadow-lg flex items-center gap-2"
           >
             Klar med onboarding! 🎉
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

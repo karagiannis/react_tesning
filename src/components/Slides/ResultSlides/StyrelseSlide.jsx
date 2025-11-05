@@ -7,7 +7,7 @@ export default function StyrelseSlide({ onNext, onBack }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-5xl w-full">
+      <div className="bg-white rounded-card shadow-2xl p-8 max-w-5xl w-full">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
             Styrelse & Firmatecknare
@@ -19,7 +19,7 @@ export default function StyrelseSlide({ onNext, onBack }) {
 
         {/* VD */}
         {boardData.ceo && (
-          <div className="mb-6 p-6 bg-brand-50 rounded-xl border border-brand-200">
+          <div className="mb-6 p-6 bg-brand-50 rounded-card border border-brand-200">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
               <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -44,7 +44,7 @@ export default function StyrelseSlide({ onNext, onBack }) {
         )}
 
         {/* Styrelse */}
-        <div className="mb-6 p-6 bg-white rounded-xl border border-brand-100">
+        <div className="mb-6 p-6 bg-white rounded-card border border-brand-100">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
             <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -98,7 +98,7 @@ export default function StyrelseSlide({ onNext, onBack }) {
 
         {/* Revisor */}
         {boardData.auditor && (
-          <div className="mb-6 p-6 bg-brand-50 rounded-xl border border-brand-200">
+          <div className="mb-6 p-6 bg-brand-50 rounded-card border border-brand-200">
             <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
               <svg className="w-5 h-5 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -123,14 +123,14 @@ export default function StyrelseSlide({ onNext, onBack }) {
         )}
 
         {/* Firmatecknare */}
-        <div className="mb-8 p-6 bg-white rounded-xl border border-brand-100">
+        <div className="mb-8 p-6 bg-white rounded-card border border-brand-100">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
             <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
             Firmatecknare
           </h2>
-          <div className="mb-4 p-4 bg-white rounded-lg border border-brand-200">
+          <div className="mb-4 p-4 bg-white rounded-box border border-brand-200">
             <div className="flex items-center">
               <span className="text-gray-600 font-medium mr-2">Firmateckningsregler:</span>
               <span className="text-brand-800 font-bold text-lg">{signatoryData.signingRules}</span>
@@ -139,7 +139,7 @@ export default function StyrelseSlide({ onNext, onBack }) {
           
           <div className="space-y-3 mb-4">
             {signatoryData.authorizedSignatories.map((signatory, index) => (
-              <div key={index} className="p-4 bg-white rounded-lg border border-brand-200">
+              <div key={index} className="p-4 bg-white rounded-box border border-brand-200">
                 <div className="flex justify-between items-center">
                   <div>
                     <div className="font-semibold text-gray-800">{signatory.name}</div>
@@ -172,7 +172,7 @@ export default function StyrelseSlide({ onNext, onBack }) {
         <div className="flex justify-between items-center pt-6 border-t border-gray-200">
           <button
             onClick={onBack}
-            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium flex items-center"
+            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-box hover:bg-gray-300 transition-colors font-medium flex items-center"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -181,7 +181,7 @@ export default function StyrelseSlide({ onNext, onBack }) {
           </button>
           <button
             onClick={onNext}
-            className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-500 text-white rounded-lg hover:from-brand-600 hover:to-brand-600 transition-colors font-medium flex items-center"
+            className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-500 text-white rounded-box hover:from-brand-600 hover:to-brand-600 transition-colors font-medium flex items-center"
           >
             Nästa: Riskindikatorer
             <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

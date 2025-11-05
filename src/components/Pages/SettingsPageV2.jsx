@@ -312,7 +312,7 @@ const SettingsPageV2 = () => {
         {/* SIDEBAR */}
         <div className="w-64 bg-white border-r border-gray-200 overflow-y-auto">
           <div className="p-6">
-            <h2 className="text-xl font-bold text-brand-900 mb-6 flex items-center gap-2">
+            <h2 className="text-section-title text-brand-900 mb-6 flex items-center gap-2">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -325,7 +325,7 @@ const SettingsPageV2 = () => {
                 {/* Main section */}
                 <button
                   onClick={() => setActiveSection(section.subsections.length > 0 ? section.subsections[0].id : section.id)}
-                  className={`w-full text-left px-3 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                  className={`w-full text-left px-3 py-2 rounded-box font-medium transition-colors flex items-center gap-2 ${
                     activeSection.startsWith(section.id) || activeSection === section.id
                       ? 'bg-brand-100 text-brand-900'
                       : 'text-gray-700 hover:bg-gray-100'
@@ -376,8 +376,8 @@ const SettingsPageV2 = () => {
             
             {/* FIRMAKONFIGURATION - Kontaktuppgifter */}
             {activeSection === 'firm-info' && (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold text-brand-900 mb-4">Kontaktuppgifter</h2>
+              <div className="bg-white rounded-box shadow-md p-6">
+                <h2 className="text-page-title text-brand-900 mb-4">Kontaktuppgifter</h2>
                 <p className="text-brand-700 mb-6">
                   Dessa uppgifter används för att automatiskt fylla i kontaktinformation i avtal, rapporter och kommunikation med klienter.
                 </p>
@@ -389,7 +389,7 @@ const SettingsPageV2 = () => {
                       type="text"
                       value={firmConfig.companyName}
                       onChange={(e) => setFirmConfig({...firmConfig, companyName: e.target.value})}
-                      className="w-full px-4 py-2 border border-brand-200 rounded-lg"
+                      className="w-full px-4 py-2 border border-brand-200 rounded-box"
                     />
                   </div>
                   
@@ -399,7 +399,7 @@ const SettingsPageV2 = () => {
                       type="text"
                       value={firmConfig.orgNumber}
                       onChange={(e) => setFirmConfig({...firmConfig, orgNumber: e.target.value})}
-                      className="w-full px-4 py-2 border border-brand-200 rounded-lg"
+                      className="w-full px-4 py-2 border border-brand-200 rounded-box"
                     />
                   </div>
 
@@ -409,7 +409,7 @@ const SettingsPageV2 = () => {
                       type="email"
                       value={firmConfig.supportEmail}
                       onChange={(e) => setFirmConfig({...firmConfig, supportEmail: e.target.value})}
-                      className="w-full px-4 py-2 border border-brand-200 rounded-lg"
+                      className="w-full px-4 py-2 border border-brand-200 rounded-box"
                     />
                   </div>
 
@@ -419,7 +419,7 @@ const SettingsPageV2 = () => {
                       type="tel"
                       value={firmConfig.supportPhone}
                       onChange={(e) => setFirmConfig({...firmConfig, supportPhone: e.target.value})}
-                      className="w-full px-4 py-2 border border-brand-200 rounded-lg"
+                      className="w-full px-4 py-2 border border-brand-200 rounded-box"
                     />
                   </div>
 
@@ -429,7 +429,7 @@ const SettingsPageV2 = () => {
                       type="text"
                       value={firmConfig.complianceOfficer}
                       onChange={(e) => setFirmConfig({...firmConfig, complianceOfficer: e.target.value})}
-                      className="w-full px-4 py-2 border border-brand-200 rounded-lg"
+                      className="w-full px-4 py-2 border border-brand-200 rounded-box"
                     />
                   </div>
 
@@ -439,7 +439,7 @@ const SettingsPageV2 = () => {
                       type="text"
                       value={firmConfig.taxOffice}
                       onChange={(e) => setFirmConfig({...firmConfig, taxOffice: e.target.value})}
-                      className="w-full px-4 py-2 border border-brand-200 rounded-lg"
+                      className="w-full px-4 py-2 border border-brand-200 rounded-box"
                     />
                   </div>
                 </div>
@@ -447,7 +447,7 @@ const SettingsPageV2 = () => {
                 <div className="mt-6 flex justify-end">
                   <button
                     onClick={handleSaveFirmConfig}
-                    className="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-medium"
+                    className="px-6 py-2 bg-brand-600 text-white rounded-box hover:bg-brand-700 font-medium"
                   >
                     Spara ändringar
                   </button>
@@ -459,11 +459,11 @@ const SettingsPageV2 = () => {
             {activeSection === 'access' && (
               <div className="space-y-6">
                 {/* Fjärronboarding */}
-                <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="bg-white rounded-box shadow-md p-6">
                   <div className="flex items-start justify-between mb-6">
                     <div>
-                      <h2 className="text-2xl font-bold text-brand-900 mb-2 flex items-center gap-2">
-                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <h2 className="text-page-title text-brand-900 mb-2 flex items-center gap-2">
+                        <svg className="w-icon-md h-icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         Fjärronboarding
@@ -475,7 +475,7 @@ const SettingsPageV2 = () => {
                     </div>
                     <button
                       onClick={() => setShowRemoteSessionModal(true)}
-                      className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-medium flex items-center gap-2"
+                      className="px-4 py-2 bg-brand-600 text-white rounded-box hover:bg-brand-700 font-medium flex items-center gap-2"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -546,11 +546,11 @@ const SettingsPageV2 = () => {
                 </div>
 
                 {/* Skuggning */}
-                <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="bg-white rounded-box shadow-md p-6">
                   <div className="flex items-start justify-between mb-6">
                     <div>
-                      <h2 className="text-2xl font-bold text-brand-900 mb-2 flex items-center gap-2">
-                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <h2 className="text-page-title text-brand-900 mb-2 flex items-center gap-2">
+                        <svg className="w-icon-md h-icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
@@ -562,7 +562,7 @@ const SettingsPageV2 = () => {
                     </div>
                     <button
                       onClick={() => setShowShadowLoginModal(true)}
-                      className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-medium flex items-center gap-2"
+                      className="px-4 py-2 bg-brand-600 text-white rounded-box hover:bg-brand-700 font-medium flex items-center gap-2"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -640,12 +640,12 @@ const SettingsPageV2 = () => {
 
             {/* ANVÄNDARE - Alla användare */}
             {activeSection === 'users' && (
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="bg-white rounded-box shadow-md p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-brand-900">Alla användare</h2>
+                  <h2 className="text-page-title text-brand-900">Alla användare</h2>
                   <button
                     onClick={() => setShowUserModal(true)}
-                    className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-medium"
+                    className="px-4 py-2 bg-brand-600 text-white rounded-box hover:bg-brand-700 font-medium"
                   >
                     + Lägg till användare
                   </button>
@@ -680,11 +680,11 @@ const SettingsPageV2 = () => {
 
             {/* PRENUMERATION - Översikt */}
             {activeSection === 'subscription-overview' && (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold text-brand-900 mb-6">Prenumeration</h2>
+              <div className="bg-white rounded-box shadow-md p-6">
+                <h2 className="text-page-title text-brand-900 mb-6">Prenumeration</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="border border-brand-200 rounded-lg p-4">
+                  <div className="border border-brand-200 rounded-box p-4">
                     <p className="text-sm text-gray-600 mb-1">Status</p>
                     <p className="text-lg font-bold text-green-600 flex items-center gap-2">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -694,17 +694,17 @@ const SettingsPageV2 = () => {
                     </p>
                   </div>
 
-                  <div className="border border-brand-200 rounded-lg p-4">
+                  <div className="border border-brand-200 rounded-box p-4">
                     <p className="text-sm text-gray-600 mb-1">Plan</p>
                     <p className="text-lg font-bold text-brand-900">{subscription.plan}</p>
                   </div>
 
-                  <div className="border border-brand-200 rounded-lg p-4">
+                  <div className="border border-brand-200 rounded-box p-4">
                     <p className="text-sm text-gray-600 mb-1">Nästa betalning</p>
                     <p className="text-lg font-bold text-brand-900">{subscription.nextPayment}</p>
                   </div>
 
-                  <div className="border border-brand-200 rounded-lg p-4">
+                  <div className="border border-brand-200 rounded-box p-4">
                     <p className="text-sm text-gray-600 mb-1">Belopp</p>
                     <p className="text-lg font-bold text-brand-900">{subscription.amount} kr</p>
                   </div>
@@ -714,8 +714,8 @@ const SettingsPageV2 = () => {
 
             {/* PRENUMERATION - Fakturor */}
             {activeSection === 'subscription-invoices' && (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold text-brand-900 mb-6">Fakturahistorik</h2>
+              <div className="bg-white rounded-box shadow-md p-6">
+                <h2 className="text-page-title text-brand-900 mb-6">Fakturahistorik</h2>
                 
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -758,9 +758,9 @@ const SettingsPageV2 = () => {
             {/* AVTAL - Alla tre typer på EN sida */}
             {activeSection === 'agreements' && (
               <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <h2 className="text-2xl font-bold text-brand-900 mb-2 flex items-center gap-2">
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-white rounded-box shadow-md p-6">
+                  <h2 className="text-page-title text-brand-900 mb-2 flex items-center gap-2">
+                    <svg className="w-icon-md h-icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     Avtal
@@ -772,14 +772,14 @@ const SettingsPageV2 = () => {
 
                   {/* Prova-på-avtal */}
                   <div className="mb-8 border-l-4 border-brand-500 bg-brand-50 p-6 rounded-r-lg">
-                    <h3 className="text-xl font-bold text-brand-900 mb-4 flex items-center gap-2">
+                    <h3 className="text-section-title text-brand-900 mb-4 flex items-center gap-2">
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       Prova-på-avtal
                     </h3>
                     
-                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="bg-white rounded-box p-4 shadow-sm">
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
                           <p className="text-sm text-gray-600">Avtalsnummer</p>
@@ -821,13 +821,13 @@ const SettingsPageV2 = () => {
                           {agreements.trial.status}
                         </span>
                         <div className="space-x-2">
-                          <button className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 text-sm flex items-center gap-1 inline-flex">
+                          <button className="px-4 py-2 bg-brand-600 text-white rounded-box hover:bg-brand-700 text-sm flex items-center gap-1 inline-flex">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             Ladda ner PDF
                           </button>
-                          <button className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm flex items-center gap-1 inline-flex">
+                          <button className="px-4 py-2 bg-gray-500 text-white rounded-box hover:bg-gray-600 text-sm flex items-center gap-1 inline-flex">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
@@ -840,14 +840,14 @@ const SettingsPageV2 = () => {
 
                   {/* Företagsavtal */}
                   <div className="mb-8 border-l-4 border-brand-600 bg-brand-100 p-6 rounded-r-lg">
-                    <h3 className="text-xl font-bold text-brand-900 mb-4 flex items-center gap-2">
+                    <h3 className="text-section-title text-brand-900 mb-4 flex items-center gap-2">
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
                       Företagsavtal
                     </h3>
                     
-                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="bg-white rounded-box p-4 shadow-sm">
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
                           <p className="text-sm text-gray-600">Avtalsnummer</p>
@@ -885,13 +885,13 @@ const SettingsPageV2 = () => {
                           {agreements.subscription.status}
                         </span>
                         <div className="space-x-2">
-                          <button className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 text-sm flex items-center gap-1 inline-flex">
+                          <button className="px-4 py-2 bg-brand-600 text-white rounded-box hover:bg-brand-700 text-sm flex items-center gap-1 inline-flex">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             Ladda ner PDF
                           </button>
-                          <button className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm flex items-center gap-1 inline-flex">
+                          <button className="px-4 py-2 bg-gray-500 text-white rounded-box hover:bg-gray-600 text-sm flex items-center gap-1 inline-flex">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
@@ -904,14 +904,14 @@ const SettingsPageV2 = () => {
 
                   {/* Uppdragsavtal */}
                   <div className="border-l-4 border-brand-500 bg-brand-50 p-6 rounded-r-lg">
-                    <h3 className="text-xl font-bold text-brand-900 mb-4 flex items-center gap-2">
+                    <h3 className="text-section-title text-brand-900 mb-4 flex items-center gap-2">
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                       Uppdragsavtal ({agreements.assignments.length} st)
                     </h3>
                     
-                    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <div className="bg-white rounded-box shadow-sm overflow-hidden">
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead className="bg-gray-100">
@@ -978,9 +978,9 @@ const SettingsPageV2 = () => {
 
             {/* DANGER ZONE */}
             {activeSection === 'danger' && (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold text-red-600 mb-4 flex items-center gap-2">
-                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-white rounded-box shadow-md p-6">
+                <h2 className="text-page-title text-red-600 mb-4 flex items-center gap-2">
+                  <svg className="w-icon-md h-icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                   Danger Zone
@@ -989,7 +989,7 @@ const SettingsPageV2 = () => {
                   Radering av konto är permanent och kan inte ångras. All data raderas omedelbart.
                 </p>
 
-                <div className="border-2 border-red-200 rounded-lg p-6 bg-red-50">
+                <div className="border-2 border-red-200 rounded-box p-6 bg-red-50">
                   <h3 className="font-bold text-red-900 mb-2">Ta bort konto permanent</h3>
                   <p className="text-sm text-red-700 mb-4">
                     Detta kommer radera all data inklusive användare, klienter, onboarding-sessioner och rapporter.
@@ -997,7 +997,7 @@ const SettingsPageV2 = () => {
                   
                   <button
                     onClick={() => setShowDeleteModal(true)}
-                    className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+                    className="px-6 py-2 bg-red-600 text-white rounded-box hover:bg-red-700 font-medium"
                   >
                     Ta bort konto
                   </button>
@@ -1007,10 +1007,10 @@ const SettingsPageV2 = () => {
 
             {/* Byråinställningar - Prislista */}
             {activeSection === 'firm-pricing' && (
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="bg-white rounded-box shadow-md p-6">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-brand-900 mb-2 flex items-center gap-2">
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <h2 className="text-page-title text-brand-900 mb-2 flex items-center gap-2">
+                    <svg className="w-icon-md h-icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     Prislista
@@ -1035,7 +1035,7 @@ const SettingsPageV2 = () => {
                         type="number"
                         value={priceList.lopandeBokforing}
                         onChange={(e) => setPriceList({...priceList, lopandeBokforing: parseInt(e.target.value) || 0})}
-                        className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-right"
+                        className="w-32 px-3 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-right"
                       />
                       <span className="text-gray-600 font-medium">kr/år</span>
                     </div>
@@ -1054,7 +1054,7 @@ const SettingsPageV2 = () => {
                         type="number"
                         value={priceList.arsbokslut}
                         onChange={(e) => setPriceList({...priceList, arsbokslut: parseInt(e.target.value) || 0})}
-                        className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-right"
+                        className="w-32 px-3 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-right"
                       />
                       <span className="text-gray-600 font-medium">kr/år</span>
                     </div>
@@ -1073,7 +1073,7 @@ const SettingsPageV2 = () => {
                         type="number"
                         value={priceList.deklarationer}
                         onChange={(e) => setPriceList({...priceList, deklarationer: parseInt(e.target.value) || 0})}
-                        className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-right"
+                        className="w-32 px-3 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-right"
                       />
                       <span className="text-gray-600 font-medium">kr/år</span>
                     </div>
@@ -1092,7 +1092,7 @@ const SettingsPageV2 = () => {
                         type="number"
                         value={priceList.loneadministration}
                         onChange={(e) => setPriceList({...priceList, loneadministration: parseInt(e.target.value) || 0})}
-                        className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-right"
+                        className="w-32 px-3 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-right"
                       />
                       <span className="text-gray-600 font-medium">kr/år</span>
                     </div>
@@ -1111,7 +1111,7 @@ const SettingsPageV2 = () => {
                         type="number"
                         value={priceList.ekonomiskRadgivning}
                         onChange={(e) => setPriceList({...priceList, ekonomiskRadgivning: parseInt(e.target.value) || 0})}
-                        className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-right"
+                        className="w-32 px-3 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-right"
                       />
                       <span className="text-gray-600 font-medium">kr/år</span>
                     </div>
@@ -1130,7 +1130,7 @@ const SettingsPageV2 = () => {
                         type="number"
                         value={priceList.foretagsregistrering}
                         onChange={(e) => setPriceList({...priceList, foretagsregistrering: parseInt(e.target.value) || 0})}
-                        className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-right"
+                        className="w-32 px-3 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-right"
                       />
                       <span className="text-gray-600 font-medium">kr (engång)</span>
                     </div>
@@ -1149,7 +1149,7 @@ const SettingsPageV2 = () => {
                         type="number"
                         value={priceList.finansiellRapportering}
                         onChange={(e) => setPriceList({...priceList, finansiellRapportering: parseInt(e.target.value) || 0})}
-                        className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-right"
+                        className="w-32 px-3 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-right"
                       />
                       <span className="text-gray-600 font-medium">kr/år</span>
                     </div>
@@ -1170,7 +1170,7 @@ const SettingsPageV2 = () => {
                 </div>
 
                 {/* Info-box */}
-                <div className="mt-6 bg-brand-50 border border-brand-200 rounded-lg p-4">
+                <div className="mt-6 bg-brand-50 border border-brand-200 rounded-box p-4">
                   <div className="flex gap-3">
                     <svg className="w-5 h-5 text-brand-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1188,7 +1188,7 @@ const SettingsPageV2 = () => {
 
                 {/* Spara-knapp */}
                 <div className="mt-6 flex justify-end">
-                  <button className="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-medium flex items-center gap-2">
+                  <button className="px-6 py-2 bg-brand-600 text-white rounded-box hover:bg-brand-700 font-medium flex items-center gap-2">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
@@ -1200,10 +1200,10 @@ const SettingsPageV2 = () => {
 
             {/* Byråinställningar - Teckna avtal med oss */}
             {activeSection === 'firm-sign-agreement' && (
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="bg-white rounded-box shadow-md p-6">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-brand-900 mb-2 flex items-center gap-2">
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <h2 className="text-page-title text-brand-900 mb-2 flex items-center gap-2">
+                    <svg className="w-icon-md h-icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     Teckna avtal med oss
@@ -1215,7 +1215,7 @@ const SettingsPageV2 = () => {
                 </div>
 
                 {/* Status overview */}
-                <div className={`mb-6 p-5 rounded-lg border-2 ${
+                <div className={`mb-6 p-5 rounded-box border-2 ${
                   platformAgreement.isSigned 
                     ? 'bg-green-50 border-green-400' 
                     : 'bg-yellow-50 border-yellow-400'
@@ -1271,7 +1271,7 @@ const SettingsPageV2 = () => {
                 {/* PDF Container - Avtalet */}
                 {!platformAgreement.isSigned && (
                   <>
-                    <div className="mb-6 border-2 border-gray-300 rounded-lg overflow-hidden">
+                    <div className="mb-6 border-2 border-gray-300 rounded-box overflow-hidden">
                       <div className="bg-gray-100 p-3 border-b border-gray-300 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
@@ -1304,7 +1304,7 @@ const SettingsPageV2 = () => {
                     </div>
 
                     {/* BankID Signing Section */}
-                    <div className="mb-6 p-5 bg-brand-50 border-2 border-brand-200 rounded-lg">
+                    <div className="mb-6 p-5 bg-brand-50 border-2 border-brand-200 rounded-box">
                       <h3 className="font-bold text-brand-900 mb-3 flex items-center gap-2">
                         <svg className="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -1336,7 +1336,7 @@ const SettingsPageV2 = () => {
                           }, 5000);
                         }}
                         disabled={platformAgreement.isSigningInProgress}
-                        className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-lg transition-all font-semibold text-lg ${
+                        className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-box transition-all font-semibold text-lg ${
                           platformAgreement.isSigningInProgress
                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             : 'bg-brand-600 text-white hover:bg-brand-700 shadow-lg'
@@ -1361,9 +1361,9 @@ const SettingsPageV2 = () => {
                       </button>
 
                       {platformAgreement.isSigningInProgress && (
-                        <div className="mt-4 p-4 bg-white border-2 border-brand-400 rounded-lg">
+                        <div className="mt-4 p-4 bg-white border-2 border-brand-400 rounded-box">
                           <div className="flex items-center justify-center mb-3">
-                            <div className="w-48 h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <div className="w-48 h-48 bg-gray-200 rounded-box flex items-center justify-center">
                               <div className="text-center">
                                 <svg className="w-32 h-32 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
                                   <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/>
@@ -1381,7 +1381,7 @@ const SettingsPageV2 = () => {
                     </div>
 
                     {/* Info box - Payment warning */}
-                    <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-300">
+                    <div className="p-4 bg-yellow-50 rounded-box border border-yellow-300">
                       <div className="flex items-start gap-3">
                         <svg className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -1405,7 +1405,7 @@ const SettingsPageV2 = () => {
 
                 {/* Success message after signing */}
                 {platformAgreement.isSigned && platformAgreement.status === 'Under verifiering' && (
-                  <div className="p-4 bg-brand-50 rounded-lg border border-brand-300">
+                  <div className="p-4 bg-brand-50 rounded-box border border-brand-300">
                     <p className="text-sm text-brand-900">
                       <strong>Tack för er signering!</strong> Vi verifierar nu er byrå. 
                       Ni kommer att få ett e-postmeddelande när verifieringen är klar (normalt 1-2 arbetsdagar). 
@@ -1418,10 +1418,10 @@ const SettingsPageV2 = () => {
 
             {/* Byråinställningar - Avtalsmall (LaTeX) */}
             {activeSection === 'firm-contract' && (
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="bg-white rounded-box shadow-md p-6">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-brand-900 mb-2 flex items-center gap-2">
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <h2 className="text-page-title text-brand-900 mb-2 flex items-center gap-2">
+                    <svg className="w-icon-md h-icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     Avtalsmall (LaTeX)
@@ -1433,7 +1433,7 @@ const SettingsPageV2 = () => {
                 </div>
 
                 {/* Nuvarande mall info */}
-                <div className="mb-6 p-5 bg-brand-50 border-2 border-brand-200 rounded-lg">
+                <div className="mb-6 p-5 bg-brand-50 border-2 border-brand-200 rounded-box">
                   <h3 className="font-semibold text-brand-900 mb-3 flex items-center gap-2">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -1441,7 +1441,7 @@ const SettingsPageV2 = () => {
                     Nuvarande mall
                   </h3>
                   
-                  <div className="bg-white rounded-lg p-4 mb-4">
+                  <div className="bg-white rounded-box p-4 mb-4">
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <p className="text-sm font-medium text-gray-900">{latexTemplate.filename}</p>
@@ -1462,7 +1462,7 @@ const SettingsPageV2 = () => {
 
                     <div className="flex gap-2">
                       <button 
-                        className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 text-sm flex items-center justify-center gap-2"
+                        className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-box hover:bg-brand-700 text-sm flex items-center justify-center gap-2"
                         onClick={() => {
                           // Mock download - In production: GET /api/settings/latex-template/download?templateId={id}
                           const downloadUrl = latexTemplate.templateId === 'default' 
@@ -1485,7 +1485,7 @@ const SettingsPageV2 = () => {
                         href={latexTemplate.previewPdfUrl} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm flex items-center justify-center gap-2"
+                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-box hover:bg-gray-300 text-sm flex items-center justify-center gap-2"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1496,7 +1496,7 @@ const SettingsPageV2 = () => {
                     </div>
                   </div>
 
-                  <div className="bg-brand-50 border border-brand-200 rounded-lg p-3">
+                  <div className="bg-brand-50 border border-brand-200 rounded-box p-3">
                     <p className="text-sm text-brand-900 mb-2 flex items-center gap-2">
                       <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -1527,7 +1527,7 @@ const SettingsPageV2 = () => {
                 </div>
 
                 {/* Upload ny mall */}
-                <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-lg">
+                <div className="mb-6 p-5 bg-gray-50 border-2 border-gray-300 rounded-box">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -1567,10 +1567,10 @@ const SettingsPageV2 = () => {
                         }
                       }}
                       disabled={latexTemplate.isUploading}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 disabled:bg-gray-100"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500 disabled:bg-gray-100"
                     />
                     {latexTemplate.isUploading && (
-                      <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center gap-2">
+                      <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-box flex items-center gap-2">
                         <svg className="w-5 h-5 text-yellow-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
@@ -1578,7 +1578,7 @@ const SettingsPageV2 = () => {
                       </div>
                     )}
                     {latexTemplate.uploadError && (
-                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-box flex items-center gap-2">
                         <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -1587,7 +1587,7 @@ const SettingsPageV2 = () => {
                     )}
                   </div>
 
-                  <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-4">
+                  <div className="bg-yellow-50 border border-yellow-300 rounded-box p-3 mb-4">
                     <p className="text-sm text-yellow-900">
                       <strong>⚠️ Viktigt:</strong> Vid upload ersätts den nuvarande mallen. Original förblir orörd 
                       och används för alla nya onboarding-sessioner.
@@ -1595,7 +1595,7 @@ const SettingsPageV2 = () => {
                   </div>
 
                   {/* Placeholders info */}
-                  <div className="bg-white border border-gray-300 rounded-lg p-4">
+                  <div className="bg-white border border-gray-300 rounded-box p-4">
                     <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                       <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1622,8 +1622,8 @@ const SettingsPageV2 = () => {
 
             {/* Placeholder för andra sektioner */}
             {!['firm-info', 'users', 'access', 'subscription-overview', 'subscription-invoices', 'agreements', 'danger', 'firm-pricing', 'firm-contract'].includes(activeSection) && (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold text-brand-900 mb-4">
+              <div className="bg-white rounded-box shadow-md p-6">
+                <h2 className="text-page-title text-brand-900 mb-4">
                   {sidebarSections.find(s => s.id === activeSection || s.subsections.some(sub => sub.id === activeSection))?.label || 'Section'}
                 </h2>
                 <p className="text-gray-600">
@@ -1639,21 +1639,21 @@ const SettingsPageV2 = () => {
       {/* Modaler (behålls från Iteration 1) */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-md">
-            <h3 className="text-xl font-bold text-red-600 mb-4">Bekräfta radering</h3>
+          <div className="bg-white rounded-box p-8 max-w-md">
+            <h3 className="text-section-title text-red-600 mb-4">Bekräfta radering</h3>
             <p className="text-gray-700 mb-6">
               Är du säker på att du vill radera kontot? Detta kan inte ångras.
             </p>
             <div className="flex gap-4">
               <button
                 onClick={handleDeleteAccount}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-box hover:bg-red-700 font-medium"
               >
                 Ja, radera
               </button>
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 font-medium"
+                className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-box hover:bg-gray-400 font-medium"
               >
                 Avbryt
               </button>
@@ -1665,9 +1665,9 @@ const SettingsPageV2 = () => {
       {/* Modal: Skapa fjärronboarding-session */}
       {showRemoteSessionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 my-8">
+          <div className="bg-white rounded-box shadow-xl max-w-lg w-full p-6 my-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-brand-900">Skapa fjärronboarding-session</h3>
+              <h3 className="text-page-title text-brand-900">Skapa fjärronboarding-session</h3>
               <button
                 onClick={() => setShowRemoteSessionModal(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -1687,7 +1687,7 @@ const SettingsPageV2 = () => {
                 <input
                   type="text"
                   id="remoteCompanyName"
-                  className="w-full px-4 py-2 border border-brand-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-brand-200 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   placeholder="Acme AB"
                 />
               </div>
@@ -1700,7 +1700,7 @@ const SettingsPageV2 = () => {
                 <input
                   type="text"
                   id="remoteOrgNr"
-                  className="w-full px-4 py-2 border border-brand-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-brand-200 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   placeholder="556123-4567"
                 />
               </div>
@@ -1713,7 +1713,7 @@ const SettingsPageV2 = () => {
                 <input
                   type="text"
                   id="remoteContactName"
-                  className="w-full px-4 py-2 border border-brand-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-brand-200 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   placeholder="Erik Johansson"
                 />
               </div>
@@ -1726,7 +1726,7 @@ const SettingsPageV2 = () => {
                 <input
                   type="email"
                   id="remoteEmail"
-                  className="w-full px-4 py-2 border border-brand-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-brand-200 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   placeholder="erik@acmeab.se"
                 />
               </div>
@@ -1739,13 +1739,13 @@ const SettingsPageV2 = () => {
                 <input
                   type="tel"
                   id="remotePhone"
-                  className="w-full px-4 py-2 border border-brand-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-brand-200 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   placeholder="070-123 45 67"
                 />
               </div>
 
               {/* Info-box */}
-              <div className="bg-brand-50 border border-brand-200 rounded-lg p-4">
+              <div className="bg-brand-50 border border-brand-200 rounded-box p-4">
                 <div className="flex gap-3">
                   <svg className="w-5 h-5 text-brand-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -1767,7 +1767,7 @@ const SettingsPageV2 = () => {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setShowRemoteSessionModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-box text-gray-700 hover:bg-gray-50 font-medium transition-colors"
               >
                 Avbryt
               </button>
@@ -1782,7 +1782,7 @@ const SettingsPageV2 = () => {
                     alert('Vänligen fyll i företagsnamn och e-postadress');
                   }
                 }}
-                className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-medium transition-colors flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-box hover:bg-brand-700 font-medium transition-colors flex items-center justify-center gap-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -1797,9 +1797,9 @@ const SettingsPageV2 = () => {
       {/* Modal: Generera skuggnings-inlogg */}
       {showShadowLoginModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 my-8">
+          <div className="bg-white rounded-box shadow-xl max-w-lg w-full p-6 my-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-brand-900">Generera skuggnings-inlogg</h3>
+              <h3 className="text-page-title text-brand-900">Generera skuggnings-inlogg</h3>
               <button
                 onClick={() => setShowShadowLoginModal(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -1818,7 +1818,7 @@ const SettingsPageV2 = () => {
                 </label>
                 <select 
                   id="shadowType"
-                  className="w-full px-4 py-2 border border-brand-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-brand-200 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 >
                   <option value="colleague">Kollega (läsvy - utbildning)</option>
                   <option value="support">Support (läsvy - telefonsupport)</option>
@@ -1833,7 +1833,7 @@ const SettingsPageV2 = () => {
                 </label>
                 <select 
                   id="shadowSession"
-                  className="w-full px-4 py-2 border border-brand-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-brand-200 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 >
                   {remoteSessions.filter(s => s.status === 'Aktiv').map(session => (
                     <option key={session.id} value={session.accessCode}>
@@ -1851,7 +1851,7 @@ const SettingsPageV2 = () => {
                 <input
                   type="text"
                   id="shadowName"
-                  className="w-full px-4 py-2 border border-brand-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-brand-200 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   placeholder="Erik Eriksson"
                 />
               </div>
@@ -1864,7 +1864,7 @@ const SettingsPageV2 = () => {
                 <input
                   type="email"
                   id="shadowEmail"
-                  className="w-full px-4 py-2 border border-brand-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-brand-200 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   placeholder="erik@exempel.se"
                 />
               </div>
@@ -1876,7 +1876,7 @@ const SettingsPageV2 = () => {
                 </label>
                 <select 
                   id="shadowExpiry"
-                  className="w-full px-4 py-2 border border-brand-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-brand-200 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 >
                   <option value="session-end">Till sessionens slut (standard)</option>
                   <option value="24">24 timmar</option>
@@ -1885,7 +1885,7 @@ const SettingsPageV2 = () => {
               </div>
 
               {/* Info-box */}
-              <div className="bg-brand-50 border border-brand-200 rounded-lg p-4">
+              <div className="bg-brand-50 border border-brand-200 rounded-box p-4">
                 <div className="flex gap-3">
                   <svg className="w-5 h-5 text-brand-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1905,7 +1905,7 @@ const SettingsPageV2 = () => {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setShowShadowLoginModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-box text-gray-700 hover:bg-gray-50 font-medium transition-colors"
               >
                 Avbryt
               </button>
@@ -1920,7 +1920,7 @@ const SettingsPageV2 = () => {
                     alert('Vänligen fyll i namn och e-postadress');
                   }
                 }}
-                className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-medium transition-colors flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-box hover:bg-brand-700 font-medium transition-colors flex items-center justify-center gap-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1935,9 +1935,9 @@ const SettingsPageV2 = () => {
 
       {showUserModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6">
+          <div className="bg-white rounded-box shadow-xl max-w-lg w-full p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-brand-900">Lägg till ny användare</h3>
+              <h3 className="text-page-title text-brand-900">Lägg till ny användare</h3>
               <button
                 onClick={() => setShowUserModal(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -1957,7 +1957,7 @@ const SettingsPageV2 = () => {
                 <input
                   type="text"
                   id="firstName"
-                  className="w-full px-4 py-2 border border-brand-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-brand-200 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   placeholder="Erik"
                 />
               </div>
@@ -1970,7 +1970,7 @@ const SettingsPageV2 = () => {
                 <input
                   type="text"
                   id="lastName"
-                  className="w-full px-4 py-2 border border-brand-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-brand-200 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   placeholder="Eriksson"
                 />
               </div>
@@ -1983,7 +1983,7 @@ const SettingsPageV2 = () => {
                 <input
                   type="email"
                   id="userEmail"
-                  className="w-full px-4 py-2 border border-brand-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-brand-200 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   placeholder="erik@exempel.se"
                 />
               </div>
@@ -1995,7 +1995,7 @@ const SettingsPageV2 = () => {
                 </label>
                 <select 
                   id="userRole"
-                  className="w-full px-4 py-2 border border-brand-200 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-brand-200 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 >
                   <option value="user">Användare (onboarding + klienter)</option>
                   <option value="admin">Administratör (full åtkomst)</option>
@@ -2004,7 +2004,7 @@ const SettingsPageV2 = () => {
               </div>
 
               {/* Info-box */}
-              <div className="bg-brand-50 border border-brand-200 rounded-lg p-4">
+              <div className="bg-brand-50 border border-brand-200 rounded-box p-4">
                 <div className="flex gap-3">
                   <svg className="w-5 h-5 text-brand-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -2024,7 +2024,7 @@ const SettingsPageV2 = () => {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setShowUserModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-box text-gray-700 hover:bg-gray-50 font-medium transition-colors"
               >
                 Avbryt
               </button>
@@ -2040,7 +2040,7 @@ const SettingsPageV2 = () => {
                     alert('Vänligen fyll i alla obligatoriska fält');
                   }
                 }}
-                className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-medium transition-colors flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-brand-600 text-white rounded-box hover:bg-brand-700 font-medium transition-colors flex items-center justify-center gap-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

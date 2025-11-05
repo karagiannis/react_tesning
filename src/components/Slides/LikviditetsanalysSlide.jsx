@@ -18,7 +18,7 @@ export default function LikviditetsanalysSlide({ onNext, onBack }) {
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-4 border border-brand-200 rounded-lg shadow-lg">
+        <div className="bg-white p-4 border border-brand-200 rounded-box shadow-lg">
           <p className="font-semibold text-gray-800 mb-2">{payload[0].payload.month}</p>
           <p className="text-brand-600">
             <strong>Saldo:</strong> {formatCurrency(payload[0].value)}
@@ -37,10 +37,10 @@ export default function LikviditetsanalysSlide({ onNext, onBack }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
-      <div className="max-w-6xl w-full bg-white rounded-2xl shadow-2xl p-10">
+      <div className="max-w-6xl w-full bg-white rounded-card shadow-2xl p-10">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-brand-900 mb-2 flex items-center gap-3">
+          <h1 className="text-page-title text-brand-900 mb-2 flex items-center gap-3">
             <svg className="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
@@ -52,7 +52,7 @@ export default function LikviditetsanalysSlide({ onNext, onBack }) {
         </div>
 
         {/* Graf */}
-        <div className="mb-8 p-6 bg-brand-50 rounded-xl border border-brand-200">
+        <div className="mb-8 p-6 bg-brand-50 rounded-card border border-brand-200">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             Likviditet över tid (12 månader)
           </h2>
@@ -87,7 +87,7 @@ export default function LikviditetsanalysSlide({ onNext, onBack }) {
         {/* Sammanfattning och AI-analys */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Sammanfattning */}
-          <div className="p-6 bg-white rounded-xl border border-brand-200">
+          <div className="p-6 bg-white rounded-card border border-brand-200">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
               <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -126,7 +126,7 @@ export default function LikviditetsanalysSlide({ onNext, onBack }) {
           </div>
 
           {/* AI-analys */}
-          <div className="p-6 bg-white rounded-xl border border-brand-200">
+          <div className="p-6 bg-white rounded-card border border-brand-200">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
               <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -165,7 +165,7 @@ export default function LikviditetsanalysSlide({ onNext, onBack }) {
 
         {/* Ovanliga transaktioner (om det finns några) */}
         {aiAnalysis.unusualTransactions && aiAnalysis.unusualTransactions.length > 0 && (
-          <div className="mb-8 p-6 bg-yellow-50 rounded-xl border border-yellow-200">
+          <div className="mb-8 p-6 bg-yellow-50 rounded-card border border-yellow-200">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
               <svg className="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -174,7 +174,7 @@ export default function LikviditetsanalysSlide({ onNext, onBack }) {
             </h3>
             <div className="space-y-2">
               {aiAnalysis.unusualTransactions.map((transaction, index) => (
-                <div key={index} className="flex justify-between items-center p-3 bg-white rounded-lg border border-yellow-200">
+                <div key={index} className="flex justify-between items-center p-3 bg-white rounded-box border border-yellow-200">
                   <div>
                     <p className="font-medium text-gray-800">{transaction.description}</p>
                     <p className="text-sm text-gray-600">Datum: {transaction.date}</p>
@@ -187,7 +187,7 @@ export default function LikviditetsanalysSlide({ onNext, onBack }) {
         )}
 
         {/* Rekommendationer */}
-        <div className="mb-8 p-6 bg-brand-50 rounded-xl border-l-4 border-brand-500">
+        <div className="mb-8 p-6 bg-brand-50 rounded-card border-l-4 border-brand-500">
           <h3 className="text-lg font-semibold text-brand-900 mb-3 flex items-center gap-2">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -208,13 +208,13 @@ export default function LikviditetsanalysSlide({ onNext, onBack }) {
         <div className="flex gap-4">
           <button
             onClick={onBack}
-            className="w-1/3 px-8 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-semibold"
+            className="w-1/3 px-8 py-3 bg-gray-200 text-gray-700 rounded-box hover:bg-gray-300 transition-colors font-semibold"
           >
             Tillbaka
           </button>
           <button
             onClick={onNext}
-            className="w-2/3 px-8 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-semibold transition-all"
+            className="w-2/3 px-8 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-box font-semibold transition-all"
           >
             Nästa: Omsättningsanalys
           </button>

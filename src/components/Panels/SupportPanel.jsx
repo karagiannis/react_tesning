@@ -49,7 +49,7 @@ export default function SupportPanel({ onClose }) {
       <div className="p-4 bg-brand-50 border-b border-brand-300 space-y-3">
         <button
           onClick={handleScreenShare}
-          className={`w-full px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
+          className={`w-full px-4 py-3 rounded-box font-semibold transition-colors flex items-center justify-center gap-2 ${
             isScreenShareActive
               ? 'bg-red-600 hover:bg-red-700 text-white'
               : 'bg-brand-600 hover:bg-brand-700 text-white'
@@ -68,7 +68,7 @@ export default function SupportPanel({ onClose }) {
           </div>
         )}
 
-        <div className="bg-white border border-brand-300 rounded-lg p-3">
+        <div className="bg-white border border-brand-300 rounded-box p-3">
           <h3 className="font-semibold text-brand-900 text-sm mb-2 flex items-center gap-2">
             <Icon name="question" className="w-4 h-4" />
             Kontakta oss
@@ -95,7 +95,7 @@ export default function SupportPanel({ onClose }) {
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                className={`max-w-[80%] rounded-box px-4 py-2 ${
                   msg.role === 'user'
                     ? 'bg-brand-600 text-white'
                     : 'bg-brand-100 border border-brand-300 text-brand-900'
@@ -123,11 +123,11 @@ export default function SupportPanel({ onClose }) {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Skriv ditt meddelande..."
-            className="flex-1 px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
           />
           <button
             onClick={handleSend}
-            className="bg-brand-600 hover:bg-brand-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors"
+            className="bg-brand-600 hover:bg-brand-700 text-white px-6 py-2 rounded-box font-semibold transition-colors"
           >
             Skicka
           </button>

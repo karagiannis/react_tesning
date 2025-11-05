@@ -1,5 +1,9 @@
 // Mock report endpoint - renderar HTML eller returnerar PDF-URL
 // Simulerar Fortnox's report.php?output=htm/pdf
+//
+// NOTE: För momsrapport-generering, se momskod-mappning i:
+// src/data/momskod_mapping.json (38 Fortnox-koder → Skatteverkets rutor)
+// Källa: Skatteverket.se + Fortnox UI
 
 import { getMockReportData } from '../data/mockAccountingData';
 

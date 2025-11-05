@@ -46,7 +46,7 @@ export default function UnauthorizedPage({ errorCode = 401 }) {
             Fel {errorCode}
           </div>
           
-          <h1 className="text-3xl font-bold text-brand-900 mb-4">
+          <h1 className="text-page-title text-brand-900 mb-4">
             {error.title}
           </h1>
           
@@ -56,7 +56,7 @@ export default function UnauthorizedPage({ errorCode = 401 }) {
         </div>
 
         {/* Error Details Card */}
-        <div className="bg-white rounded-xl shadow-lg border-2 border-red-200 p-6 mb-6">
+        <div className="bg-white rounded-card shadow-lg border-2 border-red-200 p-6 mb-6">
           <div className="flex items-start gap-3 mb-4">
             <svg className="w-6 h-6 text-red-500 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -73,7 +73,7 @@ export default function UnauthorizedPage({ errorCode = 401 }) {
           </div>
 
           {errorCode === 401 && (
-            <div className="bg-brand-50 rounded-lg p-4 mt-4">
+            <div className="bg-brand-50 rounded-box p-4 mt-4">
               <div className="flex items-start gap-2">
                 <svg className="w-5 h-5 text-brand-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -89,7 +89,7 @@ export default function UnauthorizedPage({ errorCode = 401 }) {
           )}
 
           {errorCode === 403 && (
-            <div className="bg-brand-50 rounded-lg p-4 mt-4">
+            <div className="bg-brand-50 rounded-box p-4 mt-4">
               <div className="flex items-start gap-2">
                 <svg className="w-5 h-5 text-brand-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -109,7 +109,7 @@ export default function UnauthorizedPage({ errorCode = 401 }) {
         <div className="space-y-3">
           <button
             onClick={handleAction}
-            className="w-full bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-4 rounded-lg hover:from-brand-700 hover:to-brand-800 transition-all font-bold text-lg shadow-lg flex items-center justify-center gap-2"
+            className="w-full bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-4 rounded-box hover:from-brand-700 hover:to-brand-800 transition-all font-bold text-lg shadow-lg flex items-center justify-center gap-2"
           >
             {errorCode === 401 ? (
               <>
@@ -130,7 +130,7 @@ export default function UnauthorizedPage({ errorCode = 401 }) {
 
           <button
             onClick={() => window.history.back()}
-            className="w-full bg-white border-2 border-brand-300 text-brand-700 px-6 py-3 rounded-lg hover:bg-brand-50 transition-colors font-semibold flex items-center justify-center gap-2"
+            className="w-full bg-white border-2 border-brand-300 text-brand-700 px-6 py-3 rounded-box hover:bg-brand-50 transition-colors font-semibold flex items-center justify-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

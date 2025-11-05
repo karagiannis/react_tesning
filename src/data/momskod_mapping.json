@@ -1,0 +1,299 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Fortnox momskods-mappning till Skatteverkets momsdeklaration. Källa: Fortnox UI + Skatteverket.se. Total: 38 koder (exkl 'A' - öresavrundning som bokförs på konto 3740 istället).",
+  "version": "1.0.0",
+  "lastUpdated": "2025-11-05",
+  "codes": {
+    "MP1": {
+      "ruta": "05",
+      "vatPercent": 25,
+      "description": "Momspliktig försäljning eller uttag exklusive 25% moms",
+      "category": "forsaljning_sverige",
+      "block": "A"
+    },
+    "MP2": {
+      "ruta": "05",
+      "vatPercent": 12,
+      "description": "Momspliktig försäljning eller uttag exklusive 12% moms",
+      "category": "forsaljning_sverige",
+      "block": "A"
+    },
+    "MP3": {
+      "ruta": "05",
+      "vatPercent": 6,
+      "description": "Momspliktig försäljning eller uttag exklusive 6% moms",
+      "category": "forsaljning_sverige",
+      "block": "A"
+    },
+    "UT": {
+      "ruta": "06",
+      "vatPercent": null,
+      "description": "Värdet av momspliktiga uttag exklusive moms",
+      "category": "uttag",
+      "block": "A"
+    },
+    "BVMB": {
+      "ruta": "07",
+      "vatPercent": null,
+      "description": "Beskattningsunderlag vid vinstmarginalbeskattning",
+      "category": "vinstmarginalbeskattning",
+      "block": "A"
+    },
+    "HFS": {
+      "ruta": "08",
+      "vatPercent": 25,
+      "description": "Hyresinkomster vid frivillig beskattning",
+      "category": "hyresinkomster",
+      "block": "A"
+    },
+    "U1": {
+      "ruta": "10",
+      "vatPercent": 25,
+      "description": "Utgående moms 25% på försäljning eller uttag i fält 05–08",
+      "category": "utgaende_moms",
+      "block": "B"
+    },
+    "U2": {
+      "ruta": "11",
+      "vatPercent": 12,
+      "description": "Utgående moms 12% på försäljning eller uttag i fält 05–08",
+      "category": "utgaende_moms",
+      "block": "B"
+    },
+    "U3": {
+      "ruta": "12",
+      "vatPercent": 6,
+      "description": "Utgående moms 6% på försäljning eller uttag i fält 05–08",
+      "category": "utgaende_moms",
+      "block": "B"
+    },
+    "IVEU": {
+      "ruta": "20",
+      "vatPercent": null,
+      "description": "Inköp av varor från annat EU-land",
+      "category": "inkop_omvand_betalningsskyldighet",
+      "block": "C"
+    },
+    "ITEU": {
+      "ruta": "21",
+      "vatPercent": null,
+      "description": "Inköp av tjänster från ett annat EU-land, enligt huvudregeln",
+      "category": "inkop_omvand_betalningsskyldighet",
+      "block": "C"
+    },
+    "ITGLOB": {
+      "ruta": "22",
+      "vatPercent": null,
+      "description": "Inköp av tjänster från länder utanför EU",
+      "category": "inkop_omvand_betalningsskyldighet",
+      "block": "C"
+    },
+    "IV": {
+      "ruta": "23",
+      "vatPercent": null,
+      "description": "Inköp av varor i Sverige som köparen är betalningsskyldig för",
+      "category": "inkop_omvand_betalningsskyldighet",
+      "block": "C"
+    },
+    "IT": {
+      "ruta": "24",
+      "vatPercent": null,
+      "description": "Övriga inköp av tjänster i Sverige som köparen är betalningsskyldig för",
+      "category": "inkop_omvand_betalningsskyldighet",
+      "block": "C"
+    },
+    "UOS1": {
+      "ruta": "30",
+      "vatPercent": 25,
+      "description": "Utgående moms 25% på inköp med omvänd betalningsskyldighet i fält 20–24",
+      "category": "utgaende_moms_inkop",
+      "block": "D"
+    },
+    "UOS2": {
+      "ruta": "31",
+      "vatPercent": 12,
+      "description": "Utgående moms 12% på inköp med omvänd betalningsskyldighet i fält 20–24",
+      "category": "utgaende_moms_inkop",
+      "block": "D"
+    },
+    "UOS3": {
+      "ruta": "32",
+      "vatPercent": 6,
+      "description": "Utgående moms 6% på inköp med omvänd betalningsskyldighet i fält 20–24",
+      "category": "utgaende_moms_inkop",
+      "block": "D"
+    },
+    "UEU1": {
+      "ruta": "30",
+      "vatPercent": 25,
+      "description": "Utgående moms från annat EG-land 25%",
+      "category": "utgaende_moms_inkop",
+      "block": "D"
+    },
+    "UEU2": {
+      "ruta": "31",
+      "vatPercent": 12,
+      "description": "Utgående moms från annat EG-land 12%",
+      "category": "utgaende_moms_inkop",
+      "block": "D"
+    },
+    "UEU3": {
+      "ruta": "32",
+      "vatPercent": 6,
+      "description": "Utgående moms från annat EG-land 6%",
+      "category": "utgaende_moms_inkop",
+      "block": "D"
+    },
+    "UTFU1": {
+      "ruta": "30",
+      "vatPercent": 25,
+      "description": "Utgående moms tjänsteförvarv utlandet 25%",
+      "category": "utgaende_moms_inkop",
+      "block": "D"
+    },
+    "UTFU2": {
+      "ruta": "31",
+      "vatPercent": 12,
+      "description": "Utgående moms tjänsteförvarv utlandet 12%",
+      "category": "utgaende_moms_inkop",
+      "block": "D"
+    },
+    "UTFU3": {
+      "ruta": "32",
+      "vatPercent": 6,
+      "description": "Utgående moms tjänsteförvarv utlandet 6%",
+      "category": "utgaende_moms_inkop",
+      "block": "D"
+    },
+    "VTEU": {
+      "ruta": "35",
+      "vatPercent": null,
+      "description": "Försäljning av varor till ett annat EU-land",
+      "category": "forsaljning_undantagen",
+      "block": "E"
+    },
+    "E": {
+      "ruta": "36",
+      "vatPercent": null,
+      "description": "Försäljning av varor utanför EU (export)",
+      "category": "forsaljning_undantagen",
+      "block": "E"
+    },
+    "3VEU": {
+      "ruta": "37",
+      "vatPercent": null,
+      "description": "Mellanmans inköp av varor vid trepartshandel",
+      "category": "forsaljning_undantagen",
+      "block": "E"
+    },
+    "3FEU": {
+      "ruta": "38",
+      "vatPercent": null,
+      "description": "Mellanmans försäljning av varor vid trepartshandel",
+      "category": "forsaljning_undantagen",
+      "block": "E"
+    },
+    "FTEU": {
+      "ruta": "39",
+      "vatPercent": null,
+      "description": "Försäljning av tjänster till en beskattningsbar person i ett annat EU-land, enligt huvudregeln",
+      "category": "forsaljning_undantagen",
+      "block": "E"
+    },
+    "ÖTEU": {
+      "ruta": "40",
+      "vatPercent": null,
+      "description": "Övrig försäljning av tjänster som tillhandahållits utomlands",
+      "category": "forsaljning_undantagen",
+      "block": "E"
+    },
+    "OTTU": {
+      "ruta": "41",
+      "vatPercent": null,
+      "description": "Försäljning när köparen är betalningsskyldig i Sverige",
+      "category": "forsaljning_undantagen",
+      "block": "E"
+    },
+    "MF": {
+      "ruta": "42",
+      "vatPercent": null,
+      "description": "Övrig försäljning med mera utan moms",
+      "category": "forsaljning_undantagen",
+      "block": "E"
+    },
+    "I": {
+      "ruta": "48",
+      "vatPercent": null,
+      "description": "Ingående moms att dra av",
+      "category": "ingaende_moms",
+      "block": "F"
+    },
+    "R1": {
+      "ruta": "49",
+      "vatPercent": null,
+      "description": "Moms att betala eller få tillbaka",
+      "category": "avrakning",
+      "block": "G"
+    },
+    "R2": {
+      "ruta": "49",
+      "vatPercent": null,
+      "description": "Moms att betala eller få tillbaka",
+      "category": "avrakning",
+      "block": "G"
+    },
+    "BI": {
+      "ruta": "50",
+      "vatPercent": null,
+      "description": "Beskattningsunderlag vid import",
+      "category": "import",
+      "block": "H"
+    },
+    "UI25": {
+      "ruta": "60",
+      "vatPercent": 25,
+      "description": "Utgående moms 25% på import i fält 50",
+      "category": "utgaende_moms_import",
+      "block": "I"
+    },
+    "UI12": {
+      "ruta": "61",
+      "vatPercent": 12,
+      "description": "Utgående moms 12% på import i fält 50",
+      "category": "utgaende_moms_import",
+      "block": "I"
+    },
+    "UI6": {
+      "ruta": "62",
+      "vatPercent": 6,
+      "description": "Utgående moms 6% på import i fält 50",
+      "category": "utgaende_moms_import",
+      "block": "I"
+    }
+  },
+  "categories": {
+    "forsaljning_sverige": "Block A - Momspliktig försäljning inom Sverige",
+    "uttag": "Block A - Momspliktiga uttag",
+    "vinstmarginalbeskattning": "Block A - Vinstmarginalbeskattning",
+    "hyresinkomster": "Block A - Hyresinkomster (frivillig skattskyldighet)",
+    "utgaende_moms": "Block B - Utgående moms på försäljning",
+    "inkop_omvand_betalningsskyldighet": "Block C - Inköp vid omvänd betalningsskyldighet",
+    "utgaende_moms_inkop": "Block D - Utgående moms på inköp (omvänd betalningsskyldighet)",
+    "forsaljning_undantagen": "Block E - Försäljning undantagen från moms",
+    "ingaende_moms": "Block F - Ingående moms",
+    "avrakning": "Block G - Avräkning",
+    "import": "Block H - Import",
+    "utgaende_moms_import": "Block I - Utgående moms vid import"
+  },
+  "blocks": {
+    "A": "Momspliktig försäljning eller uttag exklusive moms",
+    "B": "Utgående moms på försäljning eller uttag i fält 05–08",
+    "C": "Momspliktiga inköp vid omvänd betalningsskyldighet",
+    "D": "Utgående moms på inköp i fält 20–24",
+    "E": "Försäljning med mera som är undantagen från moms",
+    "F": "Ingående moms",
+    "G": "Moms att betala eller få tillbaka",
+    "H": "Moms vid import",
+    "I": "Utgående moms på import i fält 50"
+  }
+}

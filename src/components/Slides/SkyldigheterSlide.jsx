@@ -92,10 +92,10 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
-      <div className="max-w-6xl w-full bg-white rounded-2xl shadow-2xl p-10">
+      <div className="max-w-6xl w-full bg-white rounded-card shadow-2xl p-10">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-brand-900 mb-2 flex items-center gap-3">
+          <h1 className="text-page-title text-brand-900 mb-2 flex items-center gap-3">
             <svg className="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
@@ -126,10 +126,10 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
           {skyldigheter.map((skyldig, index) => (
             <div
               key={index}
-              className="p-5 bg-gradient-to-br from-white to-brand-50 border border-brand-200 rounded-lg hover:shadow-lg transition-all duration-200"
+              className="p-5 bg-gradient-to-br from-white to-brand-50 border border-brand-200 rounded-box hover:shadow-lg transition-all duration-200"
             >
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-brand-600 text-white rounded-lg flex items-center justify-center">
+                <div className="flex-shrink-0 w-12 h-12 bg-brand-600 text-white rounded-box flex items-center justify-center">
                   {skyldig.icon}
                 </div>
                 <div className="flex-1">
@@ -142,7 +142,7 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
         </div>
 
         {/* Faktura Information Highlight */}
-        <div className="mb-6 p-5 bg-yellow-50 border-2 border-yellow-400 rounded-lg">
+        <div className="mb-6 p-5 bg-yellow-50 border-2 border-yellow-400 rounded-box">
           <div className="flex items-start gap-3">
             <svg className="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -168,9 +168,9 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
         </div>
 
         {/* Critical Compliance Requirements - ALWAYS MANDATORY */}
-        <div className="mb-6 p-6 bg-red-50 border-2 border-red-400 rounded-lg">
+        <div className="mb-6 p-6 bg-red-50 border-2 border-red-400 rounded-box">
           <div className="flex items-start gap-3 mb-4">
-            <svg className="w-7 h-7 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-icon-md h-icon-md text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
             <div className="flex-1">
@@ -272,7 +272,7 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
           </div>
 
           {!allComplianceChecked && (
-            <div className="mt-4 p-3 bg-red-100 rounded-lg border border-red-300">
+            <div className="mt-4 p-3 bg-red-100 rounded-box border border-red-300">
               <p className="text-sm text-red-900 font-semibold text-center">
                 ⚠️ Du måste bekräfta alla punkter ovan för att kunna fortsätta
               </p>
@@ -284,7 +284,7 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
         <div className="mb-6">
           <button
             onClick={() => setShowComplianceModal(true)}
-            className="w-full flex items-center justify-between gap-3 p-4 bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-300 rounded-lg hover:from-purple-100 hover:to-purple-200 transition-all"
+            className="w-full flex items-center justify-between gap-3 p-4 bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-300 rounded-box hover:from-purple-100 hover:to-purple-200 transition-all"
           >
             <div className="flex items-center gap-3">
               <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -302,7 +302,7 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
         </div>
 
         {/* Acknowledgement Checkbox */}
-        <div className="mb-6 p-5 bg-gray-50 rounded-lg border border-gray-300">
+        <div className="mb-6 p-5 bg-gray-50 rounded-box border border-gray-300">
           <label className="flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
@@ -319,7 +319,7 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
         </div>
 
         {/* Legal Note */}
-        <div className="mb-6 p-4 bg-gray-100 rounded-lg border border-gray-300">
+        <div className="mb-6 p-4 bg-gray-100 rounded-box border border-gray-300">
           <p className="text-sm text-gray-700 italic text-center">
             📋 Dessa skyldigheter regleras i uppdragsavtalet och enligt lag (t.ex. bokföringslagen 1999:1078)
           </p>
@@ -329,7 +329,7 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
         <div className="flex justify-between items-center pt-6 border-t border-gray-200">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all font-semibold"
+            className="flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-700 rounded-box hover:bg-gray-300 transition-all font-semibold"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -340,7 +340,7 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
           <button
             onClick={onNext}
             disabled={!acknowledged || !allComplianceChecked}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all font-semibold shadow-lg ${
+            className={`flex items-center gap-2 px-6 py-3 rounded-box transition-all font-semibold shadow-lg ${
               acknowledged && allComplianceChecked
                 ? 'bg-brand-600 text-white hover:bg-brand-700'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -358,11 +358,11 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
       {/* Modal: Custom Compliance Questions */}
       {showComplianceModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-card shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 sticky top-0 bg-white">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h2 className="text-page-title text-gray-900 flex items-center gap-2">
+                  <svg className="w-icon-md h-icon-md text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   Byråns egna kontrollfrågor
@@ -392,25 +392,25 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
               <div className="space-y-4">
                 <h3 className="font-bold text-gray-900 text-lg mb-3">Exempel på egna kontrollfrågor:</h3>
                 
-                <div className="p-4 bg-gray-50 border border-gray-300 rounded-lg">
+                <div className="p-4 bg-gray-50 border border-gray-300 rounded-box">
                   <p className="text-sm text-gray-600 italic">
                     📋 <strong>Restaurangbranschen:</strong> "Har du kassaregister som uppfyller Skatteverkets krav? (Obligatoriskt sedan 2010)"
                   </p>
                 </div>
 
-                <div className="p-4 bg-gray-50 border border-gray-300 rounded-lg">
+                <div className="p-4 bg-gray-50 border border-gray-300 rounded-box">
                   <p className="text-sm text-gray-600 italic">
                     📋 <strong>Byggsektorn:</strong> "Är du medveten om F-skattsedel och RUT/ROT-regler vid arbete på privatbostäder?"
                   </p>
                 </div>
 
-                <div className="p-4 bg-gray-50 border border-gray-300 rounded-lg">
+                <div className="p-4 bg-gray-50 border border-gray-300 rounded-box">
                   <p className="text-sm text-gray-600 italic">
                     📋 <strong>E-handel:</strong> "Säljer du till andra EU-länder? (MOSS/OSS-registrering kan krävas)"
                   </p>
                 </div>
 
-                <div className="p-4 bg-gray-50 border border-gray-300 rounded-lg">
+                <div className="p-4 bg-gray-50 border border-gray-300 rounded-box">
                   <p className="text-sm text-gray-600 italic">
                     📋 <strong>Fordonshandel:</strong> "Tillämpar du vinstmarginalbeskattning vid begagnathandel? (Kräver Skatteverkets medgivande)"
                   </p>
@@ -418,7 +418,7 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
               </div>
 
               {/* Technical info */}
-              <div className="mt-6 p-4 bg-purple-50 border border-purple-300 rounded-lg">
+              <div className="mt-6 p-4 bg-purple-50 border border-purple-300 rounded-box">
                 <h4 className="font-semibold text-purple-900 mb-2">🛠️ Teknisk implementation (v2.0)</h4>
                 <p className="text-sm text-purple-800 mb-2">
                   Redovisningsbyrån kan konfigurera egna frågor i <code className="bg-purple-100 px-1 rounded">config.json</code>:
@@ -442,7 +442,7 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => setShowComplianceModal(false)}
-                  className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-semibold"
+                  className="px-6 py-3 bg-purple-600 text-white rounded-box hover:bg-purple-700 transition-all font-semibold"
                 >
                   Stäng
                 </button>

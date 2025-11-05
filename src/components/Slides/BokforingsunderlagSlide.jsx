@@ -220,7 +220,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
       <div className="max-w-5xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-brand-900 mb-3">
+          <h2 className="text-page-title text-brand-900 mb-3">
             Bokföringsunderlag
           </h2>
           <p className="text-lg text-gray-600">
@@ -229,7 +229,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
         </div>
 
         {/* Info Box */}
-        <div className="mb-8 p-6 bg-gray-50 border border-gray-200 rounded-lg">
+        <div className="mb-8 p-6 bg-gray-50 border border-gray-200 rounded-box">
           <div className="flex items-start gap-3">
             <AlertCircleIcon className="w-6 h-6 text-gray-600 flex-shrink-0 mt-0.5" />
             <div>
@@ -263,7 +263,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
                 <button
                   type="button"
                   onClick={() => setUploadMode('cloud')}
-                  className="p-6 border-2 border-gray-300 rounded-lg hover:border-brand-500 hover:bg-brand-50 transition-all text-left group"
+                  className="p-6 border-2 border-gray-300 rounded-box hover:border-brand-500 hover:bg-brand-50 transition-all text-left group"
                 >
                   <CloudIcon className="w-12 h-12 text-brand-600 mb-4" />
                   <h4 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-brand-900">
@@ -281,7 +281,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
                 <button
                   type="button"
                   onClick={() => setUploadMode('local')}
-                  className="p-6 border-2 border-gray-300 rounded-lg hover:border-brand-500 hover:bg-brand-50 transition-all text-left group"
+                  className="p-6 border-2 border-gray-300 rounded-box hover:border-brand-500 hover:bg-brand-50 transition-all text-left group"
                 >
                   <UploadIcon className="w-12 h-12 text-gray-600 mb-4 group-hover:text-brand-600" />
                   <h4 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-brand-900">
@@ -321,7 +321,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
                 <button
                   type="button"
                   onClick={() => handleCloudProviderClick('google')}
-                  className={`p-4 border-2 rounded-lg transition-all ${
+                  className={`p-4 border-2 rounded-box transition-all ${
                     cloudProvider === 'google'
                       ? 'border-brand-500 bg-brand-50'
                       : 'border-gray-300 hover:border-brand-400'
@@ -336,7 +336,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
                 <button
                   type="button"
                   onClick={() => handleCloudProviderClick('dropbox')}
-                  className={`p-4 border-2 rounded-lg transition-all ${
+                  className={`p-4 border-2 rounded-box transition-all ${
                     cloudProvider === 'dropbox'
                       ? 'border-brand-500 bg-brand-50'
                       : 'border-gray-300 hover:border-brand-400'
@@ -351,7 +351,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
                 <button
                   type="button"
                   onClick={() => handleCloudProviderClick('onedrive')}
-                  className={`p-4 border-2 rounded-lg transition-all ${
+                  className={`p-4 border-2 rounded-box transition-all ${
                     cloudProvider === 'onedrive'
                       ? 'border-brand-500 bg-brand-50'
                       : 'border-gray-300 hover:border-brand-400'
@@ -375,7 +375,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
                     value={formData.cloudLink}
                     onChange={(e) => setFormData(prev => ({ ...prev, cloudLink: e.target.value }))}
                     placeholder={`https://${cloudProvider === 'google' ? 'drive.google.com' : cloudProvider === 'dropbox' ? 'dropbox.com' : 'onedrive.live.com'}/...`}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-box focus:border-brand-500 focus:outline-none"
                   />
                   <p className="mt-2 text-sm text-gray-600">
                     Högerklicka på mappen → Dela → Kopiera länk → Klistra in här
@@ -401,7 +401,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
 
               {/* File Upload Categories - 5 categories (underlag för löpande bokföring) */}
               {['kontoutdrag', 'leverantorsfakturor', 'kundfakturor', 'kvitton', 'momsrapporter', 'arsredovisningar'].map(category => (
-                <div key={category} className="border-2 border-gray-200 rounded-lg p-4">
+                <div key={category} className="border-2 border-gray-200 rounded-box p-4">
                   <label className="block text-sm font-semibold text-gray-900 mb-3">
                     {getCategoryName(category)}
                     {['kontoutdrag', 'leverantorsfakturor', 'kundfakturor'].includes(category) && (
@@ -414,7 +414,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(category, e)}
-                    className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-all ${
+                    className={`relative border-2 border-dashed rounded-box p-8 text-center transition-all ${
                       isDragging
                         ? 'border-brand-500 bg-brand-50'
                         : 'border-gray-300 bg-gray-50 hover:border-brand-400'
@@ -440,7 +440,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
                   {formData[category].length > 0 && (
                     <div className="mt-4 space-y-2">
                       {formData[category].map((file, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg">
+                        <div key={idx} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-box">
                           <div className="flex items-center gap-3">
                             <FileIcon className="w-5 h-5 text-gray-600" />
                             <div>
@@ -464,7 +464,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
 
               {/* Upload Summary */}
               {getTotalFileCount() > 0 && (
-                <div className="p-4 bg-brand-50 border border-brand-200 rounded-lg">
+                <div className="p-4 bg-brand-50 border border-brand-200 rounded-box">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold text-brand-900">
@@ -487,7 +487,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
 
           {/* Bank Information (Optional - IBAN hanteras på nästa slide) */}
           {uploadMode && (
-            <div className="mb-8 p-6 bg-white border-2 border-gray-200 rounded-lg">
+            <div className="mb-8 p-6 bg-white border-2 border-gray-200 rounded-box">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Bankinformation (valfritt)
               </h3>
@@ -505,7 +505,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
                   value={formData.bankInfo}
                   onChange={(e) => setFormData(prev => ({ ...prev, bankInfo: e.target.value }))}
                   placeholder="123-4567 eller 12345-6"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-box focus:border-brand-500 focus:outline-none"
                 />
                 <p className="mt-2 text-xs text-gray-500">
                   Format: 123-4567 (bankgiro) eller 12345-6 (plusgiro)
@@ -516,7 +516,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
 
           {/* Fraud Alerts (Demo) */}
           {fraudAlerts.length > 0 && (
-            <div className="mb-8 p-6 bg-red-50 border-2 border-red-200 rounded-lg">
+            <div className="mb-8 p-6 bg-red-50 border-2 border-red-200 rounded-box">
               <div className="flex items-start gap-3 mb-4">
                 <AlertCircleIcon className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
                 <div>
@@ -530,7 +530,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
               </div>
 
               {fraudAlerts.map((alert, idx) => (
-                <div key={idx} className="mt-4 p-4 bg-white border border-red-300 rounded-lg">
+                <div key={idx} className="mt-4 p-4 bg-white border border-red-300 rounded-box">
                   <div className="flex items-center justify-between mb-2">
                     <p className="font-semibold text-gray-900">{alert.file}</p>
                     <span className="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full">
@@ -552,7 +552,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
 
           {/* Status Message */}
           {uploadStatus && (
-            <div className={`mb-6 p-4 rounded-lg ${
+            <div className={`mb-6 p-4 rounded-box ${
               uploadStatus.startsWith('✅') || uploadStatus.startsWith('🔗')
                 ? 'bg-green-50 text-green-800'
                 : 'bg-red-50 text-red-800'
@@ -563,7 +563,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
 
           {/* What happens next */}
           {uploadMode && (
-            <div className="mb-8 p-6 bg-brand-50 border border-brand-200 rounded-lg">
+            <div className="mb-8 p-6 bg-brand-50 border border-brand-200 rounded-box">
               <h3 className="font-semibold text-brand-900 mb-2">
                 Vad händer härnäst?
               </h3>
@@ -586,13 +586,13 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
             <button
               type="button"
               onClick={onBack}
-              className="px-6 py-3 text-gray-700 bg-white border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="px-6 py-3 text-gray-700 bg-white border-2 border-gray-300 rounded-box hover:bg-gray-50 transition-colors font-medium"
             >
               ← Tillbaka
             </button>
             <button
               type="submit"
-              className="px-8 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-3 bg-brand-600 text-white rounded-box hover:bg-brand-700 transition-colors font-semibold shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!uploadMode}
             >
               Fortsätt till ekonomisk analys →

@@ -131,7 +131,7 @@ export default function App() {
   // Inledning slide component
   const IntroSlide = () => (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
-      <div className="max-w-3xl w-full bg-white rounded-2xl shadow-2xl p-10">
+      <div className="max-w-3xl w-full bg-white rounded-card shadow-2xl p-10">
         <h1 className="text-3xl font-bold text-brand-900 mb-6">Inledning och bakgrund</h1>
         <div className="text-brand-800 space-y-4">
           <p>
@@ -155,7 +155,7 @@ export default function App() {
         </div>
         <button
           onClick={() => navigate('/riskfragor')}
-          className="w-full mt-8 px-8 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-semibold transition-all"
+          className="w-full mt-8 px-8 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-box font-semibold transition-all"
         >
           Nästa
         </button>
@@ -331,7 +331,7 @@ export default function App() {
                   <p className="text-brand-700 mt-4">Denna slide är inte implementerad än</p>
                   <button 
                     onClick={() => navigate('/')} 
-                    className="mt-4 bg-brand-600 text-white px-6 py-2 rounded-lg"
+                    className="mt-4 bg-brand-600 text-white px-6 py-2 rounded-box"
                   >
                     Tillbaka till start
                   </button>

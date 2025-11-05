@@ -142,8 +142,8 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
-      <div className="max-w-3xl w-full bg-white rounded-2xl shadow-2xl p-10">
-        <h1 className="text-3xl font-bold text-brand-900 mb-6">
+      <div className="max-w-3xl w-full bg-white rounded-card shadow-2xl p-8">
+        <h1 className="text-page-title text-brand-900 mb-4">
           Frågor som stödjer riskbedömning
         </h1>
         
@@ -154,16 +154,16 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
           Flera av dessa frågor har lagstöd och hjälper oss att bedöma risken:
         </p>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Affärsidé */}
           <div>
-            <label className="block text-sm font-medium text-brand-800 mb-2">
+            <label className="block text-section-title text-brand-800 mb-2">
               Vad är företagets huvudsakliga affärsidé? *
             </label>
             <textarea
               value={formData.affarsIde}
               onChange={(e) => handleChange('affarsIde', e.target.value)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               rows={3}
               placeholder="Beskriv kort företagets verksamhet..."
             />
@@ -171,20 +171,20 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
 
           {/* Företagsnamn med Autocomplete */}
           <div ref={autocompleteRef} className="relative">
-            <label className="block text-sm font-medium text-brand-800 mb-2 flex items-center gap-2">
+            <label className="block text-section-title text-brand-800 mb-2 flex items-center gap-2">
               Vilket företag representerar du? *
-              <Info className="w-4 h-4 text-brand-600 cursor-help" title="Sök efter ditt företag så hämtar vi automatiskt organisationsnummer från Bolagsverket" />
+              <Info className="w-icon-sm h-icon-sm text-brand-600 cursor-help" title="Sök efter ditt företag så hämtar vi automatiskt organisationsnummer från Bolagsverket" />
             </label>
             <input
               type="text"
               value={companyQuery}
               onChange={(e) => handleCompanySearch(e.target.value)}
               onFocus={() => companyQuery.length >= 2 && setShowSuggestions(true)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               placeholder="Börja skriva företagsnamn..."
             />
             {showSuggestions && companySuggestions.length > 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-brand-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              <div className="absolute z-10 w-full mt-1 bg-white border border-brand-300 rounded-box shadow-lg max-h-60 overflow-y-auto">
                 {companySuggestions.map((company) => (
                   <button
                     key={company.id}
@@ -206,14 +206,14 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
 
           {/* Organisationsnummer */}
           <div>
-            <label className="block text-sm font-medium text-brand-800 mb-2">
+            <label className="block text-section-title text-brand-800 mb-2">
               Organisationsnummer *
             </label>
             <input
               type="text"
               value={formData.organisationsnummer}
               onChange={(e) => handleChange('organisationsnummer', e.target.value)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-brand-50"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-brand-50 text-sm"
               placeholder="XXXXXX-XXXX"
             />
             <p className="text-xs text-brand-600 mt-1">
@@ -225,7 +225,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
 
           {/* Kundtyper */}
           <div>
-            <label className="block text-sm font-medium text-brand-800 mb-2">
+            <label className="block text-section-title text-brand-800 mb-2">
               Vilka typer av kunder har företaget?
             </label>
             <div className="space-y-2">
@@ -267,7 +267,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             <textarea
               value={formData.utlandskaPartners}
               onChange={(e) => handleChange('utlandskaPartners', e.target.value)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               rows={2}
               placeholder="Beskriv vilka länder och typ av samarbete..."
             />
@@ -281,7 +281,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             <textarea
               value={formData.storaLeverantorer}
               onChange={(e) => handleChange('storaLeverantorer', e.target.value)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               rows={2}
               placeholder="Lista de viktigaste leverantörerna..."
             />
@@ -295,7 +295,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             <textarea
               value={formData.verksamhetAndrad}
               onChange={(e) => handleChange('verksamhetAndrad', e.target.value)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               rows={2}
               placeholder="Beskriv eventuella förändringar..."
             />
@@ -310,7 +310,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
               type="text"
               value={formData.personnummer}
               onChange={(e) => handleChange('personnummer', e.target.value)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               placeholder="YYYYMMDD-XXXX"
             />
             <p className="text-xs text-brand-600 mt-1">
@@ -319,7 +319,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
           </div>
 
           {/* PEP-fråga */}
-          <div className="bg-brand-50 border-l-4 border-brand-500 p-4 rounded">
+          <div className="bg-brand-50 border-l-4 border-brand-500 p-4 rounded-box">
             <label className="flex items-start gap-3">
               <input
                 type="checkbox"
@@ -328,10 +328,10 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
                 className="mt-1 w-5 h-5 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
               />
               <div>
-                <span className="block font-medium text-brand-900">
+                <span className="block text-section-title text-brand-900">
                   Är du eller någon i företaget en PEP (person i politiskt utsatt ställning)?
                 </span>
-                <span className="text-sm text-brand-700">
+                <span className="text-xs text-brand-700">
                   Detta inkluderar personer som innehar eller har innehaft höga offentliga ämbeten.
                 </span>
               </div>
@@ -348,7 +348,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             }
           }}
           disabled={!isFormValid()}
-          className={`w-full mt-8 px-8 py-3 rounded-lg font-semibold transition-all ${
+          className={`w-full mt-8 px-4 py-2 rounded-box font-semibold transition-all ${
             isFormValid()
               ? 'bg-brand-600 hover:bg-brand-700 text-white cursor-pointer'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'

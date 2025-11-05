@@ -73,7 +73,7 @@ export default function DeklarationsombudSlide({ onNext, onBack, customerData = 
     <div className="max-w-4xl mx-auto p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-3 flex items-center gap-3">
+        <h1 className="text-page-title text-gray-900 mb-3 flex items-center gap-3">
           <svg className="w-8 h-8 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
@@ -98,7 +98,7 @@ export default function DeklarationsombudSlide({ onNext, onBack, customerData = 
           {/* Instructions */}
           <div className="mb-6">
             <h3 className="font-bold text-gray-900 mb-4">Så här gör du:</h3>
-            <div className="bg-gray-50 border-2 border-gray-300 rounded-lg p-5">
+            <div className="bg-gray-50 border-2 border-gray-300 rounded-box p-5">
               <ol className="space-y-4">
                 {steps.map((step) => (
                   <li key={step.number} className="flex items-start gap-3">
@@ -124,7 +124,7 @@ export default function DeklarationsombudSlide({ onNext, onBack, customerData = 
               </ol>
 
               {/* Required permissions box */}
-              <div className="mt-6 p-4 bg-white border-2 border-brand-300 rounded-lg">
+              <div className="mt-6 p-4 bg-white border-2 border-brand-300 rounded-box">
                 <h4 className="font-bold text-brand-900 mb-3 flex items-center gap-2">
                   <svg className="w-5 h-5 text-brand-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -144,7 +144,7 @@ export default function DeklarationsombudSlide({ onNext, onBack, customerData = 
               </div>
 
               {/* Copy org number button */}
-              <div className="mt-4 p-3 bg-white border border-gray-300 rounded-lg">
+              <div className="mt-4 p-3 bg-white border border-gray-300 rounded-box">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-xs text-gray-600 mb-1">Vårt organisationsnummer:</div>
@@ -155,7 +155,7 @@ export default function DeklarationsombudSlide({ onNext, onBack, customerData = 
                       navigator.clipboard.writeText(byraOrgNr);
                       alert('Organisationsnummer kopierat till urklipp!');
                     }}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold transition-colors"
+                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-box text-sm font-semibold transition-colors"
                   >
                     📋 Kopiera
                   </button>
@@ -165,7 +165,7 @@ export default function DeklarationsombudSlide({ onNext, onBack, customerData = 
           </div>
 
           {/* Confirmation checkbox */}
-          <div className="mb-6 p-4 bg-green-50 border-2 border-green-300 rounded-lg">
+          <div className="mb-6 p-4 bg-green-50 border-2 border-green-300 rounded-box">
             <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -185,7 +185,7 @@ export default function DeklarationsombudSlide({ onNext, onBack, customerData = 
             <button
               onClick={handleVerify}
               disabled={!hasAddedOmbud || isVerifying}
-              className={`px-8 py-3 rounded-lg font-semibold text-lg transition-all ${
+              className={`px-8 py-3 rounded-box font-semibold text-lg transition-all ${
                 hasAddedOmbud && !isVerifying
                   ? 'bg-brand-600 hover:bg-brand-700 text-white shadow-lg hover:shadow-xl'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -238,7 +238,7 @@ export default function DeklarationsombudSlide({ onNext, onBack, customerData = 
       {/* Verification success */}
       {isVerified && (
         <div className="mb-6">
-          <div className="p-6 bg-green-50 border-2 border-green-500 rounded-lg mb-6">
+          <div className="p-6 bg-green-50 border-2 border-green-500 rounded-box mb-6">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
                 <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -286,7 +286,7 @@ export default function DeklarationsombudSlide({ onNext, onBack, customerData = 
         <button
           onClick={onNext}
           disabled={!isVerified}
-          className={`px-8 py-3 rounded-lg font-semibold transition-all ${
+          className={`px-8 py-3 rounded-box font-semibold transition-all ${
             isVerified
               ? 'bg-brand-600 hover:bg-brand-700 text-white shadow-md hover:shadow-lg'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'

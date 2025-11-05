@@ -14,7 +14,7 @@ export default function AgarstrukturSlide({ onNext, onBack }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl w-full">
+      <div className="bg-white rounded-card shadow-2xl p-8 max-w-4xl w-full">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
             Ägarstruktur
@@ -26,7 +26,7 @@ export default function AgarstrukturSlide({ onNext, onBack }) {
 
         {/* Verklig Huvudman */}
         {beneficialOwner && (
-          <div className="mb-6 p-6 bg-brand-50 rounded-xl border border-brand-200">
+          <div className="mb-6 p-6 bg-brand-50 rounded-card border border-brand-200">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
               <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -55,7 +55,7 @@ export default function AgarstrukturSlide({ onNext, onBack }) {
         )}
 
         {/* Alla ägare */}
-        <div className="mb-6 p-6 bg-white rounded-xl border border-brand-100">
+        <div className="mb-6 p-6 bg-white rounded-card border border-brand-100">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
             <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -64,10 +64,10 @@ export default function AgarstrukturSlide({ onNext, onBack }) {
           </h2>
           <div className="space-y-4">
             {ownerData.owners.map((owner, index) => (
-              <div key={index} className="p-4 bg-brand-50 rounded-lg border border-brand-200 hover:shadow-md transition-shadow">
+              <div key={index} className="p-4 bg-brand-50 rounded-box border border-brand-200 hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold text-gray-800">{owner.name}</span>
-                  <span className="text-2xl font-bold text-brand-600">{owner.ownershipPercent}%</span>
+                  <span className="text-page-title text-brand-600">{owner.ownershipPercent}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-3">
                   <div
@@ -90,14 +90,14 @@ export default function AgarstrukturSlide({ onNext, onBack }) {
           <div className="mt-4 pt-4 border-t border-brand-200">
             <div className="flex justify-between items-center">
               <span className="text-gray-700 font-semibold">Totalt:</span>
-              <span className="text-3xl font-bold text-brand-700">100%</span>
+              <span className="text-page-title text-brand-700">100%</span>
             </div>
           </div>
         </div>
 
         {/* Alternativ verklig huvudman */}
         {alternativeBeneficialOwners && alternativeBeneficialOwners.length > 0 && (
-          <div className="mb-8 p-6 bg-brand-50 rounded-xl border border-brand-200">
+          <div className="mb-8 p-6 bg-brand-50 rounded-card border border-brand-200">
             <h2 className="text-xl font-semibold text-gray-800 mb-3 flex items-center">
               <svg className="w-5 h-5 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -119,7 +119,7 @@ export default function AgarstrukturSlide({ onNext, onBack }) {
         <div className="flex justify-between items-center pt-6 border-t border-gray-200">
           <button
             onClick={onBack}
-            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium flex items-center"
+            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-box hover:bg-gray-300 transition-colors font-medium flex items-center"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -128,7 +128,7 @@ export default function AgarstrukturSlide({ onNext, onBack }) {
           </button>
           <button
             onClick={onNext}
-            className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-500 text-white rounded-lg hover:from-brand-600 hover:to-brand-600 transition-colors font-medium flex items-center"
+            className="px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-500 text-white rounded-box hover:from-brand-600 hover:to-brand-600 transition-colors font-medium flex items-center"
           >
             Nästa: Styrelse
             <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

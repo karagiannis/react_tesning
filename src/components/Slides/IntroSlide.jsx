@@ -2,12 +2,12 @@ export default function IntroSlide({ onNext }) {
   return (
     <div className="max-w-4xl mx-auto p-8">
       {/* Rubrik */}
-      <h1 className="text-3xl font-bold text-brand-900 mb-6">
+      <h1 className="text-page-title text-brand-900 mb-6">
         Inledning och bakgrund
       </h1>
 
       {/* Huvudtext */}
-      <div className="bg-white rounded-lg shadow-sm border border-brand-200 p-6 mb-8">
+      <div className="bg-white rounded-box shadow-sm border border-brand-200 p-6 mb-8">
         <div className="space-y-4 text-gray-700 leading-relaxed">
           <p>
             Denna onboarding säkerställer att byrån uppfyller <strong>penningtvättslagstiftningens krav</strong> vid 
@@ -50,7 +50,7 @@ export default function IntroSlide({ onNext }) {
       <div className="flex justify-end">
         <button
           onClick={onNext}
-          className="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-lg shadow-md transition-colors"
+          className="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-box shadow-md transition-colors"
         >
           Nästa →
         </button>

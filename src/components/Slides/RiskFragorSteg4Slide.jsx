@@ -50,8 +50,8 @@ export default function RiskFragorSteg4Slide({ onNext }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
-      <div className="max-w-3xl w-full bg-white rounded-2xl shadow-2xl p-10">
-        <h1 className="text-3xl font-bold text-brand-900 mb-2">
+      <div className="max-w-3xl w-full bg-white rounded-card shadow-2xl p-10">
+        <h1 className="text-page-title text-brand-900 mb-2">
           Riskfrågor – Betalningar & Transaktioner
         </h1>
         
@@ -127,7 +127,7 @@ export default function RiskFragorSteg4Slide({ onNext }) {
               <select
                 value={formData.kontanterAndel}
                 onChange={(e) => handleChange('kontanterAndel', e.target.value)}
-                className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               >
                 <option value="">Välj...</option>
                 <option value="<5%">Mindre än 5%</option>
@@ -137,7 +137,7 @@ export default function RiskFragorSteg4Slide({ onNext }) {
               </select>
               
               {showKontanterWarning && (
-                <div className="mt-3 bg-yellow-50 border border-yellow-300 rounded-lg p-4">
+                <div className="mt-3 bg-yellow-50 border border-yellow-300 rounded-box p-4">
                   <p className="text-sm text-yellow-800 font-medium mb-2">
                     ⚠️ {legalTexts.kontanttransaktioner.law}
                   </p>
@@ -285,7 +285,7 @@ export default function RiskFragorSteg4Slide({ onNext }) {
                 type="text"
                 value={formData.utlandskaLander}
                 onChange={(e) => handleChange('utlandskaLander', e.target.value)}
-                className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 placeholder="Vilka länder?"
               />
             )}
@@ -296,13 +296,13 @@ export default function RiskFragorSteg4Slide({ onNext }) {
         <div className="mt-8 flex gap-4">
           <button
             onClick={handleBack}
-            className="flex-1 px-6 py-3 bg-brand-100 text-brand-800 rounded-lg hover:bg-brand-200 transition-colors font-medium"
+            className="flex-1 px-6 py-3 bg-brand-100 text-brand-800 rounded-box hover:bg-brand-200 transition-colors font-medium"
           >
             Tillbaka
           </button>
           <button
             onClick={handleNext}
-            className="flex-1 px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium"
+            className="flex-1 px-6 py-3 bg-brand-600 text-white rounded-box hover:bg-brand-700 transition-colors font-medium"
           >
             Slutför & Nästa
           </button>

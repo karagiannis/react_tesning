@@ -16,8 +16,8 @@ export default function Header({ onPanelToggle }) {
     <header className="bg-white border-b border-brand-200 px-6 py-3 flex items-center justify-between">
       {/* Logo/Title */}
       <div className="flex items-center gap-3">
-        <Icon name="building" className="w-7 h-7 text-brand-600" />
-        <h1 className="text-xl font-bold text-brand-900">Kundonboarding</h1>
+        <Icon name="building" className="w-icon-md h-icon-md text-brand-600" />
+        <h1 className="text-section-title text-brand-900">Kundonboarding</h1>
       </div>
 
       {/* Icon Menu */}
@@ -25,7 +25,7 @@ export default function Header({ onPanelToggle }) {
         {/* LLM - Commented out until Fortnox API keys obtained */}
         {/* <button
           onClick={() => handlePanelClick('llm')}
-          className={`px-4 py-2 rounded-lg transition-all font-mono font-bold text-base tracking-tight ${
+          className={`px-4 py-2 rounded-box transition-all font-mono font-bold text-base tracking-tight ${
             activePanel === 'llm'
               ? 'bg-brand-600 text-white'
               : 'bg-brand-100 text-brand-800 hover:bg-brand-200'
@@ -38,7 +38,7 @@ export default function Header({ onPanelToggle }) {
         {/* Documentation Icon */}
         <button
           onClick={() => handlePanelClick('documentation')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-box transition-all ${
             activePanel === 'documentation'
               ? 'bg-brand-600 text-white'
               : 'bg-brand-100 text-brand-800 hover:bg-brand-200'
@@ -52,7 +52,7 @@ export default function Header({ onPanelToggle }) {
         {/* Support Icon */}
         <button
           onClick={() => handlePanelClick('support')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-box transition-all ${
             activePanel === 'support'
               ? 'bg-brand-600 text-white'
               : 'bg-brand-100 text-brand-800 hover:bg-brand-200'
@@ -66,7 +66,7 @@ export default function Header({ onPanelToggle }) {
         {/* Admin Icon (endast för administratörer) */}
         <button
           onClick={() => navigate('/admin')}
-          className="p-2 rounded-lg bg-purple-100 text-purple-800 hover:bg-purple-200 transition-all"
+          className="p-2 rounded-box bg-purple-100 text-purple-800 hover:bg-purple-200 transition-all"
           title="Administratörspanel - Övervaka användare, fraud detection, support"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,7 +77,7 @@ export default function Header({ onPanelToggle }) {
         {/* Settings Icon */}
         <button
           onClick={() => navigate('/settings')}
-          className="p-2 rounded-lg bg-brand-100 text-brand-800 hover:bg-brand-200 transition-all"
+          className="p-2 rounded-box bg-brand-100 text-brand-800 hover:bg-brand-200 transition-all"
           title="Inställningar - Firmakonfiguration, användare, prenumeration"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
