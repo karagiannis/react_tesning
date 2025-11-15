@@ -66,13 +66,6 @@ export default function LoginSlide({ onNext, onRegister }) {
           setError('Bot-verifiering misslyckades. Försök igen.');
         },
       });
-      
-      // If using test key, set a mock token immediately since test mode auto-passes
-      if (TURNSTILE_SITE_KEY === '1x00000000000000000000AA') {
-        setTimeout(() => {
-          setTurnstileToken('test-token-always-pass');
-        }, 100);
-      }
     }
   };
 
@@ -97,9 +90,7 @@ export default function LoginSlide({ onNext, onRegister }) {
       return;
     }
 
-    // In development, Turnstile might be in test mode and auto-pass
-    // Only block if explicitly no token and not in test environment
-    if (!turnstileToken && TURNSTILE_SITE_KEY !== '1x00000000000000000000AA') {
+    if (!turnstileToken) {
       setError('Vänligen slutför bot-verifieringen.');
       return;
     }
@@ -135,6 +126,7 @@ export default function LoginSlide({ onNext, onRegister }) {
         body: JSON.stringify({
           email,
           password,
+          turnstile_token: turnstileToken,
         }),
       });
 
