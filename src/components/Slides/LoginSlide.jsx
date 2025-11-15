@@ -66,6 +66,13 @@ export default function LoginSlide({ onNext, onRegister }) {
           setError('Bot-verifiering misslyckades. Försök igen.');
         },
       });
+      
+      // If using test key, set a mock token immediately since test mode auto-passes
+      if (TURNSTILE_SITE_KEY === '1x00000000000000000000AA') {
+        setTimeout(() => {
+          setTurnstileToken('test-token-always-pass');
+        }, 100);
+      }
     }
   };
 
@@ -81,24 +88,23 @@ export default function LoginSlide({ onNext, onRegister }) {
   }, []); // Only run once on mount
 
   // Handle Email/Password login
-  const handleEmailLogin = async (e) => {
+  const handleEmailPasswordLogin = async (e) => {
     e.preventDefault();
     setError('');
 
-    // Validation
     if (!email || !password) {
       setError('Vänligen fyll i både e-post och lösenord.');
       return;
     }
 
-    if (!turnstileToken) {
+    // In development, Turnstile might be in test mode and auto-pass
+    // Only block if explicitly no token and not in test environment
+    if (!turnstileToken && TURNSTILE_SITE_KEY !== '1x00000000000000000000AA') {
       setError('Vänligen slutför bot-verifieringen.');
       return;
     }
 
-    setLoading(true);
-
-    // DEV MODE: Mock successful login
+    setLoading(true);    // DEV MODE: Mock successful login
     if (DEV_MODE) {
       setTimeout(() => {
         // Mock JWT tokens
