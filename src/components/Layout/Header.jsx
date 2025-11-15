@@ -4,6 +4,7 @@ import Icon from '../Shared/Icon';
 
 export default function Header({ onPanelToggle }) {
   const [activePanel, setActivePanel] = useState(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
 
   const handlePanelClick = (panel) => {
@@ -11,6 +12,38 @@ export default function Header({ onPanelToggle }) {
     setActivePanel(newPanel);
     onPanelToggle(newPanel);
   };
+
+  const handleLogout = () => {
+    // Clear all auth data
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('isDemoMode');
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('temp_orgnr');
+    
+    // Redirect to login
+    navigate('/login');
+  };
+
+  // Get user info from localStorage or JWT
+  const getUserInfo = () => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken) {
+      try {
+        const payload = JSON.parse(atob(accessToken.split('.')[1]));
+        return {
+          email: payload.email || 'Användare',
+          role: payload.role || 'user'
+        };
+      } catch {
+        return { email: 'Användare', role: 'user' };
+      }
+    }
+    return { email: 'Användare', role: 'user' };
+  };
+
+  const userInfo = getUserInfo();
 
   return (
     <header className="bg-white border-b border-brand-200 px-6 py-3 flex items-center justify-between">
@@ -63,17 +96,6 @@ export default function Header({ onPanelToggle }) {
           <span className="text-sm font-medium">Support</span>
         </button>
 
-        {/* Admin Icon (endast för administratörer) */}
-        <button
-          onClick={() => navigate('/admin')}
-          className="p-2 rounded-box bg-purple-100 text-purple-800 hover:bg-purple-200 transition-all"
-          title="Administratörspanel - Övervaka användare, fraud detection, support"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-          </svg>
-        </button>
-
         {/* Settings Icon */}
         <button
           onClick={() => navigate('/settings')}
@@ -85,6 +107,74 @@ export default function Header({ onPanelToggle }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
         </button>
+
+        {/* User Profile Dropdown */}
+        <div className="relative ml-4 border-l border-brand-200 pl-4">
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="flex items-center gap-2 px-3 py-2 rounded-box hover:bg-brand-50 transition-all"
+          >
+            <div className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-semibold">
+              {userInfo.email.charAt(0).toUpperCase()}
+            </div>
+            <div className="text-left hidden sm:block">
+              <div className="text-sm font-medium text-brand-900">{userInfo.email}</div>
+              {userInfo.role === 'admin' && (
+                <div className="text-xs text-brand-600 font-semibold">Administratör</div>
+              )}
+            </div>
+            <svg 
+              className={`w-4 h-4 text-brand-600 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {/* Dropdown Menu */}
+          {showUserMenu && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-box shadow-lg border border-brand-200 py-1 z-50">
+              <button
+                onClick={() => {
+                  setShowUserMenu(false);
+                  navigate('/settings');
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-brand-800 hover:bg-brand-50 flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Profil
+              </button>
+              {userInfo.role === 'admin' && (
+                <button
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    navigate('/admin');
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-brand-800 hover:bg-brand-50 flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  Admin Dashboard
+                </button>
+              )}
+              <hr className="my-1 border-brand-200" />
+              <button
+                onClick={handleLogout}
+                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Logga ut
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
