@@ -310,7 +310,7 @@ export default function LoginSlide({ onNext, onRegister }) {
           </div>
         )}
 
-        <form onSubmit={handleEmailLogin} className="space-y-4">
+        <form onSubmit={handleEmailPasswordLogin} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-brand-800 mb-1">E-post</label>
             <input 
