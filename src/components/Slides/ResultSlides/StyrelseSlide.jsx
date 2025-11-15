@@ -9,10 +9,10 @@ export default function StyrelseSlide({ onNext, onBack }) {
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
       <div className="bg-white rounded-card shadow-2xl p-8 max-w-5xl w-full">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+          <h1 className="text-page-title text-brand-900 mb-2">
             Styrelse & Firmatecknare
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm text-brand-700">
             Översikt över bolagets ledning och firmatecknare
           </p>
         </div>
@@ -20,7 +20,7 @@ export default function StyrelseSlide({ onNext, onBack }) {
         {/* VD */}
         {boardData.ceo && (
           <div className="mb-6 p-6 bg-brand-50 rounded-card border border-brand-200">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+            <h2 className="text-section-title text-brand-900 mb-4 flex items-center">
               <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
@@ -28,16 +28,16 @@ export default function StyrelseSlide({ onNext, onBack }) {
             </h2>
             <div className="space-y-2">
               <div className="flex justify-between items-start">
-                <span className="text-gray-600 font-medium">Namn:</span>
-                <span className="text-gray-800 font-semibold text-right">{boardData.ceo.name}</span>
+                <span className="text-sm text-gray-600 font-medium">Namn:</span>
+                <span className="text-sm text-gray-800 font-semibold text-right">{boardData.ceo.name}</span>
               </div>
               <div className="flex justify-between items-start">
-                <span className="text-gray-600 font-medium">Personnummer:</span>
-                <span className="text-gray-800 font-mono text-right">{boardData.ceo.personalNumber}</span>
+                <span className="text-sm text-gray-600 font-medium">Personnummer:</span>
+                <span className="text-sm text-gray-800 font-mono text-right">{boardData.ceo.personalNumber}</span>
               </div>
               <div className="flex justify-between items-start">
-                <span className="text-gray-600 font-medium">Tillträde:</span>
-                <span className="text-gray-800 text-right">{boardData.ceo.appointedDate}</span>
+                <span className="text-sm text-gray-600 font-medium">Tillträde:</span>
+                <span className="text-sm text-gray-800 text-right">{boardData.ceo.appointedDate}</span>
               </div>
             </div>
           </div>
@@ -45,7 +45,7 @@ export default function StyrelseSlide({ onNext, onBack }) {
 
         {/* Styrelse */}
         <div className="mb-6 p-6 bg-white rounded-card border border-brand-100">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+          <h2 className="text-section-title text-brand-900 mb-4 flex items-center">
             <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
@@ -99,7 +99,7 @@ export default function StyrelseSlide({ onNext, onBack }) {
         {/* Revisor */}
         {boardData.auditor && (
           <div className="mb-6 p-6 bg-brand-50 rounded-card border border-brand-200">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <h2 className="text-subsection-title font-semibold text-gray-800 mb-4 flex items-center">
               <svg className="w-5 h-5 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -107,16 +107,16 @@ export default function StyrelseSlide({ onNext, onBack }) {
             </h2>
             <div className="space-y-2">
               <div className="flex justify-between items-start">
-                <span className="text-gray-600 font-medium">Namn:</span>
-                <span className="text-gray-800 font-semibold text-right">{boardData.auditor.name}</span>
+                <span className="text-sm text-gray-600 font-medium">Namn:</span>
+                <span className="text-sm text-gray-800 font-semibold text-right">{boardData.auditor.name}</span>
               </div>
               <div className="flex justify-between items-start">
-                <span className="text-gray-600 font-medium">Organisationsnummer:</span>
-                <span className="text-gray-800 font-mono text-right">{boardData.auditor.organizationNumber}</span>
+                <span className="text-sm text-gray-600 font-medium">Organisationsnummer:</span>
+                <span className="text-sm text-gray-800 font-mono text-right">{boardData.auditor.organizationNumber}</span>
               </div>
               <div className="flex justify-between items-start">
-                <span className="text-gray-600 font-medium">Typ:</span>
-                <span className="text-gray-800 text-right">{boardData.auditor.auditorType}</span>
+                <span className="text-sm text-gray-600 font-medium">Typ:</span>
+                <span className="text-sm text-gray-800 text-right">{boardData.auditor.auditorType}</span>
               </div>
             </div>
           </div>
@@ -124,7 +124,7 @@ export default function StyrelseSlide({ onNext, onBack }) {
 
         {/* Firmatecknare */}
         <div className="mb-8 p-6 bg-white rounded-card border border-brand-100">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+          <h2 className="text-section-title text-brand-900 mb-4 flex items-center">
             <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>

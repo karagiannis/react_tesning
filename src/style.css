@@ -1,3 +1,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  /* VS Code style scrollbar - only visible on hover */
+  .scrollbar-hide-until-hover::-webkit-scrollbar {
+    width: 10px;
+    background: transparent;
+  }
+
+  .scrollbar-hide-until-hover::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-hide-until-hover::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 5px;
+  }
+
+  .scrollbar-hide-until-hover:hover::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3); /* slate-400 with opacity */
+  }
+
+  .scrollbar-hide-until-hover:hover::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5);
+  }
+
+  /* Firefox */
+  .scrollbar-hide-until-hover {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .scrollbar-hide-until-hover:hover {
+    scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+  }
+}

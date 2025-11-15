@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import FileDropZone from '../Shared/FileDropZone';
 
 export default function BokforingDataSlide({ onNext, onBack }) {
   const [formData, setFormData] = useState({
@@ -42,7 +43,49 @@ export default function BokforingDataSlide({ onNext, onBack }) {
     }
 
     setFormData(prev => ({ ...prev, sieFile: file }));
-    setUploadStatus(`✅ Fil uppladdad: ${file.name}`);
+    setUploadStatus(`⏳ Laddar upp ${file.name}...`);
+    
+    // Ladda upp till backend
+    uploadSieFile(file);
+  };
+
+  const uploadSieFile = async (file) => {
+    try {
+      // Hämta JWT token från localStorage
+      const token = localStorage.getItem('jwt_token');
+      if (!token) {
+        setUploadStatus('❌ Ingen inloggning hittad. Logga in igen.');
+        return;
+      }
+
+      // Hämta orgnr från formuläret (tidigare slide)
+      const orgnr = localStorage.getItem('temp_orgnr') || '555555-5555'; // Fallback
+
+      const formDataObj = new FormData();
+      formDataObj.append('file', file);
+      formDataObj.append('orgnr', orgnr);
+
+      const response = await fetch('http://localhost:8000/api/upload-sie', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formDataObj
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        setUploadStatus(`❌ Uppladdning misslyckades: ${error.detail || 'Okänt fel'}`);
+        return;
+      }
+
+      const result = await response.json();
+      setUploadStatus(`✅ Fil uppladdad: ${file.name}`);
+      console.log('Upload result:', result);
+    } catch (error) {
+      console.error('Upload error:', error);
+      setUploadStatus(`❌ Fel vid uppladdning: ${error.message}`);
+    }
   };
 
   const handleDragOver = (e) => {
@@ -291,36 +334,17 @@ export default function BokforingDataSlide({ onNext, onBack }) {
               Om ditt bokföringsprogram inte finns med ovan, exportera en SIE-fil och ladda upp den här:
             </p>
 
-            <div
+            <FileDropZone
+              accept=".se,.si,.sie"
+              maxSize="50 MB"
+              isDragging={isDragging}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-box p-8 text-center transition-all ${
-                isDragging
-                  ? 'border-brand-500 bg-brand-50'
-                  : 'border-brand-300 hover:border-brand-400'
-              }`}
-            >
-              <input
-                type="file"
-                accept=".se,.si,.sie"
-                onChange={handleFileSelect}
-                className="hidden"
-                id="sie-file-input"
-              />
-              <label htmlFor="sie-file-input" className="cursor-pointer">
-                <svg className="w-12 h-12 mx-auto mb-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                <p className="text-brand-800 font-medium mb-2">
-                  Dra och släpp SIE-fil här
-                </p>
-                <p className="text-sm text-brand-600 mb-2">eller</p>
-                <span className="inline-block px-4 py-2 bg-brand-600 text-white rounded-box hover:bg-brand-700 transition-colors">
-                  Välj fil från datorn
-                </span>
-              </label>
-            </div>
+              onChange={handleFileSelect}
+              inputId="sie-file-input"
+              variant="compact"
+            />
 
             {uploadStatus && (
               <div className={`mt-4 p-3 rounded-box ${
@@ -402,36 +426,17 @@ export default function BokforingDataSlide({ onNext, onBack }) {
           </p>
 
           <div>
-            <div
+            <FileDropZone
+              accept=".csv"
+              maxSize="10 MB"
+              isDragging={isSkattekontoHovered}
               onDragOver={handleSkattekontoDragOver}
               onDragLeave={handleSkattekontoDragLeave}
               onDrop={handleSkattekontoDrop}
-              className={`border-2 border-dashed rounded-box p-8 text-center transition-colors ${
-                isSkattekontoHovered
-                  ? 'border-brand-500 bg-brand-50'
-                  : 'border-brand-300 hover:border-brand-400'
-              }`}
-            >
-              <input
-                type="file"
-                accept=".csv"
-                onChange={handleSkattekontoFileSelect}
-                className="hidden"
-                id="skattekonto-file-input"
-              />
-              <label htmlFor="skattekonto-file-input" className="cursor-pointer">
-                <svg className="w-12 h-12 mx-auto mb-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <p className="text-brand-800 font-medium mb-2">
-                  Dra och släpp Skattekonto CSV-fil här
-                </p>
-                <p className="text-sm text-brand-600 mb-2">eller</p>
-                <span className="inline-block px-4 py-2 bg-brand-600 text-white rounded-box hover:bg-brand-700 transition-colors">
-                  Välj CSV-fil från datorn
-                </span>
-              </label>
-            </div>
+              onChange={handleSkattekontoFileSelect}
+              inputId="skattekonto-file-input"
+              variant="compact"
+            />
 
             {skattekontoStatus && (
               <div className={`mt-4 p-3 rounded-box ${

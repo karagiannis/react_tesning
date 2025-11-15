@@ -13,45 +13,45 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
       <div className="bg-white rounded-card shadow-2xl p-8 max-w-6xl w-full max-h-[90vh] overflow-y-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+          <h1 className="text-page-title text-brand-900 mb-2">
             Övriga datapunkter
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm text-brand-700">
             Kompletterande information om fastigheter, uppdrag, ärenden och finansiella data
           </p>
         </div>
 
         {/* Ekonomisk översikt */}
-        <div className="mb-6 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-card border-2 border-green-300">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
-            <svg className="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mb-6 p-6 bg-gradient-to-r from-brand-50 to-brand-50 rounded-card border-2 border-brand-200">
+          <h2 className="text-section-title text-brand-900 mb-4 flex items-center">
+            <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Ekonomisk information ({financialData.latestYear})
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 bg-white rounded-box border border-green-200">
+            <div className="p-4 bg-white rounded-box border border-brand-200">
               <div className="text-sm text-gray-600 mb-1">Omsättning</div>
               <div className="text-page-title text-gray-800">
                 {(financialData.revenue / 1000000).toFixed(1)}M
               </div>
               <div className="text-xs text-gray-500">{financialData.currency}</div>
             </div>
-            <div className="p-4 bg-white rounded-box border border-green-200">
+            <div className="p-4 bg-white rounded-box border border-brand-200">
               <div className="text-sm text-gray-600 mb-1">Rörelseresultat</div>
               <div className="text-page-title text-green-600">
                 {(financialData.operatingProfit / 1000).toFixed(0)}k
               </div>
               <div className="text-xs text-gray-500">{financialData.currency}</div>
             </div>
-            <div className="p-4 bg-white rounded-box border border-green-200">
+            <div className="p-4 bg-white rounded-box border border-brand-200">
               <div className="text-sm text-gray-600 mb-1">Resultat efter skatt</div>
               <div className="text-page-title text-green-600">
                 {(financialData.profitAfterTax / 1000).toFixed(0)}k
               </div>
               <div className="text-xs text-gray-500">{financialData.currency}</div>
             </div>
-            <div className="p-4 bg-white rounded-box border border-green-200">
+            <div className="p-4 bg-white rounded-box border border-brand-200">
               <div className="text-sm text-gray-600 mb-1">Eget kapital</div>
               <div className="text-page-title text-gray-800">
                 {(financialData.equity / 1000000).toFixed(1)}M
@@ -60,19 +60,19 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
             </div>
           </div>
           <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-3 bg-white rounded-box border border-green-200 text-center">
+            <div className="p-3 bg-white rounded-box border border-brand-200 text-center">
               <div className="text-xs text-gray-600 mb-1">Vinstmarginal</div>
               <div className="text-section-title text-gray-800">{financialData.profitMargin}%</div>
             </div>
-            <div className="p-3 bg-white rounded-box border border-green-200 text-center">
+            <div className="p-3 bg-white rounded-box border border-brand-200 text-center">
               <div className="text-xs text-gray-600 mb-1">Soliditet</div>
               <div className="text-section-title text-gray-800">{financialData.equityRatio}%</div>
             </div>
-            <div className="p-3 bg-white rounded-box border border-green-200 text-center">
+            <div className="p-3 bg-white rounded-box border border-brand-200 text-center">
               <div className="text-xs text-gray-600 mb-1">Avkastning EK</div>
               <div className="text-section-title text-gray-800">{financialData.returnOnEquity}%</div>
             </div>
-            <div className="p-3 bg-white rounded-box border border-green-200 text-center">
+            <div className="p-3 bg-white rounded-box border border-brand-200 text-center">
               <div className="text-xs text-gray-600 mb-1">Anställda</div>
               <div className="text-section-title text-gray-800">{financialData.numberOfEmployees}</div>
             </div>
@@ -82,7 +82,7 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
         {/* Fastighetsinnehav */}
         {propertyData.properties.length > 0 && (
           <div className="mb-6 p-6 bg-brand-50 rounded-card border border-brand-200">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <h2 className="text-subsection-title font-semibold text-gray-800 mb-4 flex items-center">
               <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
@@ -94,7 +94,7 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <div className="font-semibold text-gray-800">{property.propertyId}</div>
-                      <div className="text-sm text-gray-600">{property.address}</div>
+                      <div className="text-sm text-sm text-brand-700">{property.address}</div>
                     </div>
                     <div className="text-right">
                       <div className="font-bold text-brand-600">
@@ -103,7 +103,7 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
                       <div className="text-xs text-gray-500">Taxeringsvärde</div>
                     </div>
                   </div>
-                  <div className="flex gap-4 text-sm text-gray-600">
+                  <div className="flex gap-4 text-sm text-sm text-brand-700">
                     <span>Ägarandel: {property.ownershipPercent}%</span>
                     <span>Förvärvsdatum: {property.acquisitionDate}</span>
                   </div>
@@ -121,7 +121,7 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
 
         {/* Styrelseuppdrag */}
         <div className="mb-6 p-6 bg-white rounded-card border border-brand-100">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <h2 className="text-subsection-title font-semibold text-gray-800 mb-4 flex items-center">
             <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
@@ -130,17 +130,17 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
             <div className="p-4 bg-brand-50 rounded-box border border-brand-200 text-center">
               <div className="text-page-title text-brand-600">{engagementsData.currentEngagements}</div>
-              <div className="text-sm text-gray-600">Nuvarande uppdrag</div>
+              <div className="text-sm text-sm text-brand-700">Nuvarande uppdrag</div>
             </div>
             <div className="p-4 bg-brand-50 rounded-box border border-brand-200 text-center">
-              <div className="text-page-title text-gray-600">{engagementsData.historicalEngagements}</div>
-              <div className="text-sm text-gray-600">Historiska uppdrag</div>
+              <div className="text-page-title text-sm text-brand-700">{engagementsData.historicalEngagements}</div>
+              <div className="text-sm text-sm text-brand-700">Historiska uppdrag</div>
             </div>
             <div className="p-4 bg-brand-50 rounded-box border border-brand-200 text-center">
               <div className="text-page-title text-gray-800">
                 {engagementsData.currentEngagements + engagementsData.historicalEngagements}
               </div>
-              <div className="text-sm text-gray-600">Totalt</div>
+              <div className="text-sm text-sm text-brand-700">Totalt</div>
             </div>
           </div>
           {engagementsData.engagements.length > 0 && (
@@ -166,7 +166,7 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
 
         {/* Bolagsverket ärenden */}
         <div className="mb-6 p-6 bg-brand-50 rounded-card border border-brand-200">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <h2 className="text-subsection-title font-semibold text-gray-800 mb-4 flex items-center">
             <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -175,11 +175,11 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="p-4 bg-white rounded-box border border-brand-200 text-center">
               <div className="text-page-title text-brand-600">{caseData.openCases}</div>
-              <div className="text-sm text-gray-600">Öppna ärenden</div>
+              <div className="text-sm text-sm text-brand-700">Öppna ärenden</div>
             </div>
             <div className="p-4 bg-white rounded-box border border-brand-200 text-center">
-              <div className="text-page-title text-gray-600">{caseData.closedCases}</div>
-              <div className="text-sm text-gray-600">Avslutade ärenden</div>
+              <div className="text-page-title text-sm text-brand-700">{caseData.closedCases}</div>
+              <div className="text-sm text-sm text-brand-700">Avslutade ärenden</div>
             </div>
           </div>
           {caseData.cases.length > 0 && (
@@ -200,7 +200,7 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
                       {caseItem.status}
                     </span>
                   </div>
-                  <div className="mt-2 text-xs text-gray-600">
+                  <div className="mt-2 text-xs text-sm text-brand-700">
                     Registrerad: {caseItem.registrationDate}
                     {caseItem.closedDate && ` • Avslutad: ${caseItem.closedDate}`}
                   </div>
@@ -212,7 +212,7 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
 
         {/* Aktiekapital */}
         <div className="mb-8 p-6 bg-brand-50 rounded-card border border-brand-200">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <h2 className="text-subsection-title font-semibold text-gray-800 mb-4 flex items-center">
             <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -223,19 +223,19 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
               <div className="text-page-title text-brand-600">
                 {(shareData.shareCapital / 1000).toFixed(0)}k
               </div>
-              <div className="text-sm text-gray-600">Aktiekapital (SEK)</div>
+              <div className="text-sm text-sm text-brand-700">Aktiekapital (SEK)</div>
             </div>
             <div className="p-4 bg-white rounded-box border border-brand-200 text-center">
               <div className="text-page-title text-gray-800">{shareData.numberOfShares.toLocaleString()}</div>
-              <div className="text-sm text-gray-600">Antal aktier</div>
+              <div className="text-sm text-sm text-brand-700">Antal aktier</div>
             </div>
             <div className="p-4 bg-white rounded-box border border-brand-200 text-center">
               <div className="text-page-title text-gray-800">{shareData.shareValue}</div>
-              <div className="text-sm text-gray-600">Kvotvärde (SEK)</div>
+              <div className="text-sm text-sm text-brand-700">Kvotvärde (SEK)</div>
             </div>
             <div className="p-4 bg-white rounded-box border border-brand-200 text-center">
               <div className="text-page-title text-gray-800">{shareData.shareClasses.length}</div>
-              <div className="text-sm text-gray-600">Aktieklasser</div>
+              <div className="text-sm text-sm text-brand-700">Aktieklasser</div>
             </div>
           </div>
           {shareData.shareClasses.length > 0 && (
@@ -247,7 +247,7 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
                     <span className="font-medium text-gray-800">Klass {shareClass.class}</span>
                     <span className="text-sm text-gray-600 ml-3">{shareClass.shares.toLocaleString()} aktier</span>
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-sm text-brand-700">
                     {shareClass.votesPerShare} röst{shareClass.votesPerShare !== 1 ? 'er' : ''} per aktie
                   </div>
                 </div>
@@ -259,7 +259,7 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
         {/* Etableringar */}
         {establishmentsData.length > 0 && (
           <div className="mb-8 p-6 bg-gray-50 rounded-card border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <h2 className="text-subsection-title font-semibold text-gray-800 mb-4 flex items-center">
               <svg className="w-6 h-6 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
@@ -271,7 +271,7 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <div className="font-semibold text-gray-800">{establishment.name}</div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-sm text-brand-700">
                         {establishment.address.street}, {establishment.address.postalCode} {establishment.address.city}
                       </div>
                     </div>
@@ -279,7 +279,7 @@ export default function OvrigaDataSlide({ onNext, onBack }) {
                       {establishment.establishmentType}
                     </span>
                   </div>
-                  <div className="flex gap-4 text-sm text-gray-600">
+                  <div className="flex gap-4 text-sm text-sm text-brand-700">
                     <span>Anställda: {establishment.numberOfEmployees}</span>
                     <span>Etableringsnr: {establishment.establishmentNumber}</span>
                   </div>

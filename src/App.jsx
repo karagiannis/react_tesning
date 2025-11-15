@@ -11,9 +11,9 @@ import RiskFragorSlide from './components/Slides/RiskFragorSlide';
 import RiskFragorSteg2Slide from './components/Slides/RiskFragorSteg2Slide';
 import RiskFragorSteg3Slide from './components/Slides/RiskFragorSteg3Slide';
 import RiskFragorSteg4Slide from './components/Slides/RiskFragorSteg4Slide';
+import BorderTestSlide from './components/Slides/BorderTestSlide';
 import IdentitetskontrollSlide from './components/Slides/IdentitetskontrollSlide';
 import KontrolltabellSlide from './components/Slides/KontrolltabellSlide';
-import PEPSlide from './components/Slides/PEPSlide';
 import ForetagsdokumentationSlide from './components/Slides/ForetagsdokumentationSlide';
 import BokforingsunderlagSlide from './components/Slides/BokforingsunderlagSlide';
 import BokforingDataSlide from './components/Slides/BokforingDataSlide';
@@ -77,6 +77,41 @@ export default function App() {
     organisationsnummer: '',
     personnummer: ''
   });
+
+  // 🔧 DEV MODE: Auto-login för utveckling
+  useEffect(() => {
+    const autoLogin = async () => {
+      // Kontrollera om vi redan har en token
+      const existingToken = localStorage.getItem('jwt_token');
+      if (existingToken) {
+        console.log('🔧 DEV: JWT token finns redan');
+        return;
+      }
+
+      try {
+        // Anropa dev-login endpoint
+        const response = await fetch('http://localhost:8000/api/dev-login', {
+          method: 'POST'
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          localStorage.setItem('jwt_token', result.token);
+          localStorage.setItem('temp_orgnr', result.user.client_orgnr);
+          console.log('🔧 DEV MODE: Auto-login lyckades!', result.message);
+          console.log('   User:', result.user.user_id);
+          console.log('   Orgnr:', result.user.client_orgnr);
+        }
+      } catch (error) {
+        console.warn('⚠ Dev-login misslyckades:', error.message);
+      }
+    };
+
+    // Kör endast i development
+    if (import.meta.env.DEV) {
+      autoLogin();
+    }
+  }, []);
 
   // Validera format och anropa API automatiskt
   useEffect(() => {
@@ -263,11 +298,13 @@ export default function App() {
               />
             } />
             <Route path="/identitetskontroll" element={<IdentitetskontrollSlide onNext={() => navigate('/kontrolltabell')} />} />
-            <Route path="/kontrolltabell" element={<KontrolltabellSlide onNext={() => navigate(isPEP ? '/pepfordjupning' : '/verksamhet')} />} />
-            <Route path="/pepfordjupning" element={<PEPSlide onNext={() => navigate('/verksamhet')} onBack={() => navigate('/kontrolltabell')} />} />
+            <Route path="/kontrolltabell" element={<KontrolltabellSlide onNext={() => navigate('/verksamhet')} />} />
+            
+            {/* Border test page (development only) */}
+            <Route path="/border-test" element={<BorderTestSlide />} />
             
             {/* Result slides */}
-            <Route path="/verksamhet" element={<VerksamhetSlide onNext={() => navigate('/agarstruktur')} onBack={() => navigate(isPEP ? '/pepfordjupning' : '/kontrolltabell')} />} />
+            <Route path="/verksamhet" element={<VerksamhetSlide onNext={() => navigate('/agarstruktur')} onBack={() => navigate('/kontrolltabell')} />} />
             <Route path="/agarstruktur" element={<AgarstrukturSlide onNext={() => navigate('/styrelse')} onBack={() => navigate('/verksamhet')} />} />
             <Route path="/styrelse" element={<StyrelseSlide onNext={() => navigate('/riskindikatorer')} onBack={() => navigate('/agarstruktur')} />} />
             <Route path="/riskindikatorer" element={<RiskindikatorerSlide onNext={() => navigate('/ovrigadata')} onBack={() => navigate('/styrelse')} />} />

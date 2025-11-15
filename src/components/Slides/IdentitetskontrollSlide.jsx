@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import Icon from '../Shared/Icon';
 
 export default function IdentitetskontrollSlide({ onNext }) {
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -113,7 +114,10 @@ export default function IdentitetskontrollSlide({ onNext }) {
           </ul>
 
           <div className="bg-brand-50 border-l-4 border-brand-500 p-4 rounded mt-4">
-            <p className="font-semibold text-brand-900 mb-2">📋 Dokumentationskrav:</p>
+            <p className="font-semibold text-brand-900 mb-2 flex items-center">
+              <Icon name="csv" className="w-5 h-5 mr-2 text-brand-600" />
+              Dokumentationskrav:
+            </p>
             <ul className="list-disc list-inside space-y-1 text-sm">
               <li>Anteckna identitetshandlingens nummer och giltighetstid eller bevara kopia.</li>
               <li>Bevara kopia av elektronisk legitimation eller andra dokument som legat till grund för kontrollen.</li>

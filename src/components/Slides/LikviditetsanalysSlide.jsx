@@ -1,5 +1,6 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { mockLiquidityData } from '../../data/mockEconomicData';
+import BadgeIcon from '../Shared/BadgeIcon';
 
 export default function LikviditetsanalysSlide({ onNext, onBack }) {
   const { monthlyData, summary, aiAnalysis, recommendations } = mockLiquidityData;
@@ -87,8 +88,8 @@ export default function LikviditetsanalysSlide({ onNext, onBack }) {
         {/* Sammanfattning och AI-analys */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Sammanfattning */}
-          <div className="p-6 bg-white rounded-card border border-brand-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <div className="p-6 bg-brand-50 rounded-card border border-brand-200">
+            <h3 className="text-lg font-semibold text-brand-900 mb-4 flex items-center gap-2">
               <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
               </svg>
@@ -96,24 +97,24 @@ export default function LikviditetsanalysSlide({ onNext, onBack }) {
             </h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Nuvarande likviditet:</span>
-                <span className="font-bold text-gray-800">{formatCurrency(summary.currentBalance)}</span>
+                <span className="text-brand-700">Nuvarande likviditet:</span>
+                <span className="font-bold text-brand-900">{formatCurrency(summary.currentBalance)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Genomsnitt (12 mån):</span>
-                <span className="font-semibold text-gray-800">{formatCurrency(summary.averageBalance)}</span>
+                <span className="text-brand-700">Genomsnitt (12 mån):</span>
+                <span className="font-semibold text-brand-900">{formatCurrency(summary.averageBalance)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Högsta saldo:</span>
-                <span className="font-semibold text-gray-700">{formatCurrency(summary.highestBalance)}</span>
+                <span className="text-brand-700">Högsta saldo:</span>
+                <span className="font-semibold text-brand-800">{formatCurrency(summary.highestBalance)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Lägsta saldo:</span>
-                <span className="font-semibold text-gray-700">{formatCurrency(summary.lowestBalance)}</span>
+                <span className="text-brand-700">Lägsta saldo:</span>
+                <span className="font-semibold text-brand-800">{formatCurrency(summary.lowestBalance)}</span>
               </div>
-              <div className="pt-3 border-t border-gray-200">
+              <div className="pt-3 border-t border-brand-200">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600 font-medium">Trend:</span>
+                  <span className="text-brand-700 font-medium">Trend:</span>
                   <span className="font-bold text-green-600 flex items-center gap-1">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
@@ -126,26 +127,26 @@ export default function LikviditetsanalysSlide({ onNext, onBack }) {
           </div>
 
           {/* AI-analys */}
-          <div className="p-6 bg-white rounded-card border border-brand-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <div className="p-6 bg-brand-50 rounded-card border border-brand-200">
+            <h3 className="text-lg font-semibold text-brand-900 mb-4 flex items-center gap-2">
               <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
               AI-analys
             </h3>
             <div className="space-y-3">
-              <div className="flex items-start gap-2">
-                <span className="text-xl">✅</span>
+              <div className="flex items-start gap-3">
+                <BadgeIcon icon="check" variant="success" shape="square" size="md" />
                 <div>
-                  <p className="text-sm text-gray-800 font-medium">Inga layering-mönster</p>
-                  <p className="text-xs text-gray-600">Transaktionerna följer normala mönster</p>
+                  <p className="text-sm text-brand-800 font-medium">Inga layering-mönster</p>
+                  <p className="text-xs text-brand-600">Transaktionerna följer normala mönster</p>
                 </div>
               </div>
-              <div className="flex items-start gap-2">
-                <span className="text-xl">✅</span>
+              <div className="flex items-start gap-3">
+                <BadgeIcon icon="check" variant="success" shape="square" size="md" />
                 <div>
-                  <p className="text-sm text-gray-800 font-medium">Normala transaktionsstorlekar</p>
-                  <p className="text-xs text-gray-600">Inga tecken på strukturering</p>
+                  <p className="text-sm text-brand-800 font-medium">Normala transaktionsstorlekar</p>
+                  <p className="text-xs text-brand-600">Inga tecken på strukturering</p>
                 </div>
               </div>
               {aiAnalysis.unusualTransactions && aiAnalysis.unusualTransactions.length > 0 && (

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Info } from 'lucide-react';
+import { Info, ChevronRight } from 'lucide-react';
 import { getLegalTextsForQuestion, legalTexts } from '../../data/legalTexts';
 import StepIndicator from '../Shared/StepIndicator';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
@@ -47,8 +47,18 @@ export default function RiskFragorSteg3Slide({ onNext }) {
     if (onNext) {
       onNext({ steg3: formData });
     }
-    // Navigate to identitetskontroll (Steg 4 EDD will be added later with conditional routing)
-    navigate('/identitetskontroll');
+    
+    // Check if user is PEP or has high risk from localStorage
+    const steg1Data = JSON.parse(localStorage.getItem('onboarding-wizard-steg1') || '{}');
+    const isPEP = steg1Data.isPEP === true;
+    
+    // TODO: Calculate risk score from steg1-3 data
+    // For now, go to steg4 if PEP, otherwise skip to identitetskontroll
+    if (isPEP) {
+      navigate('/riskfragor/steg4');
+    } else {
+      navigate('/identitetskontroll');
+    }
   };
 
   const handleBack = () => {
@@ -83,54 +93,54 @@ export default function RiskFragorSteg3Slide({ onNext }) {
               <Info className="w-5 h-5" />
             </button>
 
-            <label className="block text-sm font-medium text-brand-800 mb-2">
+            <label className="block text-section-title text-brand-800 mb-2">
               1. Hur tar företaget betalt från kunder? *
             </label>
             <div className="space-y-2">
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-100 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.betalmetoder.bankoverföring}
                   onChange={(e) => handleCheckboxChange('bankoverföring', e.target.checked)}
                   className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                 />
-                <span className="text-brand-800">Banköverföring/Swish</span>
+                <span className="text-sm text-brand-800">Banköverföring/Swish</span>
               </label>
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-100 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.betalmetoder.kortbetalning}
                   onChange={(e) => handleCheckboxChange('kortbetalning', e.target.checked)}
                   className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                 />
-                <span className="text-brand-800">Kortbetalning</span>
+                <span className="text-sm text-brand-800">Kortbetalning</span>
               </label>
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-100 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.betalmetoder.faktura}
                   onChange={(e) => handleCheckboxChange('faktura', e.target.checked)}
                   className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                 />
-                <span className="text-brand-800">Faktura</span>
+                <span className="text-sm text-brand-800">Faktura</span>
               </label>
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-100 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.betalmetoder.kontanter}
                   onChange={(e) => handleCheckboxChange('kontanter', e.target.checked)}
                   className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                 />
-                <span className="text-brand-800">Kontanter</span>
+                <span className="text-sm text-brand-800">Kontanter</span>
               </label>
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-100 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.betalmetoder.kryptovaluta}
                   onChange={(e) => handleCheckboxChange('kryptovaluta', e.target.checked)}
                   className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                 />
-                <span className="text-brand-800">Kryptovaluta</span>
+                <span className="text-sm text-brand-800">Kryptovaluta</span>
               </label>
             </div>
             {(formData.betalmetoder.kontanter || formData.betalmetoder.kryptovaluta) && (
@@ -163,13 +173,13 @@ export default function RiskFragorSteg3Slide({ onNext }) {
                 <Info className="w-5 h-5" />
               </button>
 
-              <label className="block text-sm font-medium text-brand-800 mb-2">
+              <label className="block text-section-title text-brand-800 mb-2">
                 2. Om kontanter: Ungefär hur stor andel av omsättningen?
               </label>
               <select
                 value={formData.kontanterAndel}
                 onChange={(e) => handleChange('kontanterAndel', e.target.value)}
-                className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               >
                 <option value="">Välj...</option>
                 <option value="<5%">Mindre än 5%</option>
@@ -220,11 +230,11 @@ export default function RiskFragorSteg3Slide({ onNext }) {
               <Info className="w-5 h-5" />
             </button>
 
-            <label className="block text-sm font-medium text-brand-800 mb-2">
+            <label className="block text-section-title text-brand-800 mb-2">
               3. Förekommer transaktioner över 150 000 kr?
             </label>
             <div className="space-y-2">
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-200 cursor-pointer">
                 <input
                   type="radio"
                   name="storaTransaktioner"
@@ -233,9 +243,9 @@ export default function RiskFragorSteg3Slide({ onNext }) {
                   onChange={(e) => handleChange('storaTransaktioner', e.target.value)}
                   className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
                 />
-                <span className="text-brand-800">Ja</span>
+                <span className="text-sm text-brand-800">Ja</span>
               </label>
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-200 cursor-pointer">
                 <input
                   type="radio"
                   name="storaTransaktioner"
@@ -244,9 +254,9 @@ export default function RiskFragorSteg3Slide({ onNext }) {
                   onChange={(e) => handleChange('storaTransaktioner', e.target.value)}
                   className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
                 />
-                <span className="text-brand-800">Ibland</span>
+                <span className="text-sm text-brand-800">Ibland</span>
               </label>
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-200 cursor-pointer">
                 <input
                   type="radio"
                   name="storaTransaktioner"
@@ -255,7 +265,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
                   onChange={(e) => handleChange('storaTransaktioner', e.target.value)}
                   className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
                 />
-                <span className="text-brand-800">Nej</span>
+                <span className="text-sm text-brand-800">Nej</span>
               </label>
             </div>
             <p className="text-xs text-brand-600 mt-1">
@@ -285,14 +295,14 @@ export default function RiskFragorSteg3Slide({ onNext }) {
               <Info className="w-5 h-5" />
             </button>
 
-            <label className="block text-sm font-medium text-brand-800 mb-2">
+            <label className="block text-section-title text-brand-800 mb-2">
               4. Tar företaget emot betalningar från tredje part?
             </label>
             <p className="text-xs text-brand-600 mb-2">
               Exempel: Kund A betalar för Kund B:s tjänst
             </p>
             <div className="space-y-2">
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-200 cursor-pointer">
                 <input
                   type="radio"
                   name="tredjepartsbetalningar"
@@ -301,9 +311,9 @@ export default function RiskFragorSteg3Slide({ onNext }) {
                   onChange={(e) => handleChange('tredjepartsbetalningar', e.target.value)}
                   className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
                 />
-                <span className="text-brand-800">Ja</span>
+                <span className="text-sm text-brand-800">Ja</span>
               </label>
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-200 cursor-pointer">
                 <input
                   type="radio"
                   name="tredjepartsbetalningar"
@@ -312,7 +322,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
                   onChange={(e) => handleChange('tredjepartsbetalningar', e.target.value)}
                   className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
                 />
-                <span className="text-brand-800">Nej</span>
+                <span className="text-sm text-brand-800">Nej</span>
               </label>
             </div>
             {formData.tredjepartsbetalningar === 'ja' && (
@@ -344,11 +354,11 @@ export default function RiskFragorSteg3Slide({ onNext }) {
               <Info className="w-5 h-5" />
             </button>
 
-            <label className="block text-sm font-medium text-brand-800 mb-2">
+            <label className="block text-section-title text-brand-800 mb-2">
               5. Förekommer överföringar till/från utländska bankkonton?
             </label>
             <div className="space-y-2 mb-2">
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-200 cursor-pointer">
                 <input
                   type="radio"
                   name="utlandskaOverforingar"
@@ -357,9 +367,9 @@ export default function RiskFragorSteg3Slide({ onNext }) {
                   onChange={(e) => handleChange('utlandskaOverforingar', e.target.value)}
                   className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
                 />
-                <span className="text-brand-800">Ja, regelbundet</span>
+                <span className="text-sm text-brand-800">Ja, regelbundet</span>
               </label>
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-200 cursor-pointer">
                 <input
                   type="radio"
                   name="utlandskaOverforingar"
@@ -368,9 +378,9 @@ export default function RiskFragorSteg3Slide({ onNext }) {
                   onChange={(e) => handleChange('utlandskaOverforingar', e.target.value)}
                   className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
                 />
-                <span className="text-brand-800">Ja, ibland</span>
+                <span className="text-sm text-brand-800">Ja, ibland</span>
               </label>
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-200 cursor-pointer">
                 <input
                   type="radio"
                   name="utlandskaOverforingar"
@@ -379,17 +389,23 @@ export default function RiskFragorSteg3Slide({ onNext }) {
                   onChange={(e) => handleChange('utlandskaOverforingar', e.target.value)}
                   className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
                 />
-                <span className="text-brand-800">Nej</span>
+                <span className="text-sm text-brand-800">Nej</span>
               </label>
             </div>
             {(formData.utlandskaOverforingar === 'ja-regelbundet' || formData.utlandskaOverforingar === 'ja-ibland') && (
-              <input
-                type="text"
-                value={formData.utlandskaLander}
-                onChange={(e) => handleChange('utlandskaLander', e.target.value)}
-                className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                placeholder="Vilka länder?"
-              />
+              <div className="ml-8 mt-3 pl-4 border-l-2 border-brand-300">
+                <div className="flex items-center gap-2 text-xs text-brand-600 mb-2">
+                  <ChevronRight className="w-3 h-3" />
+                  <span>Följdfråga</span>
+                </div>
+                <input
+                  type="text"
+                  value={formData.utlandskaLander}
+                  onChange={(e) => handleChange('utlandskaLander', e.target.value)}
+                  className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+                  placeholder="Vilka länder?"
+                />
+              </div>
             )}
 
             {expandedInfo.question5 && (

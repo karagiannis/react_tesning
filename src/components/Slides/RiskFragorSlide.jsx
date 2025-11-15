@@ -342,9 +342,11 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
         <button
           onClick={() => {
             if (formData.isPEP) {
-              onNext();
-            } else {
+              // Om användaren ÄR PEP, hoppa till Steg 4 (PEP-formulär)
               onSkipPEP();
+            } else {
+              // Om användaren INTE är PEP, fortsätt till Steg 2
+              onNext();
             }
           }}
           disabled={!isFormValid()}

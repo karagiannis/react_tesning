@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Icon from '../Shared/Icon';
+import FileDropZone from '../Shared/FileDropZone';
 
 // Simple inline SVG icons for missing icons
 const UploadIcon = ({ className }) => (
@@ -219,36 +220,17 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
             </p>
 
             {!formData.registreringsbevis ? (
-              <div
+              <FileDropZone
+                accept=".pdf"
+                maxSize="10 MB"
+                isDragging={isDragging.registreringsbevis}
                 onDragOver={(e) => handleDragOver('registreringsbevis', e)}
                 onDragLeave={() => handleDragLeave('registreringsbevis')}
                 onDrop={(e) => handleDrop('registreringsbevis', e)}
-                className={`relative border-2 border-dashed rounded-box p-12 text-center transition-all ${
-                  isDragging.registreringsbevis
-                    ? 'border-brand-500 bg-brand-50'
-                    : 'border-gray-300 bg-white hover:border-brand-400 hover:bg-brand-50/50'
-                }`}
-              >
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={(e) => handleFileSelect('registreringsbevis', e)}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  id="registreringsbevis-upload"
-                />
-                <div className="pointer-events-none">
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-lg font-medium text-gray-700 mb-2">
-                    Dra och släpp PDF här
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    eller klicka för att välja fil
-                  </p>
-                  <p className="text-xs text-gray-400 mt-2">
-                    Max 10 MB • Endast PDF
-                  </p>
-                </div>
-              </div>
+                onChange={(e) => handleFileSelect('registreringsbevis', e)}
+                inputId="registreringsbevis-upload"
+                variant="compact"
+              />
             ) : (
               <div className="border-2 border-green-200 bg-green-50 rounded-box p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -323,33 +305,17 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
             </p>
 
             {!formData.arsredovisning ? (
-              <div
+              <FileDropZone
+                accept=".pdf"
+                maxSize="10 MB"
+                isDragging={isDragging.arsredovisning}
                 onDragOver={(e) => handleDragOver('arsredovisning', e)}
                 onDragLeave={() => handleDragLeave('arsredovisning')}
                 onDrop={(e) => handleDrop('arsredovisning', e)}
-                className={`relative border-2 border-dashed rounded-box p-8 text-center transition-all ${
-                  isDragging.arsredovisning
-                    ? 'border-gray-400 bg-gray-50'
-                    : 'border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50'
-                }`}
-              >
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={(e) => handleFileSelect('arsredovisning', e)}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  id="arsredovisning-upload"
-                />
-                <div className="pointer-events-none">
-                  <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                  <p className="text-base font-medium text-gray-700 mb-1">
-                    Dra och släpp PDF här
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    eller klicka för att välja fil
-                  </p>
-                </div>
-              </div>
+                onChange={(e) => handleFileSelect('arsredovisning', e)}
+                inputId="arsredovisning-upload"
+                variant="compact"
+              />
             ) : (
               <div className="border-2 border-gray-200 bg-gray-50 rounded-box p-4">
                 <div className="flex items-center justify-between">

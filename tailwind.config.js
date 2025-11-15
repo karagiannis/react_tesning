@@ -39,7 +39,7 @@ export default {
         // Content-slide huvudrubriker (h1) - Fortnox: ~16-18px
         'page-title': ['1.125rem', { lineHeight: '1.75rem', fontWeight: '600' }],  // 18px semibold
         // Sektionsrubriker (h2) - Fortnox kolumnrubriker: ~13px
-        'section-title': ['0.875rem', { lineHeight: '1.25rem', fontWeight: '600' }],  // 14px semibold
+        'section-title': ['0.875rem', { lineHeight: '1.25rem', fontWeight: '700' }],  // 14px BOLD (ändrat från 600)
         // Underrubriker (h3)
         'subsection-title': ['0.8125rem', { lineHeight: '1.125rem', fontWeight: '500' }],  // 13px medium
         // Statistik/KPI-siffror (får vara lite större än vanlig text)

@@ -1,5 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import { mockRevenueData } from '../../data/mockEconomicData';
+import BadgeIcon from '../Shared/BadgeIcon';
 
 export default function OmsattningsanalysSlide({ onNext, onBack }) {
   const { yearlyData, summary, analysis } = mockRevenueData;
@@ -95,8 +96,8 @@ export default function OmsattningsanalysSlide({ onNext, onBack }) {
         {/* Sammanfattning och Analys */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Sammanfattning */}
-          <div className="p-6 bg-white rounded-card border border-brand-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <div className="p-6 bg-brand-50 rounded-card border border-brand-200">
+            <h3 className="text-lg font-semibold text-brand-900 mb-4 flex items-center gap-2">
               <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
               </svg>
@@ -104,16 +105,16 @@ export default function OmsattningsanalysSlide({ onNext, onBack }) {
             </h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Omsättning 2024:</span>
-                <span className="font-bold text-gray-800">{formatMSEK(summary.currentYearRevenue)}</span>
+                <span className="text-brand-700">Omsättning 2024:</span>
+                <span className="font-bold text-brand-900">{formatMSEK(summary.currentYearRevenue)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Omsättning 2023:</span>
-                <span className="font-semibold text-gray-800">{formatMSEK(summary.previousYearRevenue)}</span>
+                <span className="text-brand-700">Omsättning 2023:</span>
+                <span className="font-semibold text-brand-900">{formatMSEK(summary.previousYearRevenue)}</span>
               </div>
-              <div className="pt-3 border-t border-gray-200">
+              <div className="pt-3 border-t border-brand-200">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-600 font-medium">Tillväxt (YoY):</span>
+                  <span className="text-brand-700 font-medium">Tillväxt (YoY):</span>
                   <span className="font-bold text-green-600 flex items-center gap-1">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
@@ -134,33 +135,33 @@ export default function OmsattningsanalysSlide({ onNext, onBack }) {
           </div>
 
           {/* Analys */}
-          <div className="p-6 bg-white rounded-card border border-brand-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <div className="p-6 bg-brand-50 rounded-card border border-brand-200">
+            <h3 className="text-lg font-semibold text-brand-900 mb-4 flex items-center gap-2">
               <svg className="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Analys
             </h3>
             <div className="space-y-3">
-              <div className="flex items-start gap-2">
-                <span className="text-xl mt-0.5">✅</span>
+              <div className="flex items-start gap-3">
+                <BadgeIcon icon="check" variant="success" shape="square" size="md" />
                 <div>
-                  <p className="text-sm text-gray-800 font-medium">Stabil tillväxt</p>
-                  <p className="text-xs text-gray-600">Konsekvent ökning varje år</p>
+                  <p className="text-sm text-brand-800 font-medium">Stabil tillväxt</p>
+                  <p className="text-xs text-brand-600">Konsekvent ökning varje år</p>
                 </div>
               </div>
-              <div className="flex items-start gap-2">
-                <span className="text-xl mt-0.5">✅</span>
+              <div className="flex items-start gap-3">
+                <BadgeIcon icon="check" variant="success" shape="square" size="md" />
                 <div>
-                  <p className="text-sm text-gray-800 font-medium">Inga ovanliga hopp</p>
-                  <p className="text-xs text-gray-600">Naturlig utvecklingskurva</p>
+                  <p className="text-sm text-brand-800 font-medium">Inga ovanliga hopp</p>
+                  <p className="text-xs text-brand-600">Naturlig utvecklingskurva</p>
                 </div>
               </div>
-              <div className="flex items-start gap-2">
-                <span className="text-xl mt-0.5">ℹ️</span>
+              <div className="flex items-start gap-3">
+                <BadgeIcon icon="info" variant="brand" shape="square" size="md" />
                 <div>
-                  <p className="text-sm text-gray-800 font-medium">Avtagande tillväxttakt</p>
-                  <p className="text-xs text-gray-600">Normalt för mogna företag</p>
+                  <p className="text-sm text-brand-800 font-medium">Avtagande tillväxttakt</p>
+                  <p className="text-xs text-brand-600">Normalt för mogna företag</p>
                 </div>
               </div>
             </div>

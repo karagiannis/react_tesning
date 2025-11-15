@@ -345,25 +345,25 @@ function Step1_FraudDetection({ onNext }) {
 
       {/* Statistik */}
       <div className="grid grid-cols-4 gap-4 mb-8">
-        <div className="p-4 bg-gray-50 border border-gray-200 rounded-box">
-          <div className="text-stat-value text-gray-800">{totalScanned.toLocaleString('sv-SE')}</div>
-          <div className="text-sm text-gray-600 mt-1">Verifikationer granskade</div>
+        <div className="p-3 bg-gray-50 border border-gray-200 rounded-box">
+          <div className="text-2xl font-bold text-gray-800">{totalScanned.toLocaleString('sv-SE')}</div>
+          <div className="text-xs text-gray-600 mt-1">Verifikationer granskade</div>
           <div className="text-xs text-gray-500 mt-1">{fiscalYears.length} räkenskapsår</div>
         </div>
         
-        <div className="p-4 bg-red-50 border border-red-200 rounded-box">
-          <div className="text-stat-value text-red-600">{summary.errors}</div>
-          <div className="text-sm text-red-700 mt-1">Allvarliga avvikelser</div>
+        <div className="p-3 bg-red-50 border border-red-200 rounded-box">
+          <div className="text-2xl font-bold text-red-800">{summary.errors}</div>
+          <div className="text-xs text-red-600 mt-1">Allvarliga avvikelser</div>
         </div>
         
-        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-box">
-          <div className="text-stat-value text-yellow-600">{summary.warnings}</div>
-          <div className="text-sm text-yellow-700 mt-1">Varningar</div>
+        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-box">
+          <div className="text-2xl font-bold text-yellow-800">{summary.warnings}</div>
+          <div className="text-xs text-yellow-600 mt-1">Varningar</div>
         </div>
         
-        <div className="p-4 bg-green-50 border border-green-200 rounded-box">
-          <div className="text-stat-value text-green-600">{summary.ok.toLocaleString('sv-SE')}</div>
-          <div className="text-sm text-green-700 mt-1">Godkända poster</div>
+        <div className="p-3 bg-brand-50 border border-brand-200 rounded-box">
+          <div className="text-2xl font-bold text-brand-800">{summary.ok.toLocaleString('sv-SE')}</div>
+          <div className="text-xs text-brand-600 mt-1">Godkända poster</div>
         </div>
       </div>
       
@@ -373,13 +373,13 @@ function Step1_FraudDetection({ onNext }) {
           <table className="w-full">
             <thead className="bg-gray-100 border-b border-gray-200">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 w-12">Status</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 w-24">Vernr</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 w-28">Datum</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 w-32">Räkenskapsår</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Beskrivning</th>
-              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 w-32">Belopp</th>
-              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 w-32">Åtgärd</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase w-12">Status</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase w-20">Vernr</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase w-28">Datum</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase w-28">Räkenskapsår</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700 uppercase">Beskrivning</th>
+              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700 uppercase w-32">Belopp</th>
+              <th className="px-3 py-2 text-center text-xs font-semibold text-gray-700 uppercase w-28">Åtgärd</th>
             </tr>
           </thead>
           <tbody>
@@ -389,18 +389,15 @@ function Step1_FraudDetection({ onNext }) {
                 className={`border-b border-gray-100 transition-all cursor-pointer hover:shadow-sm ${getStatusColor(voucher.status)}`}
                 onClick={() => openWindowWithCheck(() => openVoucherWindow(voucher.id))}
               >
-                <td className="px-4 py-3">
+                <td className="px-3 py-2">
                   {getStatusIcon(voucher.status)}
                 </td>
-                <td className="px-4 py-3 font-mono font-semibold text-sm">{voucher.id}</td>
-                <td className="px-4 py-3 text-sm">{voucher.date}</td>
-                <td className="px-4 py-3 text-sm text-gray-600">{voucher.fiscalYear}</td>
-                <td className="px-4 py-3">
-                  <div className="font-medium text-sm">{voucher.description}</div>
-                  <div className="text-xs text-gray-600 mt-1">{voucher.flagReason}</div>
-                </td>
-                <td className="px-4 py-3 text-sm text-right font-semibold">{formatAmount(voucher.amount)}</td>
-                <td className="px-4 py-3 text-center">
+                <td className="px-3 py-2 font-mono font-semibold text-xs">{voucher.id}</td>
+                <td className="px-3 py-2 text-xs text-gray-700">{voucher.date}</td>
+                <td className="px-3 py-2 text-xs text-gray-600">{voucher.fiscalYear}</td>
+                <td className="px-3 py-2 text-xs text-gray-800">{voucher.description}</td>
+                <td className="px-3 py-2 text-xs text-right font-semibold">{formatAmount(voucher.amount)}</td>
+                <td className="px-3 py-2 text-center">
                   <button
                     onClick={(e) => {
                       e.stopPropagation(); // Förhindra dubbel-trigger av rad-klick
@@ -599,28 +596,445 @@ function Step1_FraudDetection({ onNext }) {
 }
 
 /**
- * STEG 2: Rapportarkiv (Placeholder)
+ * STEG 2: Rapportarkiv
+ * Visar expanderbar träd-struktur per räkenskapsår med två kolumner:
+ * - "Vår korrekta bokföring" (AI-genererad, placeholder tills motor klar)
+ * - "Kundens bokföring" (från SIE-filer via server endpoints)
  */
 function Step2_ReportArchive({ onNext, onBack }) {
+  const [expandedYears, setExpandedYears] = useState(new Set());
+  const [expandedDeviations, setExpandedDeviations] = useState(new Set());
+  const API_BASE = 'http://localhost:8000';
+  
+  // Mock fiscal year data med realistiska scenarion för forensisk revision
+  const fiscalYears = [
+    {
+      year: '2024-2025',
+      period: { from: '2024-05-01', to: '2025-04-30' },
+      status: 'incomplete', // Pågående räkenskapsår - ofullständig
+      statusNote: 'Bokföring stoppades vid verifikation A123 (augusti 2024)',
+      ourReports: {
+        balance: null, // AI-motor ej implementerad än
+        income: null,
+        ledger: null,
+        vouchers: null
+      },
+      theirReports: {
+        balance: { available: true, url: `${API_BASE}/3/reports/financial?type=balance&from=2024-05-01&to=2025-04-30&format=pdf` },
+        income: { available: true, url: `${API_BASE}/3/reports/financial?type=income&from=2024-05-01&to=2025-04-30&format=pdf` },
+        ledger: { available: true, url: `${API_BASE}/3/reports/ledger?from=2024-05-01&to=2025-04-30&format=pdf` },
+        vouchers: { available: true, url: `${API_BASE}/3/vouchers?from=2024-05-01&to=2025-04-30&format=pdf` }
+      },
+      deviations: [
+        {
+          id: 1,
+          type: 'critical',
+          title: 'Bokföring avbruten - saknar verifikationsunderlag',
+          description: 'Verifikation A123 (augusti 2024): Kontantinsättning 45 000 SEK via företagets bankgiro saknar faktura/kvitto.',
+          details: [
+            'Ägaren har kommenterat i bankutdraget: "Jag har tagit emot kontanter från kund som jag satte in via bankgiro"',
+            'Detta är INTE acceptabelt verifikationsunderlag enligt BFL 5 kap',
+            'Kontanthantering kräver: a) Kvitto/faktura till kund, b) Kassarapport, c) ID på kund vid belopp >15 000 SEK (penningtvättslagen)',
+            'Liknande felaktig hantering gjordes av RS Mek vid ett tillfälle i augusti - samma problematik',
+            'Bokföringen kan ej fortsätta förrän korrekt underlag erhålls eller verifikationen omarbetas med korrektioner'
+          ],
+          impact: 'Räkenskapsåret kan ej avslutas. Risk för avvisad deklaration.',
+          recommendation: 'Begär in fullständigt underlag alternativt omarbeta verifikationen enligt BFL krav.'
+        }
+      ]
+    },
+    {
+      year: '2023-2024',
+      period: { from: '2023-05-01', to: '2024-04-30' },
+      status: 'complete',
+      statusNote: 'Avslutad - avvikelser identifierade',
+      ourReports: {
+        balance: null, // Kommer från AI-motor
+        income: null,
+        ledger: null,
+        vouchers: null
+      },
+      theirReports: {
+        balance: { available: true, url: `${API_BASE}/3/reports/financial?type=balance&from=2023-05-01&to=2024-04-30&format=pdf` },
+        income: { available: true, url: `${API_BASE}/3/reports/financial?type=income&from=2023-05-01&to=2024-04-30&format=pdf` },
+        ledger: { available: true, url: `${API_BASE}/3/reports/ledger?from=2023-05-01&to=2024-04-30&format=pdf` },
+        vouchers: { available: true, url: `${API_BASE}/3/vouchers?from=2023-05-01&to=2024-04-30&format=pdf` }
+      },
+      deviations: [
+        {
+          id: 2,
+          type: 'error',
+          title: 'Felaktig kontering av konsultkostnader',
+          description: 'Verifikation B247 (mars 2024): Konsultkostnad 850 000 SEK bokförd som löpande kostnad, borde varit aktiverad.',
+          details: [
+            'Kundens bokföring: Konto 4000 (Konsultkostnader) 850 000 SEK',
+            'Korrekt kontering: Konto 1220 (Immateriella anläggningstillgångar) 850 000 SEK',
+            'Påverkan balansräkning: Anläggningstillgångar +850 000 SEK, Resultat +850 000 SEK',
+            'Påverkan deklaration: Avskrivningar ska ske över 5 år (170 000 SEK/år)'
+          ],
+          impact: 'Resultat överskattat med 680 000 SEK (850k - 170k avskrivning)',
+          recommendation: 'Omklassificera till anläggningstillgång och justera avskrivningsplan.'
+        },
+        {
+          id: 3,
+          type: 'warning',
+          title: 'Aggregerade verifikationer med felaktiga poster',
+          description: 'Samlingsfaktura Q4 (verifikation B156) innehåller 23 affärshändelser, varav 2 festkläder (10 090 SEK).',
+          details: [
+            'Kundens bokföring: Allt bokfört på konto 5410 (Varor och material)',
+            'Festkläder är EJ avdragsgilla enligt IL 16 kap 1 §',
+            'Korrekt kontering: Konto 8999 (Ej avdragsgilla kostnader) 10 090 SEK',
+            'Moms på festkläder ska återföras: 2 523 SEK'
+          ],
+          impact: 'Avdragsgilla kostnader överskattade med 10 090 SEK, moms felaktig',
+          recommendation: 'Omklassificera festkläder och korrigera momsdeklaration.'
+        }
+      ]
+    },
+    {
+      year: '2022-2023',
+      period: { from: '2022-05-01', to: '2023-04-30' },
+      status: 'complete',
+      statusNote: 'Perfekt överensstämmelse mellan vår AI-bokföring och kundens bokföring',
+      ourReports: {
+        balance: null, // Kommer från AI-motor
+        income: null,
+        ledger: null,
+        vouchers: null
+      },
+      theirReports: {
+        balance: { available: true, url: `${API_BASE}/3/reports/financial?type=balance&from=2022-05-01&to=2023-04-30&format=pdf` },
+        income: { available: true, url: `${API_BASE}/3/reports/financial?type=income&from=2022-05-01&to=2023-04-30&format=pdf` },
+        ledger: { available: true, url: `${API_BASE}/3/reports/ledger?from=2022-05-01&to=2023-04-30&format=pdf` },
+        vouchers: { available: true, url: `${API_BASE}/3/vouchers?from=2022-05-01&to=2023-04-30&format=pdf` }
+      },
+      deviations: [] // Inga avvikelser - perfekt överensstämmelse!
+    }
+  ];
+  
+  const toggleYear = (year) => {
+    const newExpanded = new Set(expandedYears);
+    if (newExpanded.has(year)) {
+      newExpanded.delete(year);
+    } else {
+      newExpanded.add(year);
+    }
+    setExpandedYears(newExpanded);
+  };
+  
+  const toggleDeviation = (deviationId) => {
+    const newExpanded = new Set(expandedDeviations);
+    if (newExpanded.has(deviationId)) {
+      newExpanded.delete(deviationId);
+    } else {
+      newExpanded.add(deviationId);
+    }
+    setExpandedDeviations(newExpanded);
+  };
+  
+  const getStatusBadge = (status) => {
+    const styles = {
+      complete: 'bg-green-100 text-green-800 border-green-300',
+      incomplete: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      missing: 'bg-red-100 text-red-800 border-red-300'
+    };
+    const labels = {
+      complete: 'Komplett',
+      incomplete: 'Ofullständig',
+      missing: 'Saknas'
+    };
+    return (
+      <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${styles[status]}`}>
+        {labels[status]}
+      </span>
+    );
+  };
+  
+  const getDeviationIcon = (type) => {
+    if (type === 'critical') {
+      return (
+        <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+        </svg>
+      );
+    } else if (type === 'error') {
+      return (
+        <svg className="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+        </svg>
+      );
+    } else {
+      return (
+        <svg className="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+        </svg>
+      );
+    }
+  };
+  
+  const getDeviationStyle = (type) => {
+    if (type === 'critical') return 'bg-red-50 border-l-4 border-red-500';
+    if (type === 'error') return 'bg-orange-50 border-l-4 border-orange-500';
+    return 'bg-yellow-50 border-l-4 border-yellow-500';
+  };
+  
+  const openReport = (url) => {
+    if (!url) {
+      alert('Rapport ej tillgänglig ännu');
+      return;
+    }
+    window.open(url, '_blank', 'width=1200,height=800');
+  };
+  
+  const reportTypes = [
+    { key: 'balance', label: 'Balansrapport' },
+    { key: 'income', label: 'Resultatrapport' },
+    { key: 'ledger', label: 'Huvudbok' },
+    { key: 'vouchers', label: 'Verifikationslista' }
+  ];
+  
   return (
     <div className="p-10">
-      <h1 className="text-page-title text-brand-900 mb-2 flex items-center gap-3">
-        <svg className="w-icon-md h-icon-md text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        Rapportarkiv per Räkenskapsår
-      </h1>
-      <p className="text-brand-700 mb-8">
-        Expanderbar trädstruktur med Balansrapport, Resultatrapport, Huvudbok, Verifikationslista.
-      </p>
-      <p className="text-sm text-gray-500 bg-gray-50 p-compact-md rounded-fortnox mb-compact-lg">
-        <strong>TODO:</strong> Implementera expanderbar mappstruktur med window.open() för PDF-rapporter.
-      </p>
-      <div className="flex justify-between mt-compact-lg">
-        <button onClick={onBack} className="px-compact-md py-compact-sm bg-gray-200 text-gray-700 font-medium rounded-fortnox hover:bg-gray-300 shadow-md transition-colors">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-page-title text-brand-900 mb-2 flex items-center gap-3">
+          <svg className="w-icon-md h-icon-md text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+          </svg>
+          Rapportarkiv per Räkenskapsår
+        </h1>
+        <p className="text-brand-700">
+          Jämför vår AI-korrigerade bokföring med kundens ursprungliga rapporter från SIE-filer.
+        </p>
+      </div>
+      
+      {/* Info box */}
+      <div className="mb-6 p-4 bg-brand-50 border border-brand-200 rounded-box">
+        <div className="flex items-start gap-3">
+          <svg className="w-5 h-5 text-brand-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          </svg>
+          <div className="text-sm">
+            <div className="font-semibold text-brand-900 mb-2">Forensisk Revision - Simulerat Scenario</div>
+            <div className="text-brand-700 space-y-1">
+              <div><strong>2022-2023:</strong> Perfekt överensstämmelse - inga avvikelser identifierade</div>
+              <div><strong>2023-2024:</strong> Flera avvikelser funna (felaktig kontering, ej avdragsgilla kostnader)</div>
+              <div><strong>2024-2025:</strong> Bokföring stoppad vid verifikation A123 - saknar godkänt underlag för kontantinsättning</div>
+              <div className="mt-2 pt-2 border-t border-brand-200 text-xs italic">
+                AI-bokföringsmotorn implementeras inom ~1 vecka. Just nu visas enbart kundens rapporter från SIE-filer.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Fiscal Years Tree */}
+      <div className="space-y-3">
+        {fiscalYears.map((fy) => (
+          <div key={fy.year} className="border border-gray-200 rounded-box overflow-hidden bg-white shadow-sm">
+            {/* Year Header */}
+            <button
+              onClick={() => toggleYear(fy.year)}
+              className="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between"
+            >
+              <div className="flex items-center gap-3">
+                <svg 
+                  className={`w-5 h-5 text-gray-600 transition-transform ${expandedYears.has(fy.year) ? 'rotate-90' : ''}`}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                <div className="flex items-center gap-3">
+                  <span className="text-lg font-bold text-gray-900">{fy.year}</span>
+                  <span className="text-sm text-gray-600">
+                    ({fy.period.from} – {fy.period.to})
+                  </span>
+                  {getStatusBadge(fy.status)}
+                </div>
+              </div>
+              <div className="text-sm text-gray-500">
+                {expandedYears.has(fy.year) ? 'Dölj rapporter' : 'Visa rapporter'}
+              </div>
+            </button>
+            
+            {/* Expanded Content */}
+            {expandedYears.has(fy.year) && (
+              <div className="p-4 bg-gray-50">
+                {/* Status Note */}
+                {fy.statusNote && (
+                  <div className={`mb-4 p-3 rounded-box border ${
+                    fy.deviations && fy.deviations.length > 0 
+                      ? 'bg-yellow-50 border-yellow-200' 
+                      : 'bg-green-50 border-green-200'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      {fy.deviations && fy.deviations.length > 0 ? (
+                        <svg className="w-4 h-4 text-yellow-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                      <span className={`text-sm font-medium ${
+                        fy.deviations && fy.deviations.length > 0 
+                          ? 'text-yellow-900' 
+                          : 'text-green-900'
+                      }`}>
+                        {fy.statusNote}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Deviations Section */}
+                {fy.deviations && fy.deviations.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      Avvikelser identifierade ({fy.deviations.length})
+                    </h3>
+                    
+                    <div className="space-y-3">
+                      {fy.deviations.map((deviation) => (
+                        <div key={deviation.id} className={`rounded-box overflow-hidden ${getDeviationStyle(deviation.type)}`}>
+                          {/* Deviation Header */}
+                          <button
+                            onClick={() => toggleDeviation(deviation.id)}
+                            className="w-full px-4 py-3 bg-white bg-opacity-50 hover:bg-opacity-75 transition-all flex items-center justify-between"
+                          >
+                            <div className="flex items-center gap-3">
+                              {getDeviationIcon(deviation.type)}
+                              <div className="text-left">
+                                <div className="font-semibold text-sm text-gray-900">{deviation.title}</div>
+                                <div className="text-xs text-gray-700 mt-0.5">{deviation.description}</div>
+                              </div>
+                            </div>
+                            <svg 
+                              className={`w-5 h-5 text-gray-600 transition-transform flex-shrink-0 ${
+                                expandedDeviations.has(deviation.id) ? 'rotate-90' : ''
+                              }`}
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </button>
+                          
+                          {/* Deviation Details */}
+                          {expandedDeviations.has(deviation.id) && (
+                            <div className="px-4 py-3 bg-white bg-opacity-30 border-t border-gray-200">
+                              <div className="space-y-3">
+                                {/* Details List */}
+                                <div>
+                                  <div className="text-xs font-semibold text-gray-700 mb-2">Detaljer:</div>
+                                  <ul className="space-y-1.5 text-xs text-gray-800">
+                                    {deviation.details.map((detail, idx) => (
+                                      <li key={idx} className="flex items-start gap-2">
+                                        <span className="text-gray-400 flex-shrink-0">•</span>
+                                        <span>{detail}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                                
+                                {/* Impact */}
+                                <div className="p-2 bg-red-100 bg-opacity-50 rounded border border-red-200">
+                                  <div className="text-xs font-semibold text-red-900 mb-1">Påverkan:</div>
+                                  <div className="text-xs text-red-800">{deviation.impact}</div>
+                                </div>
+                                
+                                {/* Recommendation */}
+                                <div className="p-2 bg-blue-50 rounded border border-blue-200">
+                                  <div className="text-xs font-semibold text-blue-900 mb-1">Rekommendation:</div>
+                                  <div className="text-xs text-blue-800">{deviation.recommendation}</div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Reports Table */}
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900 mb-3">Rapporter:</h3>
+                  
+                  {/* Header Row */}
+                  <div className="grid grid-cols-3 gap-4 mb-3 pb-2 border-b border-gray-300">
+                    <div className="text-xs font-semibold text-gray-700 uppercase">Rapport</div>
+                    <div className="text-xs font-semibold text-gray-700 uppercase">Vår korrekta bokföring</div>
+                    <div className="text-xs font-semibold text-gray-700 uppercase">Kundens bokföring</div>
+                  </div>
+                  
+                  {/* Report Rows */}
+                  {reportTypes.map((report) => (
+                    <div key={report.key} className="grid grid-cols-3 gap-4 py-2 border-b border-gray-200 last:border-0 hover:bg-white transition-colors">
+                      {/* Report Name */}
+                      <div className="flex items-center gap-2 text-sm font-medium text-gray-900">
+                        <span>{report.label}</span>
+                      </div>
+                      
+                      {/* Our Reports (AI - placeholder) */}
+                      <div className="flex items-center">
+                        {fy.ourReports[report.key] ? (
+                          <button
+                            onClick={() => openReport(fy.ourReports[report.key].url)}
+                            className="px-3 py-1 bg-brand-600 text-white text-xs rounded hover:bg-brand-700 transition-colors"
+                          >
+                            Öppna PDF
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">
+                            Väntar på AI-motor
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Their Reports (from SIE) */}
+                      <div className="flex items-center">
+                        {fy.theirReports[report.key]?.available ? (
+                          <button
+                            onClick={() => openReport(fy.theirReports[report.key].url)}
+                            className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                          >
+                            Öppna PDF
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">
+                            Saknas
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      
+      {/* Navigation */}
+      <div className="flex justify-between mt-8">
+        <button 
+          onClick={onBack} 
+          className="px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-box hover:bg-gray-300 shadow-md transition-colors"
+        >
           ← Föregående
         </button>
-        <button onClick={onNext} className="px-compact-md py-compact-sm bg-brand-600 text-white font-medium rounded-fortnox hover:bg-brand-700 shadow-md transition-colors">
+        <button 
+          onClick={onNext} 
+          className="px-6 py-3 bg-brand-600 text-white font-medium rounded-box hover:bg-brand-700 shadow-md transition-colors"
+        >
           Fortsätt till Momsavstämning →
         </button>
       </div>

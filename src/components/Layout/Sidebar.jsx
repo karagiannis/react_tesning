@@ -1,10 +1,16 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../Shared/Icon';
 
 export default function Sidebar({ currentPath, hasRoaringData = false }) {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const saved = localStorage.getItem('sidebarWidth');
+    return saved ? parseInt(saved) : 256; // 256px = w-64 default
+  });
+  const [isResizing, setIsResizing] = useState(false);
+  const sidebarRef = useRef(null);
 
   const slides = [
     // Hem-ikon tar användaren tillbaka till hero-sektionen (landing page)
@@ -15,7 +21,6 @@ export default function Sidebar({ currentPath, hasRoaringData = false }) {
     { path: '/riskfragor', title: 'Riskfrågor', icon: 'question' },
     { path: '/identitetskontroll', title: 'Identitetskontroll', icon: 'idCard' },
     { path: '/kontrolltabell', title: 'Kontrolltabell', icon: 'checkList' },
-    { path: '/pepfordjupning', title: 'PEP-kontroll', icon: 'alert' },
     // Result slides - locked until API data available
     { path: '/verksamhet', title: 'Verksamhet', icon: 'chart', locked: !hasRoaringData },
     { path: '/agarstruktur', title: 'Ägarstruktur', icon: 'users', locked: !hasRoaringData },
@@ -61,13 +66,65 @@ export default function Sidebar({ currentPath, hasRoaringData = false }) {
     }
   };
 
+  // Resize handlers
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isResizing) return;
+
+      const newWidth = e.clientX;
+      // Constrain between 200px (min) and 400px (max)
+      if (newWidth >= 200 && newWidth <= 400) {
+        setSidebarWidth(newWidth);
+        localStorage.setItem('sidebarWidth', newWidth.toString());
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
+
   return (
-    <aside className={`
-      ${isExpanded ? 'w-64' : 'w-20'} 
-      bg-gradient-to-b from-brand-50 to-brand-50 border-r border-brand-200 
-      flex-shrink-0 overflow-y-auto transition-all duration-300 ease-in-out
-      relative
-    `}>
+    <aside
+      ref={sidebarRef}
+      style={{ width: isExpanded ? `${sidebarWidth}px` : '80px' }}
+      className={`
+        scrollbar-hide-until-hover
+        bg-gradient-to-b from-brand-50 to-brand-50 border-r border-brand-200 
+        flex-shrink-0 overflow-y-auto transition-all duration-300 ease-in-out
+        relative
+      `}
+    >
+      {/* Resize handle - vertical bar on right edge */}
+      {isExpanded && (
+        <div
+          onMouseDown={handleMouseDown}
+          className={`
+            absolute top-0 right-0 w-1 h-full cursor-ew-resize
+            hover:bg-brand-400 transition-colors z-50
+            ${isResizing ? 'bg-brand-500' : 'bg-transparent'}
+          `}
+        >
+          {/* Visible indicator on hover */}
+          <div className="absolute top-1/2 -translate-y-1/2 right-0 w-1 h-12 bg-brand-300 opacity-0 hover:opacity-100 transition-opacity" />
+        </div>
+      )}
+
       {/* Toggle button - centered when collapsed, top-right when expanded */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}

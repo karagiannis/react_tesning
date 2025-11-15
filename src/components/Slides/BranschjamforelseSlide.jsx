@@ -9,28 +9,28 @@ export default function BranschjamforelseSlide({ onNext, onBack }) {
     
     // För soliditet, likviditet, kassalikviditet: högre = bättre
     if (['soliditet', 'likviditet', 'kassalikviditet'].includes(metric)) {
-      if (diff > 10) return 'bg-green-100 text-green-800 border-green-300';
+      if (diff > 10) return 'bg-brand-100 text-brand-800 border-brand-300';
       if (diff < -10) return 'bg-red-100 text-red-800 border-red-300';
       return 'bg-yellow-100 text-yellow-800 border-yellow-300';
     }
     
     // För marginaler: högre = bättre
     if (['rörelsemarginal', 'nettomarginal'].includes(metric)) {
-      if (diff > 5) return 'bg-green-100 text-green-800 border-green-300';
+      if (diff > 5) return 'bg-brand-100 text-brand-800 border-brand-300';
       if (diff < -5) return 'bg-red-100 text-red-800 border-red-300';
       return 'bg-yellow-100 text-yellow-800 border-yellow-300';
     }
     
     // För omsättning: högre = bättre
     if (metric === 'omsättning') {
-      if (diff > 20) return 'bg-green-100 text-green-800 border-green-300';
+      if (diff > 20) return 'bg-brand-100 text-brand-800 border-brand-300';
       if (diff < -20) return 'bg-red-100 text-red-800 border-red-300';
       return 'bg-yellow-100 text-yellow-800 border-yellow-300';
     }
     
     // För skuldsättningsgrad: lägre = bättre
     if (metric === 'skuldsättningsgrad') {
-      if (diff < -20) return 'bg-green-100 text-green-800 border-green-300';
+      if (diff < -20) return 'bg-brand-100 text-brand-800 border-brand-300';
       if (diff > 20) return 'bg-red-100 text-red-800 border-red-300';
       return 'bg-yellow-100 text-yellow-800 border-yellow-300';
     }
@@ -45,7 +45,7 @@ export default function BranschjamforelseSlide({ onNext, onBack }) {
     if (['soliditet', 'likviditet', 'kassalikviditet', 'rörelsemarginal', 'nettomarginal', 'omsättning'].includes(metric)) {
       if (diff > 10 || (metric.includes('marginal') && diff > 5) || (metric === 'omsättning' && diff > 20)) {
         return (
-          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-5 h-5 text-brand-600" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
           </svg>
         );
@@ -62,7 +62,7 @@ export default function BranschjamforelseSlide({ onNext, onBack }) {
     if (metric === 'skuldsättningsgrad') {
       if (diff < -20) {
         return (
-          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-5 h-5 text-brand-600" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
           </svg>
         );
@@ -112,20 +112,20 @@ export default function BranschjamforelseSlide({ onNext, onBack }) {
         </div>
 
         {/* Percentile Position */}
-        <div className="mb-8 p-6 bg-gradient-to-r from-brand-500 to-brand-600 rounded-card text-white shadow-lg">
-          <div className="flex items-center justify-between">
+        <div className="mb-8 p-6 bg-brand-50 rounded-card border-l-4 border-brand-500">
+          <div className="flex items-center justify-between mb-3">
             <div>
-              <h3 className="text-lg font-semibold mb-1">Övergripande Position</h3>
-              <p className="text-sm opacity-90">Baserat på SCB:s statistik för branschen</p>
+              <h3 className="text-base font-semibold text-brand-900 mb-1">Övergripande Position</h3>
+              <p className="text-sm text-brand-700">Baserat på SCB:s statistik för branschen</p>
             </div>
             <div className="text-right">
-              <div className="text-4xl font-bold">{percentilePosition}:e</div>
-              <div className="text-sm opacity-90">percentilen</div>
+              <div className="text-2xl font-bold text-brand-900">{percentilePosition}:e</div>
+              <div className="text-sm text-brand-700">percentilen</div>
             </div>
           </div>
-          <div className="mt-4 bg-white/20 rounded-full h-3">
-            <div 
-              className="bg-white rounded-full h-3 transition-all duration-500"
+          <div className="bg-white/60 rounded-full h-1.5 overflow-hidden">
+            <div
+              className="bg-brand-600 h-1.5 transition-all duration-500"
               style={{ width: `${percentilePosition}%` }}
             />
           </div>
@@ -176,17 +176,17 @@ export default function BranschjamforelseSlide({ onNext, onBack }) {
         {/* Styrkor och Förbättringsområden */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Styrkor */}
-          <div className="p-6 bg-green-50 rounded-card border border-green-200">
-            <h3 className="text-lg font-semibold text-green-900 mb-4 flex items-center gap-2">
-              <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+          <div className="p-6 bg-brand-50 rounded-card border border-brand-200">
+            <h3 className="text-lg font-semibold text-brand-900 mb-4 flex items-center gap-2">
+              <svg className="w-5 h-5 text-brand-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
               Styrkor
             </h3>
             <ul className="space-y-2">
               {strengths.map((strength, index) => (
-                <li key={index} className="text-sm text-green-800 flex items-start gap-2">
-                  <span className="text-green-600 mt-1 font-bold">✓</span>
+                <li key={index} className="text-sm text-brand-800 flex items-start gap-2">
+                  <span className="text-brand-600 mt-1 font-bold">✓</span>
                   <span>{strength}</span>
                 </li>
               ))}

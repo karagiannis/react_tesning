@@ -105,7 +105,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                 <Info className="w-5 h-5" />
               </button>
 
-              <label className="block text-sm font-medium text-brand-800 mb-2 pr-8">
+              <label className="block text-section-title text-brand-800 mb-2 pr-8">
                 1. Har företaget utländska kunder? *
               </label>
               <div className="space-y-2">
@@ -116,9 +116,9 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                     value="ja"
                     checked={formData.harUtlandskaKunder === 'ja'}
                     onChange={(e) => handleChange('harUtlandskaKunder', e.target.value)}
-                    className="w-4 h-4 text-brand-600"
+                    className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                   />
-                  <span>Ja</span>
+                  <span className="text-sm">Ja</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
@@ -127,9 +127,9 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                     value="nej"
                     checked={formData.harUtlandskaKunder === 'nej'}
                     onChange={(e) => handleChange('harUtlandskaKunder', e.target.value)}
-                    className="w-4 h-4 text-brand-600"
+                    className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                   />
-                  <span>Nej</span>
+                  <span className="text-sm">Nej</span>
                 </label>
               </div>
               {formData.harUtlandskaKunder === 'ja' && (
@@ -137,7 +137,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                   type="text"
                   value={formData.utlandskaLander}
                   onChange={(e) => handleChange('utlandskaLander', e.target.value)}
-                  className="mt-2 w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500"
+                  className="mt-2 w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm focus:ring-brand-500"
                   placeholder="Vilka länder? (T.ex. Norge, Tyskland, Polen)"
                 />
               )}
@@ -168,13 +168,13 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                 <Info className="w-5 h-5" />
               </button>
 
-              <label className="block text-sm font-medium text-brand-800 mb-2 pr-8">
+              <label className="block text-section-title text-brand-800 mb-2 pr-8">
                 2. Ungefär hur stor andel av omsättningen kommer från utländska kunder? *
               </label>
               <select
                 value={formData.andelOmsattning}
                 onChange={(e) => handleChange('andelOmsattning', e.target.value)}
-                className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500"
+                className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm focus:ring-brand-500"
               >
                 <option value="">Välj...</option>
                 <option value="<10%">Mindre än 10%</option>
@@ -213,7 +213,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                 <Info className="w-5 h-5" />
               </button>
 
-              <label className="block text-sm font-medium text-brand-800 mb-2 pr-8">
+              <label className="block text-section-title text-brand-800 mb-2 pr-8">
                 3. Typ av internationellt samarbete
               </label>
               <div className="space-y-2">
@@ -222,36 +222,36 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                     type="checkbox"
                     checked={formData.typSamarbete.import}
                     onChange={(e) => handleCheckboxChange('import', e.target.checked)}
-                    className="w-4 h-4 text-brand-600"
+                    className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                   />
-                  <span>Import (köper varor/tjänster från utlandet)</span>
+                  <span className="text-sm">Import (köper varor/tjänster från utlandet)</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={formData.typSamarbete.export}
                     onChange={(e) => handleCheckboxChange('export', e.target.checked)}
-                    className="w-4 h-4 text-brand-600"
+                    className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                   />
-                  <span>Export (säljer varor/tjänster till utlandet)</span>
+                  <span className="text-sm">Export (säljer varor/tjänster till utlandet)</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={formData.typSamarbete.konsult}
                     onChange={(e) => handleCheckboxChange('konsult', e.target.checked)}
-                    className="w-4 h-4 text-brand-600"
+                    className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                   />
-                  <span>Konsulttjänster (svårvärderade tjänster)</span>
+                  <span className="text-sm">Konsulttjänster (svårvärderade tjänster)</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={formData.typSamarbete.licens}
                     onChange={(e) => handleCheckboxChange('licens', e.target.checked)}
-                    className="w-4 h-4 text-brand-600"
+                    className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                   />
-                  <span>Licensavtal (royaltybetalningar)</span>
+                  <span className="text-sm">Licensavtal (royaltybetalningar)</span>
                 </label>
               </div>
 
@@ -294,7 +294,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                 <Info className="w-5 h-5" />
               </button>
 
-              <label className="block text-sm font-medium text-brand-800 mb-2 pr-8">
+              <label className="block text-section-title text-brand-800 mb-2 pr-8">
                 4. Vilka är företagets tre största leverantörer?
               </label>
               {formData.leverantorer.map((lev, index) => (
@@ -303,14 +303,14 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                     type="text"
                     value={lev.namn}
                     onChange={(e) => handleArrayChange('leverantorer', index, 'namn', e.target.value)}
-                    className="flex-1 px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500"
+                    className="flex-1 px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm focus:ring-brand-500"
                     placeholder={`Leverantör ${index + 1} (namn)`}
                   />
                   <input
                     type="text"
                     value={lev.land}
                     onChange={(e) => handleArrayChange('leverantorer', index, 'land', e.target.value)}
-                    className="w-32 px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500"
+                    className="w-32 px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm focus:ring-brand-500"
                     placeholder="Land"
                   />
                 </div>
@@ -346,7 +346,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                 <Info className="w-5 h-5" />
               </button>
 
-              <label className="block text-sm font-medium text-brand-800 mb-2 pr-8">
+              <label className="block text-section-title text-brand-800 mb-2 pr-8">
                 5. Vilka är företagets tre största kunder? *
               </label>
               <div className="mb-2">
@@ -357,9 +357,9 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                     value="b2b"
                     checked={formData.kundTyp === 'b2b'}
                     onChange={(e) => handleChange('kundTyp', e.target.value)}
-                    className="w-4 h-4 text-brand-600"
+                    className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                   />
-                  <span>B2B (företagskunder)</span>
+                  <span className="text-sm">B2B (företagskunder)</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
@@ -368,9 +368,9 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                     value="b2c"
                     checked={formData.kundTyp === 'b2c'}
                     onChange={(e) => handleChange('kundTyp', e.target.value)}
-                    className="w-4 h-4 text-brand-600"
+                    className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                   />
-                  <span>B2C (privatkonsumenter)</span>
+                  <span className="text-sm">B2C (privatkonsumenter)</span>
                 </label>
               </div>
               {formData.kundTyp === 'b2b' && formData.kunder.map((kund, index) => (
@@ -379,14 +379,14 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                     type="text"
                     value={kund.namn}
                     onChange={(e) => handleArrayChange('kunder', index, 'namn', e.target.value)}
-                    className="flex-1 px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500"
+                    className="flex-1 px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm focus:ring-brand-500"
                     placeholder={`Kund ${index + 1} (namn)`}
                   />
                   <input
                     type="text"
                     value={kund.land}
                     onChange={(e) => handleArrayChange('kunder', index, 'land', e.target.value)}
-                    className="w-32 px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500"
+                    className="w-32 px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm focus:ring-brand-500"
                     placeholder="Land"
                   />
                 </div>
@@ -434,7 +434,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                 <Info className="w-5 h-5" />
               </button>
 
-              <label className="block text-sm font-medium text-brand-800 mb-2 pr-8">
+              <label className="block text-section-title text-brand-800 mb-2 pr-8">
                 6. Förekommer överföringar till/från utländska bankkonton?
               </label>
               <div className="space-y-2">
@@ -445,9 +445,9 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                     value="ja-regelbundet"
                     checked={formData.utlandskaBankkonton === 'ja-regelbundet'}
                     onChange={(e) => handleChange('utlandskaBankkonton', e.target.value)}
-                    className="w-4 h-4 text-brand-600"
+                    className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                   />
-                  <span>Ja, regelbundet</span>
+                  <span className="text-sm">Ja, regelbundet</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
@@ -456,9 +456,9 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                     value="ja-ibland"
                     checked={formData.utlandskaBankkonton === 'ja-ibland'}
                     onChange={(e) => handleChange('utlandskaBankkonton', e.target.value)}
-                    className="w-4 h-4 text-brand-600"
+                    className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                   />
-                  <span>Ja, ibland</span>
+                  <span className="text-sm">Ja, ibland</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
@@ -467,9 +467,9 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                     value="nej"
                     checked={formData.utlandskaBankkonton === 'nej'}
                     onChange={(e) => handleChange('utlandskaBankkonton', e.target.value)}
-                    className="w-4 h-4 text-brand-600"
+                    className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                   />
-                  <span>Nej</span>
+                  <span className="text-sm">Nej</span>
                 </label>
               </div>
               {(formData.utlandskaBankkonton === 'ja-regelbundet' || formData.utlandskaBankkonton === 'ja-ibland') && (
@@ -477,7 +477,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                   type="text"
                   value={formData.bankkontosLander}
                   onChange={(e) => handleChange('bankkontosLander', e.target.value)}
-                  className="mt-2 w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500"
+                  className="mt-2 w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm focus:ring-brand-500"
                   placeholder="Vilka länder?"
                 />
               )}

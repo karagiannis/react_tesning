@@ -1,36 +1,50 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { legalTexts } from '../../data/legalTexts';
+import { Info, ChevronRight } from 'lucide-react';
+import { getLegalTextsForQuestion, legalTexts } from '../../data/legalTexts';
 import StepIndicator from '../Shared/StepIndicator';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 export default function RiskFragorSteg4Slide({ onNext }) {
   const navigate = useNavigate();
+  const [expandedInfo, setExpandedInfo] = useState({});
+  
   const [formData, setFormData] = useLocalStorage('onboarding-wizard-steg4', {
-    betalmetoder: {
-      bankoverföring: false,
-      kortbetalning: false,
-      faktura: false,
-      kontanter: false,
-      kryptovaluta: false,
+    // EDD - Fördjupad kundkännedom
+    medelsUrsprung: '',
+    förväntadOmsättning: '',
+    affärsförbindelseSyfte: '',
+    pepRoll: '',
+    pepLand: '',
+    pepTidPeriod: '',
+    politiskaKopplingar: '',
+    mediaExponering: '',
+    familjemedlemmarPEP: false,
+    familjemedlemmarDetaljer: '',
+    källorTillFörmögenhet: '',
+    dokumentation: {
+      inkomstdeklarationer: false,
+      årsredovisningar: false,
+      kontrakt: false,
+      bankutdrag: false,
+      annat: false,
+      annatBeskrivning: '',
     },
-    kontanterAndel: '',
-    kontanthanteringstillstand: '',
-    storaTransaktioner: '',
-    tredjepartsbetalningar: '',
-    utlandskaOverforingar: '',
-    utlandskaLander: '',
   });
-
-  const handleCheckboxChange = (field, checked) => {
-    setFormData(prev => ({
-      ...prev,
-      betalmetoder: { ...prev.betalmetoder, [field]: checked }
-    }));
-  };
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleDokumentationChange = (field, checked) => {
+    setFormData(prev => ({
+      ...prev,
+      dokumentation: { ...prev.dokumentation, [field]: checked }
+    }));
+  };
+
+  const toggleInfo = (questionId) => {
+    setExpandedInfo(prev => ({ ...prev, [questionId]: !prev[questionId] }));
   };
 
   const handleNext = () => {
@@ -45,249 +59,362 @@ export default function RiskFragorSteg4Slide({ onNext }) {
     navigate('/riskfragor/steg3');
   };
 
-  const showKontanterFollowUp = formData.betalmetoder.kontanter;
-  const showKontanterWarning = formData.kontanterAndel && ['20-50%', '>50%'].includes(formData.kontanterAndel);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
       <div className="max-w-3xl w-full bg-white rounded-card shadow-2xl p-10">
         <h1 className="text-page-title text-brand-900 mb-2">
-          Riskfrågor – Betalningar & Transaktioner
+          Fördjupad Kundkännedom (EDD)
         </h1>
+        <p className="text-sm text-brand-600 mb-4">
+          För kunder som är PEP eller har hög riskprofil krävs fördjupad kontroll enligt PML 3 kap. 16-17 §§
+        </p>
         
         {/* Step Indicator */}
         <StepIndicator currentStep={4} completedSteps={3} />
 
         <div className="space-y-6">
-          {/* 1. Betalmetoder */}
-          <div>
-            <label className="block text-sm font-medium text-brand-800 mb-2">
-              1. Hur tar företaget betalt från kunder? *
-            </label>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.betalmetoder.bankoverföring}
-                  onChange={(e) => handleCheckboxChange('bankoverföring', e.target.checked)}
-                  className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
-                />
-                <span className="text-brand-800">Banköverföring/Swish</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.betalmetoder.kortbetalning}
-                  onChange={(e) => handleCheckboxChange('kortbetalning', e.target.checked)}
-                  className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
-                />
-                <span className="text-brand-800">Kortbetalning</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.betalmetoder.faktura}
-                  onChange={(e) => handleCheckboxChange('faktura', e.target.checked)}
-                  className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
-                />
-                <span className="text-brand-800">Faktura</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.betalmetoder.kontanter}
-                  onChange={(e) => handleCheckboxChange('kontanter', e.target.checked)}
-                  className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
-                />
-                <span className="text-brand-800">Kontanter</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.betalmetoder.kryptovaluta}
-                  onChange={(e) => handleCheckboxChange('kryptovaluta', e.target.checked)}
-                  className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
-                />
-                <span className="text-brand-800">Kryptovaluta</span>
-              </label>
-            </div>
-            {(formData.betalmetoder.kontanter || formData.betalmetoder.kryptovaluta) && (
-              <p className="text-xs text-red-600 mt-2 bg-red-50 p-2 rounded">
-                ⚠️ <strong>Hög risk:</strong> Kontanter och kryptovaluta innebär ökad risk för penningtvätt
-              </p>
-            )}
-          </div>
+          {/* 1. Ekonomiska medels ursprung */}
+          <div className="p-4 bg-gray-50 rounded-box border border-gray-200 relative">
+            <button
+              onClick={() => toggleInfo('question1')}
+              className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
+              title="Varför frågar vi detta?"
+            >
+              <Info className="w-5 h-5" />
+            </button>
 
-          {/* 2. Kontanterandel (conditional) */}
-          {showKontanterFollowUp && (
-            <div>
-              <label className="block text-sm font-medium text-brand-800 mb-2">
-                2. Om kontanter: Ungefär hur stor andel av omsättningen?
-              </label>
-              <select
-                value={formData.kontanterAndel}
-                onChange={(e) => handleChange('kontanterAndel', e.target.value)}
-                className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-              >
-                <option value="">Välj...</option>
-                <option value="<5%">Mindre än 5%</option>
-                <option value="5-20%">5-20%</option>
-                <option value="20-50%">20-50%</option>
-                <option value=">50%">Över 50%</option>
-              </select>
-              
-              {showKontanterWarning && (
-                <div className="mt-3 bg-yellow-50 border border-yellow-300 rounded-box p-4">
-                  <p className="text-sm text-yellow-800 font-medium mb-2">
-                    ⚠️ {legalTexts.kontanttransaktioner.law}
-                  </p>
-                  <p className="text-xs text-yellow-700 mb-2">
-                    {legalTexts.kontanttransaktioner.shortText}
-                  </p>
-                  <p className="text-xs text-yellow-600 italic mt-1">
-                    Referens: [{legalTexts.kontanttransaktioner.id}] - Se Appendix för fullständig lagtext
-                  </p>
-                  <p className="text-xs text-yellow-700 mt-2 bg-yellow-100 p-2 rounded">
-                    💡 <strong>Observera:</strong> Kontanthantering kräver särskild dokumentation för riskbedömning enligt 01FS 2024:20, 2 kap. 4 §.
-                    Vi kommer att behöva fördjupad information om affärsmodellen och transaktionsmönster.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 3. Stora transaktioner */}
-          <div>
-            <label className="block text-sm font-medium text-brand-800 mb-2">
-              3. Förekommer transaktioner över 150 000 kr?
-            </label>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="storaTransaktioner"
-                  value="ja"
-                  checked={formData.storaTransaktioner === 'ja'}
-                  onChange={(e) => handleChange('storaTransaktioner', e.target.value)}
-                  className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
-                />
-                <span className="text-brand-800">Ja</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="storaTransaktioner"
-                  value="ibland"
-                  checked={formData.storaTransaktioner === 'ibland'}
-                  onChange={(e) => handleChange('storaTransaktioner', e.target.value)}
-                  className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
-                />
-                <span className="text-brand-800">Ibland</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="storaTransaktioner"
-                  value="nej"
-                  checked={formData.storaTransaktioner === 'nej'}
-                  onChange={(e) => handleChange('storaTransaktioner', e.target.value)}
-                  className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
-                />
-                <span className="text-brand-800">Nej</span>
-              </label>
-            </div>
-            <p className="text-xs text-brand-600 mt-1">
-              PTL kräver förstärkt kundkännedom vid stora transaktioner
-            </p>
-          </div>
-
-          {/* 4. Tredjepartsbetalningar */}
-          <div>
-            <label className="block text-sm font-medium text-brand-800 mb-2">
-              4. Tar företaget emot betalningar från tredje part?
+            <label className="block text-section-title text-brand-800 mb-2 pr-8">
+              1. Vad är ursprunget till företagets ekonomiska medel? *
             </label>
             <p className="text-xs text-brand-600 mb-2">
-              Exempel: Kund A betalar för Kund B:s tjänst
+              Beskriv varifrån företagets startkapital och löpande intäkter kommer
             </p>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="tredjepartsbetalningar"
-                  value="ja"
-                  checked={formData.tredjepartsbetalningar === 'ja'}
-                  onChange={(e) => handleChange('tredjepartsbetalningar', e.target.value)}
-                  className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
-                />
-                <span className="text-brand-800">Ja</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="tredjepartsbetalningar"
-                  value="nej"
-                  checked={formData.tredjepartsbetalningar === 'nej'}
-                  onChange={(e) => handleChange('tredjepartsbetalningar', e.target.value)}
-                  className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
-                />
-                <span className="text-brand-800">Nej</span>
-              </label>
-            </div>
-            {formData.tredjepartsbetalningar === 'ja' && (
-              <p className="text-xs text-red-600 mt-2 bg-red-50 p-2 rounded">
-                ⚠️ <strong>Högrisk:</strong> Tredjepartsbetalningar innebär ökad risk för penningtvätt
-              </p>
+            <textarea
+              value={formData.medelsUrsprung}
+              onChange={(e) => handleChange('medelsUrsprung', e.target.value)}
+              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+              rows={4}
+              placeholder="T.ex. 'Egenfinansiering från grundare, lån från bank, investeringar från änglar...'"
+            />
+
+            {expandedInfo.question1 && (
+              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs space-y-2">
+                <p className="font-semibold text-brand-900">PML 3 kap. 16 § - Skärpta åtgärder</p>
+                <p className="text-gray-700">Fördjupad kontroll av kundens ekonomiska situation och ekonomiska medel genom inhämtning av information från flera tillförlitliga och oberoende källor.</p>
+              </div>
             )}
           </div>
 
-          {/* 5. Utländska överföringar */}
-          <div>
-            <label className="block text-sm font-medium text-brand-800 mb-2">
-              5. Förekommer överföringar till/från utländska bankkonton?
+          {/* 2. Förväntad omsättning */}
+          <div className="p-4 bg-gray-50 rounded-box border border-gray-200 relative">
+            <button
+              onClick={() => toggleInfo('question2')}
+              className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
+              title="Varför frågar vi detta?"
+            >
+              <Info className="w-5 h-5" />
+            </button>
+
+            <label className="block text-section-title text-brand-800 mb-2 pr-8">
+              2. Vad är förväntad årlig omsättning? *
             </label>
-            <div className="space-y-2 mb-2">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="utlandskaOverforingar"
-                  value="ja-regelbundet"
-                  checked={formData.utlandskaOverforingar === 'ja-regelbundet'}
-                  onChange={(e) => handleChange('utlandskaOverforingar', e.target.value)}
-                  className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
+            <select
+              value={formData.förväntadOmsättning}
+              onChange={(e) => handleChange('förväntadOmsättning', e.target.value)}
+              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+            >
+              <option value="">Välj intervall...</option>
+              <option value="0-500k">0-500 000 kr</option>
+              <option value="500k-2M">500 000 - 2 miljoner kr</option>
+              <option value="2M-10M">2-10 miljoner kr</option>
+              <option value="10M+">Över 10 miljoner kr</option>
+            </select>
+
+            {expandedInfo.question2 && (
+              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs space-y-2">
+                <p className="font-semibold text-brand-900">01FS 2024:20, 2 kap. 6 § punkt 2</p>
+                <p className="text-gray-700">Inhämta ytterligare information om affärsförbindelsens avsedda syfte och art genom att ställa fler frågor till kunden och kontrollera svaren.</p>
+              </div>
+            )}
+          </div>
+
+          {/* 3. Affärsförbindelsens syfte */}
+          <div className="p-4 bg-gray-50 rounded-box border border-gray-200 relative">
+            <button
+              onClick={() => toggleInfo('question3')}
+              className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
+              title="Varför frågar vi detta?"
+            >
+              <Info className="w-5 h-5" />
+            </button>
+
+            <label className="block text-section-title text-brand-800 mb-2 pr-8">
+              3. Beskriv syftet med affärsförbindelsen med Celestial *
+            </label>
+            <p className="text-xs text-brand-600 mb-2">
+              Varför behöver företaget en redovisningsbyrå just nu?
+            </p>
+            <textarea
+              value={formData.affärsförbindelseSyfte}
+              onChange={(e) => handleChange('affärsförbindelseSyfte', e.target.value)}
+              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+              rows={3}
+              placeholder="T.ex. 'Löpande bokföring, årsredovisning, rådgivning...'"
+            />
+
+            {expandedInfo.question3 && (
+              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs space-y-2">
+                <p className="font-semibold text-brand-900">PML 2 kap. 6 § punkt 3</p>
+                <p className="text-gray-700">Kontrollera och dokumentera affärsförbindelsens eller den enstaka transaktionens avsedda syfte och art.</p>
+              </div>
+            )}
+          </div>
+
+          {/* 4. PEP-roll (om PEP) */}
+          <div className="p-4 bg-brand-50 border-l-4 border-brand-500 rounded-box">
+            <h3 className="text-section-title text-brand-900 mb-3">PEP-specifika frågor</h3>
+            <p className="text-xs text-brand-700 mb-4">
+              Eftersom kunden är PEP eller har hög riskprofil behöver vi extra information
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-section-title text-brand-800 mb-2">
+                  4a. Beskriv den politiskt utsatta rollen *
+                </label>
+                <textarea
+                  value={formData.pepRoll}
+                  onChange={(e) => handleChange('pepRoll', e.target.value)}
+                  className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+                  rows={3}
+                  placeholder="T.ex. 'Tidigare kommunalråd i X kommun', 'Styrelseledamot i statligt bolag'..."
                 />
-                <span className="text-brand-800">Ja, regelbundet</span>
+              </div>
+
+              <div>
+                <label className="block text-section-title text-brand-800 mb-2">
+                  4b. I vilket land hade personen denna roll? *
+                </label>
+                <input
+                  type="text"
+                  value={formData.pepLand}
+                  onChange={(e) => handleChange('pepLand', e.target.value)}
+                  className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+                  placeholder="Land"
+                />
+              </div>
+
+              <div>
+                <label className="block text-section-title text-brand-800 mb-2">
+                  4c. Tidsperiod för rollen *
+                </label>
+                <input
+                  type="text"
+                  value={formData.pepTidPeriod}
+                  onChange={(e) => handleChange('pepTidPeriod', e.target.value)}
+                  className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+                  placeholder="T.ex. '2015-2019' eller 'Pågående'"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 5. Politiska kopplingar */}
+          <div className="p-4 bg-gray-50 rounded-box border border-gray-200 relative">
+            <button
+              onClick={() => toggleInfo('question5')}
+              className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
+              title="Varför frågar vi detta?"
+            >
+              <Info className="w-5 h-5" />
+            </button>
+
+            <label className="block text-section-title text-brand-800 mb-2 pr-8">
+              5. Finns några pågående eller tidigare politiska kopplingar i verksamheten? *
+            </label>
+            <textarea
+              value={formData.politiskaKopplingar}
+              onChange={(e) => handleChange('politiskaKopplingar', e.target.value)}
+              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+              rows={3}
+              placeholder="Beskriv eventuella kopplingar till politiska organisationer, statliga kontrakt, etc."
+            />
+
+            {expandedInfo.question5 && (
+              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs space-y-2">
+                <p className="font-semibold text-brand-900">PML 2 kap. 5 § - Verklig huvudman</p>
+                <p className="text-gray-700">Särskild kontroll krävs för att identifiera och verifiera verklig huvudman och politiska kopplingar.</p>
+              </div>
+            )}
+          </div>
+
+          {/* 6. Mediaexponering */}
+          <div className="p-4 bg-gray-50 rounded-box border border-gray-200 relative">
+            <button
+              onClick={() => toggleInfo('question6')}
+              className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
+              title="Varför frågar vi detta?"
+            >
+              <Info className="w-5 h-5" />
+            </button>
+
+            <label className="block text-section-title text-brand-800 mb-2 pr-8">
+              6. Har företaget eller dess representanter haft negativ mediaexponering? *
+            </label>
+            <p className="text-xs text-brand-600 mb-2">
+              T.ex. utredningar, skandaler, juridiska tvister
+            </p>
+            <textarea
+              value={formData.mediaExponering}
+              onChange={(e) => handleChange('mediaExponering', e.target.value)}
+              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+              rows={3}
+              placeholder="Ange 'Nej' om ingen exponering, annars beskriv"
+            />
+
+            {expandedInfo.question6 && (
+              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs space-y-2">
+                <p className="font-semibold text-brand-900">01FS 2024:20, 2 kap. 6 § punkt 1</p>
+                <p className="text-gray-700">Inhämta information om kunden och kundens historik från flera tillförlitliga och oberoende källor, inklusive media.</p>
+              </div>
+            )}
+          </div>
+
+          {/* 7. Familjemedlemmar som är PEP */}
+          <div className="p-4 bg-gray-50 rounded-box border border-gray-200 relative">
+            <label className="block text-section-title text-brand-800 mb-3">
+              7. Är någon familjemedlem eller nära affärspartner också PEP? *
+            </label>
+            <label className="flex items-center gap-3 p-3 rounded-box border border-brand-100 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.familjemedlemmarPEP}
+                onChange={(e) => handleChange('familjemedlemmarPEP', e.target.checked)}
+                className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
+              />
+              <span className="text-sm text-brand-800">Ja, det finns familjemedlemmar eller nära partners som är PEP</span>
+            </label>
+
+            {formData.familjemedlemmarPEP && (
+              <div className="ml-8 mt-3 pl-4 border-l-2 border-brand-300">
+                <div className="flex items-center gap-2 text-xs text-brand-600 mb-2">
+                  <ChevronRight className="w-3 h-3" />
+                  <span>Följdfråga</span>
+                </div>
+                <textarea
+                  value={formData.familjemedlemmarDetaljer}
+                  onChange={(e) => handleChange('familjemedlemmarDetaljer', e.target.value)}
+                  className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+                  rows={3}
+                  placeholder="Beskriv relationen och personens roll"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* 8. Källor till förmögenhet */}
+          <div className="p-4 bg-gray-50 rounded-box border border-gray-200 relative">
+            <button
+              onClick={() => toggleInfo('question8')}
+              className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
+              title="Varför frågar vi detta?"
+            >
+              <Info className="w-5 h-5" />
+            </button>
+
+            <label className="block text-section-title text-brand-800 mb-2 pr-8">
+              8. Beskriv källorna till företagets förmögenhet *
+            </label>
+            <p className="text-xs text-brand-600 mb-2">
+              Hur har företaget byggt upp sina tillgångar?
+            </p>
+            <textarea
+              value={formData.källorTillFörmögenhet}
+              onChange={(e) => handleChange('källorTillFörmögenhet', e.target.value)}
+              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+              rows={4}
+              placeholder="T.ex. 'Vinst från försäljning, reinvesterade intäkter, lån...'"
+            />
+
+            {expandedInfo.question8 && (
+              <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs space-y-2">
+                <p className="font-semibold text-brand-900">Source of Wealth (SOW)</p>
+                <p className="text-gray-700">Dokumentera hur kunden har förvärvat sin förmögenhet - kritiskt för PEP och högrisk-kunder.</p>
+              </div>
+            )}
+          </div>
+
+          {/* 9. Dokumentation som kan tillhandahållas */}
+          <div className="p-4 bg-gray-50 rounded-box border border-gray-200">
+            <h3 className="text-section-title text-brand-800 mb-3">
+              9. Vilken dokumentation kan ni tillhandahålla för verifiering? *
+            </h3>
+            <p className="text-xs text-brand-600 mb-3">
+              Välj alla dokument som kan lämnas in
+            </p>
+            
+            <div className="space-y-2">
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-100 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.dokumentation.inkomstdeklarationer}
+                  onChange={(e) => handleDokumentationChange('inkomstdeklarationer', e.target.checked)}
+                  className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
+                />
+                <span className="text-sm text-brand-800">Inkomstdeklarationer (senaste 2-3 åren)</span>
               </label>
-              <label className="flex items-center gap-2">
+              
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-100 cursor-pointer">
                 <input
-                  type="radio"
-                  name="utlandskaOverforingar"
-                  value="ja-ibland"
-                  checked={formData.utlandskaOverforingar === 'ja-ibland'}
-                  onChange={(e) => handleChange('utlandskaOverforingar', e.target.value)}
-                  className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
+                  type="checkbox"
+                  checked={formData.dokumentation.årsredovisningar}
+                  onChange={(e) => handleDokumentationChange('årsredovisningar', e.target.checked)}
+                  className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                 />
-                <span className="text-brand-800">Ja, ibland</span>
+                <span className="text-sm text-brand-800">Årsredovisningar</span>
               </label>
-              <label className="flex items-center gap-2">
+              
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-100 cursor-pointer">
                 <input
-                  type="radio"
-                  name="utlandskaOverforingar"
-                  value="nej"
-                  checked={formData.utlandskaOverforingar === 'nej'}
-                  onChange={(e) => handleChange('utlandskaOverforingar', e.target.value)}
-                  className="w-4 h-4 text-brand-600 border-brand-300 focus:ring-brand-500"
+                  type="checkbox"
+                  checked={formData.dokumentation.kontrakt}
+                  onChange={(e) => handleDokumentationChange('kontrakt', e.target.checked)}
+                  className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
                 />
-                <span className="text-brand-800">Nej</span>
+                <span className="text-sm text-brand-800">Kontrakt/avtal med större kunder</span>
+              </label>
+              
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-100 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.dokumentation.bankutdrag}
+                  onChange={(e) => handleDokumentationChange('bankutdrag', e.target.checked)}
+                  className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
+                />
+                <span className="text-sm text-brand-800">Bankutdrag (senaste 3-6 månaderna)</span>
+              </label>
+              
+              <label className="flex items-center gap-3 p-3 rounded-box border border-brand-100 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.dokumentation.annat}
+                  onChange={(e) => handleDokumentationChange('annat', e.target.checked)}
+                  className="w-4 h-4 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
+                />
+                <span className="text-sm text-brand-800">Annat (beskriv nedan)</span>
               </label>
             </div>
-            {(formData.utlandskaOverforingar === 'ja-regelbundet' || formData.utlandskaOverforingar === 'ja-ibland') && (
-              <input
-                type="text"
-                value={formData.utlandskaLander}
-                onChange={(e) => handleChange('utlandskaLander', e.target.value)}
-                className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                placeholder="Vilka länder?"
-              />
+
+            {formData.dokumentation.annat && (
+              <div className="ml-8 mt-3 pl-4 border-l-2 border-brand-300">
+                <input
+                  type="text"
+                  value={formData.dokumentation.annatBeskrivning}
+                  onChange={(e) => handleDokumentationChange('annatBeskrivning', e.target.value)}
+                  className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+                  placeholder="Beskriv övrig dokumentation"
+                />
+              </div>
             )}
           </div>
         </div>

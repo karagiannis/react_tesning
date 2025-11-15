@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Icon from '../Shared/Icon';
+import FileDropZone from '../Shared/FileDropZone';
 
 // Inline SVG icons
 const CloudIcon = ({ className }) => (
@@ -410,31 +411,17 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
                   </label>
 
                   {/* Drag & Drop Zone */}
-                  <div
+                  <FileDropZone
+                    accept=".pdf,.png,.jpg,.jpeg,.sie,.xml"
+                    maxSize="20 MB"
+                    isDragging={isDragging}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(category, e)}
-                    className={`relative border-2 border-dashed rounded-box p-8 text-center transition-all ${
-                      isDragging
-                        ? 'border-brand-500 bg-brand-50'
-                        : 'border-gray-300 bg-gray-50 hover:border-brand-400'
-                    }`}
-                  >
-                    <input
-                      type="file"
-                      multiple
-                      accept=".pdf,.png,.jpg,.jpeg,.sie,.xml"
-                      onChange={(e) => handleFileSelect(category, e)}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                    <UploadIcon className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                    <p className="text-sm font-medium text-gray-700 mb-1">
-                      Dra och släpp filer här
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      eller klicka för att välja • PDF, PNG, JPG, SIE, XML
-                    </p>
-                  </div>
+                    onChange={(e) => handleFileSelect(category, e)}
+                    inputId={`${category}-upload`}
+                    variant="compact"
+                  />
 
                   {/* Uploaded Files List */}
                   {formData[category].length > 0 && (

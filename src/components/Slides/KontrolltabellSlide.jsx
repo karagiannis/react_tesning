@@ -11,8 +11,8 @@ export default function KontrolltabellSlide({ onNext }) {
           och lagen (2017:630) om åtgärder mot penningtvätt och finansiering av terrorism.
         </p>
 
-        <div className="overflow-x-auto mb-6">
-          <table className="w-full border-collapse border border-brand-300 text-sm">
+        <div className="overflow-x-auto mb-6 rounded-box border border-brand-200">
+          <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="bg-brand-800 text-white">
                 <th className="border border-brand-300 p-3 text-left font-semibold">Vem kontrolleras</th>
