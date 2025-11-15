@@ -1,7 +1,17 @@
 import { useState, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 export default function VerifySlide({ onNext }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const email = location.state?.email || '';
+  
   const [code, setCode] = useState(['', '', '', '', '', '']);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   const inputRefs = useRef([]);
 
   const handleChange = (index, value) => {
@@ -49,6 +59,102 @@ export default function VerifySlide({ onNext }) {
 
   const isCodeComplete = code.every(digit => digit !== '');
 
+  const handleVerify = async () => {
+    if (!isCodeComplete) return;
+    
+    setError('');
+    setLoading(true);
+
+    try {
+      const verificationCode = code.join('');
+      const response = await fetch(`${API_BASE_URL}/api/auth/verify-code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          code: verificationCode,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Save tokens
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+        
+        // Call onNext or navigate based on user role
+        if (data.user && data.user.role === 'admin') {
+          navigate('/admin');
+        } else if (onNext) {
+          onNext();
+        } else {
+          navigate('/inledning');
+        }
+      } else {
+        // Handle errors
+        if (response.status === 400) {
+          if (data.detail.includes('expired')) {
+            setError('Koden har gått ut. Begär en ny kod.');
+          } else if (data.detail.includes('Invalid')) {
+            setError('Ogiltig kod. Kontrollera att du angett rätt kod.');
+          } else {
+            setError(data.detail || 'Verifiering misslyckades.');
+          }
+        } else {
+          setError('Ett fel uppstod. Försök igen.');
+        }
+      }
+    } catch (err) {
+      setError('Nätverksfel. Kontrollera din internetanslutning.');
+      console.error('Verification error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (!email) {
+      setError('Email saknas. Vänligen registrera igen.');
+      return;
+    }
+
+    setError('');
+    setResendLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password: 'dummy', // Won't be used, just triggers new code
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setError('');
+        alert('Ny kod skickad till din email!');
+        // Reset code inputs
+        setCode(['', '', '', '', '', '']);
+        inputRefs.current[0]?.focus();
+      } else {
+        setError(data.detail || 'Kunde inte skicka ny kod.');
+      }
+    } catch (err) {
+      setError('Nätverksfel. Försök igen.');
+      console.error('Resend code error:', err);
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
       <div className="max-w-md w-full bg-white rounded-card shadow-2xl p-10">
@@ -85,22 +191,32 @@ export default function VerifySlide({ onNext }) {
           </div>
         </div>
 
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-box text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
         <button
-          onClick={onNext}
-          disabled={!isCodeComplete}
+          onClick={handleVerify}
+          disabled={!isCodeComplete || loading}
           className={`w-full px-8 py-3 rounded-box font-semibold transition-all ${
-            isCodeComplete
+            isCodeComplete && !loading
               ? 'bg-brand-600 hover:bg-brand-700 text-white cursor-pointer'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
-          Verifiera kod
+          {loading ? 'Verifierar...' : 'Verifiera kod'}
         </button>
 
         <div className="mt-6 text-center">
           <p className="text-sm text-brand-700 mb-2">eller</p>
-          <button className="text-brand-600 hover:text-brand-700 font-semibold text-sm">
-            Skicka ny kod
+          <button 
+            onClick={handleResendCode}
+            disabled={resendLoading}
+            className="text-brand-600 hover:text-brand-700 font-semibold text-sm disabled:opacity-50"
+          >
+            {resendLoading ? 'Skickar...' : 'Skicka ny kod'}
           </button>
         </div>
       </div>
