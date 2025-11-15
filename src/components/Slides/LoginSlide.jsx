@@ -121,7 +121,7 @@ export default function LoginSlide({ onNext, onRegister }) {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/email-password-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -129,7 +129,6 @@ export default function LoginSlide({ onNext, onRegister }) {
         body: JSON.stringify({
           email,
           password,
-          turnstileToken,
         }),
       });
 
@@ -140,8 +139,10 @@ export default function LoginSlide({ onNext, onRegister }) {
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('refreshToken', data.refreshToken);
         
-        // Navigate to /inledning (or use onNext if provided)
-        if (onNext) {
+        // Navigate based on user role
+        if (data.user && data.user.role === 'admin') {
+          navigate('/admin');
+        } else if (onNext) {
           onNext();
         } else {
           navigate('/inledning');
