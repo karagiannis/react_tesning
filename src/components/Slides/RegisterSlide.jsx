@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// DEV MODE: Skip API calls and mock responses
-const DEV_MODE = true;
+// DEV MODE: Disabled - Real API calls only
+const DEV_MODE = false;
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
@@ -147,7 +147,7 @@ export default function RegisterSlide({ onNext, onLogin }) {
 
     setLoading(true);
 
-    // DEV MODE: Mock successful registration
+    // DEV MODE: Skip API calls and mock responses
     if (DEV_MODE) {
       setTimeout(() => {
         setLoading(false);
@@ -296,8 +296,10 @@ export default function RegisterSlide({ onNext, onLogin }) {
         // Clean URL (remove code parameter)
         window.history.replaceState({}, document.title, '/register');
         
-        // Navigate to /inledning (Google users skip email verification)
-        if (onNext) {
+        // Navigate based on user role
+        if (data.user && data.user.role === 'admin') {
+          navigate('/admin');
+        } else if (onNext) {
           onNext();
         } else {
           navigate('/inledning');
