@@ -346,7 +346,15 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             try {
               // API-anrop till backend: Skapa företagsmapp
               const token = localStorage.getItem('access_token');
-              const response = await fetch('https://celestial.se/tic-tac-toe-api/api/onboarding/risk-assessment', {
+              const onboardingId = localStorage.getItem('onboardingId');
+              
+              // Build URL with onboardingId if available
+              let url = 'https://celestial.se/tic-tac-toe-api/api/onboarding/risk-assessment';
+              if (onboardingId) {
+                url += `?onboarding_id=${onboardingId}`;
+              }
+              
+              const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                   'Authorization': `Bearer ${token}`,
