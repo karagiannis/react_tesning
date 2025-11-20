@@ -340,13 +340,53 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
         </div>
 
         <button
-          onClick={() => {
-            if (formData.isPEP) {
-              // Om användaren ÄR PEP, hoppa till Steg 4 (PEP-formulär)
-              onSkipPEP();
-            } else {
-              // Om användaren INTE är PEP, fortsätt till Steg 2
-              onNext();
+          onClick={async () => {
+            if (!isFormValid()) return;
+            
+            try {
+              // API-anrop till backend: Skapa företagsmapp
+              const token = localStorage.getItem('access_token');
+              const response = await fetch('https://celestial.se/tic-tac-toe-api/api/onboarding/risk-assessment', {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  business_idea: formData.affarsIde,
+                  company_name: formData.foretagsnamn,
+                  orgnr: formData.organisationsnummer,
+                  customer_types: Object.entries(formData.kundTyper)
+                    .filter(([_, val]) => val)
+                    .map(([key]) => key === 'privatpersoner' ? 'Privatpersoner' : key === 'foretag' ? 'Företag' : 'Offentlig sektor'),
+                  foreign_partners: formData.utlandskaPartners || null,
+                  main_suppliers: formData.storaLeverantorer || null,
+                  recent_changes: formData.verksamhetAndrad || null,
+                  personal_number: formData.personnummer,
+                  is_pep: formData.isPEP
+                }),
+              });
+              
+              if (!response.ok) {
+                const error = await response.json();
+                console.error('❌ Risk assessment failed:', error);
+                alert('Kunde inte spara riskfrågor: ' + (error.detail || 'Okänt fel'));
+                return;
+              }
+              
+              const data = await response.json();
+              console.log('✅ Risk assessment saved:', data);
+              console.log('📁 Company folder created:', data.company_dir);
+              
+              // Fortsätt till nästa steg
+              if (formData.isPEP) {
+                onSkipPEP();
+              } else {
+                onNext();
+              }
+            } catch (err) {
+              console.error('❌ Network error:', err);
+              alert('Nätverksfel: ' + err.message);
             }
           }}
           disabled={!isFormValid()}
