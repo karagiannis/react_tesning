@@ -13,20 +13,47 @@ import { ChevronDown, ChevronUp, Info } from 'lucide-react';
  * - 9 tjänsteval som checkboxes
  * - Beräknar uppskattad kostnad
  * - Returnerar onboardingId (UUID) från backend
- * - Sparar och laddar tillbaka val från localStorage
+ * - Sparar och laddar tillbaka val från localStorage (USER-SCOPED)
  */
+
+/**
+ * Helper: Extract userId from JWT token payload
+ * JWT format: header.payload.signature (base64url encoded)
+ */
+function getUserIdFromToken() {
+  const token = localStorage.getItem('accessToken');
+  if (!token) return null;
+  
+  try {
+    const payload = token.split('.')[1]; // Get payload part
+    const decoded = JSON.parse(atob(payload)); // Decode base64
+    return decoded.sub || decoded.user_id || decoded.email || null;
+  } catch (e) {
+    console.error('Failed to decode JWT token:', e);
+    return null;
+  }
+}
+
+/**
+ * Helper: Get user-scoped localStorage key
+ * Format: onboarding-{userId}-{key}
+ */
+function getStorageKey(key) {
+  const userId = getUserIdFromToken();
+  return userId ? `onboarding-${userId}-${key}` : `onboarding-${key}`;
+}
 
 export default function UppdragsvalsSlide({ onNext }) {
   // Expandable sections state
   const [expandedSections, setExpandedSections] = useState({
     intro: false,
     sanctions: false,
-    orgnr: false, // NEW
+    orgnr: false,
   });
 
-  // Service selections - load from localStorage if available
+  // Service selections - load from localStorage if available (USER-SCOPED)
   const [services, setServices] = useState(() => {
-    const saved = localStorage.getItem('onboarding-uppdragsval');
+    const saved = localStorage.getItem(getStorageKey('uppdragsval'));
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -47,23 +74,23 @@ export default function UppdragsvalsSlide({ onNext }) {
     };
   });
 
-  // NEW: Organisationsnummer state (moved from Riskfrågor steg 1)
+  // NEW: Organisationsnummer state (moved from Riskfrågor steg 1) - USER-SCOPED
   const [orgnr, setOrgnr] = useState(() => {
-    return localStorage.getItem('onboarding-orgnr') || '';
+    return localStorage.getItem(getStorageKey('orgnr')) || '';
   });
   const [companyName, setCompanyName] = useState(() => {
-    return localStorage.getItem('onboarding-companyName') || '';
+    return localStorage.getItem(getStorageKey('companyName')) || '';
   });
 
-  // Save to localStorage whenever services change
+  // Save to localStorage whenever services change (USER-SCOPED)
   useEffect(() => {
-    localStorage.setItem('onboarding-uppdragsval', JSON.stringify(services));
+    localStorage.setItem(getStorageKey('uppdragsval'), JSON.stringify(services));
   }, [services]);
 
-  // NEW: Save orgnr and companyName to localStorage
+  // NEW: Save orgnr and companyName to localStorage (USER-SCOPED)
   useEffect(() => {
-    if (orgnr) localStorage.setItem('onboarding-orgnr', orgnr);
-    if (companyName) localStorage.setItem('onboarding-companyName', companyName);
+    if (orgnr) localStorage.setItem(getStorageKey('orgnr'), orgnr);
+    if (companyName) localStorage.setItem(getStorageKey('companyName'), companyName);
   }, [orgnr, companyName]);
 
   const [loading, setLoading] = useState(false);

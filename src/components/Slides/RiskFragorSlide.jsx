@@ -6,6 +6,31 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useAgreements } from '../../contexts/AgreementContext';
 import AgreementModal from '../Modals/AgreementModal';
 
+/**
+ * Helper: Extract userId from JWT token payload
+ */
+function getUserIdFromToken() {
+  const token = localStorage.getItem('accessToken');
+  if (!token) return null;
+  
+  try {
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    return decoded.sub || decoded.user_id || decoded.email || null;
+  } catch (e) {
+    console.error('Failed to decode JWT token:', e);
+    return null;
+  }
+}
+
+/**
+ * Helper: Get user-scoped localStorage key
+ */
+function getStorageKey(key) {
+  const userId = getUserIdFromToken();
+  return userId ? `onboarding-${userId}-${key}` : `onboarding-${key}`;
+}
+
 export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange }) {
   const { hasAnyAgreement } = useAgreements();
   const [showAgreementModal, setShowAgreementModal] = useState(false);
@@ -26,10 +51,10 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     isPEP: false,
   });
 
-  // NEW: Load company info from Uppdragsval (2025-11-21)
+  // NEW: Load company info from Uppdragsval (2025-11-21) - USER-SCOPED
   useEffect(() => {
-    const savedOrgnr = localStorage.getItem('onboarding-orgnr');
-    const savedCompanyName = localStorage.getItem('onboarding-companyName');
+    const savedOrgnr = localStorage.getItem(getStorageKey('orgnr'));
+    const savedCompanyName = localStorage.getItem(getStorageKey('companyName'));
     
     if (savedOrgnr && !formData.organisationsnummer) {
       setFormData(prev => ({
