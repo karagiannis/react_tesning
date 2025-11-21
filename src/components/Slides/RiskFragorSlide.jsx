@@ -26,6 +26,21 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     isPEP: false,
   });
 
+  // NEW: Load company info from Uppdragsval (2025-11-21)
+  useEffect(() => {
+    const savedOrgnr = localStorage.getItem('onboarding-orgnr');
+    const savedCompanyName = localStorage.getItem('onboarding-companyName');
+    
+    if (savedOrgnr && !formData.organisationsnummer) {
+      setFormData(prev => ({
+        ...prev,
+        organisationsnummer: savedOrgnr,
+        foretagsnamn: savedCompanyName || ''
+      }));
+      setCompanyQuery(savedCompanyName || '');
+    }
+  }, []); // Run once on mount
+
   // Autocomplete state
   const [companyQuery, setCompanyQuery] = useState('');
   const [companySuggestions, setCompanySuggestions] = useState([]);
@@ -169,57 +184,53 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             />
           </div>
 
-          {/* Företagsnamn med Autocomplete */}
-          <div ref={autocompleteRef} className="relative">
-            <label className="block text-section-title text-brand-800 mb-2 flex items-center gap-2">
-              Vilket företag representerar du? *
-              <Info className="w-icon-sm h-icon-sm text-brand-600 cursor-help" title="Sök efter ditt företag så hämtar vi automatiskt organisationsnummer från Bolagsverket" />
-            </label>
-            <input
-              type="text"
-              value={companyQuery}
-              onChange={(e) => handleCompanySearch(e.target.value)}
-              onFocus={() => companyQuery.length >= 2 && setShowSuggestions(true)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
-              placeholder="Börja skriva företagsnamn..."
-            />
-            {showSuggestions && companySuggestions.length > 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-brand-300 rounded-box shadow-lg max-h-60 overflow-y-auto">
-                {companySuggestions.map((company) => (
-                  <button
-                    key={company.id}
-                    onClick={() => handleCompanySelect(company)}
-                    className="w-full px-4 py-2 text-left hover:bg-brand-50 transition-colors border-b border-brand-100 last:border-b-0"
-                  >
-                    <div className="font-medium text-brand-900">{company.name}</div>
-                    <div className="text-xs text-brand-600">
-                      Org.nr: {company.orgNr} • {company.stad}, {company.lan}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-            <p className="text-xs text-brand-600 mt-1">
-              Autocomplete söker i Bolagsverkets register (600 000+ företag)
+          {/* Företagsnamn och Organisationsnummer (READ-ONLY - förifyllt från Uppdragsval) */}
+          <div className="bg-amber-50 border-l-4 border-amber-400 rounded-box p-4 mb-4">
+            <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <Info className="w-5 h-5 text-amber-600" />
+              Organisationsnummer anges nu i Uppdragsval (första steget)
+            </h3>
+            <p className="text-sm text-gray-700 mb-3">
+              <strong>ARKITEKTONISK ÄNDRING (2025-11-21):</strong> Organisationsnummer har flyttats 
+              till Uppdragsval för att möjliggöra "Parkera och Avsluta"-funktionalitet. 
+              Fälten nedan är förifyllda från Uppdragsval och visas endast för bekräftelse.
+            </p>
+            <p className="text-sm text-gray-700">
+              <strong>Om fel företag valts:</strong> Gå tillbaka till Uppdragsval via sidebar för att ändra organisationsnummer.
             </p>
           </div>
 
-          {/* Organisationsnummer */}
+          {/* Företagsnamn (READ-ONLY) */}
+          <div>
+            <label className="block text-section-title text-brand-800 mb-2 flex items-center gap-2">
+              Företagsnamn (förifyllt från Uppdragsval)
+            </label>
+            <input
+              type="text"
+              value={companyQuery || formData.foretagsnamn}
+              readOnly
+              disabled
+              className="w-full px-4 py-2 border border-gray-300 rounded-box-sm bg-gray-100 text-gray-600 cursor-not-allowed text-sm"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Detta fält kan inte redigeras här. Ändra i Uppdragsval om behov finns.
+            </p>
+          </div>
+
+          {/* Organisationsnummer (READ-ONLY) */}
           <div>
             <label className="block text-section-title text-brand-800 mb-2">
-              Organisationsnummer *
+              Organisationsnummer (förifyllt från Uppdragsval)
             </label>
             <input
               type="text"
               value={formData.organisationsnummer}
-              onChange={(e) => handleChange('organisationsnummer', e.target.value)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-brand-50 text-sm"
-              placeholder="XXXXXX-XXXX"
+              readOnly
+              disabled
+              className="w-full px-4 py-2 border border-gray-300 rounded-box-sm bg-gray-100 text-gray-600 cursor-not-allowed text-sm"
             />
-            <p className="text-xs text-brand-600 mt-1">
-              {selectedCompany 
-                ? '✓ Förifyllt från Bolagsverket (kan redigeras manuellt)' 
-                : 'Välj företag ovan eller skriv in organisationsnummer manuellt'}
+            <p className="text-xs text-gray-500 mt-1">
+              Detta fält kan inte redigeras här. Ändra i Uppdragsval om behov finns.
             </p>
           </div>
 
@@ -345,7 +356,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             
             try {
               // API-anrop till backend: Skapa företagsmapp
-              const token = localStorage.getItem('access_token');
+              const token = localStorage.getItem('accessToken');
               const onboardingId = localStorage.getItem('onboardingId');
               
               // Build URL with onboardingId if available

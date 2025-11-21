@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 
 /**
@@ -13,6 +13,7 @@ import { ChevronDown, ChevronUp, Info } from 'lucide-react';
  * - 9 tjänsteval som checkboxes
  * - Beräknar uppskattad kostnad
  * - Returnerar onboardingId (UUID) från backend
+ * - Sparar och laddar tillbaka val från localStorage
  */
 
 export default function UppdragsvalsSlide({ onNext }) {
@@ -20,20 +21,50 @@ export default function UppdragsvalsSlide({ onNext }) {
   const [expandedSections, setExpandedSections] = useState({
     intro: false,
     sanctions: false,
+    orgnr: false, // NEW
   });
 
-  // Service selections
-  const [services, setServices] = useState({
-    lopandeBokforing: false,
-    arsbokslut: false,
-    deklarationer: false,
-    loneadministration: false,
-    ekonomiskRadgivning: false,
-    foretagsregistrering: false,
-    finansiellRapportering: false,
-    foretagsforsaljning: false,
-    annat: '',
+  // Service selections - load from localStorage if available
+  const [services, setServices] = useState(() => {
+    const saved = localStorage.getItem('onboarding-uppdragsval');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved services:', e);
+      }
+    }
+    return {
+      lopandeBokforing: false,
+      arsbokslut: false,
+      deklarationer: false,
+      loneadministration: false,
+      ekonomiskRadgivning: false,
+      foretagsregistrering: false,
+      finansiellRapportering: false,
+      foretagsforsaljning: false,
+      annat: '',
+    };
   });
+
+  // NEW: Organisationsnummer state (moved from Riskfrågor steg 1)
+  const [orgnr, setOrgnr] = useState(() => {
+    return localStorage.getItem('onboarding-orgnr') || '';
+  });
+  const [companyName, setCompanyName] = useState(() => {
+    return localStorage.getItem('onboarding-companyName') || '';
+  });
+
+  // Save to localStorage whenever services change
+  useEffect(() => {
+    localStorage.setItem('onboarding-uppdragsval', JSON.stringify(services));
+  }, [services]);
+
+  // NEW: Save orgnr and companyName to localStorage
+  useEffect(() => {
+    if (orgnr) localStorage.setItem('onboarding-orgnr', orgnr);
+    if (companyName) localStorage.setItem('onboarding-companyName', companyName);
+  }, [orgnr, companyName]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -63,25 +94,38 @@ export default function UppdragsvalsSlide({ onNext }) {
       return;
     }
 
+    // NEW: Validate organisationsnummer format
+    if (!orgnr || !orgnr.match(/^\d{6}-?\d{4}$/)) {
+      setError('Vänligen ange ett giltigt organisationsnummer (format: NNNNNN-NNNN)');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
       // Get JWT token from localStorage
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('accessToken');
       
-      const response = await fetch('http://localhost:8000/api/onboarding/uppdrag', {
+      // NEW: Include orgnr in request body
+      const requestBody = {
+        ...services,
+        orgnr: orgnr.replace('-', ''), // Send without dash (backend will add it)
+        companyName: companyName || '', // Optional, may be from autocomplete
+      };
+      
+      const response = await fetch('https://celestial.se/tic-tac-toe-api/api/onboarding/uppdrag', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(services),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Något gick fel');
+        throw new Error(errorData.detail || errorData.error || 'Något gick fel');
       }
 
       const data = await response.json();
@@ -89,9 +133,10 @@ export default function UppdragsvalsSlide({ onNext }) {
       // Store onboardingId in localStorage for subsequent API calls
       localStorage.setItem('onboardingId', data.onboardingId);
       
-      console.log('✅ Onboarding-process skapad:', data);
+      console.log('✅ Uppdragsval sparat:', data);
       console.log('📋 onboardingId:', data.onboardingId);
       console.log('💰 Uppskattad kostnad:', data.uppskattadKostnad);
+      console.log('📝 Valda tjänster:', data.selectedServices);
       
       // Navigate to next step
       onNext(data);
@@ -173,6 +218,97 @@ export default function UppdragsvalsSlide({ onNext }) {
             className="w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
           />
         </div>
+      </div>
+
+      {/* NEW SECTION 1B: Organisationsnummer (moved from Riskfrågor steg 1) */}
+      <div className="bg-white rounded-box shadow-md border border-gray-200 p-6 mb-6">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="flex items-center justify-center w-8 h-8 bg-brand-600 text-white rounded-full font-bold text-sm">
+                1B
+              </span>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Företagets organisationsnummer
+              </h2>
+            </div>
+            <p className="text-gray-600 mb-6 ml-11">
+              Ange ditt företags organisationsnummer för att vi ska kunna hämta företagsdata från offentliga register.
+            </p>
+
+            {/* Company name search (future: autocomplete) */}
+            <div className="ml-11 mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Sök företagsnamn (valfritt):
+              </label>
+              <input
+                type="text"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                placeholder="Börja skriva företagsnamn..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Autocomplete kommer att implementeras i Phase 2 (Proper Solution)
+              </p>
+            </div>
+
+            {/* Organisationsnummer input */}
+            <div className="ml-11">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Organisationsnummer: <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={orgnr}
+                onChange={(e) => setOrgnr(e.target.value)}
+                placeholder="NNNNNN-NNNN"
+                maxLength={11}
+                className="w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Format: 556903-8671 (bindestreck valfritt)
+              </p>
+            </div>
+          </div>
+
+          {/* Info button - Why we collect this */}
+          <button
+            onClick={() => toggleSection('orgnr')}
+            className="flex-shrink-0 ml-4 p-2 text-brand-600 hover:bg-brand-50 rounded-full transition-colors"
+            title="Varför samlar vi in detta?"
+          >
+            <Info className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Expandable explanation */}
+        {expandedSections.orgnr && (
+          <div className="mt-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-box ml-11">
+            <h3 className="font-semibold text-gray-900 mb-2">Arkitektonisk anledning:</h3>
+            <p className="text-sm text-gray-700 mb-3">
+              Organisationsnummer krävs för att skapa företagsmappen i backend-systemet 
+              (<code className="bg-gray-100 px-1 py-0.5 rounded">data/{'{user_id}'}/{'{orgnr}'}/</code>). 
+              Detta möjliggör:
+            </p>
+            <ul className="list-disc list-inside text-sm text-gray-700 space-y-1 ml-4">
+              <li><strong>"Parkera och Avsluta"</strong> – Spara onboarding-session för senare</li>
+              <li><strong>Partiell datainsamling</strong> – Spara progress även om användaren avbryter</li>
+              <li><strong>Strukturerad datalagring</strong> – Alla företagsdata organiseras per orgnr</li>
+            </ul>
+            
+            <h3 className="font-semibold text-gray-900 mt-4 mb-2">Juridisk grund (Penningtvättslagen):</h3>
+            <p className="text-sm text-gray-700">
+              Organisationsnummer är grunden för identifiering av juridisk person enligt 
+              <strong> 3 kap. 7 § PTL</strong> och <strong>01FS 2024:20, 3 kap. 3 §</strong>.
+            </p>
+            <p className="text-sm text-gray-700 mt-2">
+              Vi måste kontrollera identiteten genom oberoende källor (Bolagsverket = 
+              offentligt register = tillförlitlig källa). Denna kontroll måste dokumenteras 
+              och sparas, oavsett om vi känner kunden sedan tidigare.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Section 2: Why we need to ask tough questions */}

@@ -64,10 +64,37 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
     }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (onNext) {
       onNext({ steg2: formData });
     }
+
+    // Send data to backend via PATCH
+    const token = localStorage.getItem('accessToken');
+    const onboardingId = localStorage.getItem('onboardingId');
+
+    if (token && onboardingId) {
+      try {
+        const response = await fetch(
+          `https://celestial.se/tic-tac-toe-api/api/onboarding/risk-assessment-extended?onboarding_id=${onboardingId}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ steg2: formData })
+          }
+        );
+
+        if (!response.ok) {
+          console.error('Failed to save steg2 data:', await response.text());
+        }
+      } catch (error) {
+        console.error('Error saving steg2 data:', error);
+      }
+    }
+
     navigate('/riskfragor/steg3');
   };
 

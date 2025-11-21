@@ -619,6 +619,67 @@
   
   \vspace{0.5cm}
   
+  % SEKTION 1B: ORGANISATIONSNUMMER (FLYTTAT FRÅN RISKFRÅGOR STEG 1)
+  % CRITICAL CHANGE 2025-11-21: Orgnr måste samlas in FÖRE Riskfrågor
+  % Anledning: Backend behöver skapa företagsmapp (data/{user_id}/{orgnr}/) 
+  % direkt vid Uppdragsval för att möjliggöra "Parkera och Avsluta" funktionalitet
+  \begin{block}{\textbf{1B. Företagets organisationsnummer}* \hspace{0.3cm} ⓘ}
+    \footnotesize
+    Ange ditt företags organisationsnummer för att vi ska kunna hämta företagsdata från offentliga register.
+  \end{block}
+  
+  \vspace{0.2cm}
+  \footnotesize
+  
+  % Autocomplete för företagsnamn
+  \textbf{Sök företagsnamn:} \underline{\hspace{6cm}} (autocomplete)\\[0.2cm]
+  
+  \textbf{Organisationsnummer:}* \underline{\hspace{4cm}} (NNNNNN-NNNN)
+  
+  \begin{block}{\textbf{Autocomplete-logik}}
+    \tiny
+    \textbf{Exempel:}
+    \begin{itemize}
+      \item Användaren skriver "Celestial Redo"
+      \item Dropdown visar: "Celestial Redovisning AB (556903-8671)"
+      \item Väljer från listan → Org.nr fylls i automatiskt
+    \end{itemize}
+    \vspace{0.1cm}
+    
+    \tiny \textbf{Teknisk implementation:}\\[0.1cm]
+    \tiny • Fuzzy search i lokal Bolagsverket-FIL (600 000+ företag, <1ms lookup)\\[0.1cm]
+    \tiny • Autocomplete-komponent (React-Select eller Material-UI)\\[0.1cm]
+    \tiny • Organisationsnummer: förifyllt från autocomplete, kan redigeras manuellt\\[0.2cm]
+    
+    \tiny \textbf{UX-logik:}\\[0.1cm]
+    \tiny • Om användaren RADERAR företagsnamnet → RENSA även org.nr\\[0.1cm]
+    \tiny • Om användaren ÄNDRAR org.nr manuellt → BEHÅLL det (manuell override)\\[0.1cm]
+    \tiny • Grön bakgrund (bg-brand-50) när org.nr är förifyllt från autocomplete\\[0.2cm]
+    
+    \tiny \textbf{Hittar du inte ditt företag?}\\[0.1cm]
+    \tiny → Skriv in organisationsnummer manuellt (valideras mot Bolagsverket API)
+  \end{block}
+  
+  \begin{alertblock}{Expansionsknapp (ⓘ) → Varför samlar vi in detta?}
+    \tiny \textbf{Arkitektonisk anledning:}\\[0.1cm]
+    \tiny Organisationsnummer krävs för att skapa företagsmappen i backend-systemet\\[0.1cm]
+    \tiny (\texttt{data/\{user\_id\}/\{orgnr\}/}). Detta möjliggör:\\[0.2cm]
+    
+    \tiny • \textbf{"Parkera och Avsluta"} – Spara onboarding-session för senare\\[0.1cm]
+    \tiny • \textbf{Partiell datainsamling} – Spara progress även om användaren avbryter\\[0.1cm]
+    \tiny • \textbf{Strukturerad datalagring} – Alla företagsdata organiseras per orgnr\\[0.2cm]
+    
+    \tiny \textbf{Juridisk grund (Penningtvättslagen):}\\[0.1cm]
+    \tiny Organisationsnummer är grunden för identifiering av juridisk person enligt\\[0.1cm]
+    \tiny \textbf{3 kap. 7 § PTL} och \textbf{01FS 2024:20, 3 kap. 3 §}.\\[0.2cm]
+    
+    \tiny Vi måste kontrollera identiteten genom oberoende källor (Bolagsverket =\\[0.1cm]
+    \tiny offentligt register = tillförlitlig källa). Denna kontroll måste dokumenteras\\[0.1cm]
+    \tiny och sparas, oavsett om vi känner kunden sedan tidigare.
+  \end{alertblock}
+  
+  \vspace{0.5cm}
+  
   % SEKTION 2: VARFÖR FÖRDJUPADE FRÅGOR?
   \begin{block}{\textbf{2. Varför kommer vi att ställa vissa fördjupade frågor?} \hspace{0.3cm} ⓘ}
     \footnotesize
@@ -841,32 +902,32 @@
 
   \vspace{0.2cm}
 
-   % Företagsnamn med autocomplete
-  \textbf{2. Vilket företag representerar du?}* \hspace{0.3cm} ⓘ
-  \begin{block}{Autocomplete + Hidden org.nr}
-    \tiny Börja skriva företagsnamn... (Autocomplete söker i Bolagsverkets register)\\[0.2cm]
+  % ORGANISATIONSNUMMER HAR FLYTTATS TILL UPPDRAGSVAL-SLIDE (2025-11-21)
+  % Företagets namn visas här för bekräftelse (förifyllt från Uppdragsval)
+  \textbf{2. Bekräfta företagets information}* \hspace{0.3cm} ⓘ\\
+  \vspace{0.2cm}
+  
+  \begin{block}{Företagsinformation (förifylld från Uppdragsval)}
+    \tiny \textbf{Företagsnamn:} \underline{\hspace{6cm}} (förifyllt, ej redigerbart)\\[0.2cm]
+    \tiny \textbf{Organisationsnummer:} \underline{\hspace{4cm}} (förifyllt, ej redigerbart)\\[0.2cm]
+  \end{block}
+  
+  \begin{block}{\textbf{ARKITEKTONISK ÄNDRING (2025-11-21)}}
+    \tiny
+    \textbf{Organisationsnummer har flyttats till Uppdragsval (första steget).}\\[0.2cm]
     
-    \tiny \textit{Exempel:} 
-    \begin{itemize}
-      \item Användaren skriver "Anderssons A"
-      \item Dropdown visar: "Anderssons Atelje AB (556789-1234)"
-      \item Väljer från listan → Org.nr fylls i automatiskt
-    \end{itemize}
-    \vspace{0.1cm}
+    \tiny \textbf{Anledning:}\\
+    \tiny • Backend måste skapa företagsmapp (\texttt{data/\{user\_id\}/\{orgnr\}/}) tidigt\\
+    \tiny • Möjliggör "Parkera och Avsluta"-funktionalitet\\
+    \tiny • Tillåter sparning av partiell progress vid avbrott\\
+    \tiny • Strukturerad datalagring från start av onboarding\\[0.2cm]
     
-    \tiny \textbf{Teknisk implementation:}\\
-    \tiny • Fuzzy search i lokal Bolagsverket-FIL (600 000+ företag, <1ms lookup)\\
-    \tiny • Autocomplete-komponent (Material-UI eller React-Select)\\
-    \tiny • Organisationsnummer: \underline{\hspace{3cm}} (förifyllt, kan redigeras manuellt)\\[0.2cm]
+    \tiny \textbf{Användarupplevelse:}\\
+    \tiny Användaren behöver inte fylla i organisationsnummer igen här.\\
+    \tiny Fälten är förifyllda från Uppdragsval och visas endast för bekräftelse.\\[0.2cm]
     
-    \tiny \textbf{UX-logik för redigering:}\\
-    \tiny • Om användaren RADERAR företagsnamnet → RENSA även org.nr (eftersom de är kopplade)\\
-    \tiny • Om användaren ÄNDRAR org.nr manuellt → BEHÅLL det (tillåt manuell override)\\
-    \tiny • Autocomplete aktiveras igen när minst 2 tecken skrivs i företagsnamn-fältet\\
-    \tiny • Visuell feedback: Grön bakgrund (bg-brand-50) när org.nr är förifyllt från autocomplete\\[0.2cm]
-    
-    \tiny \textbf{Hittar du inte ditt företag?}\\
-    \tiny → \textit{Skriv in organisationsnummer manuellt} (gör direkt API-anrop till Bolagsverket)
+    \tiny \textbf{Om fel företag valts:}\\
+    \tiny → Gå tillbaka till Uppdragsval via sidebar för att ändra organisationsnummer.
   \end{block}
   \begin{alertblock}{Expansionsknapp (ⓘ) → Lagtext}
     \tiny \textbf{3 kap. 7 §  PTL – Identifiering och kontroll av kunden}\\

@@ -1,2 +1,0 @@
-# This file ensures the Bolagsverket directory is tracked in Git
-# All sensitive files (zip, credentials) are gitignored

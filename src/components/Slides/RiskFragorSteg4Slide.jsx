@@ -47,10 +47,37 @@ export default function RiskFragorSteg4Slide({ onNext }) {
     setExpandedInfo(prev => ({ ...prev, [questionId]: !prev[questionId] }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (onNext) {
       onNext({ steg4: formData });
     }
+
+    // Send data to backend via PATCH
+    const token = localStorage.getItem('accessToken');
+    const onboardingId = localStorage.getItem('onboardingId');
+
+    if (token && onboardingId) {
+      try {
+        const response = await fetch(
+          `https://celestial.se/tic-tac-toe-api/api/onboarding/risk-assessment-extended?onboarding_id=${onboardingId}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ steg4: formData })
+          }
+        );
+
+        if (!response.ok) {
+          console.error('Failed to save steg4 data:', await response.text());
+        }
+      } catch (error) {
+        console.error('Error saving steg4 data:', error);
+      }
+    }
+
     // Navigate to next slide (identitetskontroll based on spec)
     navigate('/identitetskontroll');
   };
