@@ -163,7 +163,9 @@ export default function App() {
         const token = localStorage.getItem('accessToken');
         if (!token) return;
 
-        const response = await fetch('http://localhost:8000/api/onboarding/list', {
+        const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/api';
+
+        const response = await fetch(`${API_BASE}/onboarding/list`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

@@ -33,46 +33,59 @@ export default function Header({ onPanelToggle }) {
       '• Radera all sparad företagsdata från backend\n' +
       '• Rensa localStorage helt\n' +
       '• Logga ut dig från systemet\n\n' +
-      'Denna åtgärd INTE kan ångras!'
+      'Denna åtgärd kan INTE ångras!'
     );
 
     if (!confirmed) return;
 
     try {
       const token = localStorage.getItem('accessToken');
-      if (token) {
-        // Hämta alla företag
-        const response = await fetch('http://localhost:8000/api/onboarding/list', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+      if (!token) {
+        console.warn('Ingen token finns - kan inte radera från backend');
+        localStorage.clear();
+        navigate('/login');
+        return;
+      }
 
-        if (response.ok) {
-          const data = await response.json();
-          
-          // Radera alla företag
-          for (const company of data.companies || []) {
-            await fetch(`http://localhost:8000/api/onboarding/delete/${company.orgnr}`, {
-              method: 'DELETE',
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              }
-            });
-          }
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/api';
+
+      // Hämta alla företag
+      const listResponse = await fetch(`${API_BASE}/onboarding/list`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
+      });
+
+      if (listResponse.ok) {
+        const data = await listResponse.json();
+        
+        // Radera alla företag
+        const deletePromises = (data.companies || []).map(company =>
+          fetch(`${API_BASE}/onboarding/delete/${company.orgnr}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          })
+        );
+
+        await Promise.all(deletePromises);
+        console.log('✅ Alla företag raderade från backend');
+      } else {
+        console.warn('Kunde inte hämta företag från backend:', listResponse.status);
       }
 
       // Rensa localStorage
       localStorage.clear();
+      console.log('✅ localStorage rensat');
 
       // Logga ut
       navigate('/login');
     } catch (error) {
       console.error('Error clearing all onboardings:', error);
-      alert('Kunde inte radera alla onboardings. Försök igen eller kontakta support.');
+      alert(`Kunde inte radera alla onboardings: ${error.message}\n\nFörsök igen eller kontakta support.`);
     }
   };
 

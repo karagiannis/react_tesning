@@ -13,8 +13,8 @@ export default function Sidebar({ currentPath, hasRoaringData = false }) {
   const sidebarRef = useRef(null);
 
   const slides = [
-    // Hem-ikon tar användaren tillbaka till hero-sektionen (landing page)
-    { path: '/', title: 'Hem', icon: 'home' },
+    // Hem-ikon tar användaren till Uppdragsval (dashboard efter login)
+    { path: '/uppdragsval', title: 'Hem', icon: 'home' },
     // Autentiseringssidor (login, register, verify) visas INTE i sidebar
     // eftersom de inte har sidebar överhuvudtaget
     { path: '/uppdragsval', title: 'Uppdragsval', icon: 'checkList' },

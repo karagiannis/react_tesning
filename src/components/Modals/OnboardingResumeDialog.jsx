@@ -35,7 +35,9 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
         throw new Error('Ingen access token hittades');
       }
 
-      const response = await fetch('http://localhost:8000/api/onboarding/list', {
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/api';
+
+      const response = await fetch(`${API_BASE}/onboarding/list`, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -65,7 +67,9 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
       setDeletingOrgnr(orgnr);
       
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:8000/api/onboarding/delete/${orgnr}`, {
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/api';
+
+      const response = await fetch(`${API_BASE}/onboarding/delete/${orgnr}`, {
         method: 'DELETE',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -95,7 +99,9 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
   const handleContinue = async (orgnr) => {
     try {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`http://localhost:8000/api/onboarding/resume/${orgnr}`, {
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/api';
+
+      const response = await fetch(`${API_BASE}/onboarding/resume/${orgnr}`, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
