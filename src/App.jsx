@@ -96,6 +96,7 @@ export default function App() {
   
   // Resume dialog state
   const [showResumeDialog, setShowResumeDialog] = useState(false);
+  const [dialogDismissed, setDialogDismissed] = useState(false); // Prevent re-showing after user dismisses
   
   const [isPEP, setIsPEP] = useState(false);
   const [roaringData, setRoaringData] = useState(null);
@@ -144,8 +145,8 @@ export default function App() {
 
   // 🆕 Check for ongoing onboardings vid login
   useEffect(() => {
-    console.log('🔍 useEffect triggered - isLoggedIn:', isLoggedIn, 'isDemoMode:', isDemoMode);
-    if (!isLoggedIn || isDemoMode) return;
+    console.log('🔍 useEffect triggered - isLoggedIn:', isLoggedIn, 'isDemoMode:', isDemoMode, 'dialogDismissed:', dialogDismissed);
+    if (!isLoggedIn || isDemoMode || dialogDismissed) return;
 
     const checkForOngoingOnboarding = async () => {
       console.log('🚀 checkForOngoingOnboarding started');
@@ -213,7 +214,7 @@ export default function App() {
     };
 
     checkForOngoingOnboarding();
-  }, [isLoggedIn, isDemoMode, navigate]);
+  }, [isLoggedIn, isDemoMode, dialogDismissed, navigate]);
 
   // 🆕 Helper: Extract userId from JWT for localStorage keys
   const getUserIdFromToken = () => {
@@ -259,6 +260,7 @@ export default function App() {
     }
     
     setShowResumeDialog(false);
+    setDialogDismissed(true);  // Prevent re-showing
     navigate(`/${data.currentStep}`);  // Navigera till där användaren var
   };
 
@@ -266,6 +268,7 @@ export default function App() {
   const handleNewSession = () => {
     console.log('✨ Starting new onboarding session');
     setShowResumeDialog(false);
+    setDialogDismissed(true);  // Prevent re-showing
     navigate('/uppdragsval');
   };
 
