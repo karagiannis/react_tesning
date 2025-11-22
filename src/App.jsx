@@ -63,7 +63,16 @@ export default function App() {
   const [activePanel, setActivePanel] = useState(null);
   
   // Persistent login state based on valid JWT token
+  // BUT: Always force logout if explicitly on auth pages
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    const authPages = ['/', '/login', '/register', '/verify', '/forgot-password', '/reset-password'];
+    const isOnAuthPage = authPages.includes(window.location.pathname);
+    
+    if (isOnAuthPage) {
+      console.log('🚪 User is on auth page - forcing logged out state');
+      return false;
+    }
+    
     const token = localStorage.getItem('accessToken');
     if (!token) return false;
     
@@ -71,8 +80,11 @@ export default function App() {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const expirationTime = payload.exp * 1000; // Convert to milliseconds
-      return Date.now() < expirationTime;
+      const isValid = Date.now() < expirationTime;
+      console.log('🔐 Initial token check:', isValid ? 'VALID' : 'EXPIRED');
+      return isValid;
     } catch (e) {
+      console.log('🔐 Initial token check: INVALID format');
       return false; // Invalid token format
     }
   });
@@ -118,6 +130,7 @@ export default function App() {
   }, [formData.organisationsnummer, formData.personnummer, roaringData]);
 
   const handleLogin = () => {
+    console.log('🔐 handleLogin called - setting isLoggedIn to true');
     setIsLoggedIn(true);
     // Note: JWT tokens are already saved by LoginSlide
     // checkForOngoingOnboarding() will handle navigation
@@ -131,15 +144,17 @@ export default function App() {
 
   // 🆕 Check for ongoing onboardings vid login
   useEffect(() => {
+    console.log('🔍 useEffect triggered - isLoggedIn:', isLoggedIn, 'isDemoMode:', isDemoMode);
     if (!isLoggedIn || isDemoMode) return;
 
     const checkForOngoingOnboarding = async () => {
+      console.log('🚀 checkForOngoingOnboarding started');
       try {
         const token = localStorage.getItem('accessToken');
+        console.log('🔑 Token check:', token ? 'EXISTS' : 'MISSING');
         if (!token) {
-          console.error('No access token found, logging out');
-          setIsLoggedIn(false);
-          navigate('/login');
+          console.error('No access token found after login');
+          // Don't navigate - let LoginSlide handle navigation
           return;
         }
         
@@ -147,24 +162,23 @@ export default function App() {
         try {
           const payload = JSON.parse(atob(token.split('.')[1]));
           const expirationTime = payload.exp * 1000;
+          const now = Date.now();
+          const timeLeft = Math.floor((expirationTime - now) / 1000 / 60);
+          console.log(`⏰ Token expires in ${timeLeft} minutes`);
+          
           if (Date.now() >= expirationTime) {
-            console.error('Token expired, logging out');
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            setIsLoggedIn(false);
-            navigate('/login');
+            console.error('Token expired immediately after login - this should not happen');
+            // Don't navigate - let LoginSlide handle navigation
             return;
           }
         } catch (e) {
-          console.error('Invalid token format, logging out');
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          setIsLoggedIn(false);
-          navigate('/login');
+          console.error('Invalid token format:', e);
+          // Don't navigate - let LoginSlide handle navigation
           return;
         }
 
         const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/tic-tac-toe-api/api';
+        console.log('📡 Fetching onboardings from:', `${API_BASE}/onboarding/list`);
 
         const response = await fetch(`${API_BASE}/onboarding/list`, {
           headers: {
@@ -174,16 +188,22 @@ export default function App() {
         });
 
         if (!response.ok) {
-          console.error('Failed to fetch onboardings:', response.status);
+          console.error('❌ Failed to fetch onboardings:', response.status);
           navigate('/uppdragsval');  // Fallback: gå till uppdragsval
           return;
         }
 
         const data = await response.json();
+        console.log('📦 Onboarding data received:', data);
         
         if (data.companies && data.companies.length > 0) {
-          setShowResumeDialog(true);  // Visa Resume-dialog
+          console.log('✅ Found', data.companies.length, 'ongoing onboarding(s) - showing resume dialog');
+          // Navigate away from auth page first so dialog is visible
+          navigate('/uppdragsval');
+          // Show dialog on next tick so navigation completes first
+          setTimeout(() => setShowResumeDialog(true), 100);
         } else {
+          console.log('✅ No ongoing onboardings - navigating to /uppdragsval');
           navigate('/uppdragsval');  // Inga företag → gå direkt till uppdragsval
         }
       } catch (error) {

@@ -22,6 +22,13 @@ export default function LoginSlide({ onNext, onRegister }) {
   const turnstileRef = useRef(null);
   const turnstileWidgetId = useRef(null);
 
+  // Clear any existing auth state when visiting login page
+  useEffect(() => {
+    console.log('🧹 LoginSlide mounted - clearing old auth state');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+  }, []);
+
   // Load Cloudflare Turnstile script
   useEffect(() => {
     // Check if script already loaded
