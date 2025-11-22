@@ -22,8 +22,8 @@ export default function Header({ onPanelToggle }) {
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('temp_orgnr');
     
-    // Redirect to login
-    navigate('/login');
+    // Redirect to Hero page
+    navigate('/');
   };
 
   const handleClearAll = async () => {

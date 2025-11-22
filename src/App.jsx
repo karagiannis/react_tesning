@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import HeroSlide from './components/Slides/HeroSlide';
 import LoginSlide from './components/Slides/LoginSlide';
@@ -143,10 +143,29 @@ export default function App() {
     navigate('/uppdragsval');  // Demo mode går direkt till uppdragsval
   };
 
+  // 🆕 Ref to prevent double-triggering
+  const hasCheckedOnboarding = useRef(false);
+
+  // Reset ref when user logs out
+  useEffect(() => {
+    if (!isLoggedIn) {
+      hasCheckedOnboarding.current = false;
+    }
+  }, [isLoggedIn]);
+
   // 🆕 Check for ongoing onboardings vid login
   useEffect(() => {
     console.log('🔍 useEffect triggered - isLoggedIn:', isLoggedIn, 'isDemoMode:', isDemoMode, 'dialogDismissed:', dialogDismissed);
+    
+    // Early returns
     if (!isLoggedIn || isDemoMode || dialogDismissed) return;
+    
+    // Prevent double-execution
+    if (hasCheckedOnboarding.current) {
+      console.log('⏭️ Already checked onboarding - skipping');
+      return;
+    }
+    hasCheckedOnboarding.current = true;
 
     const checkForOngoingOnboarding = async () => {
       console.log('🚀 checkForOngoingOnboarding started');
@@ -244,9 +263,13 @@ export default function App() {
     localStorage.setItem(getStorageKey('orgnr'), data.orgnr);
     localStorage.setItem(getStorageKey('companyName'), data.companyName);
     
-    // Uppdragsval data
-    if (data.data.uppdrag) {
-      localStorage.setItem(getStorageKey('uppdragsval'), JSON.stringify(data.data.uppdrag));
+    // Uppdragsval data - restore all service selections
+    if (data.data && data.data.services) {
+      localStorage.setItem(getStorageKey('uppdragsval'), JSON.stringify(data.data.services));
+    }
+    // Also save selectedServices array for reference
+    if (data.selectedServices) {
+      localStorage.setItem(getStorageKey('selectedServices'), JSON.stringify(data.selectedServices));
     }
     
     // Riskfrågor Steg 1 data
