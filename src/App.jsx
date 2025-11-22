@@ -55,6 +55,7 @@ import LLMPanel from './components/Panels/LLMPanel';
 import DocumentationPanel from './components/Panels/DocumentationPanel';
 import SupportPanel from './components/Panels/SupportPanel';
 import { AgreementProvider } from './contexts/AgreementContext';
+import OnboardingResumeDialog from './components/Modals/OnboardingResumeDialog';
 
 export default function App() {
   const navigate = useNavigate();
@@ -70,6 +71,9 @@ export default function App() {
   const [isDemoMode, setIsDemoMode] = useState(() => {
     return localStorage.getItem('isDemoMode') === 'true';
   });
+  
+  // Resume dialog state
+  const [showResumeDialog, setShowResumeDialog] = useState(false);
   
   const [isPEP, setIsPEP] = useState(false);
   const [roaringData, setRoaringData] = useState(null);
@@ -141,13 +145,105 @@ export default function App() {
   const handleLogin = () => {
     setIsLoggedIn(true);
     localStorage.setItem('isLoggedIn', 'true');
-    navigate('/uppdragsval');  // Start directly with service selection
+    // INTE navigate direkt - checkForOngoingOnboarding() tar över
   };
 
   const handleDemo = () => {
     setIsDemoMode(true);
     localStorage.setItem('isDemoMode', 'true');
-    navigate('/uppdragsval');  // Start directly with service selection
+    navigate('/uppdragsval');  // Demo mode går direkt till uppdragsval
+  };
+
+  // 🆕 Check for ongoing onboardings vid login
+  useEffect(() => {
+    if (!isLoggedIn || isDemoMode) return;
+
+    const checkForOngoingOnboarding = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        if (!token) return;
+
+        const response = await fetch('http://localhost:8000/api/onboarding/list', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          console.error('Failed to fetch onboardings:', response.status);
+          navigate('/uppdragsval');  // Fallback: gå till uppdragsval
+          return;
+        }
+
+        const data = await response.json();
+        
+        if (data.companies && data.companies.length > 0) {
+          setShowResumeDialog(true);  // Visa Resume-dialog
+        } else {
+          navigate('/uppdragsval');  // Inga företag → gå direkt till uppdragsval
+        }
+      } catch (error) {
+        console.error('Error checking ongoing onboardings:', error);
+        navigate('/uppdragsval');  // Fallback vid fel
+      }
+    };
+
+    checkForOngoingOnboarding();
+  }, [isLoggedIn, isDemoMode, navigate]);
+
+  // 🆕 Helper: Extract userId from JWT for localStorage keys
+  const getUserIdFromToken = () => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return null;
+    
+    try {
+      const payload = token.split('.')[1];
+      const decoded = JSON.parse(atob(payload));
+      return decoded.sub || decoded.user_id || decoded.email;
+    } catch {
+      return null;
+    }
+  };
+
+  // 🆕 Helper: Get user-scoped localStorage key
+  const getStorageKey = (key) => {
+    const userId = getUserIdFromToken();
+    return userId ? `onboarding-${userId}-${key}` : `onboarding-${key}`;
+  };
+
+  // 🆕 Resume callback: Ladda data och navigera
+  const handleResume = (data) => {
+    console.log('📂 Resuming onboarding:', data);
+    
+    // Populate localStorage med backend-data (cache)
+    localStorage.setItem(getStorageKey('orgnr'), data.orgnr);
+    localStorage.setItem(getStorageKey('companyName'), data.companyName);
+    
+    // Uppdragsval data
+    if (data.data.uppdrag) {
+      localStorage.setItem(getStorageKey('uppdragsval'), JSON.stringify(data.data.uppdrag));
+    }
+    
+    // Riskfrågor Steg 1 data
+    if (data.data.riskfragor_steg1) {
+      localStorage.setItem(getStorageKey('riskfragor-steg-1'), JSON.stringify(data.data.riskfragor_steg1));
+    }
+    
+    // Riskfrågor Extended (steg 2-4)
+    if (data.data.riskfragor_extended) {
+      localStorage.setItem(getStorageKey('riskfragor-extended'), JSON.stringify(data.data.riskfragor_extended));
+    }
+    
+    setShowResumeDialog(false);
+    navigate(`/${data.currentStep}`);  // Navigera till där användaren var
+  };
+
+  // 🆕 New session callback: Stäng dialog och gå till uppdragsval
+  const handleNewSession = () => {
+    console.log('✨ Starting new onboarding session');
+    setShowResumeDialog(false);
+    navigate('/uppdragsval');
   };
 
   const renderPanel = () => {
@@ -226,6 +322,14 @@ export default function App() {
 
   return (
     <AgreementProvider>
+      {/* 🆕 Resume dialog - visas över allt annat när pågående onboardings finns */}
+      {showResumeDialog && (
+        <OnboardingResumeDialog 
+          onResume={handleResume} 
+          onNewSession={handleNewSession} 
+        />
+      )}
+      
       <div className="flex h-screen overflow-hidden">
         {!isSettingsPage && !isVoucherPage && (
           <Sidebar 

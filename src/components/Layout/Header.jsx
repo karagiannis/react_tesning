@@ -26,6 +26,56 @@ export default function Header({ onPanelToggle }) {
     navigate('/login');
   };
 
+  const handleClearAll = async () => {
+    const confirmed = window.confirm(
+      '⚠️ Är du säker på att du vill radera ALLA pågående onboardings?\n\n' +
+      'Detta kommer att:\n' +
+      '• Radera all sparad företagsdata från backend\n' +
+      '• Rensa localStorage helt\n' +
+      '• Logga ut dig från systemet\n\n' +
+      'Denna åtgärd INTE kan ångras!'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        // Hämta alla företag
+        const response = await fetch('http://localhost:8000/api/onboarding/list', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Radera alla företag
+          for (const company of data.companies || []) {
+            await fetch(`http://localhost:8000/api/onboarding/delete/${company.orgnr}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+          }
+        }
+      }
+
+      // Rensa localStorage
+      localStorage.clear();
+
+      // Logga ut
+      navigate('/login');
+    } catch (error) {
+      console.error('Error clearing all onboardings:', error);
+      alert('Kunde inte radera alla onboardings. Försök igen eller kontakta support.');
+    }
+  };
+
   // Get user info from localStorage or JWT
   const getUserInfo = () => {
     const accessToken = localStorage.getItem('accessToken');
@@ -163,6 +213,18 @@ export default function Header({ onPanelToggle }) {
                 </button>
               )}
               <hr className="my-1 border-brand-200" />
+              <button
+                onClick={() => {
+                  setShowUserMenu(false);
+                  handleClearAll();
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Avsluta (rensar)
+              </button>
               <button
                 onClick={handleLogout}
                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"

@@ -2506,6 +2506,103 @@
 \end{frame}
 
 
+% NYTT 2025-11-22: localStorage vs Backend - Data Persistence Strategy
+\begin{frame}[label=localstorage-strategy]
+  \frametitle{Data Persistence: localStorage vs Backend (Uppdaterad 2025-11-22)}
+
+  \footnotesize
+
+  \begin{alertblock}{Arkitektonisk Princip}
+    \tiny \textbf{Backend är Source of Truth} – localStorage används endast som cache/draft buffer
+  \end{alertblock}
+
+  \vspace{0.3cm}
+
+  \textbf{localStorage SKA lagra (user-scoped):}\\
+  \begin{itemize}
+    \tiny
+    \item \textbf{Session tokens:} \texttt{accessToken}, \texttt{refreshToken} (JWT authentication)
+    \item \textbf{Draft changes:} \texttt{onboarding-\{userId\}-draft-steg2} (temporära formulärändringar)
+    \item \textbf{UI preferences:} \texttt{sidebar-collapsed}, \texttt{theme} (användarinställningar)
+    \item \textbf{Performance cache:} \texttt{cache-companies-\{userId\}} (kopia av backend-data, TTL 5-10 min)
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{localStorage SKA INTE lagra:}\\
+  \begin{itemize}
+    \tiny
+    \item \textcolor{red}{❌} Source of truth för onboarding-data (Backend äger: \texttt{data/\{user\_id\}/\{orgnr\}/})
+    \item \textcolor{red}{❌} PII utan kryptering (personnummer, företagsdata → Backend)
+    \item \textcolor{red}{❌} Permanent företagsdata (Backend JSON-filer eller PostgreSQL)
+    \item \textcolor{red}{❌} Multi-device synkad data (Backend sync via GET /resume)
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{Dataflöde (ny arkitektur):}\\
+  \begin{enumerate}
+    \tiny
+    \item \textbf{User fyller formulär} → onChange sparar till localStorage (draft)
+    \item \textbf{User klickar "Nästa"} → POST till backend → Backend sparar JSON → localStorage draft rensas
+    \item \textbf{User loggar ut} → localStorage: tokens behålls, draft kan finnas kvar
+    \item \textbf{User loggar in igen} → GET /api/onboarding/list → Backend returnerar företag → Resume-dialog
+    \item \textbf{User klickar "Fortsätt"} → GET /api/onboarding/resume/\{orgnr\} → Backend läser JSON → Frontend populerar formulär
+  \end{enumerate}
+
+  \vspace{0.3cm}
+
+  \begin{block}{Multi-Device Support}
+    \tiny Med backend som source of truth kan användare börja på mobil, fortsätta på desktop.\\
+    localStorage används endast för snabbare laddning (cache), EJ för persistent lagring.
+  \end{block}
+\end{frame}
+
+
+% NYTT 2025-11-22: Session Management - Resume Functionality
+\begin{frame}[label=session-resume]
+  \frametitle{Session Management: Resume \& Multi-Company (Ny 2025-11-22)}
+
+  \footnotesize
+
+  \textbf{Vid login: Frontend frågar backend om pågående onboardings}\\
+  \tiny GET /api/onboarding/list → \texttt{\{ companies: [\{orgnr, companyName, currentStep, progress\}] \}}
+
+  \vspace{0.3cm}
+
+  \textbf{Resume-Dialog (OnboardingResumeDialog.jsx):}\\
+  \begin{itemize}
+    \tiny
+    \item \textbf{Fortsätt-knapp:} Laddar företagsdata (GET /resume/\{orgnr\}) → Navigerar till \texttt{currentStep}
+    \item \textbf{Radera-knapp:} DELETE /api/onboarding/delete/\{orgnr\} → Tar bort från lista
+    \item \textbf{Ny Onboarding Session:} Stänger dialog → Navigerar till Uppdragsval (tom)
+  \end{itemize}
+
+  \vspace{0.3cm}
+
+  \textbf{Exempel-scenario (konsult med flera kunder):}\\
+  \begin{enumerate}
+    \tiny
+    \item Login → Resume-dialog visar: "Övningsbolag1 AB" (45\%), "Övningsbolag2 AB" (20\%)
+    \item Klickar "Fortsätt" för Övningsbolag1 → Alla fält förifyllda från backend
+    \item Arbetar till lunch → Klickar "Logga ut" (data sparad i backend)
+    \item Login igen → Samma dialog, klickar "Ny Onboarding Session"
+    \item Påbörjar "Övningsbolag3 AB" → Nästa login: 3 företag i listan
+  \end{enumerate}
+
+  \vspace{0.3cm}
+
+  \textbf{Progress Calculation:}\\
+  \tiny Backend beräknar progress baserat på vilka JSON-filer som existerar:\\
+  \texttt{metadata.json (15\%) + företagsinfo1\_static\_KYC.json (30\%) + företagsinfo2\_static\_KYC.json (40\%) + övriga (15\%)}
+
+  \vspace{0.3cm}
+
+  \begin{alertblock}{Header-knapp: "Avsluta (rensar)"}
+    \tiny I profil-dropdown: Raderar ALLA pågående onboardings (loop DELETE), rensar localStorage, loggar ut.\\
+    Används när användare vill starta helt om från början.
+  \end{alertblock}
+\end{frame}
 
 
 % IDENTITETSKONTROLL OCH DOKUMENTATION
