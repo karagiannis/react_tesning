@@ -62,9 +62,19 @@ export default function App() {
   const location = useLocation();
   const [activePanel, setActivePanel] = useState(null);
   
-  // Persistent login state via localStorage
+  // Persistent login state based on valid JWT token
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem('isLoggedIn') === 'true';
+    const token = localStorage.getItem('accessToken');
+    if (!token) return false;
+    
+    // Check if token is expired
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expirationTime = payload.exp * 1000; // Convert to milliseconds
+      return Date.now() < expirationTime;
+    } catch (e) {
+      return false; // Invalid token format
+    }
   });
   
   // Demo mode - doesn't require real login
@@ -81,41 +91,6 @@ export default function App() {
     organisationsnummer: '',
     personnummer: ''
   });
-
-  // 🔧 DEV MODE: Auto-login för utveckling
-  useEffect(() => {
-    const autoLogin = async () => {
-      // Kontrollera om vi redan har en token
-      const existingToken = localStorage.getItem('jwt_token');
-      if (existingToken) {
-        console.log('🔧 DEV: JWT token finns redan');
-        return;
-      }
-
-      try {
-        // Anropa dev-login endpoint
-        const response = await fetch('http://localhost:8000/api/dev-login', {
-          method: 'POST'
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          localStorage.setItem('jwt_token', result.token);
-          localStorage.setItem('temp_orgnr', result.user.client_orgnr);
-          console.log('🔧 DEV MODE: Auto-login lyckades!', result.message);
-          console.log('   User:', result.user.user_id);
-          console.log('   Orgnr:', result.user.client_orgnr);
-        }
-      } catch (error) {
-        console.warn('⚠ Dev-login misslyckades:', error.message);
-      }
-    };
-
-    // Kör endast i development
-    if (import.meta.env.DEV) {
-      autoLogin();
-    }
-  }, []);
 
   // Validera format och anropa API automatiskt
   useEffect(() => {
@@ -144,8 +119,8 @@ export default function App() {
 
   const handleLogin = () => {
     setIsLoggedIn(true);
-    localStorage.setItem('isLoggedIn', 'true');
-    // INTE navigate direkt - checkForOngoingOnboarding() tar över
+    // Note: JWT tokens are already saved by LoginSlide
+    // checkForOngoingOnboarding() will handle navigation
   };
 
   const handleDemo = () => {
@@ -161,9 +136,35 @@ export default function App() {
     const checkForOngoingOnboarding = async () => {
       try {
         const token = localStorage.getItem('accessToken');
-        if (!token) return;
+        if (!token) {
+          console.error('No access token found, logging out');
+          setIsLoggedIn(false);
+          navigate('/login');
+          return;
+        }
+        
+        // Validate token expiration
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          const expirationTime = payload.exp * 1000;
+          if (Date.now() >= expirationTime) {
+            console.error('Token expired, logging out');
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            setIsLoggedIn(false);
+            navigate('/login');
+            return;
+          }
+        } catch (e) {
+          console.error('Invalid token format, logging out');
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          setIsLoggedIn(false);
+          navigate('/login');
+          return;
+        }
 
-        const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/api';
+        const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/tic-tac-toe-api/api';
 
         const response = await fetch(`${API_BASE}/onboarding/list`, {
           headers: {

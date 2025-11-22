@@ -35,7 +35,7 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
         throw new Error('Ingen access token hittades');
       }
 
-      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/api';
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/tic-tac-toe-api/api';
 
       const response = await fetch(`${API_BASE}/onboarding/list`, {
         headers: { 
@@ -67,7 +67,7 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
       setDeletingOrgnr(orgnr);
       
       const token = localStorage.getItem('accessToken');
-      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/api';
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/tic-tac-toe-api/api';
 
       const response = await fetch(`${API_BASE}/onboarding/delete/${orgnr}`, {
         method: 'DELETE',
@@ -99,7 +99,7 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
   const handleContinue = async (orgnr) => {
     try {
       const token = localStorage.getItem('accessToken');
-      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/api';
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/tic-tac-toe-api/api';
 
       const response = await fetch(`${API_BASE}/onboarding/resume/${orgnr}`, {
         headers: { 
