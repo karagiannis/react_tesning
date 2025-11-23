@@ -1,3 +1,10 @@
+/**
+ * MODIFIED: 2025-11-23
+ * PURPOSE: Multi-session localStorage scoping (orgnr-based isolation)
+ * CHANGES: Added activeOnboarding state, updated getStorageKey() with orgnr scoping
+ * REF: CHANGELOG_2025-11-23.md - Problem 5
+ */
+
 import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import HeroSlide from './components/Slides/HeroSlide';
@@ -61,6 +68,21 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [activePanel, setActivePanel] = useState(null);
+  
+  // 🆕 Active onboarding session state (orgnr-scoped localStorage)
+  const [activeOnboarding, setActiveOnboarding] = useState(() => {
+    const cached = localStorage.getItem('activeOnboarding');
+    return cached ? JSON.parse(cached) : null;
+  });
+  
+  // Save activeOnboarding to localStorage whenever it changes
+  useEffect(() => {
+    if (activeOnboarding) {
+      localStorage.setItem('activeOnboarding', JSON.stringify(activeOnboarding));
+    } else {
+      localStorage.removeItem('activeOnboarding');
+    }
+  }, [activeOnboarding]);
   
   // Persistent login state based on valid JWT token
   // BUT: Always force logout if explicitly on auth pages
@@ -249,15 +271,28 @@ export default function App() {
     }
   };
 
-  // 🆕 Helper: Get user-scoped localStorage key
+  // 🆕 Helper: Get user-scoped AND orgnr-scoped localStorage key
   const getStorageKey = (key) => {
     const userId = getUserIdFromToken();
-    return userId ? `onboarding-${userId}-${key}` : `onboarding-${key}`;
+    const orgnr = activeOnboarding?.orgnr;
+    
+    if (!userId) return `onboarding-${key}`;
+    if (!orgnr) return `onboarding-${userId}-${key}`;
+    
+    // Full scoping: user + orgnr + key
+    return `onboarding-${userId}-${orgnr}-${key}`;
   };
 
   // 🆕 Resume callback: Ladda data och navigera
   const handleResume = (data) => {
     console.log('📂 Resuming onboarding:', data);
+    
+    // 🆕 Set active onboarding session FIRST (needed for getStorageKey)
+    setActiveOnboarding({
+      orgnr: data.orgnr,
+      companyName: data.companyName,
+      currentStep: data.currentStep
+    });
     
     // Populate localStorage med backend-data (cache)
     localStorage.setItem(getStorageKey('orgnr'), data.orgnr);
@@ -265,7 +300,15 @@ export default function App() {
     
     // Uppdragsval data - restore all service selections
     if (data.data && data.data.services) {
+      // Save full services object (with costs etc)
       localStorage.setItem(getStorageKey('uppdragsval'), JSON.stringify(data.data.services));
+      
+      // Also save each individual service for UppdragsvalsSlide checkboxes
+      Object.entries(data.data.services).forEach(([serviceKey, serviceData]) => {
+        if (serviceData.selected) {
+          localStorage.setItem(getStorageKey(serviceKey), 'true');
+        }
+      });
     }
     // Also save selectedServices array for reference
     if (data.selectedServices) {

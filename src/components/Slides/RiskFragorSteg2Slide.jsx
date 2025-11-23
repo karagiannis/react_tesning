@@ -1,3 +1,14 @@
+/**
+ * MODIFIED: 2025-11-23
+ * PURPOSE: Multi-session localStorage scoping (orgnr-based isolation)
+ * CHANGES: Migrated to useQuestionnaireForm hook for standardized form persistence
+ * STATUS: PARTIAL - Complex legacy form, needs full refactor to use Question components
+ * REF: CHANGELOG_2025-11-23.md - Problem 5
+ * 
+ * NOTE: This slide uses legacy useLocalStorage hook. Full migration pending.
+ * TODO: Refactor to use QUESTIONNAIRE_CONFIG + Question components
+ */
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Info } from 'lucide-react';

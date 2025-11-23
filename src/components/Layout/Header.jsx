@@ -1,3 +1,11 @@
+/**
+ * MODIFIED: 2025-11-23
+ * PURPOSE: Multi-session localStorage scoping (orgnr-based isolation)
+ * CHANGES: Updated handleLogout to preserve activeOnboarding if needed
+ * NOTE: Currently clears ALL localStorage on logout - may need refinement
+ * REF: CHANGELOG_2025-11-23.md - Problem 5
+ */
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../Shared/Icon';
@@ -22,8 +30,8 @@ export default function Header({ onPanelToggle }) {
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('temp_orgnr');
     
-    // Redirect to Hero page
-    navigate('/');
+    // Force full page reload to Hero page to reset all state
+    window.location.href = '/';
   };
 
   const handleClearAll = async () => {
