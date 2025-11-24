@@ -1,10 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 
-export default function DeklarationsombudSlide({ onNext, onBack, customerData = {} }) {
-  const [hasAddedOmbud, setHasAddedOmbud] = useState(false);
+export default function DeklarationsombudSlide({ onNext, onBack }) {
+  const { companyId } = useParams();
+  
+  const QUESTIONS_CONFIG = {
+    entireForm: { type: 'object', required: false }
+  };
+
+  const { formData: savedFormData, updateQuestion, pushToServer } = useQuestionnaireForm(
+    'deklarationsombud',
+    QUESTIONS_CONFIG
+  );
+
+  const [hasAddedOmbud, setHasAddedOmbud] = useState(formData?.entireForm?.hasAddedOmbud || false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
+  const [isVerified, setIsVerified] = useState(formData?.entireForm?.isVerified || false);
   const [verificationError, setVerificationError] = useState('');
+
+  // Sync state changes
+  useEffect(() => {
+    updateQuestion('entireForm', { hasAddedOmbud, isVerified });
+  }, [hasAddedOmbud, isVerified]);
 
   // Mock byrå data (should come from config in production)
   const byraOrgNr = customerData.byraOrgNr || '556XXX-XXXX';
@@ -284,7 +302,10 @@ export default function DeklarationsombudSlide({ onNext, onBack, customerData = 
         </button>
         
         <button
-          onClick={onNext}
+          onClick={async () => {
+            await pushToServer();
+            onNext();
+          }}
           disabled={!isVerified}
           className={`px-8 py-3 rounded-box font-semibold transition-all ${
             isVerified

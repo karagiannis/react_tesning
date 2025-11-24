@@ -1,16 +1,34 @@
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 
 export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
-  const [hasReadContract, setHasReadContract] = useState(false);
+  const { companyId } = useParams();
+  
+  const QUESTIONS_CONFIG = {
+    entireForm: { type: 'object', required: false }
+  };
+
+  const { formData, updateQuestion, pushToServer } = useQuestionnaireForm(
+    'avtal',
+    QUESTIONS_CONFIG
+  );
+
+  const [hasReadContract, setHasReadContract] = useState(formData?.entireForm?.hasReadContract || false);
   const [isSigningInProgress, setIsSigningInProgress] = useState(false);
-  const [isSigned, setIsSigned] = useState(false);
-  const [signatureData, setSignatureData] = useState(null);
+  const [isSigned, setIsSigned] = useState(formData?.entireForm?.isSigned || false);
+  const [signatureData, setSignatureData] = useState(formData?.entireForm?.signatureData || null);
   
   // LaTeX template state
   const [contractTemplate, setContractTemplate] = useState(null);
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(true);
-  const [finalContractUrl, setFinalContractUrl] = useState(null);
+  const [finalContractUrl, setFinalContractUrl] = useState(formData?.entireForm?.finalContractUrl || null);
   const [isGeneratingContract, setIsGeneratingContract] = useState(false);
+
+  // Sync state changes
+  useEffect(() => {
+    updateQuestion('entireForm', { hasReadContract, isSigned, signatureData, finalContractUrl });
+  }, [hasReadContract, isSigned, signatureData, finalContractUrl]);
 
   // Fetch LaTeX template from Settings on mount
   useEffect(() => {
@@ -353,7 +371,10 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
           </button>
 
           <button
-            onClick={onNext}
+            onClick={async () => {
+              await pushToServer();
+              onNext();
+            }}
             disabled={!isSigned}
             className={`flex items-center gap-2 px-6 py-3 rounded-box transition-all font-semibold shadow-lg ${
               isSigned

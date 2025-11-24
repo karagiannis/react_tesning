@@ -1,41 +1,37 @@
 import { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Info } from 'lucide-react';
 import { searchCompanies, getCompanyByOrgNr } from '../../data/mockCompanyAutocomplete';
 import StepIndicator from '../Shared/StepIndicator';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 import { useAgreements } from '../../contexts/AgreementContext';
 import AgreementModal from '../Modals/AgreementModal';
 
-/**
- * Helper: Extract userId from JWT token payload
- */
-function getUserIdFromToken() {
-  const token = localStorage.getItem('accessToken');
-  if (!token) return null;
-  
-  try {
-    const payload = token.split('.')[1];
-    const decoded = JSON.parse(atob(payload));
-    return decoded.sub || decoded.user_id || decoded.email || null;
-  } catch (e) {
-    console.error('Failed to decode JWT token:', e);
-    return null;
-  }
-}
-
-/**
- * Helper: Get user-scoped localStorage key
- */
-function getStorageKey(key) {
-  const userId = getUserIdFromToken();
-  return userId ? `onboarding-${userId}-${key}` : `onboarding-${key}`;
-}
+// BRUTE FORCE CONFIG: Single question that stores entire complex formData object
+const QUESTIONS_CONFIG = {
+  entireForm: { type: 'object', required: false }
+};
 
 export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange }) {
+  const { companyId } = useParams();
+  const navigate = useNavigate();
   const { hasAnyAgreement } = useAgreements();
   const [showAgreementModal, setShowAgreementModal] = useState(false);
   
-  const [formData, setFormData] = useLocalStorage('onboarding-wizard-steg1', {
+  // Use new hook with company_id from URL
+  const {
+    formData: hookFormData,
+    updateQuestion,
+    isLoading: syncLoading,
+    syncStatus,
+    pushToServer,
+  } = useQuestionnaireForm(
+    'riskfragor_steg1',
+    QUESTIONS_CONFIG
+  );
+
+  // Extract actual form data from hook (brute force: everything in entireForm.selected)
+  const formData = hookFormData.entireForm?.selected || {
     affarsIde: '',
     kundTyper: {
       privatpersoner: false,
@@ -49,25 +45,16 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     organisationsnummer: '',
     personnummer: '',
     isPEP: false,
-  });
+  };
 
-  // NEW: Load company info from Uppdragsval (2025-11-21) - USER-SCOPED
-  useEffect(() => {
-    const savedOrgnr = localStorage.getItem(getStorageKey('orgnr'));
-    const savedCompanyName = localStorage.getItem(getStorageKey('companyName'));
-    
-    if (savedOrgnr && !formData.organisationsnummer) {
-      setFormData(prev => ({
-        ...prev,
-        organisationsnummer: savedOrgnr,
-        foretagsnamn: savedCompanyName || ''
-      }));
-      setCompanyQuery(savedCompanyName || '');
-    }
-  }, []); // Run once on mount
+  // Setter that updates the brute force field
+  const setFormData = (updater) => {
+    const newData = typeof updater === 'function' ? updater(formData) : updater;
+    updateQuestion('entireForm', newData);
+  };
 
   // Autocomplete state
-  const [companyQuery, setCompanyQuery] = useState('');
+  const [companyQuery, setCompanyQuery] = useState(formData.foretagsnamn || '');
   const [companySuggestions, setCompanySuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(null);
@@ -186,6 +173,18 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
         <h1 className="text-page-title text-brand-900 mb-4">
           Frågor som stödjer riskbedömning
         </h1>
+        
+        {/* Sync Status Indicator */}
+        {syncLoading && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-box">
+            <p className="text-sm text-blue-700">🔄 Synkroniserar data...</p>
+          </div>
+        )}
+        {syncStatus === 'conflict' && (
+          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-box">
+            <p className="text-sm text-amber-700">⚠️ Data har uppdaterats från servern</p>
+          </div>
+        )}
         
         {/* Step Indicator */}
         <StepIndicator currentStep={1} completedSteps={0} />
@@ -380,57 +379,27 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             if (!isFormValid()) return;
             
             try {
-              // API-anrop till backend: Skapa företagsmapp
-              const token = localStorage.getItem('accessToken');
-              const onboardingId = localStorage.getItem('onboardingId');
+              // Save to server
+              const success = await pushToServer();
               
-              // Build URL with onboardingId if available
-              let url = 'https://celestial.se/tic-tac-toe-api/api/onboarding/risk-assessment';
-              if (onboardingId) {
-                url += `?onboarding_id=${onboardingId}`;
-              }
+              // Save to server
+              const success = await pushToServer();
               
-              const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  business_idea: formData.affarsIde,
-                  company_name: formData.foretagsnamn,
-                  orgnr: formData.organisationsnummer,
-                  customer_types: Object.entries(formData.kundTyper)
-                    .filter(([_, val]) => val)
-                    .map(([key]) => key === 'privatpersoner' ? 'Privatpersoner' : key === 'foretag' ? 'Företag' : 'Offentlig sektor'),
-                  foreign_partners: formData.utlandskaPartners || null,
-                  main_suppliers: formData.storaLeverantorer || null,
-                  recent_changes: formData.verksamhetAndrad || null,
-                  personal_number: formData.personnummer,
-                  is_pep: formData.isPEP
-                }),
-              });
-              
-              if (!response.ok) {
-                const error = await response.json();
-                console.error('❌ Risk assessment failed:', error);
-                alert('Kunde inte spara riskfrågor: ' + (error.detail || 'Okänt fel'));
-                return;
-              }
-              
-              const data = await response.json();
-              console.log('✅ Risk assessment saved:', data);
-              console.log('📁 Company folder created:', data.company_dir);
-              
-              // Fortsätt till nästa steg
-              if (formData.isPEP) {
-                onSkipPEP();
+              if (success) {
+                console.log('✅ Riskfrågor Steg 1 saved');
+                
+                // Pass companyId to parent callback
+                if (formData.isPEP) {
+                  onSkipPEP(companyId);
+                } else {
+                  onNext(companyId);
+                }
               } else {
-                onNext();
+                alert('⚠️ Kunde inte spara till server');
               }
             } catch (err) {
-              console.error('❌ Network error:', err);
-              alert('Nätverksfel: ' + err.message);
+              console.error('❌ Error saving:', err);
+              alert('Fel vid sparande: ' + err.message);
             }
           }}
           disabled={!isFormValid()}

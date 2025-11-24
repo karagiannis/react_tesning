@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 
 /**
  * DocumentSetupSlide - Steg 3: Digital dokumenthantering
@@ -24,10 +25,26 @@ import { useNavigate } from 'react-router-dom';
 
 const DocumentSetupSlide = () => {
   const navigate = useNavigate();
-  const [selectedProvider, setSelectedProvider] = useState('dropbox'); // 'dropbox' | 'gdrive' | 'onedrive'
-  const [authStatus, setAuthStatus] = useState('not_started'); // 'not_started' | 'authenticating' | 'success' | 'error'
-  const [folderPath, setFolderPath] = useState('');
-  const [testStatus, setTestStatus] = useState('pending'); // 'pending' | 'testing' | 'success' | 'failed'
+  const { companyId } = useParams();
+  
+  const QUESTIONS_CONFIG = {
+    entireForm: { type: 'object', required: false }
+  };
+
+  const { formData, updateQuestion, pushToServer } = useQuestionnaireForm(
+    'dokumentsetup',
+    QUESTIONS_CONFIG
+  );
+
+  const [selectedProvider, setSelectedProvider] = useState(formData?.entireForm?.selectedProvider || 'dropbox');
+  const [authStatus, setAuthStatus] = useState(formData?.entireForm?.authStatus || 'not_started');
+  const [folderPath, setFolderPath] = useState(formData?.entireForm?.folderPath || '');
+  const [testStatus, setTestStatus] = useState(formData?.entireForm?.testStatus || 'pending');
+
+  // Sync state changes
+  useEffect(() => {
+    updateQuestion('entireForm', { selectedProvider, authStatus, folderPath, testStatus });
+  }, [selectedProvider, authStatus, folderPath, testStatus]);
 
   // Simulera att vi redan har företagsnamn från tidigare steg
   const companyName = "Acme AB"; // TODO: Hämta från formData state
@@ -166,14 +183,14 @@ const DocumentSetupSlide = () => {
     }
   };
 
-  const handleContinue = () => {
-    // Navigate to next slide (e.g., ongoing routines)
-    navigate('/rutiner'); // TODO: Skapa denna slide
+  const handleContinue = async () => {
+    await pushToServer();
+    navigate('/rutiner');
   };
 
-  const handleSkip = () => {
-    // Allow skip but warn user
+  const handleSkip = async () => {
     if (window.confirm('Är du säker på att du vill hoppa över detta steg? Du kan alltid konfigurera dokumenthantering senare.')) {
+      await pushToServer();
       navigate('/rutiner');
     }
   };

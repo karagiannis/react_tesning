@@ -1,12 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 
-export default function DocumentDeliverySlide({ onNext, onBack, customerData = {} }) {
-  const [email, setEmail] = useState(customerData.email || '');
-  const [confirmEmail, setConfirmEmail] = useState('');
+export default function DocumentDeliverySlide({ onNext, onBack }) {
+  const { companyId } = useParams();
+  
+  const QUESTIONS_CONFIG = {
+    entireForm: { type: 'object', required: false }
+  };
+
+  const { formData: savedFormData, updateQuestion, pushToServer } = useQuestionnaireForm(
+    'dokumentleverans',
+    QUESTIONS_CONFIG
+  );
+
+  const [email, setEmail] = useState(formData?.entireForm?.email || customerData.email || '');
+  const [confirmEmail, setConfirmEmail] = useState(formData?.entireForm?.confirmEmail || '');
   const [isSending, setIsSending] = useState(false);
-  const [isSent, setIsSent] = useState(false);
+  const [isSent, setIsSent] = useState(formData?.entireForm?.isSent || false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Sync state changes
+  useEffect(() => {
+    updateQuestion('entireForm', { email, confirmEmail, isSent });
+  }, [email, confirmEmail, isSent]);
 
   // Mock customer data
   const mockCustomerData = {
@@ -85,8 +103,9 @@ export default function DocumentDeliverySlide({ onNext, onBack, customerData = {
     }, 2500);
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (isSent) {
+      await pushToServer();
       onNext();
     }
   };

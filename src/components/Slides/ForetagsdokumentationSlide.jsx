@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import Icon from '../Shared/Icon';
 import FileDropZone from '../Shared/FileDropZone';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 
 // Simple inline SVG icons for missing icons
 const UploadIcon = ({ className }) => (
@@ -40,12 +42,23 @@ const Upload = ({ className }) => (
 );
 
 export default function ForetagsdokumentationSlide({ onNext, onBack }) {
-  const [formData, setFormData] = useState({
+  const { companyId } = useParams();
+  
+  const QUESTIONS_CONFIG = {
+    entireForm: { type: 'object', required: false }
+  };
+
+  const { formData: savedFormData, updateQuestion, pushToServer } = useQuestionnaireForm(
+    'foretagsdokumentation',
+    QUESTIONS_CONFIG
+  );
+
+  const [formData, setFormData] = useState(savedFormData?.entireForm?.formData || {
     registreringsbevis: null,
     arsredovisning: null,
   });
 
-  const [uploadStatus, setUploadStatus] = useState({
+  const [uploadStatus, setUploadStatus] = useState(savedFormData?.entireForm?.uploadStatus || {
     registreringsbevis: '',
     arsredovisning: '',
   });
@@ -55,9 +68,56 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
     arsredovisning: false,
   });
 
-  const [parsedData, setParsedData] = useState({
-    registreringsbevis: null, // Will contain org.nr, namn, styrelse, etc.
+  const [parsedData, setParsedData] = useState(savedFormData?.entireForm?.parsedData || {
+    registreringsbevis: null,
   });
+  
+  const [uploadedFiles, setUploadedFiles] = useState(savedFormData?.entireForm?.uploadedFiles || {
+    registreringsbevis: null,
+    arsredovisning: null,
+  });
+  
+  const [isUploading, setIsUploading] = useState({
+    registreringsbevis: false,
+    arsredovisning: false,
+  });
+
+  // Sync to questionnaire hook
+  useEffect(() => {
+    updateQuestion('entireForm', { formData, uploadStatus, parsedData, uploadedFiles });
+  }, [formData, uploadStatus, parsedData, uploadedFiles]);
+
+  // Fetch existing uploads from metadata.json
+  useEffect(() => {
+    const fetchExistingUploads = async () => {
+      if (!orgnr) return;
+      
+      try {
+        const token = localStorage.getItem('accessToken');
+        const response = await fetch(
+          `https://celestial.se/tic-tac-toe-api/api/onboarding/${orgnr}/roaring-data`,
+          {
+            headers: { 'Authorization': `Bearer ${token}` },
+          }
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Check if metadata has uploaded_documents section
+          if (data.uploaded_documents) {
+            setUploadedFiles({
+              registreringsbevis: data.uploaded_documents.registreringsbevis || null,
+              arsredovisning: data.uploaded_documents.arsredovisning || null,
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('⚠️ Failed to fetch existing uploads:', err);
+      }
+    };
+    
+    fetchExistingUploads();
+  }, [orgnr]);
 
   const handleFileSelect = (field, e) => {
     const file = e.target.files[0];
@@ -66,7 +126,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
     }
   };
 
-  const handleFile = (field, file) => {
+  const handleFile = async (field, file) => {
     // Validera filtyp (endast PDF)
     const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
     
@@ -91,12 +151,60 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
     setFormData(prev => ({ ...prev, [field]: file }));
     setUploadStatus(prev => ({
       ...prev,
-      [field]: `✅ Fil uppladdad: ${file.name}`
+      [field]: '🔄 Laddar upp...'
     }));
+    setIsUploading(prev => ({ ...prev, [field]: true }));
 
-    // Om det är registreringsbevis, simulera parsing (i produktion: OCR/PDF-parsing)
-    if (field === 'registreringsbevis') {
-      simulateParsing();
+    // Upload to backend
+    try {
+      const token = localStorage.getItem('accessToken');
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      formDataUpload.append('document_type', field);
+      
+      const response = await fetch(
+        `https://celestial.se/tic-tac-toe-api/api/onboarding/${orgnr}/upload-document`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: formDataUpload,
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error('Uppladdning misslyckades');
+      }
+      
+      const result = await response.json();
+      
+      setUploadedFiles(prev => ({
+        ...prev,
+        [field]: {
+          filename: result.filename,
+          size: result.file_size,
+          uploaded_at: result.uploaded_at,
+        }
+      }));
+      
+      setUploadStatus(prev => ({
+        ...prev,
+        [field]: `✅ Fil uppladdad: ${result.filename}`
+      }));
+      
+      // Om det är registreringsbevis, simulera parsing (i produktion: OCR/PDF-parsing)
+      if (field === 'registreringsbevis') {
+        simulateParsing();
+      }
+    } catch (err) {
+      console.error('❌ Upload error:', err);
+      setUploadStatus(prev => ({
+        ...prev,
+        [field]: '❌ Uppladdning misslyckades: ' + err.message
+      }));
+    } finally {
+      setIsUploading(prev => ({ ...prev, [field]: false }));
     }
   };
 
@@ -147,10 +255,9 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validera att registreringsbevis är uppladdad
     if (!formData.registreringsbevis) {
       setUploadStatus(prev => ({
         ...prev,
@@ -159,7 +266,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
       return;
     }
 
-    // Skicka data vidare
+    await pushToServer();
     onNext({
       ...formData,
       parsedData: parsedData.registreringsbevis,
@@ -219,7 +326,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
               Ladda upp aktuellt registreringsbevis (max 3 månader gammalt). Detta verifierar företagets existens och ger oss styrelseuppgifter.
             </p>
 
-            {!formData.registreringsbevis ? (
+            {!formData.registreringsbevis && !uploadedFiles.registreringsbevis ? (
               <FileDropZone
                 accept=".pdf"
                 maxSize="10 MB"
@@ -231,7 +338,21 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
                 inputId="registreringsbevis-upload"
                 variant="compact"
               />
-            ) : (
+            ) : uploadedFiles.registreringsbevis ? (
+              <div className="border-2 border-green-200 bg-green-50 rounded-box p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <CheckCircleIcon className="w-8 h-8 text-green-600" />
+                    <div>
+                      <p className="font-medium text-gray-900">{uploadedFiles.registreringsbevis.filename}</p>
+                      <p className="text-xs text-gray-500">
+                        {(uploadedFiles.registreringsbevis.size / 1024).toFixed(0)} KB • Uppladdad {new Date(uploadedFiles.registreringsbevis.uploaded_at).toLocaleString('sv-SE')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : formData.registreringsbevis ? (
               <div className="border-2 border-green-200 bg-green-50 rounded-box p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -304,7 +425,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
               Om tillgänglig, hjälper detta oss bedöma företagets ekonomiska hälsa.
             </p>
 
-            {!formData.arsredovisning ? (
+            {!formData.arsredovisning && !uploadedFiles.arsredovisning ? (
               <FileDropZone
                 accept=".pdf"
                 maxSize="10 MB"
@@ -316,7 +437,21 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
                 inputId="arsredovisning-upload"
                 variant="compact"
               />
-            ) : (
+            ) : uploadedFiles.arsredovisning ? (
+              <div className="border-2 border-green-200 bg-green-50 rounded-box p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <CheckCircleIcon className="w-6 h-6 text-green-600" />
+                    <div>
+                      <p className="font-medium text-gray-900">{uploadedFiles.arsredovisning.filename}</p>
+                      <p className="text-xs text-gray-500">
+                        {(uploadedFiles.arsredovisning.size / 1024).toFixed(0)} KB • Uppladdad {new Date(uploadedFiles.arsredovisning.uploaded_at).toLocaleString('sv-SE')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : formData.arsredovisning ? (
               <div className="border-2 border-gray-200 bg-gray-50 rounded-box p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">

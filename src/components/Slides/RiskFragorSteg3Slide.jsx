@@ -1,15 +1,32 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Info, ChevronRight } from 'lucide-react';
 import { getLegalTextsForQuestion, legalTexts } from '../../data/legalTexts';
 import StepIndicator from '../Shared/StepIndicator';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
+
+// BRUTE FORCE CONFIG
+const QUESTIONS_CONFIG = {
+  entireForm: { type: 'object', required: false }
+};
 
 export default function RiskFragorSteg3Slide({ onNext }) {
+  const { companyId } = useParams();
   const navigate = useNavigate();
   const [expandedInfo, setExpandedInfo] = useState({});
   
-  const [formData, setFormData] = useLocalStorage('onboarding-wizard-steg3', {
+  const {
+    formData: hookFormData,
+    updateQuestion,
+    isLoading: syncLoading,
+    syncStatus,
+    pushToServer,
+  } = useQuestionnaireForm(
+    'riskfragor_steg3',
+    QUESTIONS_CONFIG
+  );
+
+  const formData = hookFormData.entireForm?.selected || {
     betalmetoder: {
       bankoverföring: false,
       kortbetalning: false,
@@ -23,7 +40,12 @@ export default function RiskFragorSteg3Slide({ onNext }) {
     tredjepartsbetalningar: '',
     utlandskaOverforingar: '',
     utlandskaLander: '',
-  });
+  };
+
+  const setFormData = (updater) => {
+    const newData = typeof updater === 'function' ? updater(formData) : updater;
+    updateQuestion('entireForm', newData);
+  };
 
   const handleCheckboxChange = (field, checked) => {
     setFormData(prev => ({
@@ -44,6 +66,9 @@ export default function RiskFragorSteg3Slide({ onNext }) {
   };
 
   const handleNext = async () => {
+    // Push to server with version control
+    await pushToServer();
+    
     if (onNext) {
       onNext({ steg3: formData });
     }

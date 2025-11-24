@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
+import { searchCompanies } from '../../data/companySearchAPI';
 
 /**
  * Content Slide 1: Uppdragsval och introduktion
@@ -16,34 +18,46 @@ import { ChevronDown, ChevronUp, Info } from 'lucide-react';
  * - Sparar och laddar tillbaka val från localStorage (USER-SCOPED)
  */
 
-/**
- * Helper: Extract userId from JWT token payload
- * JWT format: header.payload.signature (base64url encoded)
- */
-function getUserIdFromToken() {
-  const token = localStorage.getItem('accessToken');
-  if (!token) return null;
-  
-  try {
-    const payload = token.split('.')[1]; // Get payload part
-    const decoded = JSON.parse(atob(payload)); // Decode base64
-    return decoded.sub || decoded.user_id || decoded.email || null;
-  } catch (e) {
-    console.error('Failed to decode JWT token:', e);
-    return null;
-  }
-}
-
-/**
- * Helper: Get user-scoped localStorage key
- * Format: onboarding-{userId}-{key}
- */
-function getStorageKey(key) {
-  const userId = getUserIdFromToken();
-  return userId ? `onboarding-${userId}-${key}` : `onboarding-${key}`;
-}
+// Question configuration for useQuestionnaireForm
+const QUESTIONS_CONFIG = {
+  services: { type: 'object', required: true },
+  orgnr: { type: 'text', required: true, pattern: /^\d{6}-?\d{4}$/ },
+  companyName: { type: 'text', required: false },
+};
 
 export default function UppdragsvalsSlide({ onNext }) {
+  // Get orgnr from localStorage (may have been set in previous session)
+  const getOrgnr = () => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return null;
+    try {
+      const payload = token.split('.')[1];
+      const decoded = JSON.parse(atob(payload));
+      const userId = decoded.sub || decoded.user_id || decoded.email;
+      return localStorage.getItem(`onboarding-${userId}-orgnr`) || null;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const orgnrFromStorage = getOrgnr();
+
+  // Use new questionnaire hook with decision tree
+  const {
+    formData,
+    updateQuestion,
+    isValid,
+    errors,
+    isLoading: syncLoading,
+    syncStatus,
+    pushToServer,
+  } = useQuestionnaireForm(
+    'uppdragsval',
+    QUESTIONS_CONFIG,
+    orgnrFromStorage, // Will be null on first visit
+    null // userId extracted inside hook
+  );
+
   // Expandable sections state
   const [expandedSections, setExpandedSections] = useState({
     intro: false,
@@ -51,50 +65,47 @@ export default function UppdragsvalsSlide({ onNext }) {
     orgnr: false,
   });
 
-  // Service selections - load from localStorage if available (USER-SCOPED)
-  const [services, setServices] = useState(() => {
-    const saved = localStorage.getItem(getStorageKey('uppdragsval'));
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error('Failed to parse saved services:', e);
-      }
-    }
-    return {
-      lopandeBokforing: false,
-      arsbokslut: false,
-      deklarationer: false,
-      loneadministration: false,
-      ekonomiskRadgivning: false,
-      foretagsregistrering: false,
-      finansiellRapportering: false,
-      foretagsforsaljning: false,
-      annat: '',
-    };
-  });
-
-  // NEW: Organisationsnummer state (moved from Riskfrågor steg 1) - USER-SCOPED
-  const [orgnr, setOrgnr] = useState(() => {
-    return localStorage.getItem(getStorageKey('orgnr')) || '';
-  });
-  const [companyName, setCompanyName] = useState(() => {
-    return localStorage.getItem(getStorageKey('companyName')) || '';
-  });
-
-  // Save to localStorage whenever services change (USER-SCOPED)
-  useEffect(() => {
-    localStorage.setItem(getStorageKey('uppdragsval'), JSON.stringify(services));
-  }, [services]);
-
-  // NEW: Save orgnr and companyName to localStorage (USER-SCOPED)
-  useEffect(() => {
-    if (orgnr) localStorage.setItem(getStorageKey('orgnr'), orgnr);
-    if (companyName) localStorage.setItem(getStorageKey('companyName'), companyName);
-  }, [orgnr, companyName]);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Autocomplete state
+  const [companyQuery, setCompanyQuery] = useState(companyName || '');
+  const [companySuggestions, setCompanySuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const autocompleteRef = useRef(null);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Sync companyQuery with formData
+  useEffect(() => {
+    setCompanyQuery(companyName || '');
+  }, [companyName]);
+
+  // Initialize services from formData or defaults
+  const services = formData.services?.selected || {
+    lopandeBokforing: false,
+    arsbokslut: false,
+    deklarationer: false,
+    loneadministration: false,
+    ekonomiskRadgivning: false,
+    foretagsregistrering: false,
+    finansiellRapportering: false,
+    foretagsforsaljning: false,
+    annat: '',
+  };
+
+  const orgnr = formData.orgnr?.selected || '';
+  const companyName = formData.companyName?.selected || '';
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
@@ -104,10 +115,52 @@ export default function UppdragsvalsSlide({ onNext }) {
   };
 
   const handleServiceChange = (service, value) => {
-    setServices(prev => ({
-      ...prev,
-      [service]: value
-    }));
+    const updatedServices = { ...services, [service]: value };
+    updateQuestion('services', updatedServices);
+  };
+
+  const handleOrgnrChange = (value) => {
+    updateQuestion('orgnr', value);
+  };
+
+  const handleCompanyNameChange = (value) => {
+    updateQuestion('companyName', value);
+  };
+
+  const handleCompanySearch = async (query) => {
+    setCompanyQuery(query);
+    
+    if (query.trim() === '') {
+      setCompanySuggestions([]);
+      setShowSuggestions(false);
+      updateQuestion('companyName', '');
+      updateQuestion('orgnr', '');
+      return;
+    }
+    
+    if (query.length >= 2) {
+      setSearchLoading(true);
+      try {
+        const results = await searchCompanies(query, 10);
+        setCompanySuggestions(results);
+        setShowSuggestions(true);
+      } catch (error) {
+        console.error('Company search failed:', error);
+        setCompanySuggestions([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    } else {
+      setCompanySuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleCompanySelect = (company) => {
+    setCompanyQuery(company.name);
+    updateQuestion('companyName', company.name);
+    updateQuestion('orgnr', company.orgnr);
+    setShowSuggestions(false);
   };
 
   const handleSubmit = async () => {
@@ -121,9 +174,9 @@ export default function UppdragsvalsSlide({ onNext }) {
       return;
     }
 
-    // NEW: Validate organisationsnummer format
-    if (!orgnr || !orgnr.match(/^\d{6}-?\d{4}$/)) {
-      setError('Vänligen ange ett giltigt organisationsnummer (format: NNNNNN-NNNN)');
+    // Hook validation for orgnr
+    if (!isValid) {
+      setError(errors.orgnr || 'Vänligen fyll i alla obligatoriska fält');
       return;
     }
 
@@ -131,14 +184,17 @@ export default function UppdragsvalsSlide({ onNext }) {
     setError(null);
 
     try {
-      // Get JWT token from localStorage
+      // Push to server with version control
+      await pushToServer();
+
+      // Get JWT token for legacy API call
       const token = localStorage.getItem('accessToken');
       
-      // NEW: Include orgnr in request body
+      // Create onboarding with legacy API
       const requestBody = {
         ...services,
-        orgnr: orgnr.replace('-', ''), // Send without dash (backend will add it)
-        companyName: companyName || '', // Optional, may be from autocomplete
+        orgnr: orgnr.replace('-', ''),
+        companyName: companyName || '',
       };
       
       const response = await fetch('https://celestial.se/tic-tac-toe-api/api/onboarding/uppdrag', {
@@ -185,6 +241,28 @@ export default function UppdragsvalsSlide({ onNext }) {
         <p className="text-lg text-gray-600">
           Vilka tjänster behöver ditt företag? Vi skapar ett skräddarsytt förslag baserat på dina val.
         </p>
+        
+        {/* Sync Status Indicator */}
+        {syncLoading && (
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-box">
+            <p className="text-sm text-blue-700">🔄 Synkroniserar data...</p>
+          </div>
+        )}
+        {syncStatus === 'conflict' && (
+          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-box">
+            <p className="text-sm text-amber-700">⚠️ Data har uppdaterats från servern (nyare version)</p>
+          </div>
+        )}
+        {syncStatus === 'restored' && (
+          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-box">
+            <p className="text-sm text-green-700">♻️ Data återställd från servern</p>
+          </div>
+        )}
+        {syncStatus === 'offline' && (
+          <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-box">
+            <p className="text-sm text-gray-700">📴 Arbetar offline – data sparas lokalt</p>
+          </div>
+        )}
       </div>
 
       {/* Section 1: Service Selection (FIRST - Customer-centric!) */}
@@ -263,20 +341,52 @@ export default function UppdragsvalsSlide({ onNext }) {
               Ange ditt företags organisationsnummer för att vi ska kunna hämta företagsdata från offentliga register.
             </p>
 
-            {/* Company name search (future: autocomplete) */}
-            <div className="ml-11 mb-4">
+            {/* Company name search (autocomplete from Bolagsverket) */}
+            <div className="ml-11 mb-4" ref={autocompleteRef}>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sök företagsnamn (valfritt):
+                Sök företagsnamn: <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                placeholder="Börja skriva företagsnamn..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={companyQuery}
+                  onChange={(e) => handleCompanySearch(e.target.value)}
+                  placeholder="Börja skriva företagsnamn..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                  autoComplete="off"
+                />
+                {searchLoading && (
+                  <div className="absolute right-3 top-2.5">
+                    <div className="animate-spin h-5 w-5 border-2 border-brand-500 border-t-transparent rounded-full"></div>
+                  </div>
+                )}
+                
+                {/* Autocomplete suggestions */}
+                {showSuggestions && companySuggestions.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-box shadow-lg max-h-60 overflow-y-auto">
+                    {companySuggestions.map((company, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleCompanySelect(company)}
+                        className="w-full text-left px-4 py-3 hover:bg-brand-50 border-b border-gray-100 last:border-b-0 transition-colors"
+                      >
+                        <div className="font-medium text-gray-900">{company.name}</div>
+                        <div className="text-sm text-gray-600 mt-0.5">
+                          {company.orgnr} • {company.city || 'Okänd stad'} • {company.org_form}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                
+                {showSuggestions && companySuggestions.length === 0 && !searchLoading && companyQuery.length >= 2 && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-box shadow-lg p-4 text-center text-gray-500">
+                    Inga företag hittades
+                  </div>
+                )}
+              </div>
               <p className="text-sm text-gray-500 mt-1">
-                Autocomplete kommer att implementeras i Phase 2 (Proper Solution)
+                ✅ Söker i 2.9 miljoner företag från Bolagsverket (uppdateras veckovis)
               </p>
             </div>
 
@@ -288,14 +398,22 @@ export default function UppdragsvalsSlide({ onNext }) {
               <input
                 type="text"
                 value={orgnr}
-                onChange={(e) => setOrgnr(e.target.value)}
+                onChange={(e) => handleOrgnrChange(e.target.value)}
                 placeholder="NNNNNN-NNNN"
                 maxLength={11}
-                className="w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                readOnly={companyName !== ''}
+                className={`w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500 ${
+                  companyName !== '' ? 'bg-gray-100 cursor-not-allowed' : ''
+                }`}
               />
               <p className="text-sm text-gray-500 mt-1">
-                Format: 556903-8671 (bindestreck valfritt)
+                {companyName !== '' 
+                  ? '✅ Fylls i automatiskt från valt företag' 
+                  : 'Format: 556903-8671 (bindestreck valfritt)'}
               </p>
+              {errors.orgnr && (
+                <p className="text-sm text-red-500 mt-1">{errors.orgnr}</p>
+              )}
             </div>
           </div>
 

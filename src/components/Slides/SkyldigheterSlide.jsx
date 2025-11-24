@@ -1,16 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { legalTexts } from '../../data/legalTexts';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 
 export default function SkyldigheterSlide({ onNext, onBack }) {
-  const [acknowledged, setAcknowledged] = useState(false);
+  const { companyId } = useParams();
+  
+  const QUESTIONS_CONFIG = {
+    entireForm: { type: 'object', required: false }
+  };
+
+  const { formData: savedFormData, updateQuestion, pushToServer } = useQuestionnaireForm(
+    'skyldigheter',
+    QUESTIONS_CONFIG
+  );
+
+  // Load from formData or use defaults
+  const [acknowledged, setAcknowledged] = useState(formData?.entireForm?.acknowledged || false);
   const [showComplianceModal, setShowComplianceModal] = useState(false);
-  const [complianceChecks, setComplianceChecks] = useState({
-    kontanter: false,
-    vinstmarginal: false,
-    betalningUtanFaktura: false,
-    fakturaSpecifikation: false,
-    agarlån: false
-  });
+  const [complianceChecks, setComplianceChecks] = useState(
+    formData?.entireForm?.complianceChecks || {
+      kontanter: false,
+      vinstmarginal: false,
+      betalningUtanFaktura: false,
+      fakturaSpecifikation: false,
+      agarlån: false
+    }
+  );
+
+  // Sync state changes to formData
+  useEffect(() => {
+    updateQuestion('entireForm', { acknowledged, complianceChecks });
+  }, [acknowledged, complianceChecks]);
 
   // Check if all compliance items are checked
   const allComplianceChecked = Object.values(complianceChecks).every(v => v);
@@ -338,7 +358,10 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
           </button>
 
           <button
-            onClick={onNext}
+            onClick={async () => {
+              await pushToServer();
+              onNext();
+            }}
             disabled={!acknowledged || !allComplianceChecked}
             className={`flex items-center gap-2 px-6 py-3 rounded-box transition-all font-semibold shadow-lg ${
               acknowledged && allComplianceChecked

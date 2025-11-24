@@ -1,9 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 
-export default function BankRattigheterSlide({ onNext, onBack, customerData = {} }) {
-  const [selectedBank, setSelectedBank] = useState('');
-  const [hasGrantedAccess, setHasGrantedAccess] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
+export default function BankRattigheterSlide({ onNext, onBack }) {
+  const { companyId } = useParams();
+  
+  const QUESTIONS_CONFIG = {
+    entireForm: { type: 'object', required: false }
+  };
+
+  const { formData: savedFormData, updateQuestion, pushToServer } = useQuestionnaireForm(
+    'bank_rattigheter',
+    QUESTIONS_CONFIG
+  );
+
+  const [selectedBank, setSelectedBank] = useState(formData?.entireForm?.selectedBank || '');
+  const [hasGrantedAccess, setHasGrantedAccess] = useState(formData?.entireForm?.hasGrantedAccess || false);
+  const [showConfirmation, setShowConfirmation] = useState(formData?.entireForm?.showConfirmation || false);
+
+  // Sync state changes
+  useEffect(() => {
+    updateQuestion('entireForm', { selectedBank, hasGrantedAccess, showConfirmation });
+  }, [selectedBank, hasGrantedAccess, showConfirmation]);
 
   // Mock byrå data (should come from config in production)
   const byraOrgNr = customerData.byraOrgNr || '556XXX-XXXX';
@@ -307,7 +325,10 @@ export default function BankRattigheterSlide({ onNext, onBack, customerData = {}
         </button>
         
         <button
-          onClick={onNext}
+          onClick={async () => {
+            await pushToServer();
+            onNext();
+          }}
           disabled={!showConfirmation}
           className={`px-8 py-3 rounded-box font-semibold transition-all ${
             showConfirmation

@@ -5,7 +5,7 @@
  * REF: CHANGELOG_2025-11-23.md - Problem 5
  */
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import HeroSlide from './components/Slides/HeroSlide';
 import LoginSlide from './components/Slides/LoginSlide';
@@ -412,6 +412,16 @@ export default function App() {
   // Voucher detail pages open in separate windows without sidebar/header
   const isVoucherPage = location.pathname.startsWith('/voucher/');
 
+  // Check if Roaring.io data is available (OUTPUT slides unlocked)
+  const hasRoaringData = React.useMemo(() => {
+    if (roaringData !== null) return true; // Demo mode or existing data
+    
+    const userId = getUserIdFromToken();
+    if (!userId) return false;
+    
+    return localStorage.getItem(`onboarding-${userId}-hasRoaringData`) === 'true';
+  }, [roaringData, location.pathname]); // Re-check on navigation
+
   return (
     <AgreementProvider>
       {/* 🆕 Resume dialog - visas över allt annat när pågående onboardings finns */}
@@ -427,7 +437,7 @@ export default function App() {
           <Sidebar 
             currentPath={location.pathname}
             onNavigate={(path) => navigate(path)}
-            hasRoaringData={roaringData !== null}
+            hasRoaringData={hasRoaringData}
             isDemoMode={isDemoMode}
           />
         )}
@@ -445,20 +455,21 @@ export default function App() {
               <UppdragsvalsSlide 
                 onNext={(data) => {
                   console.log('✅ Onboarding created:', data);
-                  console.log('📋 onboardingId:', data.onboardingId);
-                  navigate('/riskfragor');
+                  console.log('📋 company_id:', data.onboardingId);
+                  // Navigate to riskfragor with company_id
+                  navigate(`/riskfragor/${data.onboardingId}`);
                 }} 
               />
             } />
-            <Route path="/riskfragor" element={
+            <Route path="/riskfragor/:companyId" element={
               <RiskFragorSlide 
-                onNext={() => {
-                  // Navigate to steg 2 instead of skipping directly to identitetskontroll
-                  navigate('/riskfragor/steg2');
+                onNext={(companyId) => {
+                  // Navigate to steg 2 with companyId
+                  navigate(`/riskfragor/steg2/${companyId}`);
                 }}
-                onSkipPEP={() => {
+                onSkipPEP={(companyId) => {
                   setIsPEP(false);
-                  navigate('/riskfragor/steg2');
+                  navigate(`/riskfragor/steg2/${companyId}`);
                 }}
                 onFormDataChange={(data) => {
                   setFormData({
@@ -468,77 +479,81 @@ export default function App() {
                 }}
               />
             } />
-            <Route path="/riskfragor/steg2" element={
+            <Route path="/riskfragor/steg2/:companyId" element={
               <RiskFragorSteg2Slide 
-                onNext={(data) => {
-                  // Save steg2 data
-                  console.log('Steg 2 data:', data);
+                onNext={(companyId) => {
+                  console.log('Steg 2 complete, company:', companyId);
+                  navigate(`/riskfragor/steg3/${companyId}`);
                 }}
               />
             } />
-            <Route path="/riskfragor/steg3" element={
+            <Route path="/riskfragor/steg3/:companyId" element={
               <RiskFragorSteg3Slide 
-                onNext={(data) => {
-                  // Save steg3 data
-                  console.log('Steg 3 data:', data);
+                onNext={(companyId) => {
+                  console.log('Steg 3 complete, company:', companyId);
+                  navigate(`/riskfragor/steg4/${companyId}`);
                 }}
               />
             } />
-            <Route path="/riskfragor/steg4" element={
+            <Route path="/riskfragor/steg4/:companyId" element={
               <RiskFragorSteg4Slide 
-                onNext={(data) => {
-                  // Save steg4 data
-                  console.log('Steg 4 data:', data);
-                  setIsPEP(true); // Could be based on data from steg1
+                onNext={(companyId) => {
+                  console.log('Steg 4 complete, triggering Roaring.io fetch');
+                  // Steg 4 internally calls Roaring.io API
+                  navigate(`/identitetskontroll/${companyId}`);
                 }}
               />
             } />
-            <Route path="/identitetskontroll" element={<IdentitetskontrollSlide onNext={() => navigate('/kontrolltabell')} />} />
-            <Route path="/kontrolltabell" element={<KontrolltabellSlide onNext={() => navigate('/verksamhet')} />} />
+            <Route path="/identitetskontroll/:companyId" element={
+              <IdentitetskontrollSlide onNext={(companyId) => navigate(`/kontrolltabell/${companyId}`)} />
+            } />
+            <Route path="/kontrolltabell/:companyId" element={
+              <KontrolltabellSlide onNext={(companyId) => navigate(`/verksamhet/${companyId}`)} />
+            } />
             
             {/* Border test page (development only) */}
             <Route path="/border-test" element={<BorderTestSlide />} />
             
             {/* Result slides */}
-            <Route path="/verksamhet" element={<VerksamhetSlide onNext={() => navigate('/agarstruktur')} onBack={() => navigate('/kontrolltabell')} />} />
-            <Route path="/agarstruktur" element={<AgarstrukturSlide onNext={() => navigate('/styrelse')} onBack={() => navigate('/verksamhet')} />} />
-            <Route path="/styrelse" element={<StyrelseSlide onNext={() => navigate('/riskindikatorer')} onBack={() => navigate('/agarstruktur')} />} />
-            <Route path="/riskindikatorer" element={<RiskindikatorerSlide onNext={() => navigate('/ovrigadata')} onBack={() => navigate('/styrelse')} />} />
-            <Route path="/ovrigadata" element={<OvrigaDataSlide onNext={() => navigate('/dokumentation')} onBack={() => navigate('/riskindikatorer')} />} />
+            <Route path="/verksamhet/:companyId" element={<VerksamhetSlide onNext={() => navigate('/agarstruktur')} onBack={() => navigate('/kontrolltabell')} />} />
+            <Route path="/agarstruktur/:companyId" element={<AgarstrukturSlide onNext={() => navigate('/styrelse')} onBack={() => navigate('/verksamhet')} />} />
+            <Route path="/styrelse/:companyId" element={<StyrelseSlide onNext={() => navigate('/riskindikatorer')} onBack={() => navigate('/agarstruktur')} />} />
+            <Route path="/riskindikatorer/:companyId" element={<RiskindikatorerSlide onNext={() => navigate('/ovrigadata')} onBack={() => navigate('/styrelse')} />} />
+            <Route path="/ovrigadata/:companyId" element={<OvrigaDataSlide onNext={() => navigate('/dokumentation')} onBack={() => navigate('/riskindikatorer')} />} />
             
             {/* Företagsdokumentation */}
-            <Route path="/dokumentation" element={<ForetagsdokumentationSlide onNext={() => navigate('/underlag')} onBack={() => navigate('/ovrigadata')} />} />
+            <Route path="/dokumentation/:companyId" element={<ForetagsdokumentationSlide onNext={() => navigate('/underlag')} onBack={() => navigate('/ovrigadata')} />} />
             
             {/* Bokföringsunderlag */}
-            <Route path="/underlag" element={<BokforingsunderlagSlide onNext={() => navigate('/bokforing')} onBack={() => navigate('/dokumentation')} />} />
+            <Route path="/underlag/:companyId" element={<BokforingsunderlagSlide onNext={() => navigate('/bokforing')} onBack={() => navigate('/dokumentation')} />} />
             
             {/* Bokföringsdata (Skattekonto OAuth) */}
-            <Route path="/bokforing" element={<BokforingDataSlide onNext={() => navigate('/likviditet')} onBack={() => navigate('/underlag')} />} />
+            <Route path="/bokforing/:companyId" element={<BokforingDataSlide onNext={() => navigate('/likviditet')} onBack={() => navigate('/underlag')} />} />
             
             {/* Ekonomisk rådgivning (slides 11-14) */}
-            <Route path="/likviditet" element={<LikviditetsanalysSlide onNext={() => navigate('/omsattning')} onBack={() => navigate('/bokforing')} />} />
-            <Route path="/omsattning" element={<OmsattningsanalysSlide onNext={() => navigate('/resultat')} onBack={() => navigate('/likviditet')} />} />
-            <Route path="/resultat" element={<ResultatanalysSlide onNext={() => navigate('/bransch')} onBack={() => navigate('/omsattning')} />} />
-            <Route path="/bransch" element={<BranschjamforelseSlide onNext={() => navigate('/bokanalys')} onBack={() => navigate('/resultat')} />} />
+            <Route path="/likviditet/:companyId" element={<LikviditetsanalysSlide onNext={() => navigate('/omsattning')} onBack={() => navigate('/bokforing')} />} />
+            <Route path="/omsattning/:companyId" element={<OmsattningsanalysSlide onNext={() => navigate('/resultat')} onBack={() => navigate('/likviditet')} />} />
+            <Route path="/resultat/:companyId" element={<ResultatanalysSlide onNext={() => navigate('/bransch')} onBack={() => navigate('/omsattning')} />} />
+            <Route path="/bransch/:companyId" element={<BranschjamforelseSlide onNext={() => navigate('/bokanalys')} onBack={() => navigate('/resultat')} />} />
             
             {/* Djupgranskning och beslut (slides 15-20) */}
-            <Route path="/bokanalys" element={<AccountingAnalysisWizard />} />
-            <Route path="/penningflodes" element={<PenningflodesanalysSlide onNext={() => navigate('/riskbedomning')} onBack={() => navigate('/bokanalys')} />} />
-            <Route path="/riskbedomning" element={<RiskbedomningSlide onNext={() => navigate('/skyldigheter')} onBack={() => navigate('/penningflodes')} />} />
-            <Route path="/skyldigheter" element={<SkyldigheterSlide onNext={() => navigate('/avtal')} onBack={() => navigate('/riskbedomning')} />} />
-            <Route path="/avtal" element={<AvtalSlide onNext={() => navigate('/dokument')} onBack={() => navigate('/skyldigheter')} />} />
-            <Route path="/dokument" element={<DocumentDeliverySlide onNext={() => navigate('/fortnox')} onBack={() => navigate('/avtal')} />} />
+            <Route path="/bokanalys/:companyId" element={<AccountingAnalysisWizard />} />
+            <Route path="/penningflodes/:companyId" element={<PenningflodesanalysSlide onNext={() => navigate('/riskbedomning')} onBack={() => navigate('/bokanalys')} />} />
+            <Route path="/riskbedomning/:companyId" element={<RiskbedomningSlide onNext={() => navigate('/skyldigheter')} onBack={() => navigate('/penningflodes')} />} />
+            <Route path="/skyldigheter/:companyId" element={<SkyldigheterSlide onNext={() => navigate('/avtal')} onBack={() => navigate('/riskbedomning')} />} />
+            <Route path="/avtal/:companyId" element={<AvtalSlide onNext={() => navigate('/dokument')} onBack={() => navigate('/skyldigheter')} />} />
+            <Route path="/dokument/:companyId" element={<DocumentDeliverySlide onNext={() => navigate('/fortnox')} onBack={() => navigate('/avtal')} />} />
             
             {/* Post-kontrakt setup - slides 24-30 */}
-            <Route path="/fortnox" element={<FortnoxPackageSlide onNext={() => navigate('/bank')} onBack={() => navigate('/dokument')} />} />
-            <Route path="/bank" element={<BankRattigheterSlide onNext={() => navigate('/ombud')} onBack={() => navigate('/fortnox')} />} />
-            <Route path="/ombud" element={<DeklarationsombudSlide onNext={() => navigate('/dokument-setup')} onBack={() => navigate('/bank')} />} />
-            <Route path="/dokument-setup" element={<DocumentSetupSlide onNext={() => navigate('/welcome')} onBack={() => navigate('/ombud')} />} />
+            <Route path="/fortnox/:companyId" element={<FortnoxPackageSlide onNext={() => navigate('/bank')} onBack={() => navigate('/dokument')} />} />
+            <Route path="/bank/:companyId" element={<BankRattigheterSlide onNext={() => navigate('/ombud')} onBack={() => navigate('/fortnox')} />} />
+            <Route path="/ombud/:companyId" element={<DeklarationsombudSlide onNext={() => navigate('/dokument-setup')} onBack={() => navigate('/bank')} />} />
+            <Route path="/dokument-setup/:companyId" element={<DocumentSetupSlide onNext={() => navigate('/welcome')} onBack={() => navigate('/ombud')} />} />
             
             {/* Final onboarding slides 28-30 */}
-            <Route path="/welcome" element={<WelcomeSlide onNext={() => navigate('/rutiner')} onBack={() => navigate('/dokument-setup')} />} />
-            <Route path="/rutiner" element={<OngoingRoutinesSlide onNext={() => navigate('/support')} onBack={() => navigate('/welcome')} />} />
-            <Route path="/support" element={<SupportSlide onNext={() => navigate('/')} onBack={() => navigate('/rutiner')} />} />
+            <Route path="/welcome/:companyId" element={<WelcomeSlide onNext={() => navigate('/rutiner')} onBack={() => navigate('/dokument-setup')} />} />
+            <Route path="/rutiner/:companyId" element={<OngoingRoutinesSlide onNext={() => navigate('/support')} onBack={() => navigate('/welcome')} />} />
+            <Route path="/support/:companyId" element={<SupportSlide onNext={() => navigate('/')} onBack={() => navigate('/rutiner')} />} />
             
             {/* Settings, Admin & Error pages */}
             {/* OLD: <Route path="/settings" element={<SettingsPage />} /> */}

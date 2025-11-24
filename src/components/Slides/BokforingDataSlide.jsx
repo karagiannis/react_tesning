@@ -1,14 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import FileDropZone from '../Shared/FileDropZone';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 
 export default function BokforingDataSlide({ onNext, onBack }) {
-  const [formData, setFormData] = useState({
+  const { companyId } = useParams();
+  
+  const QUESTIONS_CONFIG = {
+    entireForm: { type: 'object', required: false }
+  };
+
+  const { formData: savedFormData, updateQuestion, pushToServer } = useQuestionnaireForm(
+    'bokforingdata',
+    QUESTIONS_CONFIG
+  );
+
+  const [formData, setFormData] = useState(savedFormData?.entireForm || {
     bank: '',
     iban: '',
     sieFile: null,
     skattekontoFile: null,
-    selectedProvider: null, // 'fortnox', 'visma', 'bokio'
+    selectedProvider: null,
   });
+
+  // Sync to questionnaire hook
+  useEffect(() => {
+    updateQuestion('entireForm', formData);
+  }, [formData]);
 
   const [uploadStatus, setUploadStatus] = useState('');
   const [skattekontoStatus, setSkattekontoStatus] = useState('');
@@ -478,7 +496,10 @@ export default function BokforingDataSlide({ onNext, onBack }) {
             Tillbaka
           </button>
           <button
-            onClick={onNext}
+            onClick={async () => {
+              await pushToServer();
+              onNext();
+            }}
             disabled={!isFormValid()}
             className={`w-2/3 px-8 py-3 rounded-box font-semibold transition-all ${
               isFormValid()

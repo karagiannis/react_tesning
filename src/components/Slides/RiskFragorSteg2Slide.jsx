@@ -1,27 +1,42 @@
 /**
- * MODIFIED: 2025-11-23
- * PURPOSE: Multi-session localStorage scoping (orgnr-based isolation)
- * CHANGES: Migrated to useQuestionnaireForm hook for standardized form persistence
- * STATUS: PARTIAL - Complex legacy form, needs full refactor to use Question components
- * REF: CHANGELOG_2025-11-23.md - Problem 5
- * 
- * NOTE: This slide uses legacy useLocalStorage hook. Full migration pending.
- * TODO: Refactor to use QUESTIONNAIRE_CONFIG + Question components
+ * MODIFIED: 2025-11-24
+ * PURPOSE: Decision tree sync with useQuestionnaireForm (brute force strategy)
+ * CHANGES: Migrated from useLocalStorage to useQuestionnaireForm with entire form object
+ * STRATEGY: Store entire complex formData as single "entireForm" field (no structure parsing needed)
+ * REF: CHANGELOG_2025-11-24.md
  */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Info } from 'lucide-react';
 import { getLegalTextsForQuestion } from '../../data/legalTexts';
 import StepIndicator from '../Shared/StepIndicator';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
+
+// BRUTE FORCE CONFIG: Single field stores entire complex object
+const QUESTIONS_CONFIG = {
+  entireForm: { type: 'object', required: false }
+};
 
 export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
+  const { companyId } = useParams();
   const navigate = useNavigate();
   const [expandedInfo, setExpandedInfo] = useState({});
   
-  const [formData, setFormData] = useLocalStorage('onboarding-wizard-steg2', {
-    // BLOCK A: Allmän geografisk exponering
+  // Use hook with company_id from URL
+  const {
+    formData: hookFormData,
+    updateQuestion,
+    isLoading: syncLoading,
+    syncStatus,
+    pushToServer,
+  } = useQuestionnaireForm(
+    'riskfragor_steg2',
+    QUESTIONS_CONFIG
+  );
+
+  // Extract from brute force field
+  const formData = hookFormData.entireForm?.selected || {
     harUtlandskaKunder: '',
     utlandskaLander: '',
     andelOmsattning: '',
@@ -31,7 +46,6 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
       konsult: false,
       licens: false,
     },
-    // BLOCK B: Konkreta affärspartners
     leverantorer: [
       { namn: '', land: '' },
       { namn: '', land: '' },
@@ -43,10 +57,14 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
       { namn: '', land: '' }
     ],
     kundTyp: '',
-    // BLOCK C: Gränsöverskridande transaktioner
     utlandskaBankkonton: '',
     bankkontosLander: '',
-  });
+  };
+
+  const setFormData = (updater) => {
+    const newData = typeof updater === 'function' ? updater(formData) : updater;
+    updateQuestion('entireForm', newData);
+  };
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -76,41 +94,28 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
   };
 
   const handleNext = async () => {
-    if (onNext) {
-      onNext({ steg2: formData });
-    }
-
-    // Send data to backend via PATCH
-    const token = localStorage.getItem('accessToken');
-    const onboardingId = localStorage.getItem('onboardingId');
-
-    if (token && onboardingId) {
-      try {
-        const response = await fetch(
-          `https://celestial.se/tic-tac-toe-api/api/onboarding/risk-assessment-extended?onboarding_id=${onboardingId}`,
-          {
-            method: 'PATCH',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ steg2: formData })
-          }
-        );
-
-        if (!response.ok) {
-          console.error('Failed to save steg2 data:', await response.text());
+    try {
+      // Save to server
+      const success = await pushToServer();
+      
+      if (success) {
+        console.log('✅ Riskfrågor Steg 2 saved');
+        
+        // Pass companyId to parent
+        if (onNext) {
+          onNext(companyId);
         }
-      } catch (error) {
-        console.error('Error saving steg2 data:', error);
+      } else {
+        alert('⚠️ Kunde inte spara till server');
       }
+    } catch (err) {
+      console.error('❌ Error saving:', err);
+      alert('Fel vid sparande: ' + err.message);
     }
-
-    navigate('/riskfragor/steg3');
   };
 
   const handleBack = () => {
-    navigate('/riskfragor');
+    navigate(`/riskfragor/${companyId}`);
   };
 
   return (

@@ -1,9 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 
 export default function RiskbedomningSlide({ onNext, onBack }) {
-  const [decision, setDecision] = useState(''); // 'accept', 'review', 'reject'
-  const [monthlyPrice, setMonthlyPrice] = useState('');
+  const { companyId } = useParams();
+  
+  const QUESTIONS_CONFIG = {
+    entireForm: { type: 'object', required: false }
+  };
+
+  const { formData: savedFormData, updateQuestion, pushToServer } = useQuestionnaireForm(
+    'riskbedomning',
+    QUESTIONS_CONFIG
+  );
+
+  const [decision, setDecision] = useState(formData?.entireForm?.decision || '');
+  const [monthlyPrice, setMonthlyPrice] = useState(formData?.entireForm?.monthlyPrice || '');
   const [showError, setShowError] = useState(false);
+
+  // Sync state changes
+  useEffect(() => {
+    updateQuestion('entireForm', { decision, monthlyPrice });
+  }, [decision, monthlyPrice]);
 
   // AI-rekommenderat pris baserat på komplexitet (mock)
   const aiRecommendedPrice = 4500;
@@ -16,7 +34,7 @@ export default function RiskbedomningSlide({ onNext, onBack }) {
     riskIndicators: 'Inga träffar'
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (decision === '') {
       setShowError(true);
       return;
@@ -28,18 +46,18 @@ export default function RiskbedomningSlide({ onNext, onBack }) {
     }
 
     if (decision === 'reject') {
-      // Hantera avslag - skulle kunna visa en bekräftelse eller gå till avslags-slide
+      await pushToServer();
       alert('Avslag registrerat. Kunden kommer att informeras.');
       return;
     }
 
     if (decision === 'review') {
-      // Hantera fördjupad kontroll
+      await pushToServer();
       alert('Fördjupad kontroll markerad. Ytterligare dokumentation kommer att begäras.');
       return;
     }
 
-    // Om accept - gå vidare till Skyldigheter
+    await pushToServer();
     onNext();
   };
 

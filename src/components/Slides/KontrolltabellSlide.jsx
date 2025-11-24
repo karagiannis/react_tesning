@@ -1,4 +1,31 @@
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
+
 export default function KontrolltabellSlide({ onNext }) {
+  const { companyId } = useParams();
+  
+  const QUESTIONS_CONFIG = {
+    viewed: { type: 'boolean', required: false }
+  };
+
+  const { formData, updateQuestion, pushToServer } = useQuestionnaireForm(
+    'kontrolltabell',
+    QUESTIONS_CONFIG
+  );
+
+  // Mark as viewed when component mounts
+  useEffect(() => {
+    if (!formData.viewed) {
+      updateQuestion('viewed', true);
+    }
+  }, []);
+
+  const handleNext = async () => {
+    await pushToServer();
+    onNext();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
       <div className="max-w-6xl w-full bg-white rounded-card shadow-2xl p-10">
@@ -123,7 +150,7 @@ export default function KontrolltabellSlide({ onNext }) {
         </div>
 
         <button
-          onClick={onNext}
+          onClick={handleNext}
           className="w-full bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-box font-semibold transition-all"
         >
           Nästa

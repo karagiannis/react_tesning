@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import Icon from '../Shared/Icon';
 import FileDropZone from '../Shared/FileDropZone';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 
 // Inline SVG icons
 const CloudIcon = ({ className }) => (
@@ -40,30 +42,39 @@ const FileIcon = ({ className }) => (
 );
 
 export default function BokforingsunderlagSlide({ onNext, onBack }) {
-  const [uploadMode, setUploadMode] = useState(null); // 'cloud' | 'local'
-  const [cloudProvider, setCloudProvider] = useState(null); // 'google' | 'dropbox' | 'onedrive'
+  const { companyId } = useParams();
   
-  const [formData, setFormData] = useState({
-    // Bank information (endast för kontoutdrag-matchning)
-    bankInfo: '', // Kombinerat fält för bankgiro/plusgiro
-    
-    // Files (5 categories - underlag for löpande bokföring)
+  const QUESTIONS_CONFIG = {
+    entireForm: { type: 'object', required: false }
+  };
+
+  const { formData: savedFormData, updateQuestion, pushToServer } = useQuestionnaireForm(
+    'bokforingsunderlag',
+    QUESTIONS_CONFIG
+  );
+
+  const [uploadMode, setUploadMode] = useState(savedFormData?.entireForm?.uploadMode || null);
+  const [cloudProvider, setCloudProvider] = useState(savedFormData?.entireForm?.cloudProvider || null);
+  
+  const [formData, setFormData] = useState(savedFormData?.entireForm?.formData || {
+    bankInfo: '',
     kontoutdrag: [],
     leverantorsfakturor: [],
     kundfakturor: [],
     kvitton: [],
     momsrapporter: [],
-    arsredovisningar: [], // För manuell uppladdning av saknade (endast juridiska personer)
-    
-    // Cloud link
+    arsredovisningar: [],
     cloudLink: '',
   });
 
   const [isDragging, setIsDragging] = useState(false);
   const [uploadStatus, setUploadStatus] = useState('');
+  const [fraudAlerts, setFraudAlerts] = useState(savedFormData?.entireForm?.fraudAlerts || []);
 
-  // Mock fraud detection results (för demo)
-  const [fraudAlerts, setFraudAlerts] = useState([]);
+  // Sync to questionnaire hook
+  useEffect(() => {
+    updateQuestion('entireForm', { uploadMode, cloudProvider, formData, fraudAlerts });
+  }, [uploadMode, cloudProvider, formData, fraudAlerts]);
 
   const handleFileSelect = (category, e) => {
     const files = Array.from(e.target.files);
@@ -158,10 +169,9 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
     }, 1500);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validera att minst något är uppladdat
     const hasFiles = Object.keys(formData)
       .filter(key => Array.isArray(formData[key]))
       .some(key => formData[key].length > 0);
@@ -173,13 +183,12 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
       return;
     }
 
-    // Validera bankinformation (frivilligt här - IBAN hanteras på nästa slide)
-    // Om bankInfo finns, kontrollera format
     if (formData.bankInfo && !/^\d{3,4}-\d{4,7}$/.test(formData.bankInfo)) {
       setUploadStatus('❌ Ogiltigt format för bankgiro/plusgiro. Exempel: 123-4567 eller 12345-6');
       return;
     }
 
+    await pushToServer();
     onNext({
       ...formData,
       fraudAlerts,

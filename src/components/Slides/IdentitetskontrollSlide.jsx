@@ -1,9 +1,41 @@
 import { useState, useRef, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Icon from '../Shared/Icon';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
+
+// BRUTE FORCE CONFIG
+const QUESTIONS_CONFIG = {
+  entireForm: { type: 'object', required: false }
+};
 
 export default function IdentitetskontrollSlide({ onNext }) {
+  const { companyId } = useParams();
+  const navigate = useNavigate();
+  
+  const {
+    formData: hookFormData,
+    updateQuestion,
+    isLoading: syncLoading,
+    syncStatus,
+    pushToServer,
+  } = useQuestionnaireForm(
+    'identitetskontroll',
+    QUESTIONS_CONFIG
+  );
+
+  const formData = hookFormData.entireForm?.selected || {
+    photoFilename: null,
+    photoUploaded: false
+  };
+
+  const setFormData = (updater) => {
+    const newData = typeof updater === 'function' ? updater(formData) : updater;
+    updateQuestion('entireForm', newData);
+  };
+
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
+  const [uploadedFilename, setUploadedFilename] = useState(formData.photoFilename);
   const [stream, setStream] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -127,6 +159,18 @@ export default function IdentitetskontrollSlide({ onNext }) {
           </div>
         </div>
 
+        {/* Sync Status */}
+        {syncLoading && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-box">
+            <p className="text-sm text-blue-700">🔄 Synkroniserar data...</p>
+          </div>
+        )}
+        {syncStatus === 'conflict' && (
+          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-box">
+            <p className="text-sm text-amber-700">⚠️ Data har uppdaterats från servern</p>
+          </div>
+        )}
+
         {/* Camera Section */}
         <div className="bg-gray-100 rounded-box p-6 mb-6">
           <h2 className="text-section-title text-brand-900 mb-4">
@@ -135,6 +179,12 @@ export default function IdentitetskontrollSlide({ onNext }) {
           <p className="text-sm text-brand-700 mb-4">
             Håll upp ditt körkort eller ID-handling framför kameran så att både ditt ansikte och handlingen syns tydligt.
           </p>
+          
+          {uploadedFilename && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-box">
+              <p className="text-sm text-green-700">✅ Foto uppladdat: <code className="bg-green-100 px-2 py-1 rounded">{uploadedFilename}</code></p>
+            </div>
+          )}
 
           {!isCameraActive && !capturedImage && (
             <button
@@ -202,9 +252,51 @@ export default function IdentitetskontrollSlide({ onNext }) {
                   🔄 Ta om foto
                 </button>
                 <button
-                  onClick={() => {
-                    // I produktion: skicka capturedImage till backend
-                    alert('Foto sparat! (I produktion skickas detta till backend)');
+                  onClick={async () => {
+                    try {
+                      // Convert base64 to blob
+                      const base64Data = capturedImage.split(',')[1];
+                      const blob = await fetch(`data:image/png;base64,${base64Data}`).then(r => r.blob());
+                      
+                      // Create FormData for multipart upload
+                      const formDataUpload = new FormData();
+                      formDataUpload.append('photo', blob, 'identity_photo.png');
+                      formDataUpload.append('orgnr', orgnr);
+                      
+                      // Upload to backend
+                      const token = localStorage.getItem('accessToken');
+                      const response = await fetch(`https://celestial.se/tic-tac-toe-api/api/onboarding/${orgnr}/upload-identity-photo`, {
+                        method: 'POST',
+                        headers: {
+                          'Authorization': `Bearer ${token}`,
+                        },
+                        body: formDataUpload
+                      });
+                      
+                      if (!response.ok) {
+                        throw new Error('Foto-uppladdning misslyckades');
+                      }
+                      
+                      const data = await response.json();
+                      const filename = data.filename;
+                      
+                      // Save filename in formData
+                      setFormData(prev => ({
+                        ...prev,
+                        photoFilename: filename,
+                        photoUploaded: true
+                      }));
+                      
+                      setUploadedFilename(filename);
+                      
+                      // Push to versioned endpoint
+                      await pushToServer();
+                      
+                      alert(`✅ Foto sparat som: ${filename}`);
+                    } catch (err) {
+                      console.error('❌ Upload error:', err);
+                      alert('Kunde inte ladda upp foto: ' + err.message);
+                    }
                   }}
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-box font-semibold transition-all"
                 >

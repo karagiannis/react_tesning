@@ -1,16 +1,32 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Info, ChevronRight } from 'lucide-react';
 import { getLegalTextsForQuestion, legalTexts } from '../../data/legalTexts';
 import StepIndicator from '../Shared/StepIndicator';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
+import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
+
+// BRUTE FORCE CONFIG
+const QUESTIONS_CONFIG = {
+  entireForm: { type: 'object', required: false }
+};
 
 export default function RiskFragorSteg4Slide({ onNext }) {
+  const { companyId } = useParams();
   const navigate = useNavigate();
   const [expandedInfo, setExpandedInfo] = useState({});
   
-  const [formData, setFormData] = useLocalStorage('onboarding-wizard-steg4', {
-    // EDD - Fördjupad kundkännedom
+  const {
+    formData: hookFormData,
+    updateQuestion,
+    isLoading: syncLoading,
+    syncStatus,
+    pushToServer,
+  } = useQuestionnaireForm(
+    'riskfragor_steg4',
+    QUESTIONS_CONFIG
+  );
+
+  const formData = hookFormData.entireForm?.selected || {
     medelsUrsprung: '',
     förväntadOmsättning: '',
     affärsförbindelseSyfte: '',
@@ -30,7 +46,12 @@ export default function RiskFragorSteg4Slide({ onNext }) {
       annat: false,
       annatBeskrivning: '',
     },
-  });
+  };
+
+  const setFormData = (updater) => {
+    const newData = typeof updater === 'function' ? updater(formData) : updater;
+    updateQuestion('entireForm', newData);
+  };
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -48,6 +69,9 @@ export default function RiskFragorSteg4Slide({ onNext }) {
   };
 
   const handleNext = async () => {
+    // Push to server with version control
+    await pushToServer();
+    
     if (onNext) {
       onNext({ steg4: formData });
     }

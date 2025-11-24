@@ -1,8 +1,40 @@
 import React from 'react';
-import { mockRoaringData } from '../../../data/mockRoaringData';
+import useRoaringData from '../../../hooks/useRoaringData';
 
 export default function VerksamhetSlide({ onNext, onBack, hideNavigation = false }) {
-  const data = mockRoaringData.companyActivity;
+  const { data: roaringData, loading, error } = useRoaringData();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mx-auto mb-4"></div>
+          <p className="text-brand-700">Laddar verksamhetsdata...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
+        <div className="bg-red-50 border border-red-200 rounded-card p-6 max-w-md">
+          <p className="text-red-700">⚠️ {error}</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const data = roaringData?.verksamhet;
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
+        <div className="bg-amber-50 border border-amber-200 rounded-card p-6 max-w-md">
+          <p className="text-amber-700">Verksamhetsdata saknas</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
