@@ -36,8 +36,9 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
   }, []); // Empty deps - userId doesn't change during component lifecycle
   
   // Use "draft" as placeholder if companyId or caseId missing (new onboarding)
-  const effectiveCompanyId = companyId || 'draft';
-  const effectiveCaseId = caseId || 'draft';
+  // Memoized to stabilize useMemo dependencies
+  const effectiveCompanyId = useMemo(() => companyId || 'draft', [companyId]);
+  const effectiveCaseId = useMemo(() => caseId || 'draft', [caseId]);
   
   // Build storage key: onboarding-{userId}-{companyId}-{caseId}-{slideKey}
   // This supports:
