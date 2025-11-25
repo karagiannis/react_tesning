@@ -21,8 +21,8 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
   // Get company_id AND case_id from URL (source of truth for multi-tab isolation)
   const { companyId, caseId } = useParams();
   
-  // Extract userId from JWT token (memoized to prevent useMemo dependency issues)
-  const userId = useMemo(() => {
+  // Extract userId from JWT token  
+  const getUserId = () => {
     const token = localStorage.getItem('accessToken');
     if (!token) return 'anonymous';
     try {
@@ -33,24 +33,13 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
       console.error('Failed to decode JWT:', e);
       return 'anonymous';
     }
-  }, []); // Empty deps - userId doesn't change during component lifecycle
+  };
   
+  // Build storage key directly (will be stable because params don't change during component lifecycle)
   // Use "draft" as placeholder if companyId or caseId missing (new onboarding)
-  // Memoized to stabilize useMemo dependencies
-  const effectiveCompanyId = useMemo(() => companyId || 'draft', [companyId]);
-  const effectiveCaseId = useMemo(() => caseId || 'draft', [caseId]);
-  
-  // Build storage key: onboarding-{userId}-{companyId}-{caseId}-{slideKey}
-  // This supports:
-  // - Multi-user in same browser (different tabs, different accounts)
-  // - Multi-tab (same user, multiple cases)
-  // - Multi-case collaboration (different users, same case)
-  // IMPORTANT: useMemo stabilizes storageKey to prevent infinite re-render in useEffect
-  // Without useMemo, storageKey would be recreated on every render → useEffect triggers → re-render → loop
-  const storageKey = useMemo(
-    () => `onboarding-${userId}-${effectiveCompanyId}-${effectiveCaseId}-${slideKey}`,
-    [userId, effectiveCompanyId, effectiveCaseId, slideKey]
-  );
+  const effectiveCompanyId = companyId || 'draft';
+  const effectiveCaseId = caseId || 'draft';
+  const storageKey = `onboarding-${getUserId()}-${effectiveCompanyId}-${effectiveCaseId}-${slideKey}`;
   
   // State
   const [formData, setFormData] = useState(() => {
@@ -251,7 +240,7 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     };
     
     syncData();
-  }, [slideKey, effectiveCompanyId, effectiveCaseId, userId, storageKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [slideKey]); // Removed all other deps - storageKey is stable, params don't change during lifecycle
 
   // Auto-save till localStorage när formData ändras (men INTE till server)
   useEffect(() => {
@@ -261,7 +250,7 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
       writeToStorage(storageKey, formData, localData?.version || 0);
       console.log(`💾 Auto-saved ${slideKey} to localStorage (v${localData?.version || 0})`);
     }
-  }, [formData, storageKey, slideKey, isLoading]);
+  }, [formData, slideKey, isLoading]); // Removed storageKey - it's stable within component lifecycle
 
   /**
    * Uppdatera en fråga
