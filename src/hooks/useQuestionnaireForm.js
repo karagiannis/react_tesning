@@ -2,9 +2,10 @@
  * CREATED: 2025-11-23
  * UPDATED: 2025-11-24 - Decision tree med server sync + version control
  * UPDATED: 2025-11-25 - Använder useParams för company_id (multi-tab safe)
+ * UPDATED: 2025-11-25 - case_id support + "draft" mode för nya onboardings
  * PURPOSE: Generic hook for form data persistence with localStorage + server sync
  * FEATURES: Auto-load, auto-save, multi-tab sync, validation, git-like version control
- * REF: CHANGELOG_2025-11-24.md - Section 3: Decision Tree för Slide Population
+ * REF: CHANGELOG_2025-11-25.md - Smart Case Sharing Strategy
  */
 
 import { useState, useEffect } from 'react';
@@ -17,11 +18,35 @@ import { useParams } from 'react-router-dom';
  * @returns {Object} - { formData, updateQuestion, isValid, errors, resetForm, isLoading, syncStatus, pushToServer }
  */
 export const useQuestionnaireForm = (slideKey, questionConfig) => {
-  // Get company_id from URL (source of truth for multi-tab isolation)
-  const { companyId } = useParams();
+  // Get company_id AND case_id from URL (source of truth for multi-tab isolation)
+  const { companyId, caseId } = useParams();
   
-  // Build storage key with company_id scoping (NO user_id - JWT contains that)
-  const storageKey = `${companyId}-${slideKey}`;
+  // Extract userId from JWT token
+  const getUserId = () => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return 'anonymous';
+    try {
+      const payload = token.split('.')[1];
+      const decoded = JSON.parse(atob(payload));
+      return decoded.sub || decoded.user_id || decoded.email || 'anonymous';
+    } catch (e) {
+      console.error('Failed to decode JWT:', e);
+      return 'anonymous';
+    }
+  };
+  
+  const userId = getUserId();
+  
+  // Use "draft" as placeholder if companyId or caseId missing (new onboarding)
+  const effectiveCompanyId = companyId || 'draft';
+  const effectiveCaseId = caseId || 'draft';
+  
+  // Build storage key: onboarding-{userId}-{companyId}-{caseId}-{slideKey}
+  // This supports:
+  // - Multi-user in same browser (different tabs, different accounts)
+  // - Multi-tab (same user, multiple cases)
+  // - Multi-case collaboration (different users, same case)
+  const storageKey = `onboarding-${userId}-${effectiveCompanyId}-${effectiveCaseId}-${slideKey}`;
   
   // State
   const [formData, setFormData] = useState(() => {
@@ -73,7 +98,7 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
 
   // Helper: Get auth token (TODO: replace with actual auth implementation)
   const getToken = () => {
-    return localStorage.getItem('authToken') || 'mock-token';
+    return localStorage.getItem('accessToken') || 'mock-token';
   };
 
   // DECISION TREE: Initial load från server + localStorage (syncData)
@@ -86,28 +111,37 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
       const localData = readFromStorage(storageKey);
       
       // 2. Hämta från server (ALWAYS - server is source of truth)
+      // Skip server fetch if we're in "draft" mode (no case created yet)
       let serverData = null;
-      try {
-        const response = await fetch(`/api/onboarding/${companyId}/${slideKey}`, {
-          headers: { 
-            'Authorization': `Bearer ${getToken()}`,
-            'Content-Type': 'application/json'
+      
+      if (effectiveCompanyId !== 'draft' && effectiveCaseId !== 'draft') {
+        try {
+          const response = await fetch(
+            `/api/companies/${effectiveCompanyId}/cases/${effectiveCaseId}/slides/${slideKey}`, 
+            {
+              headers: { 
+                'Authorization': `Bearer ${getToken()}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+          
+          if (response.ok) {
+            const json = await response.json();
+            serverData = {
+              value: json.data,
+              version: json.version,      // Backend returnerar version number
+              timestamp: json.updated_at  // Backend returnerar timestamp
+            };
+          } else if (response.status === 404) {
+            // Slide finns inte på server - helt ny
+            serverData = null;
           }
-        });
-        
-        if (response.ok) {
-          const json = await response.json();
-          serverData = {
-            value: json.data,
-            version: json.version,      // Backend returnerar version number
-            timestamp: json.updated_at  // Backend returnerar timestamp
-          };
-        } else if (response.status === 404) {
-          // Slide finns inte på server - helt ny
-          serverData = null;
+        } catch (e) {
+          console.warn(`⚠️ Server fetch failed for ${slideKey}, using localStorage only:`, e);
         }
-      } catch (e) {
-        console.warn(`⚠️ Server fetch failed for ${slideKey}, using localStorage only:`, e);
+      } else {
+        console.log(`[${slideKey}] 📝 Draft mode - skipping server fetch`);
       }
 
       // 3. DECISION TREE
@@ -212,7 +246,7 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     };
     
     syncData();
-  }, [slideKey, orgnr, userId, storageKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [slideKey, effectiveCompanyId, effectiveCaseId, userId, storageKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-save till localStorage när formData ändras (men INTE till server)
   useEffect(() => {
@@ -328,20 +362,30 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
    * @returns {Promise<boolean>} - true om lyckades, false om conflict eller error
    */
   const pushToServer = async () => {
+    // Skip if in draft mode (no case created yet)
+    if (effectiveCompanyId === 'draft' || effectiveCaseId === 'draft') {
+      console.log(`[${slideKey}] 📝 Draft mode - not pushing to server yet`);
+      setSyncStatus('draft');
+      return true; // Success (saved locally)
+    }
+    
     const localData = readFromStorage(storageKey);
     
     try {
-      const response = await fetch(`/api/onboarding/${companyId}/${slideKey}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${getToken()}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-          data: formData,
-          expected_version: localData?.version || 0  // Git-liknande: måste ha rätt base version
-        })
-      });
+      const response = await fetch(
+        `/api/companies/${effectiveCompanyId}/cases/${effectiveCaseId}/slides/${slideKey}`, 
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${getToken()}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            data: formData,
+            expected_version: localData?.version || 0  // Git-liknande: måste ha rätt base version
+          })
+        }
+      );
 
       if (response.status === 409) {
         // Version conflict - någon annan har pushat
@@ -382,7 +426,12 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     resetForm,
     isLoading,
     syncStatus,
-    pushToServer
+    pushToServer,
+    // 🆕 Export IDs för komponenter som behöver dem
+    companyId: effectiveCompanyId,
+    caseId: effectiveCaseId,
+    userId,
+    isDraftMode: effectiveCompanyId === 'draft' || effectiveCaseId === 'draft'
   };
 };
 

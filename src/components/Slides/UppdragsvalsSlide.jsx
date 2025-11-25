@@ -26,23 +26,9 @@ const QUESTIONS_CONFIG = {
 };
 
 export default function UppdragsvalsSlide({ onNext }) {
-  // Get orgnr from localStorage (may have been set in previous session)
-  const getOrgnr = () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return null;
-    try {
-      const payload = token.split('.')[1];
-      const decoded = JSON.parse(atob(payload));
-      const userId = decoded.sub || decoded.user_id || decoded.email;
-      return localStorage.getItem(`onboarding-${userId}-orgnr`) || null;
-    } catch (e) {
-      return null;
-    }
-  };
-
-  const orgnrFromStorage = getOrgnr();
-
   // Use new questionnaire hook with decision tree
+  // Hook internally uses useParams() to get companyId from URL
+  // and extracts userId from JWT token
   const {
     formData,
     updateQuestion,
@@ -53,9 +39,7 @@ export default function UppdragsvalsSlide({ onNext }) {
     pushToServer,
   } = useQuestionnaireForm(
     'uppdragsval',
-    QUESTIONS_CONFIG,
-    orgnrFromStorage, // Will be null on first visit
-    null // userId extracted inside hook
+    QUESTIONS_CONFIG
   );
 
   // Expandable sections state
