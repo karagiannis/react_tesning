@@ -40,11 +40,13 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     }
   };
   
+  const userId = getUserId();
+  
   // Build storage key directly (will be stable because params don't change during component lifecycle)
   // Use "draft" as placeholder if companyId or caseId missing (new onboarding)
   const effectiveCompanyId = companyId || 'draft';
   const effectiveCaseId = caseId || 'draft';
-  const storageKey = `onboarding-${getUserId()}-${effectiveCompanyId}-${effectiveCaseId}-${slideKey}`;
+  const storageKey = `onboarding-${userId}-${effectiveCompanyId}-${effectiveCaseId}-${slideKey}`;
   
   // State
   const [formData, setFormData] = useState(() => {
