@@ -26,9 +26,20 @@ const QUESTIONS_CONFIG = {
 };
 
 export default function UppdragsvalsSlide({ onNext }) {
-  // Use new questionnaire hook with decision tree
-  // Hook internally uses useParams() to get companyId from URL
-  // and extracts userId from JWT token
+  // TEMPORARY: Bypass useQuestionnaireForm to isolate Error #310
+  const formData = {
+    services: { selected: null },
+    orgnr: { selected: '' },
+    companyName: { selected: '' }
+  };
+  const updateQuestion = () => {};
+  const isValid = false;
+  const errors = {};
+  const syncLoading = false;
+  const syncStatus = 'new';
+  const pushToServer = async () => {};
+  
+  /*
   const {
     formData,
     updateQuestion,
@@ -41,6 +52,7 @@ export default function UppdragsvalsSlide({ onNext }) {
     'uppdragsval',
     QUESTIONS_CONFIG
   );
+  */
 
   // Expandable sections state
   const [expandedSections, setExpandedSections] = useState({
