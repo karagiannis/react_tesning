@@ -147,7 +147,8 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
 
       // 3. DECISION TREE
       let finalData = {};
-      Object.keys(questionConfig.questions).forEach(qId => {
+      const questions = questionConfig.questions || questionConfig;
+      Object.keys(questions).forEach(qId => {
         finalData[qId] = { selected: null, expansion: null };
       });
       let finalVersion = 0;
@@ -293,7 +294,7 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
       }
       
       // Kontrollera expansion om det krävs
-      const option = qConfig.options.find(opt => opt.value === answer.selected);
+      const option = qConfig.options?.find(opt => opt.value === answer.selected);
       if (option?.hasExpansion && option.expansionConfig?.required) {
         const hasExpansionData = answer.expansion && 
           Object.keys(answer.expansion).length > 0 &&
@@ -327,7 +328,7 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
       // Kontrollera expansion-fel
       const answer = formData[qId];
       if (answer?.selected) {
-        const option = qConfig.options.find(opt => opt.value === answer.selected);
+        const option = qConfig.options?.find(opt => opt.value === answer.selected);
         if (option?.hasExpansion && option.expansionConfig?.required) {
           const hasExpansionData = answer.expansion && 
             Object.keys(answer.expansion).length > 0 &&
@@ -350,7 +351,8 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
    */
   const resetForm = () => {
     const initialData = {};
-    Object.keys(questionConfig.questions).forEach(qId => {
+    const questions = questionConfig.questions || questionConfig;
+    Object.keys(questions).forEach(qId => {
       initialData[qId] = {
         selected: null,
         expansion: null
