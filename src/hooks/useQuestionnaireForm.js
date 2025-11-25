@@ -279,7 +279,8 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
    * @returns {boolean} - true om alla required frågor är besvarade
    */
   const isValid = () => {
-    return Object.entries(questionConfig.questions).every(([qId, qConfig]) => {
+    const questions = questionConfig.questions || questionConfig;
+    return Object.entries(questions).every(([qId, qConfig]) => {
       // Skip om ej required
       if (!qConfig.required) return true;
       
@@ -314,8 +315,9 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
    */
   const getErrors = () => {
     const errors = {};
+    const questions = questionConfig.questions || questionConfig;
     
-    Object.entries(questionConfig.questions).forEach(([qId, qConfig]) => {
+    Object.entries(questions).forEach(([qId, qConfig]) => {
       if (qConfig.required && (!formData[qId] || !formData[qId].selected)) {
         errors[qId] = "Detta fält är obligatoriskt";
       }
