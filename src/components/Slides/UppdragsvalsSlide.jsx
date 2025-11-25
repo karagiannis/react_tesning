@@ -52,7 +52,22 @@ export default function UppdragsvalsSlide({ onNext }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Autocomplete state
+  // Extract values early
+  const services = formData.services?.selected || {
+    lopandeBokforing: false,
+    arsbokslut: false,
+    deklarationer: false,
+    loneadministration: false,
+    ekonomiskRadgivning: false,
+    foretagsregistrering: false,
+    finansiellRapportering: false,
+    foretagsforsaljning: false,
+    annat: '',
+  };
+  const orgnr = formData.orgnr?.selected || '';
+  const companyName = formData.companyName?.selected || '';
+
+  // Autocomplete state (now companyName is defined)
   const [companyQuery, setCompanyQuery] = useState(companyName || '');
   const [companySuggestions, setCompanySuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -74,22 +89,6 @@ export default function UppdragsvalsSlide({ onNext }) {
   useEffect(() => {
     setCompanyQuery(companyName || '');
   }, [companyName]);
-
-  // Initialize services from formData or defaults
-  const services = formData.services?.selected || {
-    lopandeBokforing: false,
-    arsbokslut: false,
-    deklarationer: false,
-    loneadministration: false,
-    ekonomiskRadgivning: false,
-    foretagsregistrering: false,
-    finansiellRapportering: false,
-    foretagsforsaljning: false,
-    annat: '',
-  };
-
-  const orgnr = formData.orgnr?.selected || '';
-  const companyName = formData.companyName?.selected || '';
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
