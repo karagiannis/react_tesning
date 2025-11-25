@@ -13,7 +13,7 @@ import RegisterSlide from './components/Slides/RegisterSlide';
 import VerifySlide from './components/Slides/VerifySlide';
 import ForgotPasswordSlide from './components/Slides/ForgotPasswordSlide';
 import ResetPasswordSlide from './components/Slides/ResetPasswordSlide';
-import UppdragsvalsSlide from './components/Slides/UppdragsvalsSlideSimple';
+import UppdragsvalsSlide from './components/Slides/UppdragsvalsSlide';
 import RiskFragorSlide from './components/Slides/RiskFragorSlide';
 import RiskFragorSteg2Slide from './components/Slides/RiskFragorSteg2Slide';
 import RiskFragorSteg3Slide from './components/Slides/RiskFragorSteg3Slide';
@@ -390,6 +390,17 @@ export default function App() {
   const authPages = ['/', '/login', '/register', '/verify'];
   const isAuthPage = authPages.includes(location.pathname);
 
+  // Check if Roaring.io data is available (OUTPUT slides unlocked)
+  // ⚠️ MUST be called before any conditional returns (Rules of Hooks)
+  const hasRoaringData = React.useMemo(() => {
+    if (roaringData !== null) return true; // Demo mode or existing data
+    
+    const userId = getUserIdFromToken();
+    if (!userId) return false;
+    
+    return localStorage.getItem(`onboarding-${userId}-hasRoaringData`) === 'true';
+  }, [roaringData, location.pathname]); // Re-check on navigation
+
   // Show auth layout (no sidebar) for auth pages OR when not logged in (unless in demo mode)
   if (isAuthPage || (!isLoggedIn && !isDemoMode)) {
     return (
@@ -411,16 +422,6 @@ export default function App() {
   
   // Voucher detail pages open in separate windows without sidebar/header
   const isVoucherPage = location.pathname.startsWith('/voucher/');
-
-  // Check if Roaring.io data is available (OUTPUT slides unlocked)
-  const hasRoaringData = React.useMemo(() => {
-    if (roaringData !== null) return true; // Demo mode or existing data
-    
-    const userId = getUserIdFromToken();
-    if (!userId) return false;
-    
-    return localStorage.getItem(`onboarding-${userId}-hasRoaringData`) === 'true';
-  }, [roaringData, location.pathname]); // Re-check on navigation
 
   return (
     <AgreementProvider>

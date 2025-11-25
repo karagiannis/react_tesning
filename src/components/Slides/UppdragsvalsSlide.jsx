@@ -26,20 +26,6 @@ const QUESTIONS_CONFIG = {
 };
 
 export default function UppdragsvalsSlide({ onNext }) {
-  // TEMPORARY: Bypass useQuestionnaireForm to isolate Error #310
-  const formData = {
-    services: { selected: null },
-    orgnr: { selected: '' },
-    companyName: { selected: '' }
-  };
-  const updateQuestion = () => {};
-  const isValid = false;
-  const errors = {};
-  const syncLoading = false;
-  const syncStatus = 'new';
-  const pushToServer = async () => {};
-  
-  /*
   const {
     formData,
     updateQuestion,
@@ -52,7 +38,6 @@ export default function UppdragsvalsSlide({ onNext }) {
     'uppdragsval',
     QUESTIONS_CONFIG
   );
-  */
 
   // Expandable sections state
   const [expandedSections, setExpandedSections] = useState({
