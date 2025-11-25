@@ -21,8 +21,8 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
   // Get company_id AND case_id from URL (source of truth for multi-tab isolation)
   const { companyId, caseId } = useParams();
   
-  // Extract userId from JWT token
-  const getUserId = () => {
+  // Extract userId from JWT token (memoized to prevent useMemo dependency issues)
+  const userId = useMemo(() => {
     const token = localStorage.getItem('accessToken');
     if (!token) return 'anonymous';
     try {
@@ -33,9 +33,7 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
       console.error('Failed to decode JWT:', e);
       return 'anonymous';
     }
-  };
-  
-  const userId = getUserId();
+  }, []); // Empty deps - userId doesn't change during component lifecycle
   
   // Use "draft" as placeholder if companyId or caseId missing (new onboarding)
   const effectiveCompanyId = companyId || 'draft';
