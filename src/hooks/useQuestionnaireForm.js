@@ -8,7 +8,7 @@
  * REF: CHANGELOG_2025-11-25.md - Smart Case Sharing Strategy
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 /**
@@ -46,7 +46,12 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
   // - Multi-user in same browser (different tabs, different accounts)
   // - Multi-tab (same user, multiple cases)
   // - Multi-case collaboration (different users, same case)
-  const storageKey = `onboarding-${userId}-${effectiveCompanyId}-${effectiveCaseId}-${slideKey}`;
+  // IMPORTANT: useMemo stabilizes storageKey to prevent infinite re-render in useEffect
+  // Without useMemo, storageKey would be recreated on every render → useEffect triggers → re-render → loop
+  const storageKey = useMemo(
+    () => `onboarding-${userId}-${effectiveCompanyId}-${effectiveCaseId}-${slideKey}`,
+    [userId, effectiveCompanyId, effectiveCaseId, slideKey]
+  );
   
   // State
   const [formData, setFormData] = useState(() => {
