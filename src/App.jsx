@@ -13,7 +13,7 @@ import RegisterSlide from './components/Slides/RegisterSlide';
 import VerifySlide from './components/Slides/VerifySlide';
 import ForgotPasswordSlide from './components/Slides/ForgotPasswordSlide';
 import ResetPasswordSlide from './components/Slides/ResetPasswordSlide';
-import UppdragsvalsSlide from './components/Slides/UppdragsvalsSlide';
+import UppdragsvalsSlide from './components/Slides/UppdragsvalsSlideSimple';
 import RiskFragorSlide from './components/Slides/RiskFragorSlide';
 import RiskFragorSteg2Slide from './components/Slides/RiskFragorSteg2Slide';
 import RiskFragorSteg3Slide from './components/Slides/RiskFragorSteg3Slide';
