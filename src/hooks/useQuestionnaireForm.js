@@ -18,6 +18,11 @@ import { useParams } from 'react-router-dom';
  * @returns {Object} - { formData, updateQuestion, isValid, errors, resetForm, isLoading, syncStatus, pushToServer }
  */
 export const useQuestionnaireForm = (slideKey, questionConfig) => {
+  // Validate inputs
+  if (!slideKey || !questionConfig) {
+    throw new Error('useQuestionnaireForm requires slideKey and questionConfig');
+  }
+  
   // Get company_id AND case_id from URL (source of truth for multi-tab isolation)
   const { companyId, caseId } = useParams();
   
