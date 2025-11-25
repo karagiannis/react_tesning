@@ -407,7 +407,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
                   </div>
                 )}
               </div>
-            )}
+            ) : null}
 
             {uploadStatus.registreringsbevis && !formData.registreringsbevis && (
               <p className="mt-2 text-sm text-red-600">{uploadStatus.registreringsbevis}</p>
@@ -472,7 +472,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
                   </button>
                 </div>
               </div>
-            )}
+            ) : null}
 
             {uploadStatus.arsredovisning && !formData.arsredovisning && (
               <p className="mt-2 text-sm text-gray-600">{uploadStatus.arsredovisning}</p>

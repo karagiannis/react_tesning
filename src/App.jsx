@@ -461,6 +461,16 @@ export default function App() {
                 }} 
               />
             } />
+            <Route path="/uppdragsval/:companyId/:caseId" element={
+              <UppdragsvalsSlide 
+                onNext={(data) => {
+                  console.log('✅ Onboarding created:', data);
+                  console.log('📋 company_id:', data.onboardingId);
+                  // Navigate to riskfragor with company_id + case_id
+                  navigate(`/riskfragor/${data.companyId}/${data.caseId}`);
+                }} 
+              />
+            } />
             <Route path="/riskfragor/:companyId" element={
               <RiskFragorSlide 
                 onNext={(companyId) => {

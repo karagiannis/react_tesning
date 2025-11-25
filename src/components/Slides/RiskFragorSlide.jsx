@@ -382,9 +382,6 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
               // Save to server
               const success = await pushToServer();
               
-              // Save to server
-              const success = await pushToServer();
-              
               if (success) {
                 console.log('✅ Riskfrågor Steg 1 saved');
                 
