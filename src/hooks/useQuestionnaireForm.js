@@ -57,7 +57,8 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
   const [formData, setFormData] = useState(() => {
     // Default: alla frågor har null selected och null expansion
     const initialData = {};
-    Object.keys(questionConfig.questions).forEach(qId => {
+    const questions = questionConfig.questions || questionConfig;
+    Object.keys(questions).forEach(qId => {
       initialData[qId] = {
         selected: null,
         expansion: null
