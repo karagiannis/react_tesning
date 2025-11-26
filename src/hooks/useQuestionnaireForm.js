@@ -3,19 +3,20 @@
  * UPDATED: 2025-11-24 - Decision tree med server sync + version control
  * UPDATED: 2025-11-25 - Använder useParams för company_id (multi-tab safe)
  * UPDATED: 2025-11-25 - case_id support + "draft" mode för nya onboardings
- * PURPOSE: Generic hook for form data persistence with localStorage + server sync
- * FEATURES: Auto-load, auto-save, multi-tab sync, validation, git-like version control
- * REF: CHANGELOG_2025-11-25.md - Smart Case Sharing Strategy
+ * UPDATED: 2025-11-27 - STATE MACHINE REFACTOR: Behavior driven by metadata.state
+ * PURPOSE: Generic hook for form data persistence with state machine architecture
+ * FEATURES: Auto-load, auto-save, multi-tab sync, state-driven behavior
+ * REF: CHANGELOG_2025-11-26.md - State Machine Refactor
  */
 
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
 /**
- * Generic hook för formulärdata med localStorage + server sync
+ * Generic hook för formulärdata med state machine architecture
  * @param {string} slideKey - Unik identifierare för slide (t.ex. "riskfragor_steg2")
  * @param {Object} questionConfig - Config från QUESTIONNAIRE_CONFIG
- * @returns {Object} - { formData, updateQuestion, isValid, errors, resetForm, isLoading, syncStatus, pushToServer }
+ * @returns {Object} - { formData, formState, canEdit, updateQuestion, isValid, errors, resetForm, pushToServer }
  */
 export const useQuestionnaireForm = (slideKey, questionConfig) => {
   // Validate inputs
@@ -62,22 +63,27 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     return initialData;
   });
   
+  const [formState, setFormState] = useState('loading'); // State machine state
+  const [caseMetadata, setCaseMetadata] = useState(null); // Case metadata from server
   const [isLoading, setIsLoading] = useState(true);
-  const [syncStatus, setSyncStatus] = useState('checking'); // checking | synced | conflict | offline | new
 
-  // Helper: Läs från localStorage med version + timestamp
+  // Helper: Get auth token
+  const getToken = () => {
+    return localStorage.getItem('accessToken') || 'mock-token';
+  };
+
+  // Helper: Läs från localStorage with version
   const readFromStorage = (key) => {
     const cached = localStorage.getItem(key);
     if (!cached) return null;
     
     try {
       const parsed = JSON.parse(cached);
-      // Backward compatibility: Om gamla formatet (direkt value), konvertera
       if (parsed.version === undefined) {
         return {
           value: parsed,
-          version: 0,  // Default version för gamla data
-          timestamp: new Date(0).toISOString() // Epoch = äldsta möjliga
+          version: 0,
+          timestamp: new Date(0).toISOString()
         };
       }
       return parsed;
@@ -87,7 +93,7 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     }
   };
 
-  // Helper: Skriv till localStorage med version + timestamp
+  // Helper: Skriv till localStorage with version
   const writeToStorage = (key, value, version) => {
     const wrapped = {
       value,
@@ -97,168 +103,129 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     localStorage.setItem(key, JSON.stringify(wrapped));
   };
 
-  // Helper: Get auth token (TODO: replace with actual auth implementation)
-  const getToken = () => {
-    return localStorage.getItem('accessToken') || 'mock-token';
-  };
-
-  // DECISION TREE: Initial load från server + localStorage (syncData)
+  // STATE MACHINE: Initial load - fetch case metadata and determine state
   useEffect(() => {
-    const syncData = async () => {
+    const loadData = async () => {
       setIsLoading(true);
-      setSyncStatus('checking');
+      setFormState('loading');
 
-      // 1. Hämta från localStorage
-      const localData = readFromStorage(storageKey);
-      
-      // 2. Hämta från server (ALWAYS - server is source of truth)
-      // Skip server fetch if we're in "draft" mode (no case created yet)
-      let serverData = null;
-      
-      if (effectiveCompanyId !== 'draft' && effectiveCaseId !== 'draft') {
-        try {
-          const response = await fetch(
-            `/api/companies/${effectiveCompanyId}/cases/${effectiveCaseId}/slides/${slideKey}`, 
-            {
-              headers: { 
-                'Authorization': `Bearer ${getToken()}`,
-                'Content-Type': 'application/json'
-              }
-            }
-          );
-          
-          if (response.ok) {
-            const json = await response.json();
-            serverData = {
-              value: json.data,
-              version: json.version,      // Backend returnerar version number
-              timestamp: json.updated_at  // Backend returnerar timestamp
-            };
-          } else if (response.status === 404) {
-            // Slide finns inte på server - helt ny
-            serverData = null;
-          }
-        } catch (e) {
-          console.warn(`⚠️ Server fetch failed for ${slideKey}, using localStorage only:`, e);
-        }
-      } else {
-        console.log(`[${slideKey}] 📝 Draft mode - skipping server fetch`);
-      }
-
-      // 3. DECISION TREE
-      let finalData = {};
-      const questions = questionConfig.questions || questionConfig;
-      Object.keys(questions).forEach(qId => {
-        finalData[qId] = { selected: null, expansion: null };
-      });
-      let finalVersion = 0;
-      let status = 'synced';
-      
-      if (!localData && !serverData) {
-        // ════════════════════════════════════════════════════════
-        // Case A: Första gången någonsin - TOM SLIDE
-        // ════════════════════════════════════════════════════════
-        status = 'new';
-        console.log(`[${slideKey}] 🆕 Case A: Ny slide - blank form`);
-        
-      } else if (!serverData) {
-        // ════════════════════════════════════════════════════════
-        // Case B: Endast localStorage finns (offline/ny onboarding)
-        // ════════════════════════════════════════════════════════
-        finalData = localData.value;
-        finalVersion = localData.version;
-        status = 'offline';
-        console.log(`[${slideKey}] 📴 Case B: Offline - använder localStorage v${localData.version}`);
-        
-      } else if (!localData) {
-        // ════════════════════════════════════════════════════════
-        // Case C: Endast server finns (rensad cache/ny browser)
-        // ════════════════════════════════════════════════════════
-        finalData = serverData.value;
-        finalVersion = serverData.version;
-        status = 'restored';
-        
-        // Synka till localStorage
-        writeToStorage(storageKey, serverData.value, serverData.version);
-        console.log(`[${slideKey}] ♻️ Case C: Återställd från server v${serverData.version}`);
-        
-      } else {
-        // ════════════════════════════════════════════════════════
-        // Case D: Båda finns - JÄMFÖR VERSION
-        // ════════════════════════════════════════════════════════
-        
-        if (serverData.version > localData.version) {
-          // D1: Server är nyare - någon annan har sparat
-          finalData = serverData.value;
-          finalVersion = serverData.version;
-          status = 'conflict_resolved';
-          
-          // Synka till localStorage
-          writeToStorage(storageKey, serverData.value, serverData.version);
-          
-          console.warn(
-            `[${slideKey}] ⚠️ Case D1: Version conflict - server nyare\n` +
-            `  Local: v${localData.version} @ ${localData.timestamp}\n` +
-            `  Server: v${serverData.version} @ ${serverData.timestamp}\n` +
-            `  → Använder server (dina lokala ändringar förlorade)`
-          );
-          
-          // Visa varning till användare (optional - kan ta bort om för invasivt)
-          // alert(
-          //   `⚠️ Data har uppdaterats av någon annan\n\n` +
-          //   `Din version: v${localData.version}\n` +
-          //   `Server version: v${serverData.version}\n\n` +
-          //   `Dina osparade ändringar har förlorats.`
-          // );
-          
-        } else if (serverData.version === localData.version) {
-          // D2: Samma version - använd localStorage (kan ha nyare draft)
-          finalData = localData.value;
-          finalVersion = localData.version;
-          status = 'synced';
-          
-          console.log(
-            `[${slideKey}] ✅ Case D2: Version match v${localData.version}\n` +
-            `  → Använder localStorage (kan ha nyare draft)`
-          );
-          
+      // If no case created yet (draft mode), use localStorage only
+      if (effectiveCompanyId === 'draft' || effectiveCaseId === 'draft') {
+        const localData = readFromStorage(storageKey);
+        if (localData) {
+          setFormData(localData.value);
+          setFormState('draft-offline');
         } else {
-          // D3: localStorage har högre version?!
-          // Detta SKA INTE hända (server vinner alltid vid POST)
-          // Fallback: använd server
-          finalData = serverData.value;
-          finalVersion = serverData.version;
-          status = 'inconsistent';
-          
-          // Synka till localStorage
-          writeToStorage(storageKey, serverData.value, serverData.version);
-          
-          console.error(
-            `[${slideKey}] 🚨 Case D3: Inkonsistent state!\n` +
-            `  Local: v${localData.version}\n` +
-            `  Server: v${serverData.version}\n` +
-            `  → Fallback till server`
-          );
+          setFormState('new');
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      // Fetch case metadata to determine state
+      try {
+        const response = await fetch(
+          `/api/onboarding/resume/${effectiveCompanyId}?onboarding_id=${effectiveCaseId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${getToken()}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Resume failed: ${response.status}`);
+        }
+
+        const metadata = await response.json();
+        setCaseMetadata(metadata);
+
+        // STATE MACHINE: Determine behavior based on metadata.state
+        const serverState = metadata.state || 'draft';
+
+        switch (serverState) {
+          case 'draft': {
+            // Draft mode - localStorage has priority (offline-first)
+            const localDraft = readFromStorage(storageKey);
+            if (localDraft) {
+              setFormData(localDraft.value);
+              setFormState('draft-offline');
+            } else {
+              // No local draft, read from metadata.json
+              const serverDraft = metadata.data?.[slideKey];
+              if (serverDraft) {
+                setFormData(serverDraft);
+                writeToStorage(storageKey, serverDraft, 0);
+              }
+              setFormState('draft-synced');
+            }
+            break;
+          }
+
+          case 'submitted': {
+            // Submitted - server is source of truth (read-only)
+            const submittedData = metadata.data?.[slideKey];
+            if (submittedData) {
+              setFormData(submittedData);
+            }
+            setFormState('submitted-readonly');
+            break;
+          }
+
+          case 'locked': {
+            // Locked by another user
+            const lockedData = metadata.data?.[slideKey];
+            if (lockedData) {
+              setFormData(lockedData);
+            }
+            setFormState('locked');
+            console.warn(`⚠️ Case is locked by ${metadata.locked_by || 'another user'}`);
+            break;
+          }
+
+          case 'completed': {
+            // Entire case completed
+            const completedData = metadata.data?.[slideKey];
+            if (completedData) {
+              setFormData(completedData);
+            }
+            setFormState('completed-archived');
+            break;
+          }
+
+          default: {
+            // New slide, no data
+            setFormState('new');
+          }
+        }
+
+      } catch (error) {
+        console.error('Failed to load case metadata:', error);
+        // Fallback to localStorage
+        const localData = readFromStorage(storageKey);
+        if (localData) {
+          setFormData(localData.value);
+          setFormState('draft-offline');
+        } else {
+          setFormState('new');
         }
       }
-      
-      setFormData(finalData);
-      setSyncStatus(status);
+
       setIsLoading(false);
     };
-    
-    syncData();
-  }, [slideKey]); // Removed all other deps - storageKey is stable, params don't change during lifecycle
 
-  // Auto-save till localStorage när formData ändras (men INTE till server)
+    loadData();
+  }, [slideKey, effectiveCompanyId, effectiveCaseId, storageKey]);
+
+  // Auto-save to localStorage when formData changes (only in draft states)
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && ['draft-offline', 'draft-synced', 'new'].includes(formState)) {
       const localData = readFromStorage(storageKey);
-      // Behåll samma version - ökar endast vid server POST
       writeToStorage(storageKey, formData, localData?.version || 0);
-      console.log(`💾 Auto-saved ${slideKey} to localStorage (v${localData?.version || 0})`);
+      console.log(`💾 Auto-saved ${slideKey} to localStorage (state: ${formState})`);
     }
-  }, [formData, slideKey, isLoading]); // Removed storageKey - it's stable within component lifecycle
+  }, [formData, slideKey, isLoading, formState, storageKey]);
 
   /**
    * Uppdatera en fråga
@@ -370,15 +337,20 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     // Skip if in draft mode (no case created yet)
     if (effectiveCompanyId === 'draft' || effectiveCaseId === 'draft') {
       console.log(`[${slideKey}] 📝 Draft mode - not pushing to server yet`);
-      setSyncStatus('draft');
       return true; // Success (saved locally)
+    }
+    
+    // Check if state allows editing
+    if (!canEdit) {
+      console.warn(`[${slideKey}] ⚠️ Cannot push - form is in ${formState} state`);
+      return false;
     }
     
     const localData = readFromStorage(storageKey);
     
     try {
       const response = await fetch(
-        `/api/companies/${effectiveCompanyId}/cases/${effectiveCaseId}/slides/${slideKey}`, 
+        `/api/onboarding/${effectiveCompanyId}/${slideKey}`, 
         {
           method: 'POST',
           headers: {
@@ -387,30 +359,24 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
           },
           body: JSON.stringify({ 
             data: formData,
-            expected_version: localData?.version || 0  // Git-liknande: måste ha rätt base version
+            onboarding_id: effectiveCaseId,
+            expected_version: localData?.version || 0
           })
         }
       );
 
       if (response.status === 409) {
-        // Version conflict - någon annan har pushat
         const conflict = await response.json();
         console.error(`[${slideKey}] ⚠️ Version conflict: expected ${localData?.version}, but server has ${conflict.current_version}`);
-        
-        // Force "git pull" - hämta från server igen
         alert('⚠️ Någon annan har uppdaterat denna sida. Hämtar senaste versionen...');
-        window.location.reload(); // Enklaste: reload page
-        
-        setSyncStatus('conflict');
+        window.location.reload();
         return false;
       }
 
       if (response.ok) {
         const json = await response.json();
-        // Uppdatera localStorage med ny version från server
-        writeToStorage(storageKey, formData, json.version);
-        setSyncStatus('synced');
-        console.log(`[${slideKey}] ✅ Pushad till server: v${localData?.version} → v${json.version}`);
+        writeToStorage(storageKey, formData, json.version || 1);
+        console.log(`[${slideKey}] ✅ Pushad till server: v${localData?.version} → v${json.version || 1}`);
         return true;
       }
       
@@ -418,21 +384,29 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
       return false;
     } catch (e) {
       console.error(`[${slideKey}] ❌ Failed to push to server:`, e);
-      setSyncStatus('offline');
       return false;
     }
   };
 
+  // Derived state: Determine capabilities based on formState
+  const canEdit = ['draft-offline', 'draft-synced', 'new'].includes(formState);
+  const shouldShowLockWarning = formState === 'locked';
+  const shouldShowReadOnlyMessage = formState === 'submitted-readonly' || formState === 'completed-archived';
+
   return {
     formData,
+    formState,  // New: Expose state machine state
+    canEdit,    // New: Derived permission
+    shouldShowLockWarning,  // New: UI hint
+    shouldShowReadOnlyMessage,  // New: UI hint
     updateQuestion,
     isValid: isValid(),
     errors: getErrors(),
     resetForm,
     isLoading,
-    syncStatus,
     pushToServer,
-    // 🆕 Export IDs för komponenter som behöver dem
+    caseMetadata,  // New: Full case metadata
+    // Export IDs för komponenter som behöver dem
     companyId: effectiveCompanyId,
     caseId: effectiveCaseId,
     userId,

@@ -283,69 +283,30 @@ export default function App() {
     return `onboarding-${userId}-${orgnr}-${key}`;
   };
 
-  // 🆕 Resume callback: Ladda data och navigera
+  // Resume callback: Ladda data och navigera (STATE MACHINE SIMPLIFIED)
   const handleResume = (data) => {
     console.log('📂 Resuming onboarding:', data);
     
-    // 🆕 Set active onboarding session FIRST (needed for getStorageKey)
+    // Set active onboarding session
     setActiveOnboarding({
       orgnr: data.orgnr,
       companyName: data.companyName,
-      currentStep: data.currentStep
+      currentStep: data.currentStep,
+      state: data.state || 'draft'  // State machine support
     });
     
-    // Populate localStorage med backend-data (cache)
+    // Set global localStorage keys (for IDs and basic info)
     localStorage.setItem('onboardingId', data.onboardingId);
     localStorage.setItem('currentCompanyId', data.company_id);
     localStorage.setItem('currentCompanyName', data.companyName);
     localStorage.setItem('currentOrgnr', data.orgnr);
-    localStorage.setItem(getStorageKey('orgnr'), data.orgnr);
-    localStorage.setItem(getStorageKey('companyName'), data.companyName);
     
-    // Uppdragsval data - restore service selections in questionnaire format
-    if (data.data && data.data.uppdrag) {
-      const uppdragData = data.data.uppdrag;
-      
-      // Save selectedServices array
-      if (uppdragData.selectedServices) {
-        localStorage.setItem(getStorageKey('selectedServices'), JSON.stringify(uppdragData.selectedServices));
-      }
-      
-      // Build questionnaire structure for draft-uppdragsval
-      const draftData = {
-        value: {
-          services: {
-            selected: uppdragData.services || {},
-            expansion: null
-          },
-          orgnr: {
-            selected: data.orgnr,
-            expansion: null
-          },
-          companyName: {
-            selected: data.companyName,
-            expansion: null
-          }
-        },
-        version: 1,
-        timestamp: new Date().toISOString()
-      };
-      localStorage.setItem(getStorageKey('draft-draft-uppdragsval'), JSON.stringify(draftData));
-    }
-    
-    // Riskfrågor Steg 1 data
-    if (data.data.riskfragor_steg1) {
-      localStorage.setItem(getStorageKey('riskfragor-steg-1'), JSON.stringify(data.data.riskfragor_steg1));
-    }
-    
-    // Riskfrågor Extended (steg 2-4)
-    if (data.data.riskfragor_extended) {
-      localStorage.setItem(getStorageKey('riskfragor-extended'), JSON.stringify(data.data.riskfragor_extended));
-    }
+    // useQuestionnaireForm will handle data loading based on state
+    // No need to manually map slide data - state machine takes care of it!
     
     setShowResumeDialog(false);
-    setDialogDismissed(true);  // Prevent re-showing
-    navigate(`/${data.currentStep}`);  // Navigera till där användaren var
+    setDialogDismissed(true);
+    navigate(`/${data.currentStep}`);  // Navigate to current step
   };
 
   // 🆕 New session callback: Stäng dialog och gå till uppdragsval
