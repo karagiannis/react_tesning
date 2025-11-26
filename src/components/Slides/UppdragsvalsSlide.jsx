@@ -193,11 +193,17 @@ export default function UppdragsvalsSlide({ onNext }) {
 
       const data = await response.json();
       
-      // Store onboardingId in localStorage for subsequent API calls
+      // Store critical data in localStorage for subsequent API calls and UI display
       localStorage.setItem('onboardingId', data.onboardingId);
+      localStorage.setItem('currentCompanyId', data.company_id);
+      localStorage.setItem('currentCompanyName', data.companyName || '');
+      localStorage.setItem('currentOrgnr', data.orgnr || '');
       
       console.log('✅ Uppdragsval sparat:', data);
       console.log('📋 onboardingId:', data.onboardingId);
+      console.log('🏢 company_id:', data.company_id);
+      console.log('🏷️ companyName:', data.companyName);
+      console.log('🔢 orgnr:', data.orgnr);
       console.log('💰 Uppskattad kostnad:', data.uppskattadKostnad);
       console.log('📝 Valda tjänster:', data.selectedServices);
       

@@ -60,6 +60,22 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
   const [selectedCompany, setSelectedCompany] = useState(null);
   const autocompleteRef = useRef(null);
 
+  // 🆕 Läs företagsnamn och orgnr från localStorage (sparat från Uppdragsval)
+  useEffect(() => {
+    const savedCompanyName = localStorage.getItem('currentCompanyName');
+    const savedOrgnr = localStorage.getItem('currentOrgnr');
+    
+    if (savedCompanyName && !formData.foretagsnamn) {
+      console.log('📋 Loading company name from localStorage:', savedCompanyName);
+      setCompanyQuery(savedCompanyName);
+      setFormData(prev => ({
+        ...prev,
+        foretagsnamn: savedCompanyName,
+        organisationsnummer: savedOrgnr || prev.organisationsnummer
+      }));
+    }
+  }, []); // Run only once on mount
+
   // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
