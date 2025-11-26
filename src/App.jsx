@@ -295,24 +295,28 @@ export default function App() {
     });
     
     // Populate localStorage med backend-data (cache)
+    localStorage.setItem('onboardingId', data.onboardingId);
+    localStorage.setItem('currentCompanyId', data.company_id);
+    localStorage.setItem('currentCompanyName', data.companyName);
+    localStorage.setItem('currentOrgnr', data.orgnr);
     localStorage.setItem(getStorageKey('orgnr'), data.orgnr);
     localStorage.setItem(getStorageKey('companyName'), data.companyName);
     
     // Uppdragsval data - restore all service selections
-    if (data.data && data.data.services) {
-      // Save full services object (with costs etc)
-      localStorage.setItem(getStorageKey('uppdragsval'), JSON.stringify(data.data.services));
+    if (data.data && data.data.uppdrag) {
+      const uppdragData = data.data.uppdrag;
       
-      // Also save each individual service for UppdragsvalsSlide checkboxes
-      Object.entries(data.data.services).forEach(([serviceKey, serviceData]) => {
-        if (serviceData.selected) {
-          localStorage.setItem(getStorageKey(serviceKey), 'true');
-        }
+      // Save selectedServices array
+      if (uppdragData.selectedServices) {
+        localStorage.setItem(getStorageKey('selectedServices'), JSON.stringify(uppdragData.selectedServices));
+      }
+      
+      // Save individual service flags for checkboxes
+      const serviceNames = uppdragData.selectedServices || [];
+      serviceNames.forEach(serviceName => {
+        const serviceKey = serviceName.toLowerCase().replace(/\s+/g, '-');
+        localStorage.setItem(getStorageKey(serviceKey), 'true');
       });
-    }
-    // Also save selectedServices array for reference
-    if (data.selectedServices) {
-      localStorage.setItem(getStorageKey('selectedServices'), JSON.stringify(data.selectedServices));
     }
     
     // Riskfrågor Steg 1 data
