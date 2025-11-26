@@ -395,20 +395,62 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             if (!isFormValid()) return;
             
             try {
-              // Save to server
-              const success = await pushToServer();
+              // Get required data from localStorage
+              const onboardingId = localStorage.getItem('onboardingId');
+              const token = localStorage.getItem('accessToken');
               
-              if (success) {
-                console.log('✅ Riskfrågor Steg 1 saved');
-                
-                // Pass companyId to parent callback
-                if (formData.isPEP) {
-                  onSkipPEP(companyId);
-                } else {
-                  onNext(companyId);
+              if (!onboardingId) {
+                alert('⚠️ onboardingId saknas. Gå tillbaka till Uppdragsval.');
+                return;
+              }
+              
+              // Prepare request body matching backend RiskAssessmentRequest
+              const requestBody = {
+                orgnr: formData.organisationsnummer,
+                company_name: formData.foretagsnamn,
+                business_idea: formData.affarsIde,
+                customer_types: Object.entries(formData.kundTyper)
+                  .filter(([_, checked]) => checked)
+                  .map(([key]) => key)
+                  .join(', '),
+                foreign_partners: formData.utlandskaPartners,
+                main_suppliers: formData.storaLeverantorer,
+                recent_changes: formData.verksamhetAndrad,
+                personal_number: formData.personnummer,
+                is_pep: formData.isPEP
+              };
+              
+              console.log('📤 Submitting risk assessment:', requestBody);
+              
+              // Submit to backend with onboarding_id query parameter
+              const response = await fetch(
+                `https://celestial.se/tic-tac-toe-api/api/onboarding/risk-assessment?onboarding_id=${onboardingId}`,
+                {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(requestBody)
                 }
+              );
+              
+              if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Kunde inte spara riskbedömning');
+              }
+              
+              const data = await response.json();
+              console.log('✅ Riskfrågor Steg 1 saved:', data);
+              
+              // Also save to localStorage for offline access (optional)
+              updateQuestion('entireForm', formData);
+              
+              // Pass companyId to parent callback
+              if (formData.isPEP) {
+                onSkipPEP(companyId);
               } else {
-                alert('⚠️ Kunde inte spara till server');
+                onNext(companyId);
               }
             } catch (err) {
               console.error('❌ Error saving:', err);

@@ -68,16 +68,20 @@ export default function Header({ onPanelToggle }) {
       if (listResponse.ok) {
         const data = await listResponse.json();
         
-        // Radera alla företag
-        const deletePromises = (data.companies || []).map(company =>
-          fetch(`${API_BASE}/onboarding/delete/${company.orgnr}`, {
+        // Radera alla cases (backend ändrat till case-based structure)
+        const deletePromises = (data.companies || []).map(company => {
+          // Backend kräver nu company_id + onboarding_id (case_id)
+          const companyId = company.company_id;
+          const caseId = company.case_id || company.onboardingId; // case_id är det nya namnet
+          
+          return fetch(`${API_BASE}/onboarding/delete/${companyId}?onboarding_id=${caseId}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             }
-          })
-        );
+          });
+        });
 
         await Promise.all(deletePromises);
         console.log('✅ Alla företag raderade från backend');

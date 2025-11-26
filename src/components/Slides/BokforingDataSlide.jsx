@@ -69,21 +69,31 @@ export default function BokforingDataSlide({ onNext, onBack }) {
 
   const uploadSieFile = async (file) => {
     try {
-      // Hämta JWT token från localStorage
-      const token = localStorage.getItem('jwt_token');
+      // Hämta JWT token och onboardingId från localStorage
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('jwt_token');
+      const onboardingId = localStorage.getItem('onboardingId');
+      const orgnr = localStorage.getItem('currentOrgnr') || localStorage.getItem('temp_orgnr');
+      
       if (!token) {
         setUploadStatus('❌ Ingen inloggning hittad. Logga in igen.');
         return;
       }
-
-      // Hämta orgnr från formuläret (tidigare slide)
-      const orgnr = localStorage.getItem('temp_orgnr') || '555555-5555'; // Fallback
+      
+      if (!onboardingId) {
+        setUploadStatus('❌ onboardingId saknas. Gå tillbaka till Uppdragsval.');
+        return;
+      }
+      
+      if (!orgnr) {
+        setUploadStatus('❌ Organisationsnummer saknas. Gå tillbaka till Uppdragsval.');
+        return;
+      }
 
       const formDataObj = new FormData();
       formDataObj.append('file', file);
-      formDataObj.append('orgnr', orgnr);
 
-      const response = await fetch('http://localhost:8000/api/upload-sie', {
+      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/tic-tac-toe-api/api';
+      const response = await fetch(`${API_BASE}/onboarding/upload-sie?orgnr=${orgnr}&onboarding_id=${onboardingId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
