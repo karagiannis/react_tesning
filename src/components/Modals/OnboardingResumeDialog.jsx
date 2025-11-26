@@ -58,18 +58,25 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
     }
   };
 
-  const handleDelete = async (orgnr, companyName) => {
-    if (!confirm(`Är du säker på att du vill radera onboarding för ${companyName}?\n\nDetta kommer att permanent radera all data för detta företag.`)) {
+  const handleDelete = async (company) => {
+    if (!confirm(`Är du säker på att du vill radera onboarding för ${company.companyName}?\n\nDetta kommer att permanent radera all data för detta företag.`)) {
       return;
     }
 
     try {
-      setDeletingOrgnr(orgnr);
+      setDeletingOrgnr(company.orgnr);
       
       const token = localStorage.getItem('accessToken');
       const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/tic-tac-toe-api/api';
 
-      const response = await fetch(`${API_BASE}/onboarding/delete/${orgnr}`, {
+      const companyId = company.company_id;
+      const caseId = company.case_id || company.onboardingId;
+
+      if (!companyId || !caseId) {
+        throw new Error('company_id eller case_id saknas');
+      }
+
+      const response = await fetch(`${API_BASE}/onboarding/delete/${companyId}?onboarding_id=${caseId}`, {
         method: 'DELETE',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -82,7 +89,7 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
       }
 
       // Ta bort från listan
-      setCompanies(prev => prev.filter(c => c.orgnr !== orgnr));
+      setCompanies(prev => prev.filter(c => c.orgnr !== company.orgnr));
 
       // Om inga företag kvar, gå direkt till ny session
       if (companies.length === 1) {
@@ -96,12 +103,20 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
     }
   };
 
-  const handleContinue = async (orgnr) => {
+  const handleContinue = async (company) => {
     try {
       const token = localStorage.getItem('accessToken');
       const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/tic-tac-toe-api/api';
 
-      const response = await fetch(`${API_BASE}/onboarding/resume/${orgnr}`, {
+      const companyId = company.company_id;
+      const caseId = company.case_id || company.onboardingId;
+
+      if (!companyId || !caseId) {
+        alert('company_id eller case_id saknas');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE}/onboarding/resume/${companyId}?onboarding_id=${caseId}`, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -243,7 +258,7 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
                 <div className="flex gap-2">
                   {/* Fortsätt-knapp */}
                   <button
-                    onClick={() => handleContinue(company.orgnr)}
+                    onClick={() => handleContinue(company)}
                     className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium shadow-sm"
                     title="Fortsätt onboarding"
                   >
@@ -253,7 +268,7 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
 
                   {/* Radera-knapp */}
                   <button
-                    onClick={() => handleDelete(company.orgnr, company.companyName)}
+                    onClick={() => handleDelete(company)}
                     disabled={deletingOrgnr === company.orgnr}
                     className={`p-2 rounded-lg transition-colors ${
                       deletingOrgnr === company.orgnr
