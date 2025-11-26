@@ -302,7 +302,7 @@ export default function App() {
     localStorage.setItem(getStorageKey('orgnr'), data.orgnr);
     localStorage.setItem(getStorageKey('companyName'), data.companyName);
     
-    // Uppdragsval data - restore all service selections
+    // Uppdragsval data - restore service selections in questionnaire format
     if (data.data && data.data.uppdrag) {
       const uppdragData = data.data.uppdrag;
       
@@ -311,12 +311,26 @@ export default function App() {
         localStorage.setItem(getStorageKey('selectedServices'), JSON.stringify(uppdragData.selectedServices));
       }
       
-      // Save individual service flags for checkboxes
-      const serviceNames = uppdragData.selectedServices || [];
-      serviceNames.forEach(serviceName => {
-        const serviceKey = serviceName.toLowerCase().replace(/\s+/g, '-');
-        localStorage.setItem(getStorageKey(serviceKey), 'true');
-      });
+      // Build questionnaire structure for draft-uppdragsval
+      const draftData = {
+        value: {
+          services: {
+            selected: uppdragData.services || {},
+            expansion: null
+          },
+          orgnr: {
+            selected: data.orgnr,
+            expansion: null
+          },
+          companyName: {
+            selected: data.companyName,
+            expansion: null
+          }
+        },
+        version: 1,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem(getStorageKey('draft-draft-uppdragsval'), JSON.stringify(draftData));
     }
     
     // Riskfrågor Steg 1 data
