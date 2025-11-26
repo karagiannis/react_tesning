@@ -404,6 +404,13 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
                 return;
               }
               
+              // Map checkbox keys to Swedish display names for backend
+              const customerTypeMap = {
+                privatpersoner: 'Privatpersoner',
+                foretag: 'Företag',
+                offentligSektor: 'Offentlig sektor'
+              };
+
               // Prepare request body matching backend RiskAssessmentRequest
               const requestBody = {
                 orgnr: formData.organisationsnummer,
@@ -411,11 +418,10 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
                 business_idea: formData.affarsIde,
                 customer_types: Object.entries(formData.kundTyper)
                   .filter(([_, checked]) => checked)
-                  .map(([key]) => key)
-                  .join(', '),
-                foreign_partners: formData.utlandskaPartners,
-                main_suppliers: formData.storaLeverantorer,
-                recent_changes: formData.verksamhetAndrad,
+                  .map(([key]) => customerTypeMap[key]),  // Map to Swedish names
+                foreign_partners: formData.utlandskaPartners || '',
+                main_suppliers: formData.storaLeverantorer || '',
+                recent_changes: formData.verksamhetAndrad || '',
                 personal_number: formData.personnummer,
                 is_pep: formData.isPEP
               };
