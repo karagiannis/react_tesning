@@ -488,9 +488,10 @@ export default function App() {
               <UppdragsvalsSlide 
                 onNext={(data) => {
                   console.log('✅ Onboarding created:', data);
-                  console.log('📋 company_id:', data.onboardingId);
-                  // Navigate to riskfragor with company_id
-                  navigate(`/riskfragor/${data.onboardingId}`);
+                  console.log('📋 company_id:', data.company_id);
+                  console.log('📋 onboardingId:', data.onboardingId);
+                  // Navigate to riskfragor with company_id AND caseId
+                  navigate(`/riskfragor/${data.company_id}/${data.onboardingId}`);
                 }} 
               />
             } />
@@ -504,7 +505,7 @@ export default function App() {
                 }} 
               />
             } />
-            <Route path="/riskfragor/:companyId" element={
+            <Route path="/riskfragor/:companyId/:caseId" element={
               <RiskFragorSlide 
                 onNext={(companyId) => {
                   // Navigate to steg 2 with companyId
@@ -522,7 +523,7 @@ export default function App() {
                 }}
               />
             } />
-            <Route path="/riskfragor/steg2/:companyId" element={
+            <Route path="/riskfragor/steg2/:companyId/:caseId" element={
               <RiskFragorSteg2Slide 
                 onNext={(companyId) => {
                   console.log('Steg 2 complete, company:', companyId);
@@ -530,7 +531,7 @@ export default function App() {
                 }}
               />
             } />
-            <Route path="/riskfragor/steg3/:companyId" element={
+            <Route path="/riskfragor/steg3/:companyId/:caseId" element={
               <RiskFragorSteg3Slide 
                 onNext={(companyId) => {
                   console.log('Steg 3 complete, company:', companyId);
@@ -538,7 +539,7 @@ export default function App() {
                 }}
               />
             } />
-            <Route path="/riskfragor/steg4/:companyId" element={
+            <Route path="/riskfragor/steg4/:companyId/:caseId" element={
               <RiskFragorSteg4Slide 
                 onNext={(companyId) => {
                   console.log('Steg 4 complete, triggering Roaring.io fetch');
