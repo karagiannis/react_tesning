@@ -279,48 +279,6 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             </label>
           </div>
         </div>
-              rows={2}
-              placeholder="Beskriv eventuella förändringar..."
-            />
-          </div>
-
-          {/* Personnummer */}
-          <div>
-            <label className="block text-sm font-medium text-brand-800 mb-2">
-              Personnummer *
-            </label>
-            <input
-              type="text"
-              value={formData.personnummer}
-              onChange={(e) => handleChange('personnummer', e.target.value)}
-              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
-              placeholder="YYYYMMDD-XXXX"
-            />
-            <p className="text-xs text-brand-600 mt-1">
-              Personnumret används för att hämta officiell information från Bolagsverket eller Roaring.io.
-            </p>
-          </div>
-
-          {/* PEP-fråga */}
-          <div className="bg-brand-50 border-l-4 border-brand-500 p-4 rounded-box">
-            <label className="flex items-start gap-3">
-              <input
-                type="checkbox"
-                checked={formData.isPEP}
-                onChange={(e) => handleChange('isPEP', e.target.checked)}
-                className="mt-1 w-5 h-5 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
-              />
-              <div>
-                <span className="block text-section-title text-brand-900">
-                  Är du eller någon i företaget en PEP (person i politiskt utsatt ställning)?
-                </span>
-                <span className="text-xs text-brand-700">
-                  Detta inkluderar personer som innehar eller har innehaft höga offentliga ämbeten.
-                </span>
-              </div>
-            </label>
-          </div>
-        </div>
 
         <button
           onClick={async () => {
@@ -329,7 +287,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             try {
               // Get required data from localStorage
               const onboardingId = localStorage.getItem('onboardingId');
-if (!onboardingId) {
+              if (!onboardingId) {
                 alert('⚠️ onboardingId saknas. Gå tillbaka till Uppdragsval.');
                 return;
               }
