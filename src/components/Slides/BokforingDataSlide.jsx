@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { fetchWithAuth } from '../../utils/auth';
 import { useParams } from 'react-router-dom';
 import FileDropZone from '../Shared/FileDropZone';
 import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
@@ -20,7 +21,7 @@ export default function BokforingDataSlide({ onNext, onBack }) {
     iban: '',
     sieFile: null,
     skattekontoFile: null,
-    selectedProvider: null,
+    selectedProvider: null
   });
 
   // Sync to questionnaire hook
@@ -93,11 +94,9 @@ export default function BokforingDataSlide({ onNext, onBack }) {
       formDataObj.append('file', file);
 
       const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/tic-tac-toe-api/api';
-      const response = await fetch(`${API_BASE}/onboarding/upload-sie?orgnr=${orgnr}&onboarding_id=${onboardingId}`, {
+      const response = await fetchWithAuth(`${API_BASE}/onboarding/upload-sie?orgnr=${orgnr}&onboarding_id=${onboardingId}`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        headers: {},
         body: formDataObj
       });
 

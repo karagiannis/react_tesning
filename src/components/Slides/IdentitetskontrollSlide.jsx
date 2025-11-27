@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { fetchWithAuth } from '../../utils/auth';
 import { useParams, useNavigate } from 'react-router-dom';
 import Icon from '../Shared/Icon';
 import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
@@ -17,7 +18,7 @@ export default function IdentitetskontrollSlide({ onNext }) {
     updateQuestion,
     isLoading: syncLoading,
     syncStatus,
-    pushToServer,
+    pushToServer
   } = useQuestionnaireForm(
     'identitetskontroll',
     QUESTIONS_CONFIG
@@ -256,7 +257,7 @@ export default function IdentitetskontrollSlide({ onNext }) {
                     try {
                       // Convert base64 to blob
                       const base64Data = capturedImage.split(',')[1];
-                      const blob = await fetch(`data:image/png;base64,${base64Data}`).then(r => r.blob());
+                      const blob = await fetchWithAuth(`data:image/png;base64,${base64Data}`).then(r => r.blob());
                       
                       // Create FormData for multipart upload
                       const formDataUpload = new FormData();
@@ -264,12 +265,9 @@ export default function IdentitetskontrollSlide({ onNext }) {
                       formDataUpload.append('orgnr', orgnr);
                       
                       // Upload to backend
-                      const token = localStorage.getItem('accessToken');
-                      const response = await fetch(`https://celestial.se/tic-tac-toe-api/api/onboarding/${orgnr}/upload-identity-photo`, {
+const response = await fetchWithAuth(`https://celestial.se/tic-tac-toe-api/api/onboarding/${orgnr}/upload-identity-photo`, {
                         method: 'POST',
-                        headers: {
-                          'Authorization': `Bearer ${token}`,
-                        },
+                        headers: {},
                         body: formDataUpload
                       });
                       

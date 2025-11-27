@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { fetchWithAuth } from '../../utils/auth';
 import { useParams } from 'react-router-dom';
 import Icon from '../Shared/Icon';
 import FileDropZone from '../Shared/FileDropZone';
@@ -55,31 +56,31 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
 
   const [formData, setFormData] = useState(savedFormData?.entireForm?.formData || {
     registreringsbevis: null,
-    arsredovisning: null,
+    arsredovisning: null
   });
 
   const [uploadStatus, setUploadStatus] = useState(savedFormData?.entireForm?.uploadStatus || {
     registreringsbevis: '',
-    arsredovisning: '',
+    arsredovisning: ''
   });
 
   const [isDragging, setIsDragging] = useState({
     registreringsbevis: false,
-    arsredovisning: false,
+    arsredovisning: false
   });
 
   const [parsedData, setParsedData] = useState(savedFormData?.entireForm?.parsedData || {
-    registreringsbevis: null,
+    registreringsbevis: null
   });
   
   const [uploadedFiles, setUploadedFiles] = useState(savedFormData?.entireForm?.uploadedFiles || {
     registreringsbevis: null,
-    arsredovisning: null,
+    arsredovisning: null
   });
   
   const [isUploading, setIsUploading] = useState({
     registreringsbevis: false,
-    arsredovisning: false,
+    arsredovisning: false
   });
 
   // Sync to questionnaire hook
@@ -93,11 +94,10 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
       if (!orgnr) return;
       
       try {
-        const token = localStorage.getItem('accessToken');
-        const response = await fetch(
+const response = await fetchWithAuth(
           `https://celestial.se/tic-tac-toe-api/api/onboarding/${orgnr}/roaring-data`,
           {
-            headers: { 'Authorization': `Bearer ${token}` },
+            headers: {}
           }
         );
         
@@ -107,7 +107,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
           if (data.uploaded_documents) {
             setUploadedFiles({
               registreringsbevis: data.uploaded_documents.registreringsbevis || null,
-              arsredovisning: data.uploaded_documents.arsredovisning || null,
+              arsredovisning: data.uploaded_documents.arsredovisning || null
             });
           }
         }
@@ -157,19 +157,16 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
 
     // Upload to backend
     try {
-      const token = localStorage.getItem('accessToken');
-      const formDataUpload = new FormData();
+const formDataUpload = new FormData();
       formDataUpload.append('file', file);
       formDataUpload.append('document_type', field);
       
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `https://celestial.se/tic-tac-toe-api/api/onboarding/${orgnr}/upload-document`,
         {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          body: formDataUpload,
+          headers: {},
+          body: formDataUpload
         }
       );
       
@@ -184,7 +181,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
         [field]: {
           filename: result.filename,
           size: result.file_size,
-          uploaded_at: result.uploaded_at,
+          uploaded_at: result.uploaded_at
         }
       }));
       
@@ -222,7 +219,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
             { namn: 'Rafal Andrzej Szalasny', personnummer: '841103-4112', roll: 'VD' },
             { namn: 'Jarmila Anna Szalasny', personnummer: '791210-3988', roll: 'Suppleant' }
           ],
-          registreringsdatum: '2018-09-10',
+          registreringsdatum: '2018-09-10'
         }
       }));
     }, 1500);
@@ -269,7 +266,7 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
     await pushToServer();
     onNext({
       ...formData,
-      parsedData: parsedData.registreringsbevis,
+      parsedData: parsedData.registreringsbevis
     });
   };
 

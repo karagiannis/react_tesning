@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { fetchWithAuth } from '../../utils/auth';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Info, ChevronRight } from 'lucide-react';
 import { getLegalTextsForQuestion, legalTexts } from '../../data/legalTexts';
@@ -20,7 +21,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
     updateQuestion,
     isLoading: syncLoading,
     syncStatus,
-    pushToServer,
+    pushToServer
   } = useQuestionnaireForm(
     'riskfragor_steg3',
     QUESTIONS_CONFIG
@@ -32,14 +33,14 @@ export default function RiskFragorSteg3Slide({ onNext }) {
       kortbetalning: false,
       faktura: false,
       kontanter: false,
-      kryptovaluta: false,
+      kryptovaluta: false
     },
     kontanterAndel: '',
     kontanthanteringstillstand: '',
     storaTransaktioner: '',
     tredjepartsbetalningar: '',
     utlandskaOverforingar: '',
-    utlandskaLander: '',
+    utlandskaLander: ''
   };
 
   const setFormData = (updater) => {
@@ -74,18 +75,15 @@ export default function RiskFragorSteg3Slide({ onNext }) {
     }
 
     // Send data to backend via PATCH
-    const token = localStorage.getItem('accessToken');
-    const onboardingId = localStorage.getItem('onboardingId');
+const onboardingId = localStorage.getItem('onboardingId');
 
     if (token && onboardingId) {
       try {
-        const response = await fetch(
+        const response = await fetchWithAuth(
           `https://celestial.se/tic-tac-toe-api/api/onboarding/risk-assessment-extended?onboarding_id=${onboardingId}`,
           {
             method: 'PATCH',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
+            headers: {'Content-Type': 'application/json'
             },
             body: JSON.stringify({ steg3: formData })
           }

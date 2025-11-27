@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { fetchWithAuth } from '../../utils/auth';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Info } from 'lucide-react';
 import { searchCompanies, getCompanyByOrgNr } from '../../data/mockCompanyAutocomplete';
@@ -24,7 +25,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     updateQuestion,
     isLoading: syncLoading,
     syncStatus,
-    pushToServer,
+    pushToServer
   } = useQuestionnaireForm(
     'riskfragor_steg1',
     QUESTIONS_CONFIG
@@ -36,7 +37,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     kundTyper: {
       privatpersoner: false,
       foretag: false,
-      offentligSektor: false,
+      offentligSektor: false
     },
     utlandskaPartners: '',
     storaLeverantorer: '',
@@ -44,7 +45,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     foretagsnamn: '',
     organisationsnummer: '',
     personnummer: '',
-    isPEP: false,
+    isPEP: false
   };
 
   // Setter that updates the brute force field
@@ -397,9 +398,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             try {
               // Get required data from localStorage
               const onboardingId = localStorage.getItem('onboardingId');
-              const token = localStorage.getItem('accessToken');
-              
-              if (!onboardingId) {
+if (!onboardingId) {
                 alert('⚠️ onboardingId saknas. Gå tillbaka till Uppdragsval.');
                 return;
               }
@@ -429,13 +428,11 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
               console.log('📤 Submitting risk assessment:', requestBody);
               
               // Submit to backend with onboarding_id query parameter
-              const response = await fetch(
+              const response = await fetchWithAuth(
                 `https://celestial.se/tic-tac-toe-api/api/onboarding/risk-assessment?onboarding_id=${onboardingId}`,
                 {
                   method: 'POST',
-                  headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
+                  headers: {'Content-Type': 'application/json'
                   },
                   body: JSON.stringify(requestBody)
                 }
