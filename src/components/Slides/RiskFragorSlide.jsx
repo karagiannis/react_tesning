@@ -55,6 +55,13 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
   const [companyNameDisplay, setCompanyNameDisplay] = useState('');
   const [orgnrDisplay, setOrgnrDisplay] = useState('');
 
+  // Initialize entireForm with default data if null
+  useEffect(() => {
+    if (hookFormData.entireForm === null) {
+      updateQuestion('entireForm', formData);
+    }
+  }, []);
+
   useEffect(() => {
     const savedCompanyName = localStorage.getItem('currentCompanyName');
     const savedOrgnr = localStorage.getItem('currentOrgnr');

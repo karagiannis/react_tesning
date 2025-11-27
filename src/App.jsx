@@ -317,10 +317,24 @@ export default function App() {
     localStorage.setItem('currentCompanyName', data.companyName);
     localStorage.setItem('currentOrgnr', data.orgnr);
     
+    // Extract userId from JWT token
+    const getUserId = () => {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return 'anonymous';
+      try {
+        const payload = token.split('.')[1];
+        const decoded = JSON.parse(atob(payload));
+        return decoded.sub || decoded.user_id || decoded.email || 'anonymous';
+      } catch (e) {
+        console.error('Failed to decode JWT:', e);
+        return 'anonymous';
+      }
+    };
+    
     // Write slide data to localStorage (useQuestionnaireForm cache)
     // Resume endpoint returns data.data with per-slide structure
     if (data.data) {
-      const userId = localStorage.getItem('userId');
+      const userId = getUserId();
       Object.entries(data.data).forEach(([slideKey, slideData]) => {
         const cacheKey = `onboarding-${userId}-${data.onboardingId}-draft-${slideKey}`;
         const cacheValue = {
