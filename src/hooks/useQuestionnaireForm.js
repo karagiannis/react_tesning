@@ -11,6 +11,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { getStateMachineBehavior, STATES } from './useOnboardingStateMachine';
 
 /**
  * Generic hook för formulärdata med state machine architecture
@@ -151,64 +152,41 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
         const metadata = await response.json();
         setCaseMetadata(metadata);
 
-        // STATE MACHINE: Determine behavior based on metadata.state
-        const serverState = metadata.state || 'draft';
-
-        switch (serverState) {
-          case 'draft': {
-            // Draft mode - localStorage has priority (offline-first)
-            const localDraft = readFromStorage(storageKey);
-            if (localDraft) {
-              setFormData(localDraft.value);
-              setFormState('draft-offline');
-            } else {
-              // No local draft, read from metadata.json
-              const serverDraft = metadata.data?.[slideKey];
-              if (serverDraft) {
-                setFormData(serverDraft);
-                writeToStorage(storageKey, serverDraft, 0);
-              }
-              setFormState('draft-synced');
-            }
-            break;
-          }
-
-          case 'submitted': {
-            // Submitted - server is source of truth (read-only)
-            const submittedData = metadata.data?.[slideKey];
-            if (submittedData) {
-              setFormData(submittedData);
-            }
-            setFormState('submitted-readonly');
-            break;
-          }
-
-          case 'locked': {
-            // Locked by another user
-            const lockedData = metadata.data?.[slideKey];
-            if (lockedData) {
-              setFormData(lockedData);
-            }
-            setFormState('locked');
-            console.warn(`⚠️ Case is locked by ${metadata.locked_by || 'another user'}`);
-            break;
-          }
-
-          case 'completed': {
-            // Entire case completed
-            const completedData = metadata.data?.[slideKey];
-            if (completedData) {
-              setFormData(completedData);
-            }
-            setFormState('completed-archived');
-            break;
-          }
-
-          default: {
-            // New slide, no data
-            setFormState('new');
+        // NEW STATE MACHINE: Use centralized state machine logic
+        const behavior = getStateMachineBehavior(metadata, slideKey);
+        console.log(`🎰 State Machine: ${behavior.state} - ${behavior.message}`);
+        
+        let loadedData = null;
+        
+        // Load from cache if allowed
+        if (behavior.shouldLoadFromCache) {
+          const cached = readFromStorage(storageKey);
+          if (cached) {
+            loadedData = cached.value;
+            console.log(`📦 Loaded from cache for slide: ${slideKey}`);
           }
         }
+        
+        // Load from server if no cache or server has priority
+        if (!loadedData && behavior.shouldLoadFromServer) {
+          const serverData = metadata.data?.[slideKey];
+          if (serverData) {
+            loadedData = serverData;
+            console.log(`☁️ Loaded from server for slide: ${slideKey}`);
+            // Cache server data for offline access
+            if (behavior.canEdit) {
+              writeToStorage(storageKey, serverData, 0);
+            }
+          }
+        }
+        
+        // Set form data
+        if (loadedData) {
+          setFormData(loadedData);
+        }
+        
+        // Set form state based on state machine
+        setFormState(behavior.state);
 
       } catch (error) {
         console.error('Failed to load case metadata:', error);
@@ -228,9 +206,9 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     loadData();
   }, [slideKey, effectiveCompanyId, effectiveCaseId, storageKey]);
 
-  // Auto-save to localStorage when formData changes (only in draft states)
+  // Auto-save to localStorage when formData changes (only if editable)
   useEffect(() => {
-    if (!isLoading && ['draft-offline', 'draft-synced', 'new'].includes(formState)) {
+    if (!isLoading && [STATES.NEW, STATES.DRAFT].includes(formState)) {
       const localData = readFromStorage(storageKey);
       writeToStorage(storageKey, formData, localData?.version || 0);
       console.log(`💾 Auto-saved ${slideKey} to localStorage (state: ${formState})`);
