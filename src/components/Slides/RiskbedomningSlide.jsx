@@ -14,8 +14,8 @@ export default function RiskbedomningSlide({ onNext, onBack }) {
     QUESTIONS_CONFIG
   );
 
-  const [decision, setDecision] = useState(savedFormData?.decision || '');
-  const [monthlyPrice, setMonthlyPrice] = useState(savedFormData?.monthlyPrice || '');
+  const [decision, setDecision] = useState(savedFormData?.entireForm?.decision || '');
+  const [monthlyPrice, setMonthlyPrice] = useState(savedFormData?.entireForm?.monthlyPrice || '');
   const [showError, setShowError] = useState(false);
 
   // Sync state changes

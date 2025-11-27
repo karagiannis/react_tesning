@@ -14,9 +14,9 @@ export default function DeklarationsombudSlide({ onNext, onBack }) {
     QUESTIONS_CONFIG
   );
 
-  const [hasAddedOmbud, setHasAddedOmbud] = useState(savedFormData?.hasAddedOmbud || false);
+  const [hasAddedOmbud, setHasAddedOmbud] = useState(savedFormData?.entireForm?.hasAddedOmbud || false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isVerified, setIsVerified] = useState(savedFormData?.isVerified || false);
+  const [isVerified, setIsVerified] = useState(savedFormData?.entireForm?.isVerified || false);
   const [verificationError, setVerificationError] = useState('');
 
   // Sync state changes

@@ -14,9 +14,9 @@ export default function BankRattigheterSlide({ onNext, onBack }) {
     QUESTIONS_CONFIG
   );
 
-  const [selectedBank, setSelectedBank] = useState(savedFormData?.selectedBank || '');
-  const [hasGrantedAccess, setHasGrantedAccess] = useState(savedFormData?.hasGrantedAccess || false);
-  const [showConfirmation, setShowConfirmation] = useState(savedFormData?.showConfirmation || false);
+  const [selectedBank, setSelectedBank] = useState(savedFormData?.entireForm?.selectedBank || '');
+  const [hasGrantedAccess, setHasGrantedAccess] = useState(savedFormData?.entireForm?.hasGrantedAccess || false);
+  const [showConfirmation, setShowConfirmation] = useState(savedFormData?.entireForm?.showConfirmation || false);
 
   // Sync state changes
   useEffect(() => {

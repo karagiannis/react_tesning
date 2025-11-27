@@ -15,10 +15,10 @@ export default function SkyldigheterSlide({ onNext, onBack }) {
   );
 
   // Load from formData or use defaults
-  const [acknowledged, setAcknowledged] = useState(savedFormData?.acknowledged || false);
+  const [acknowledged, setAcknowledged] = useState(savedFormData?.entireForm?.acknowledged || false);
   const [showComplianceModal, setShowComplianceModal] = useState(false);
   const [complianceChecks, setComplianceChecks] = useState(
-    savedFormData?.complianceChecks || {
+    savedFormData?.entireForm?.complianceChecks || {
       kontanter: false,
       vinstmarginal: false,
       betalningUtanFaktura: false,

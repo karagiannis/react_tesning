@@ -14,15 +14,15 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
     QUESTIONS_CONFIG
   );
 
-  const [hasReadContract, setHasReadContract] = useState(formData?.hasReadContract || false);
+  const [hasReadContract, setHasReadContract] = useState(formData?.entireForm?.hasReadContract || false);
   const [isSigningInProgress, setIsSigningInProgress] = useState(false);
-  const [isSigned, setIsSigned] = useState(formData?.isSigned || false);
-  const [signatureData, setSignatureData] = useState(formData?.signatureData || null);
+  const [isSigned, setIsSigned] = useState(formData?.entireForm?.isSigned || false);
+  const [signatureData, setSignatureData] = useState(formData?.entireForm?.signatureData || null);
   
   // LaTeX template state
   const [contractTemplate, setContractTemplate] = useState(null);
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(true);
-  const [finalContractUrl, setFinalContractUrl] = useState(formData?.finalContractUrl || null);
+  const [finalContractUrl, setFinalContractUrl] = useState(formData?.entireForm?.finalContractUrl || null);
   const [isGeneratingContract, setIsGeneratingContract] = useState(false);
 
   // Sync state changes

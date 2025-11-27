@@ -54,12 +54,12 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
     QUESTIONS_CONFIG
   );
 
-  const [formData, setFormData] = useState(savedFormData?.formData || {
+  const [formData, setFormData] = useState(savedFormData?.entireForm?.formData || {
     registreringsbevis: null,
     arsredovisning: null
   });
 
-  const [uploadStatus, setUploadStatus] = useState(savedFormData?.uploadStatus || {
+  const [uploadStatus, setUploadStatus] = useState(savedFormData?.entireForm?.uploadStatus || {
     registreringsbevis: '',
     arsredovisning: ''
   });
@@ -69,11 +69,11 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
     arsredovisning: false
   });
 
-  const [parsedData, setParsedData] = useState(savedFormData?.parsedData || {
+  const [parsedData, setParsedData] = useState(savedFormData?.entireForm?.parsedData || {
     registreringsbevis: null
   });
   
-  const [uploadedFiles, setUploadedFiles] = useState(savedFormData?.uploadedFiles || {
+  const [uploadedFiles, setUploadedFiles] = useState(savedFormData?.entireForm?.uploadedFiles || {
     registreringsbevis: null,
     arsredovisning: null
   });
