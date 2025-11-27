@@ -1,16 +1,20 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { fetchWithAuth } from '../../utils/auth';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Info } from 'lucide-react';
-import { searchCompanies, getCompanyByOrgNr } from '../../data/mockCompanyAutocomplete';
 import StepIndicator from '../Shared/StepIndicator';
 import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 import { useAgreements } from '../../contexts/AgreementContext';
 import AgreementModal from '../Modals/AgreementModal';
 
-// BRUTE FORCE CONFIG: Single question that stores entire complex formData object
+// UNIFIED DATA PROTOCOL: Structured q1-q7 config
 const QUESTIONS_CONFIG = {
-  entireForm: { type: 'object', required: false }
+  q1: { type: 'textarea', required: true },   // Affärsidé
+  q2: { type: 'checkbox', required: true },   // Kundtyper
+  q3: { type: 'textarea', required: false },  // Utländska partners
+  q4: { type: 'textarea', required: false },  // Största leverantörer
+  q5: { type: 'textarea', required: false },  // Verksamhetsändring
+  q6: { type: 'text', required: true },       // Personnummer
+  q7: { type: 'boolean', required: true }     // PEP
 };
 
 export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange }) {
@@ -31,67 +35,55 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     QUESTIONS_CONFIG
   );
 
-  // Extract actual form data from hook (brute force: everything in entireForm.selected)
-  const formData = hookFormData.entireForm?.selected || {
-    affarsIde: '',
-    kundTyper: {
+  // Extract form data using new q1-q7 structure
+  const formData = {
+    affarsIde: hookFormData.q1?.value || '',
+    kundTyper: hookFormData.q2?.value || {
       privatpersoner: false,
       foretag: false,
       offentligSektor: false
     },
-    utlandskaPartners: '',
-    storaLeverantorer: '',
-    verksamhetAndrad: '',
-    foretagsnamn: '',
-    organisationsnummer: '',
-    personnummer: '',
-    isPEP: false
+    utlandskaPartners: hookFormData.q3?.value || '',
+    storaLeverantorer: hookFormData.q4?.value || '',
+    verksamhetAndrad: hookFormData.q5?.value || '',
+    personnummer: hookFormData.q6?.value || '',
+    isPEP: hookFormData.q7?.value || false
   };
 
-  // Setter that updates the brute force field
+  // Setters for each question
   const setFormData = (updater) => {
     const newData = typeof updater === 'function' ? updater(formData) : updater;
-    updateQuestion('entireForm', newData);
+    
+    // Map back to q1-q7 structure
+    updateQuestion('q1', newData.affarsIde);
+    updateQuestion('q2', newData.kundTyper);
+    updateQuestion('q3', newData.utlandskaPartners);
+    updateQuestion('q4', newData.storaLeverantorer);
+    updateQuestion('q5', newData.verksamhetAndrad);
+    updateQuestion('q6', newData.personnummer);
+    updateQuestion('q7', newData.isPEP);
   };
 
-  // Autocomplete state
-  const [companyQuery, setCompanyQuery] = useState(formData.foretagsnamn || '');
-  const [companySuggestions, setCompanySuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedCompany, setSelectedCompany] = useState(null);
-  const autocompleteRef = useRef(null);
+  // Get företagsnamn and orgnr from localStorage (set by Uppdragsval or handleResume)
+  // These are NOT stored in q1-q7, just displayed for confirmation
+  const [companyNameDisplay, setCompanyNameDisplay] = useState('');
+  const [orgnrDisplay, setOrgnrDisplay] = useState('');
 
-  // 🆕 Läs företagsnamn och orgnr från localStorage (sparat från Uppdragsval)
   useEffect(() => {
     const savedCompanyName = localStorage.getItem('currentCompanyName');
     const savedOrgnr = localStorage.getItem('currentOrgnr');
     
-    if (savedCompanyName && !formData.foretagsnamn) {
-      console.log('📋 Loading company name from localStorage:', savedCompanyName);
-      setCompanyQuery(savedCompanyName);
-      setFormData(prev => ({
-        ...prev,
-        foretagsnamn: savedCompanyName,
-        organisationsnummer: savedOrgnr || prev.organisationsnummer
-      }));
+    if (savedCompanyName) {
+      console.log('📋 Loading company info from localStorage:', savedCompanyName, savedOrgnr);
+      setCompanyNameDisplay(savedCompanyName);
+      setOrgnrDisplay(savedOrgnr || '');
     }
   }, []); // Run only once on mount
 
-  // Close suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   // Kolla om agreement krävs när kritisk data finns
   useEffect(() => {
-    const hasCompanyName = formData.foretagsnamn && formData.foretagsnamn.trim() !== '';
-    const hasOrgNr = formData.organisationsnummer && formData.organisationsnummer.trim() !== '';
+    const hasCompanyName = companyNameDisplay && companyNameDisplay.trim() !== '';
+    const hasOrgNr = orgnrDisplay && orgnrDisplay.trim() !== '';
     const hasPersonNr = formData.personnummer && formData.personnummer.trim() !== '';
     const hasBusinessDescription = formData.affarsIde && formData.affarsIde.trim() !== '';
     
@@ -103,76 +95,23 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     } else {
       setShowAgreementModal(false);
     }
-  }, [formData.foretagsnamn, formData.organisationsnummer, formData.personnummer, formData.affarsIde, hasAnyAgreement]);
+  }, [companyNameDisplay, orgnrDisplay, formData.personnummer, formData.affarsIde, hasAnyAgreement]);
 
-  const handleChange = (field, value) => {
-    const newFormData = { ...formData, [field]: value };
-    setFormData(newFormData);
+  const handleChange = (questionId, value) => {
+    updateQuestion(questionId, value);
     
-    // Om användaren manuellt ändrar org.nr → ta bort selectedCompany (manuell override)
-    if (field === 'organisationsnummer' && selectedCompany) {
-      setSelectedCompany(null);
-    }
-    
-    // Notify parent immediately when org/pers nummer changes
-    if ((field === 'organisationsnummer' || field === 'personnummer') && onFormDataChange) {
+    // Notify parent immediately when personnummer changes
+    if (questionId === 'q6' && onFormDataChange) {
       onFormDataChange({
-        organisationsnummer: field === 'organisationsnummer' ? value : formData.organisationsnummer,
-        personnummer: field === 'personnummer' ? value : formData.personnummer
+        organisationsnummer: orgnrDisplay,
+        personnummer: value
       });
     }
   };
 
   const handleCheckboxChange = (field, checked) => {
-    setFormData(prev => ({
-      ...prev,
-      kundTyper: { ...prev.kundTyper, [field]: checked }
-    }));
-  };
-
-  const handleCompanySearch = (query) => {
-    setCompanyQuery(query);
-    
-    // Om användaren raderar företagsnamnet → rensa även org.nr och selectedCompany
-    if (query.trim() === '') {
-      setSelectedCompany(null);
-      setFormData(prev => ({
-        ...prev,
-        foretagsnamn: '',
-        organisationsnummer: ''
-      }));
-      setCompanySuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-    
-    if (query.length >= 2) {
-      const results = searchCompanies(query);
-      setCompanySuggestions(results);
-      setShowSuggestions(true);
-    } else {
-      setCompanySuggestions([]);
-      setShowSuggestions(false);
-    }
-  };
-
-  const handleCompanySelect = (company) => {
-    setSelectedCompany(company);
-    setCompanyQuery(company.name);
-    setFormData(prev => ({
-      ...prev,
-      foretagsnamn: company.name,
-      organisationsnummer: company.orgNr
-    }));
-    setShowSuggestions(false);
-    
-    // Notify parent
-    if (onFormDataChange) {
-      onFormDataChange({
-        organisationsnummer: company.orgNr,
-        personnummer: formData.personnummer
-      });
-    }
+    const newKundTyper = { ...formData.kundTyper, [field]: checked };
+    updateQuestion('q2', newKundTyper);
   };
 
   const isFormValid = () => {
@@ -180,7 +119,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     const personnummerValid = formData.personnummer.replace(/\D/g, '').length >= 12;
     
     return formData.affarsIde.trim() && 
-           formData.organisationsnummer.trim() && 
+           orgnrDisplay.trim() &&  // Use display value from localStorage
            personnummerValid;
   };
 
@@ -211,71 +150,21 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
         </p>
 
         <div className="space-y-4">
-          {/* Affärsidé */}
+          {/* Q1: Affärsidé */}
           <div>
             <label className="block text-section-title text-brand-800 mb-2">
               Vad är företagets huvudsakliga affärsidé? *
             </label>
             <textarea
               value={formData.affarsIde}
-              onChange={(e) => handleChange('affarsIde', e.target.value)}
+              onChange={(e) => handleChange('q1', e.target.value)}
               className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               rows={3}
               placeholder="Beskriv kort företagets verksamhet..."
             />
           </div>
 
-          {/* Företagsnamn och Organisationsnummer (READ-ONLY - förifyllt från Uppdragsval) */}
-          <div className="bg-amber-50 border-l-4 border-amber-400 rounded-box p-4 mb-4">
-            <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-              <Info className="w-5 h-5 text-amber-600" />
-              Organisationsnummer anges nu i Uppdragsval (första steget)
-            </h3>
-            <p className="text-sm text-gray-700 mb-3">
-              <strong>ARKITEKTONISK ÄNDRING (2025-11-21):</strong> Organisationsnummer har flyttats 
-              till Uppdragsval för att möjliggöra "Parkera och Avsluta"-funktionalitet. 
-              Fälten nedan är förifyllda från Uppdragsval och visas endast för bekräftelse.
-            </p>
-            <p className="text-sm text-gray-700">
-              <strong>Om fel företag valts:</strong> Gå tillbaka till Uppdragsval via sidebar för att ändra organisationsnummer.
-            </p>
-          </div>
-
-          {/* Företagsnamn (READ-ONLY) */}
-          <div>
-            <label className="block text-section-title text-brand-800 mb-2 flex items-center gap-2">
-              Företagsnamn (förifyllt från Uppdragsval)
-            </label>
-            <input
-              type="text"
-              value={companyQuery || formData.foretagsnamn}
-              readOnly
-              disabled
-              className="w-full px-4 py-2 border border-gray-300 rounded-box-sm bg-gray-100 text-gray-600 cursor-not-allowed text-sm"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Detta fält kan inte redigeras här. Ändra i Uppdragsval om behov finns.
-            </p>
-          </div>
-
-          {/* Organisationsnummer (READ-ONLY) */}
-          <div>
-            <label className="block text-section-title text-brand-800 mb-2">
-              Organisationsnummer (förifyllt från Uppdragsval)
-            </label>
-            <input
-              type="text"
-              value={formData.organisationsnummer}
-              readOnly
-              disabled
-              className="w-full px-4 py-2 border border-gray-300 rounded-box-sm bg-gray-100 text-gray-600 cursor-not-allowed text-sm"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Detta fält kan inte redigeras här. Ändra i Uppdragsval om behov finns.
-            </p>
-          </div>
-
-          {/* Kundtyper */}
+          {/* Q2: Kundtyper */}
           <div>
             <label className="block text-section-title text-brand-800 mb-2">
               Vilka typer av kunder har företaget?
@@ -311,43 +200,85 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             </div>
           </div>
 
-          {/* Utländska partners */}
+          {/* Q3: Utländska partners */}
           <div>
             <label className="block text-sm font-medium text-brand-800 mb-2">
               Har företaget återkommande utländska affärspartners?
             </label>
             <textarea
               value={formData.utlandskaPartners}
-              onChange={(e) => handleChange('utlandskaPartners', e.target.value)}
+              onChange={(e) => handleChange('q3', e.target.value)}
               className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               rows={2}
               placeholder="Beskriv vilka länder och typ av samarbete..."
             />
           </div>
 
-          {/* Största leverantörer */}
+          {/* Q4: Största leverantörer */}
           <div>
             <label className="block text-sm font-medium text-brand-800 mb-2">
               Vilka är de största leverantörerna, och var är de etablerade?
             </label>
             <textarea
               value={formData.storaLeverantorer}
-              onChange={(e) => handleChange('storaLeverantorer', e.target.value)}
+              onChange={(e) => handleChange('q4', e.target.value)}
               className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               rows={2}
               placeholder="Lista de viktigaste leverantörerna..."
             />
           </div>
 
-          {/* Verksamhetsändring */}
+          {/* Q5: Verksamhetsändring */}
           <div>
             <label className="block text-sm font-medium text-brand-800 mb-2">
               Har verksamheten ändrats på senare tid?
             </label>
             <textarea
               value={formData.verksamhetAndrad}
-              onChange={(e) => handleChange('verksamhetAndrad', e.target.value)}
+              onChange={(e) => handleChange('q5', e.target.value)}
               className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+              rows={2}
+              placeholder="Beskriv eventuella förändringar..."
+            />
+          </div>
+
+          {/* Q6: Personnummer */}
+          <div>
+            <label className="block text-sm font-medium text-brand-800 mb-2">
+              Personnummer *
+            </label>
+            <input
+              type="text"
+              value={formData.personnummer}
+              onChange={(e) => handleChange('q6', e.target.value)}
+              className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
+              placeholder="YYYYMMDD-XXXX"
+            />
+            <p className="text-xs text-brand-600 mt-1">
+              Personnumret används för att hämta officiell information från Bolagsverket eller Roaring.io.
+            </p>
+          </div>
+
+          {/* Q7: PEP-fråga */}
+          <div className="bg-brand-50 border-l-4 border-brand-500 p-4 rounded-box">
+            <label className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                checked={formData.isPEP}
+                onChange={(e) => handleChange('q7', e.target.checked)}
+                className="mt-1 w-5 h-5 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
+              />
+              <div>
+                <span className="block text-section-title text-brand-900">
+                  Är du eller någon i företaget en PEP (person i politiskt utsatt ställning)?
+                </span>
+                <span className="text-xs text-brand-700">
+                  Detta inkluderar personer som innehar eller har innehaft höga offentliga ämbeten.
+                </span>
+              </div>
+            </label>
+          </div>
+        </div>
               rows={2}
               placeholder="Beskriv eventuella förändringar..."
             />
@@ -412,8 +343,8 @@ if (!onboardingId) {
 
               // Prepare request body matching backend RiskAssessmentRequest
               const requestBody = {
-                orgnr: formData.organisationsnummer,
-                company_name: formData.foretagsnamn,
+                orgnr: orgnrDisplay,  // From localStorage (set by Uppdragsval)
+                company_name: companyNameDisplay,  // From localStorage
                 business_idea: formData.affarsIde,
                 customer_types: Object.entries(formData.kundTyper)
                   .filter(([_, checked]) => checked)
@@ -446,8 +377,7 @@ if (!onboardingId) {
               const data = await response.json();
               console.log('✅ Riskfrågor Steg 1 saved:', data);
               
-              // Also save to localStorage for offline access (optional)
-              updateQuestion('entireForm', formData);
+              // Data already saved via useQuestionnaireForm auto-save (q1-q7)
               
               // Pass companyId to parent callback
               if (formData.isPEP) {
