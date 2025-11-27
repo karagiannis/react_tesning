@@ -63,6 +63,7 @@ import DocumentationPanel from './components/Panels/DocumentationPanel';
 import SupportPanel from './components/Panels/SupportPanel';
 import { AgreementProvider } from './contexts/AgreementContext';
 import OnboardingResumeDialog from './components/Modals/OnboardingResumeDialog';
+import { initAuth } from './utils/auth';
 
 export default function App() {
   const navigate = useNavigate();
@@ -174,6 +175,21 @@ export default function App() {
       hasCheckedOnboarding.current = false;
     }
   }, [isLoggedIn]);
+
+  // 🆕 BUG #2 FIX: Auto-login via refreshToken on app mount
+  useEffect(() => {
+    const authPages = ['/', '/login', '/register', '/verify', '/forgot-password', '/reset-password'];
+    const isOnAuthPage = authPages.includes(location.pathname);
+    
+    // Skip auto-login if on auth page
+    if (isOnAuthPage) {
+      console.log('🚪 On auth page - skipping auto-login');
+      return;
+    }
+    
+    // Run initAuth to check refreshToken and auto-login if valid
+    initAuth(setIsLoggedIn);
+  }, []); // Only run once on mount
 
   // 🆕 Check for ongoing onboardings vid login
   useEffect(() => {

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 import { searchCompanies } from '../../data/companySearchAPI';
+import { fetchWithAuth } from '../../utils/auth';
 
 /**
  * Content Slide 1: Uppdragsval och introduktion
@@ -167,20 +168,16 @@ export default function UppdragsvalsSlide({ onNext }) {
       // Push to server with version control
       await pushToServer();
 
-      // Get JWT token for legacy API call
-      const token = localStorage.getItem('accessToken');
-      
-      // Create onboarding with legacy API
+      // Create onboarding with legacy API (BUG #1 FIX: uses fetchWithAuth for auto-refresh)
       const requestBody = {
         ...services,
         orgnr: orgnr.replace('-', ''),
         companyName: companyName || '',
       };
       
-      const response = await fetch('https://celestial.se/tic-tac-toe-api/api/onboarding/uppdrag', {
+      const response = await fetchWithAuth('https://celestial.se/tic-tac-toe-api/api/onboarding/uppdrag', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestBody),
