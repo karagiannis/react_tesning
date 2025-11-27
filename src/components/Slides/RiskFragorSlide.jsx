@@ -6,15 +6,9 @@ import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 import { useAgreements } from '../../contexts/AgreementContext';
 import AgreementModal from '../Modals/AgreementModal';
 
-// UNIFIED DATA PROTOCOL: Structured q1-q7 config
+// BRUTE FORCE CONFIG: Single field stores entire complex object
 const QUESTIONS_CONFIG = {
-  q1: { type: 'textarea', required: true },   // Affärsidé
-  q2: { type: 'checkbox', required: true },   // Kundtyper
-  q3: { type: 'textarea', required: false },  // Utländska partners
-  q4: { type: 'textarea', required: false },  // Största leverantörer
-  q5: { type: 'textarea', required: false },  // Verksamhetsändring
-  q6: { type: 'text', required: true },       // Personnummer
-  q7: { type: 'boolean', required: true }     // PEP
+  entireForm: { type: 'object', required: false }
 };
 
 export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange }) {
@@ -23,7 +17,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
   const { hasAnyAgreement } = useAgreements();
   const [showAgreementModal, setShowAgreementModal] = useState(false);
   
-  // Use new hook with company_id from URL
+  // Use hook with company_id from URL
   const {
     formData: hookFormData,
     updateQuestion,
@@ -35,33 +29,25 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     QUESTIONS_CONFIG
   );
 
-  // Extract form data using new q1-q7 structure
-  const formData = {
-    affarsIde: hookFormData.q1?.value || '',
-    kundTyper: hookFormData.q2?.value || {
+  // Extract from brute force field
+  const formData = hookFormData.entireForm?.selected || {
+    affarsIde: '',
+    kundTyper: {
       privatpersoner: false,
       foretag: false,
       offentligSektor: false
     },
-    utlandskaPartners: hookFormData.q3?.value || '',
-    storaLeverantorer: hookFormData.q4?.value || '',
-    verksamhetAndrad: hookFormData.q5?.value || '',
-    personnummer: hookFormData.q6?.value || '',
-    isPEP: hookFormData.q7?.value || false
+    utlandskaPartners: '',
+    storaLeverantorer: '',
+    verksamhetAndrad: '',
+    personnummer: '',
+    isPEP: false
   };
 
-  // Setters for each question
+  // Setter updates entire form object
   const setFormData = (updater) => {
     const newData = typeof updater === 'function' ? updater(formData) : updater;
-    
-    // Map back to q1-q7 structure
-    updateQuestion('q1', newData.affarsIde);
-    updateQuestion('q2', newData.kundTyper);
-    updateQuestion('q3', newData.utlandskaPartners);
-    updateQuestion('q4', newData.storaLeverantorer);
-    updateQuestion('q5', newData.verksamhetAndrad);
-    updateQuestion('q6', newData.personnummer);
-    updateQuestion('q7', newData.isPEP);
+    updateQuestion('entireForm', newData);
   };
 
   // Get företagsnamn and orgnr from localStorage (set by Uppdragsval or handleResume)
@@ -97,11 +83,11 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     }
   }, [companyNameDisplay, orgnrDisplay, formData.personnummer, formData.affarsIde, hasAnyAgreement]);
 
-  const handleChange = (questionId, value) => {
-    updateQuestion(questionId, value);
+  const handleChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
     
     // Notify parent immediately when personnummer changes
-    if (questionId === 'q6' && onFormDataChange) {
+    if (field === 'personnummer' && onFormDataChange) {
       onFormDataChange({
         organisationsnummer: orgnrDisplay,
         personnummer: value
@@ -111,7 +97,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
 
   const handleCheckboxChange = (field, checked) => {
     const newKundTyper = { ...formData.kundTyper, [field]: checked };
-    updateQuestion('q2', newKundTyper);
+    setFormData(prev => ({ ...prev, kundTyper: newKundTyper }));
   };
 
   const isFormValid = () => {
@@ -157,7 +143,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             </label>
             <textarea
               value={formData.affarsIde}
-              onChange={(e) => handleChange('q1', e.target.value)}
+              onChange={(e) => handleChange('affarsIde', e.target.value)}
               className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               rows={3}
               placeholder="Beskriv kort företagets verksamhet..."
@@ -207,7 +193,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             </label>
             <textarea
               value={formData.utlandskaPartners}
-              onChange={(e) => handleChange('q3', e.target.value)}
+              onChange={(e) => handleChange('utlandskaPartners', e.target.value)}
               className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               rows={2}
               placeholder="Beskriv vilka länder och typ av samarbete..."
@@ -221,7 +207,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             </label>
             <textarea
               value={formData.storaLeverantorer}
-              onChange={(e) => handleChange('q4', e.target.value)}
+              onChange={(e) => handleChange('storaLeverantorer', e.target.value)}
               className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               rows={2}
               placeholder="Lista de viktigaste leverantörerna..."
@@ -235,7 +221,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             </label>
             <textarea
               value={formData.verksamhetAndrad}
-              onChange={(e) => handleChange('q5', e.target.value)}
+              onChange={(e) => handleChange('verksamhetAndrad', e.target.value)}
               className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               rows={2}
               placeholder="Beskriv eventuella förändringar..."
@@ -250,7 +236,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             <input
               type="text"
               value={formData.personnummer}
-              onChange={(e) => handleChange('q6', e.target.value)}
+              onChange={(e) => handleChange('personnummer', e.target.value)}
               className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm"
               placeholder="YYYYMMDD-XXXX"
             />
@@ -265,7 +251,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
               <input
                 type="checkbox"
                 checked={formData.isPEP}
-                onChange={(e) => handleChange('q7', e.target.checked)}
+                onChange={(e) => handleChange('isPEP', e.target.checked)}
                 className="mt-1 w-5 h-5 text-brand-600 border-brand-300 rounded focus:ring-brand-500"
               />
               <div>
@@ -335,7 +321,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
               const data = await response.json();
               console.log('✅ Riskfrågor Steg 1 saved:', data);
               
-              // Data already saved via useQuestionnaireForm auto-save (q1-q7)
+              // Data already saved via useQuestionnaireForm auto-save (entireForm)
               
               // Pass companyId to parent callback
               if (formData.isPEP) {

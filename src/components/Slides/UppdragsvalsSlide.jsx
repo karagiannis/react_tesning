@@ -21,9 +21,7 @@ import { fetchWithAuth } from '../../utils/auth';
 
 // Question configuration for useQuestionnaireForm
 const QUESTIONS_CONFIG = {
-  services: { type: 'object', required: true },
-  orgnr: { type: 'text', required: true, pattern: /^\d{6}-?\d{4}$/ },
-  companyName: { type: 'text', required: false },
+  entireForm: { type: 'object', required: false }
 };
 
 export default function UppdragsvalsSlide({ onNext }) {
@@ -50,20 +48,25 @@ export default function UppdragsvalsSlide({ onNext }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Extract values early
-  const services = formData.services?.selected || {
-    lopandeBokforing: false,
-    arsbokslut: false,
-    deklarationer: false,
-    loneadministration: false,
-    ekonomiskRadgivning: false,
-    foretagsregistrering: false,
-    finansiellRapportering: false,
-    foretagsforsaljning: false,
-    annat: '',
+  // Extract values from entireForm
+  const formState = formData.entireForm?.selected || {
+    services: {
+      lopandeBokforing: false,
+      arsbokslut: false,
+      deklarationer: false,
+      loneadministration: false,
+      ekonomiskRadgivning: false,
+      foretagsregistrering: false,
+      finansiellRapportering: false,
+      foretagsforsaljning: false,
+      annat: '',
+    },
+    orgnr: '',
+    companyName: ''
   };
-  const orgnr = formData.orgnr?.selected || '';
-  const companyName = formData.companyName?.selected || '';
+  const services = formState.services;
+  const orgnr = formState.orgnr;
+  const companyName = formState.companyName;
 
   // Autocomplete state (now companyName is defined)
   const [companyQuery, setCompanyQuery] = useState(companyName || '');
@@ -97,15 +100,15 @@ export default function UppdragsvalsSlide({ onNext }) {
 
   const handleServiceChange = (service, value) => {
     const updatedServices = { ...services, [service]: value };
-    updateQuestion('services', updatedServices);
+    updateQuestion('entireForm', { ...formState, services: updatedServices });
   };
 
   const handleOrgnrChange = (value) => {
-    updateQuestion('orgnr', value);
+    updateQuestion('entireForm', { ...formState, orgnr: value });
   };
 
   const handleCompanyNameChange = (value) => {
-    updateQuestion('companyName', value);
+    updateQuestion('entireForm', { ...formState, companyName: value });
   };
 
   const handleCompanySearch = async (query) => {
@@ -114,8 +117,7 @@ export default function UppdragsvalsSlide({ onNext }) {
     if (query.trim() === '') {
       setCompanySuggestions([]);
       setShowSuggestions(false);
-      updateQuestion('companyName', '');
-      updateQuestion('orgnr', '');
+      updateQuestion('entireForm', { ...formState, companyName: '', orgnr: '' });
       return;
     }
     
@@ -139,8 +141,7 @@ export default function UppdragsvalsSlide({ onNext }) {
 
   const handleCompanySelect = (company) => {
     setCompanyQuery(company.name);
-    updateQuestion('companyName', company.name);
-    updateQuestion('orgnr', company.orgnr);
+    updateQuestion('entireForm', { ...formState, companyName: company.name, orgnr: company.orgnr });
     setShowSuggestions(false);
   };
 
