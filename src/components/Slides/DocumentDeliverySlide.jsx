@@ -14,10 +14,10 @@ export default function DocumentDeliverySlide({ onNext, onBack }) {
     QUESTIONS_CONFIG
   );
 
-  const [email, setEmail] = useState(formData?.entireForm?.email || customerData.email || '');
-  const [confirmEmail, setConfirmEmail] = useState(formData?.entireForm?.confirmEmail || '');
+  const [email, setEmail] = useState(savedFormData?.email || customerData.email || '');
+  const [confirmEmail, setConfirmEmail] = useState(savedFormData?.confirmEmail || '');
   const [isSending, setIsSending] = useState(false);
-  const [isSent, setIsSent] = useState(formData?.entireForm?.isSent || false);
+  const [isSent, setIsSent] = useState(savedFormData?.isSent || false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 

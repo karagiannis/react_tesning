@@ -36,10 +36,10 @@ const DocumentSetupSlide = () => {
     QUESTIONS_CONFIG
   );
 
-  const [selectedProvider, setSelectedProvider] = useState(formData?.entireForm?.selectedProvider || 'dropbox');
-  const [authStatus, setAuthStatus] = useState(formData?.entireForm?.authStatus || 'not_started');
-  const [folderPath, setFolderPath] = useState(formData?.entireForm?.folderPath || '');
-  const [testStatus, setTestStatus] = useState(formData?.entireForm?.testStatus || 'pending');
+  const [selectedProvider, setSelectedProvider] = useState(formData?.selectedProvider || 'dropbox');
+  const [authStatus, setAuthStatus] = useState(formData?.authStatus || 'not_started');
+  const [folderPath, setFolderPath] = useState(formData?.folderPath || '');
+  const [testStatus, setTestStatus] = useState(formData?.testStatus || 'pending');
 
   // Sync state changes
   useEffect(() => {

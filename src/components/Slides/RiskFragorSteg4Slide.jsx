@@ -27,7 +27,7 @@ export default function RiskFragorSteg4Slide({ onNext }) {
     QUESTIONS_CONFIG
   );
 
-  const formData = hookFormData.entireForm?.selected || {
+  const formData = hookFormData.entireForm || {
     medelsUrsprung: '',
     förväntadOmsättning: '',
     affärsförbindelseSyfte: '',

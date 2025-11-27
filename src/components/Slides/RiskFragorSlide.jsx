@@ -29,8 +29,8 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     QUESTIONS_CONFIG
   );
 
-  // Extract from brute force field
-  const formData = hookFormData.entireForm?.selected || {
+  // Extract from brute force field (simplified: no wrapping)
+  const formData = hookFormData.entireForm || {
     affarsIde: '',
     kundTyper: {
       privatpersoner: false,
@@ -44,7 +44,7 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     isPEP: false
   };
 
-  // Setter updates entire form object
+  // Setter updates entire form object (simplified: no wrapping)
   const setFormData = (updater) => {
     const newData = typeof updater === 'function' ? updater(formData) : updater;
     updateQuestion('entireForm', newData);

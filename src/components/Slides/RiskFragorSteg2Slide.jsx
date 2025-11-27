@@ -35,8 +35,8 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
     QUESTIONS_CONFIG
   );
 
-  // Extract from brute force field
-  const formData = hookFormData.entireForm?.selected || {
+  // Extract from brute force field (simplified: no wrapping)
+  const formData = hookFormData.entireForm || {
     harUtlandskaKunder: '',
     utlandskaLander: '',
     andelOmsattning: '',

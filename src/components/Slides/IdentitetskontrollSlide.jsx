@@ -24,7 +24,7 @@ export default function IdentitetskontrollSlide({ onNext }) {
     QUESTIONS_CONFIG
   );
 
-  const formData = hookFormData.entireForm?.selected || {
+  const formData = hookFormData.entireForm || {
     photoFilename: null,
     photoUploaded: false
   };

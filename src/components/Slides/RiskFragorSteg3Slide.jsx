@@ -27,7 +27,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
     QUESTIONS_CONFIG
   );
 
-  const formData = hookFormData.entireForm?.selected || {
+  const formData = hookFormData.entireForm || {
     betalmetoder: {
       bankoverföring: false,
       kortbetalning: false,

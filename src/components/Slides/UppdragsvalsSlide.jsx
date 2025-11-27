@@ -48,8 +48,8 @@ export default function UppdragsvalsSlide({ onNext }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Extract values from entireForm
-  const formState = formData.entireForm?.selected || {
+  // Extract values from entireForm (simplified: no wrapping)
+  const formState = formData.entireForm || {
     services: {
       lopandeBokforing: false,
       arsbokslut: false,

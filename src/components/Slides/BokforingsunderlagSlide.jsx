@@ -53,10 +53,10 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
     QUESTIONS_CONFIG
   );
 
-  const [uploadMode, setUploadMode] = useState(savedFormData?.entireForm?.uploadMode || null);
-  const [cloudProvider, setCloudProvider] = useState(savedFormData?.entireForm?.cloudProvider || null);
-  
-  const [formData, setFormData] = useState(savedFormData?.entireForm?.formData || {
+  const [uploadMode, setUploadMode] = useState(savedFormData?.uploadMode || null);
+  const [cloudProvider, setCloudProvider] = useState(savedFormData?.cloudProvider || null);
+
+  const [formData, setFormData] = useState(savedFormData?.formData || {
     bankInfo: '',
     kontoutdrag: [],
     leverantorsfakturor: [],
@@ -69,7 +69,7 @@ export default function BokforingsunderlagSlide({ onNext, onBack }) {
 
   const [isDragging, setIsDragging] = useState(false);
   const [uploadStatus, setUploadStatus] = useState('');
-  const [fraudAlerts, setFraudAlerts] = useState(savedFormData?.entireForm?.fraudAlerts || []);
+  const [fraudAlerts, setFraudAlerts] = useState(savedFormData?.fraudAlerts || []);
 
   // Sync to questionnaire hook
   useEffect(() => {

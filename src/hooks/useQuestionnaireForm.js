@@ -51,14 +51,11 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
   
   // State
   const [formData, setFormData] = useState(() => {
-    // Default: alla frågor har null selected och null expansion
+    // Default: alla frågor har null value (no wrapping)
     const initialData = {};
     const questions = questionConfig.questions || questionConfig;
     Object.keys(questions).forEach(qId => {
-      initialData[qId] = {
-        selected: null,
-        expansion: null
-      };
+      initialData[qId] = null;
     });
     return initialData;
   });
@@ -228,20 +225,16 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
   }, [formData, slideKey, isLoading, formState, storageKey]);
 
   /**
-   * Uppdatera en fråga
-   * @param {string} questionId - Question ID (t.ex. "q6")
-   * @param {string} selected - Valt alternativ (t.ex. "ja_regelbundet")
-   * @param {Object|null} expansion - Expansion data om hasExpansion är true
+   * Uppdatera en fråga (SIMPLIFIED: no wrapping)
+   * @param {string} questionId - Question ID (t.ex. "entireForm")
+   * @param {any} value - Data to store directly
    */
-  const updateQuestion = (questionId, selected, expansion = null) => {
+  const updateQuestion = (questionId, value) => {
     setFormData(prev => ({
       ...prev,
-      [questionId]: {
-        selected,
-        expansion
-      }
+      [questionId]: value
     }));
-    console.log(`✏️ Updated ${questionId}:`, { selected, expansion });
+    console.log(`✏️ Updated ${questionId}:`, value);
   };
 
   /**
@@ -255,24 +248,9 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
       if (!qConfig.required) return true;
       
       const answer = formData[qId];
-      if (!answer || !answer.selected) {
+      if (!answer) {
         console.log(`❌ Validation failed: ${qId} is required but not answered`);
         return false;
-      }
-      
-      // Kontrollera expansion om det krävs
-      const option = qConfig.options?.find(opt => opt.value === answer.selected);
-      if (option?.hasExpansion && option.expansionConfig?.required) {
-        const hasExpansionData = answer.expansion && 
-          Object.keys(answer.expansion).length > 0 &&
-          Object.values(answer.expansion).some(val => 
-            Array.isArray(val) ? val.length > 0 : val
-          );
-        
-        if (!hasExpansionData) {
-          console.log(`❌ Validation failed: ${qId} requires expansion data`);
-          return false;
-        }
       }
       
       return true;
@@ -288,25 +266,8 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     const questions = questionConfig.questions || questionConfig;
     
     Object.entries(questions).forEach(([qId, qConfig]) => {
-      if (qConfig.required && (!formData[qId] || !formData[qId].selected)) {
+      if (qConfig.required && !formData[qId]) {
         errors[qId] = "Detta fält är obligatoriskt";
-      }
-      
-      // Kontrollera expansion-fel
-      const answer = formData[qId];
-      if (answer?.selected) {
-        const option = qConfig.options?.find(opt => opt.value === answer.selected);
-        if (option?.hasExpansion && option.expansionConfig?.required) {
-          const hasExpansionData = answer.expansion && 
-            Object.keys(answer.expansion).length > 0 &&
-            Object.values(answer.expansion).some(val => 
-              Array.isArray(val) ? val.length > 0 : val
-            );
-          
-          if (!hasExpansionData) {
-            errors[qId] = `${option.expansionConfig.label || 'Expansion field'} är obligatoriskt`;
-          }
-        }
       }
     });
     
@@ -320,10 +281,7 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     const initialData = {};
     const questions = questionConfig.questions || questionConfig;
     Object.keys(questions).forEach(qId => {
-      initialData[qId] = {
-        selected: null,
-        expansion: null
-      };
+      initialData[qId] = null;
     });
     setFormData(initialData);
     console.log(`🔄 Reset form data for ${slideKey}`);
