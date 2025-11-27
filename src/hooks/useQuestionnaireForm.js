@@ -24,8 +24,19 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     throw new Error('useQuestionnaireForm requires slideKey and questionConfig');
   }
   
-  // Get company_id AND case_id from URL (source of truth for multi-tab isolation)
-  const { companyId, caseId } = useParams();
+  // Get company_id AND case_id from URL params OR localStorage
+  // Priority: URL params > localStorage > 'draft'
+  const urlParams = useParams();
+  
+  const getEffectiveId = (urlValue, localStorageKey, idType) => {
+    if (urlValue) return urlValue;
+    const stored = localStorage.getItem(localStorageKey);
+    if (stored && stored !== 'null' && stored !== 'undefined') return stored;
+    return 'draft';
+  };
+  
+  const effectiveCompanyId = getEffectiveId(urlParams.companyId, 'currentCompanyId', 'companyId');
+  const effectiveCaseId = getEffectiveId(urlParams.caseId, 'onboardingId', 'caseId');
   
   // Extract userId from JWT token  
   const getUserId = () => {
@@ -43,11 +54,13 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
   
   const userId = getUserId();
   
-  // Build storage key directly (will be stable because params don't change during component lifecycle)
-  // Use "draft" as placeholder if companyId or caseId missing (new onboarding)
-  const effectiveCompanyId = companyId || 'draft';
-  const effectiveCaseId = caseId || 'draft';
+  // Build storage key using effective IDs
+  // Priority: URL params > localStorage > 'draft'
   const storageKey = `onboarding-${userId}-${effectiveCompanyId}-${effectiveCaseId}-${slideKey}`;
+  
+  console.log(`🔑 Cache key for ${slideKey}:`, storageKey);
+  console.log(`   companyId: ${effectiveCompanyId} (from ${urlParams.companyId ? 'URL' : 'localStorage'})`);
+  console.log(`   caseId: ${effectiveCaseId} (from ${urlParams.caseId ? 'URL' : 'localStorage'})`);
   
   // State
   const [formData, setFormData] = useState(() => {

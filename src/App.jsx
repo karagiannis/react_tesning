@@ -336,20 +336,22 @@ export default function App() {
     if (data.data) {
       const userId = getUserId();
       Object.entries(data.data).forEach(([slideKey, slideData]) => {
-        const cacheKey = `onboarding-${userId}-${data.onboardingId}-draft-${slideKey}`;
+        // Cache key format: onboarding-{userId}-{companyId}-{caseId}-{slideKey}
+        const cacheKey = `onboarding-${userId}-${data.company_id}-${data.onboardingId}-${slideKey}`;
         const cacheValue = {
           value: slideData,  // Already in correct format from backend
           version: 0,
           timestamp: new Date().toISOString()
         };
         localStorage.setItem(cacheKey, JSON.stringify(cacheValue));
-        console.log(`✅ Cached ${slideKey} data for Resume`);
+        console.log(`✅ Cached ${slideKey} data for Resume with key: ${cacheKey}`);
       });
     }
     
     setShowResumeDialog(false);
     setDialogDismissed(true);
-    navigate(`/${data.currentStep}`);  // Navigate to current step
+    // Navigate to current step (IDs will be read from localStorage by state machine)
+    navigate(`/${data.currentStep}`);
   };
 
   // 🆕 New session callback: Stäng dialog och gå till uppdragsval
