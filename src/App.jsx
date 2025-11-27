@@ -311,42 +311,13 @@ export default function App() {
       state: data.state || 'draft'  // State machine support
     });
     
-    // Set global localStorage keys (for IDs and basic info)
+    // ✅ REFACTOR: Only set IDs - state machine will load data
+    // Set resume flags for state machine to detect
     localStorage.setItem('onboardingId', data.onboardingId);
     localStorage.setItem('currentCompanyId', data.company_id);
     localStorage.setItem('currentCompanyName', data.companyName);
     localStorage.setItem('currentOrgnr', data.orgnr);
-    
-    // Extract userId from JWT token
-    const getUserId = () => {
-      const token = localStorage.getItem('accessToken');
-      if (!token) return 'anonymous';
-      try {
-        const payload = token.split('.')[1];
-        const decoded = JSON.parse(atob(payload));
-        return decoded.sub || decoded.user_id || decoded.email || 'anonymous';
-      } catch (e) {
-        console.error('Failed to decode JWT:', e);
-        return 'anonymous';
-      }
-    };
-    
-    // Write slide data to localStorage (useQuestionnaireForm cache)
-    // Resume endpoint returns data.data with per-slide structure
-    if (data.data) {
-      const userId = getUserId();
-      Object.entries(data.data).forEach(([slideKey, slideData]) => {
-        // Cache key format: onboarding-{userId}-{companyId}-{caseId}-{slideKey}
-        const cacheKey = `onboarding-${userId}-${data.company_id}-${data.onboardingId}-${slideKey}`;
-        const cacheValue = {
-          value: slideData,  // Already in correct format from backend
-          version: 0,
-          timestamp: new Date().toISOString()
-        };
-        localStorage.setItem(cacheKey, JSON.stringify(cacheValue));
-        console.log(`✅ Cached ${slideKey} data for Resume with key: ${cacheKey}`);
-      });
-    }
+    localStorage.setItem('resumeMode', 'true');  // Flag for state machine
     
     setShowResumeDialog(false);
     setDialogDismissed(true);

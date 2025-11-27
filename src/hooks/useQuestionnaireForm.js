@@ -158,8 +158,52 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
         
         let loadedData = null;
         
-        // Load from cache if allowed
-        if (behavior.shouldLoadFromCache) {
+        // ✅ CHECK RESUME MODE: Load from Resume endpoint if resuming
+        const isResumeMode = localStorage.getItem('resumeMode') === 'true';
+        
+        if (isResumeMode) {
+          console.log('🔄 Resume mode detected - fetching data from Resume endpoint');
+          try {
+            // Fetch complete Resume data
+            const resumeResponse = await fetch(
+              `${API_BASE}/onboarding/resume/${effectiveCompanyId}?onboarding_id=${effectiveCaseId}`,
+              {
+                headers: {
+                  'Authorization': `Bearer ${getToken()}`,
+                  'Content-Type': 'application/json'
+                }
+              }
+            );
+            
+            if (resumeResponse.ok) {
+              const resumeData = await resumeResponse.json();
+              
+              // Cache ALL slides from Resume endpoint
+              if (resumeData.data) {
+                Object.entries(resumeData.data).forEach(([key, value]) => {
+                  const cacheKey = `onboarding-${userId}-${effectiveCompanyId}-${effectiveCaseId}-${key}`;
+                  writeToStorage(cacheKey, value, 0);
+                  console.log(`✅ Cached ${key} from Resume endpoint`);
+                });
+              }
+              
+              // Load data for current slide
+              if (resumeData.data?.[slideKey]) {
+                loadedData = resumeData.data[slideKey];
+                console.log(`📥 Loaded ${slideKey} from Resume endpoint`);
+              }
+              
+              // Clear resume flag after successful load
+              localStorage.removeItem('resumeMode');
+            }
+          } catch (err) {
+            console.error('Failed to load Resume data:', err);
+            localStorage.removeItem('resumeMode');
+          }
+        }
+        
+        // Load from cache if not already loaded from Resume
+        if (!loadedData && behavior.shouldLoadFromCache) {
           const cached = readFromStorage(storageKey);
           if (cached) {
             loadedData = cached.value;
