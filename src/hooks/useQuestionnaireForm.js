@@ -13,6 +13,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { getStateMachineBehavior, STATES } from './useOnboardingStateMachine';
 
+const API_BASE = 'https://celestial.se/tic-tac-toe-api/api';
+
 /**
  * Generic hook för formulärdata med state machine architecture
  * @param {string} slideKey - Unik identifierare för slide (t.ex. "riskfragor_steg2")
@@ -136,7 +138,7 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
       // Fetch case metadata to determine state
       try {
         const response = await fetch(
-          `/api/onboarding/resume/${effectiveCompanyId}?onboarding_id=${effectiveCaseId}`,
+          `${API_BASE}/onboarding/resume/${effectiveCompanyId}?onboarding_id=${effectiveCaseId}`,
           {
             headers: {
               'Authorization': `Bearer ${getToken()}`,
