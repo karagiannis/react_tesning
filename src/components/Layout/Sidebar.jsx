@@ -16,7 +16,7 @@ export default function Sidebar({ currentPath, hasRoaringData = false }) {
     // Hem-ikon removed - was duplicate of Uppdragsval causing both to be highlighted
     // User enters onboarding flow directly at Uppdragsval after login
     { path: '/uppdragsval', title: 'Uppdragsval', icon: 'checkList' },
-    { path: '/riskfragor', title: 'Riskfrågor', icon: 'question' },
+    { path: '/riskfragor/:companyId', title: 'Riskfrågor', icon: 'question', requiresCompanyId: true },
     { path: '/identitetskontroll', title: 'Identitetskontroll', icon: 'idCard' },
     { path: '/kontrolltabell', title: 'Kontrolltabell', icon: 'checkList' },
     // Result slides - locked until API data available
@@ -58,8 +58,21 @@ export default function Sidebar({ currentPath, hasRoaringData = false }) {
     { path: '/support', title: 'Support & kontakt', icon: 'support' },
   ];
 
-  const handleNavigation = (path, isLocked) => {
-    if (!isLocked) {
+  const handleNavigation = (path, isLocked, requiresCompanyId) => {
+    if (isLocked) return;
+    
+    // If path requires companyId, get it from localStorage
+    if (requiresCompanyId) {
+      const companyId = localStorage.getItem('currentCompanyId');
+      if (!companyId) {
+        console.error('❌ No currentCompanyId found in localStorage for navigation to', path);
+        alert('Inget pågående onboarding-ärende hittat. Börja om från Uppdragsval.');
+        return;
+      }
+      // Replace :companyId with actual value
+      const resolvedPath = path.replace(':companyId', companyId);
+      navigate(resolvedPath);
+    } else {
       navigate(path);
     }
   };
@@ -148,13 +161,22 @@ export default function Sidebar({ currentPath, hasRoaringData = false }) {
         {isExpanded && <h2 className="text-lg font-bold text-brand-900 mb-4">Navigation</h2>}
         <nav className="space-y-2">
           {slides.map((slide) => {
-            const isActive = currentPath === slide.path;
+            // Handle path matching for dynamic routes
+            let isActive;
+            if (slide.requiresCompanyId) {
+              // Match /riskfragor/:companyId pattern with actual /riskfragor/5569...
+              const basePattern = slide.path.split('/:')[0];
+              isActive = currentPath.startsWith(basePattern);
+            } else {
+              isActive = currentPath === slide.path;
+            }
+            
             const isLocked = slide.locked;
 
             return (
               <button
                 key={slide.path}
-                onClick={() => handleNavigation(slide.path, isLocked)}
+                onClick={() => handleNavigation(slide.path, isLocked, slide.requiresCompanyId)}
                 disabled={isLocked}
                 title={!isExpanded ? slide.title : ''}
                 className={`

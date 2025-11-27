@@ -356,7 +356,15 @@ export default function App() {
           </p>
         </div>
         <button
-          onClick={() => navigate('/riskfragor')}
+          onClick={() => {
+            const companyId = localStorage.getItem('currentCompanyId');
+            if (companyId) {
+              navigate(`/riskfragor/${companyId}`);
+            } else {
+              console.error('❌ No currentCompanyId found in localStorage');
+              alert('Inget pågående onboarding-ärende hittat. Börja om från Uppdragsval.');
+            }
+          }}
           className="w-full mt-8 px-8 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-box font-semibold transition-all"
         >
           Nästa
