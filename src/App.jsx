@@ -317,8 +317,21 @@ export default function App() {
     localStorage.setItem('currentCompanyName', data.companyName);
     localStorage.setItem('currentOrgnr', data.orgnr);
     
-    // useQuestionnaireForm will handle data loading based on state
-    // No need to manually map slide data - state machine takes care of it!
+    // Write slide data to localStorage (useQuestionnaireForm cache)
+    // Resume endpoint returns data.data with per-slide structure
+    if (data.data) {
+      const userId = localStorage.getItem('userId');
+      Object.entries(data.data).forEach(([slideKey, slideData]) => {
+        const cacheKey = `onboarding-${userId}-${data.onboardingId}-draft-${slideKey}`;
+        const cacheValue = {
+          value: slideData,  // Already in correct format from backend
+          version: 0,
+          timestamp: new Date().toISOString()
+        };
+        localStorage.setItem(cacheKey, JSON.stringify(cacheValue));
+        console.log(`✅ Cached ${slideKey} data for Resume`);
+      });
+    }
     
     setShowResumeDialog(false);
     setDialogDismissed(true);
