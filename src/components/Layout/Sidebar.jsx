@@ -16,29 +16,29 @@ export default function Sidebar({ currentPath, hasRoaringData = false }) {
     // Hem-ikon removed - was duplicate of Uppdragsval causing both to be highlighted
     // User enters onboarding flow directly at Uppdragsval after login
     { path: '/uppdragsval', title: 'Uppdragsval', icon: 'checkList' },
-    { path: '/riskfragor/:companyId', title: 'Riskfrågor', icon: 'question', requiresCompanyId: true },
-    { path: '/identitetskontroll', title: 'Identitetskontroll', icon: 'idCard' },
-    { path: '/kontrolltabell', title: 'Kontrolltabell', icon: 'checkList' },
+    { path: '/riskfragor/:companyId/:caseId', title: 'Riskfrågor', icon: 'question', requiresCompanyId: true, requiresCaseId: true },
+    { path: '/identitetskontroll/:companyId', title: 'Identitetskontroll', icon: 'idCard', requiresCompanyId: true },
+    { path: '/kontrolltabell/:companyId', title: 'Kontrolltabell', icon: 'checkList', requiresCompanyId: true },
     // Result slides - locked until API data available
-    { path: '/verksamhet', title: 'Verksamhet', icon: 'chart', locked: !hasRoaringData },
-    { path: '/agarstruktur', title: 'Ägarstruktur', icon: 'users', locked: !hasRoaringData },
-    { path: '/styrelse', title: 'Styrelse', icon: 'building', locked: !hasRoaringData },
-    { path: '/riskindikatorer', title: 'Riskindikatorer', icon: 'shield', locked: !hasRoaringData },
-    { path: '/ovrigadata', title: 'Övriga data', icon: 'collection', locked: !hasRoaringData },
+    { path: '/verksamhet/:companyId', title: 'Verksamhet', icon: 'chart', locked: !hasRoaringData, requiresCompanyId: true },
+    { path: '/agarstruktur/:companyId', title: 'Ägarstruktur', icon: 'users', locked: !hasRoaringData, requiresCompanyId: true },
+    { path: '/styrelse/:companyId', title: 'Styrelse', icon: 'building', locked: !hasRoaringData, requiresCompanyId: true },
+    { path: '/riskindikatorer/:companyId', title: 'Riskindikatorer', icon: 'shield', locked: !hasRoaringData, requiresCompanyId: true },
+    { path: '/ovrigadata/:companyId', title: 'Övriga data', icon: 'collection', locked: !hasRoaringData, requiresCompanyId: true },
     // Company documentation (slide 13.5)
-    { path: '/dokumentation', title: 'Företagsdokumentation', icon: 'document' },
+    { path: '/dokumentation/:companyId', title: 'Företagsdokumentation', icon: 'document', requiresCompanyId: true },
     // Accounting documents (slide 14.5)
-    { path: '/underlag', title: 'Bokföringsunderlag', icon: 'collection' },
+    { path: '/underlag/:companyId', title: 'Bokföringsunderlag', icon: 'collection', requiresCompanyId: true },
     // Accounting data slide (Skattekonto OAuth)
-    { path: '/bokforing', title: 'Bokföringsdata', icon: 'document' },
+    { path: '/bokforing/:companyId', title: 'Bokföringsdata', icon: 'document', requiresCompanyId: true },
     // Economic advisory slides (11-14)
-    { path: '/likviditet', title: 'Likviditetsanalys', icon: 'chart' },
-    { path: '/omsattning', title: 'Omsättningsanalys', icon: 'trendingUp' },
-    { path: '/resultat', title: 'Resultatanalys', icon: 'pieChart' },
-    { path: '/bransch', title: 'Branschjämförelse', icon: 'comparison' },
+    { path: '/likviditet/:companyId', title: 'Likviditetsanalys', icon: 'chart', requiresCompanyId: true },
+    { path: '/omsattning/:companyId', title: 'Omsättningsanalys', icon: 'trendingUp', requiresCompanyId: true },
+    { path: '/resultat/:companyId', title: 'Resultatanalys', icon: 'pieChart', requiresCompanyId: true },
+    { path: '/bransch/:companyId', title: 'Branschjämförelse', icon: 'comparison', requiresCompanyId: true },
     // Deep dive analysis (slides 19-20)
-    { path: '/bokanalys', title: 'Bokföringsanalys', icon: 'documentSearch' },
-    { path: '/penningflodes', title: 'Penningflödesanalys', icon: 'map' },
+    { path: '/bokanalys/:companyId', title: 'Bokföringsanalys', icon: 'documentSearch', requiresCompanyId: true },
+    { path: '/penningflodes/:companyId', title: 'Penningflödesanalys', icon: 'map', requiresCompanyId: true },
     // Risk assessment and decision (slide 20)
     { path: '/riskbedomning', title: 'Riskbedömning', icon: 'shield' },
     // Customer obligations (slide 18)
@@ -58,19 +58,35 @@ export default function Sidebar({ currentPath, hasRoaringData = false }) {
     { path: '/support', title: 'Support & kontakt', icon: 'support' },
   ];
 
-  const handleNavigation = (path, isLocked, requiresCompanyId) => {
+  const handleNavigation = (path, isLocked, requiresCompanyId, requiresCaseId) => {
     if (isLocked) return;
     
-    // If path requires companyId, get it from localStorage
-    if (requiresCompanyId) {
+    // If path requires companyId or caseId, get them from localStorage
+    if (requiresCompanyId || requiresCaseId) {
       const companyId = localStorage.getItem('currentCompanyId');
-      if (!companyId) {
+      const caseId = localStorage.getItem('onboardingId');
+      
+      if (requiresCompanyId && !companyId) {
         console.error('❌ No currentCompanyId found in localStorage for navigation to', path);
         alert('Inget pågående onboarding-ärende hittat. Börja om från Uppdragsval.');
         return;
       }
-      // Replace :companyId with actual value
-      const resolvedPath = path.replace(':companyId', companyId);
+      
+      if (requiresCaseId && !caseId) {
+        console.error('❌ No onboardingId found in localStorage for navigation to', path);
+        alert('Inget pågående onboarding-ärende hittat. Börja om från Uppdragsval.');
+        return;
+      }
+      
+      // Replace placeholders with actual values
+      let resolvedPath = path;
+      if (requiresCompanyId) {
+        resolvedPath = resolvedPath.replace(':companyId', companyId);
+      }
+      if (requiresCaseId) {
+        resolvedPath = resolvedPath.replace(':caseId', caseId);
+      }
+      
       navigate(resolvedPath);
     } else {
       navigate(path);
@@ -176,7 +192,7 @@ export default function Sidebar({ currentPath, hasRoaringData = false }) {
             return (
               <button
                 key={slide.path}
-                onClick={() => handleNavigation(slide.path, isLocked, slide.requiresCompanyId)}
+                onClick={() => handleNavigation(slide.path, isLocked, slide.requiresCompanyId, slide.requiresCaseId)}
                 disabled={isLocked}
                 title={!isExpanded ? slide.title : ''}
                 className={`
