@@ -478,13 +478,15 @@ export default function App() {
             } />
             <Route path="/riskfragor/:companyId/:caseId" element={
               <RiskFragorSlide 
-                onNext={(companyId) => {
-                  // Navigate to steg 2 with companyId
-                  navigate(`/riskfragor/steg2/${companyId}`);
+                onNext={(companyId, caseId) => {
+                  // Navigate to steg 2 with companyId + caseId
+                  const effectiveCaseId = caseId || localStorage.getItem('onboardingId');
+                  navigate(`/riskfragor/steg2/${companyId}/${effectiveCaseId}`);
                 }}
-                onSkipPEP={(companyId) => {
+                onSkipPEP={(companyId, caseId) => {
                   setIsPEP(false);
-                  navigate(`/riskfragor/steg2/${companyId}`);
+                  const effectiveCaseId = caseId || localStorage.getItem('onboardingId');
+                  navigate(`/riskfragor/steg2/${companyId}/${effectiveCaseId}`);
                 }}
                 onFormDataChange={(data) => {
                   setFormData({
@@ -496,17 +498,19 @@ export default function App() {
             } />
             <Route path="/riskfragor/steg2/:companyId/:caseId" element={
               <RiskFragorSteg2Slide 
-                onNext={(companyId) => {
+                onNext={(companyId, caseId) => {
                   console.log('Steg 2 complete, company:', companyId);
-                  navigate(`/riskfragor/steg3/${companyId}`);
+                  const effectiveCaseId = caseId || localStorage.getItem('onboardingId');
+                  navigate(`/riskfragor/steg3/${companyId}/${effectiveCaseId}`);
                 }}
               />
             } />
             <Route path="/riskfragor/steg3/:companyId/:caseId" element={
               <RiskFragorSteg3Slide 
-                onNext={(companyId) => {
+                onNext={(companyId, caseId) => {
                   console.log('Steg 3 complete, company:', companyId);
-                  navigate(`/riskfragor/steg4/${companyId}`);
+                  const effectiveCaseId = caseId || localStorage.getItem('onboardingId');
+                  navigate(`/riskfragor/steg4/${companyId}/${effectiveCaseId}`);
                 }}
               />
             } />

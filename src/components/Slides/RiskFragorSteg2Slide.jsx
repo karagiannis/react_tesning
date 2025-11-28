@@ -19,7 +19,7 @@ const QUESTIONS_CONFIG = {
 };
 
 export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
-  const { companyId } = useParams();
+  const { companyId, caseId } = useParams();
   const navigate = useNavigate();
   const [expandedInfo, setExpandedInfo] = useState({});
   
@@ -101,9 +101,9 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
       if (success) {
         console.log('✅ Riskfrågor Steg 2 saved');
         
-        // Pass companyId to parent
+        // Pass companyId + caseId to parent
         if (onNext) {
-          onNext(companyId);
+          onNext(companyId, caseId);
         }
       } else {
         alert('⚠️ Kunde inte spara till server');

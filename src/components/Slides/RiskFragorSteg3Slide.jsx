@@ -12,7 +12,7 @@ const QUESTIONS_CONFIG = {
 };
 
 export default function RiskFragorSteg3Slide({ onNext }) {
-  const { companyId } = useParams();
+  const { companyId, caseId } = useParams();
   const navigate = useNavigate();
   const [expandedInfo, setExpandedInfo] = useState({});
   
@@ -71,7 +71,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
     await pushToServer();
     
     if (onNext) {
-      onNext({ steg3: formData });
+      onNext(companyId, caseId);
     }
 
     // Send data to backend via PATCH

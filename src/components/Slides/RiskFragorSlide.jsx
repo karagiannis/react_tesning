@@ -12,7 +12,7 @@ const QUESTIONS_CONFIG = {
 };
 
 export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange }) {
-  const { companyId } = useParams();
+  const { companyId, caseId } = useParams();
   const navigate = useNavigate();
   const { hasAnyAgreement } = useAgreements();
   const [showAgreementModal, setShowAgreementModal] = useState(false);
@@ -330,11 +330,11 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
               
               // Data already saved via useQuestionnaireForm auto-save (entireForm)
               
-              // Pass companyId to parent callback
+              // Pass companyId + caseId to parent callback
               if (formData.isPEP) {
-                onSkipPEP(companyId);
+                onSkipPEP(companyId, caseId);
               } else {
-                onNext(companyId);
+                onNext(companyId, caseId);
               }
             } catch (err) {
               console.error('❌ Error saving:', err);
