@@ -115,7 +115,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
   };
 
   const handleBack = () => {
-    navigate(`/riskfragor/${companyId}`);
+    navigate(`/riskfragor/${companyId}/${caseId}`);
   };
 
   return (

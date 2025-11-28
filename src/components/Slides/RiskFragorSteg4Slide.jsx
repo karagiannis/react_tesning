@@ -105,7 +105,7 @@ const onboardingId = localStorage.getItem('onboardingId');
   };
 
   const handleBack = () => {
-    navigate('/riskfragor/steg3');
+    navigate(`/riskfragor/steg3/${companyId}/${caseId}`);
   };
 
   return (

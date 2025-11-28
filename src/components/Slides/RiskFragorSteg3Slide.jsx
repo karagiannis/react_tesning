@@ -111,7 +111,7 @@ const onboardingId = localStorage.getItem('onboardingId');
   };
 
   const handleBack = () => {
-    navigate('/riskfragor/steg2');
+    navigate(`/riskfragor/steg2/${companyId}/${caseId}`);
   };
 
   const showKontanterFollowUp = formData.betalmetoder.kontanter;
