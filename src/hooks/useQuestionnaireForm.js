@@ -5,12 +5,14 @@
  * UPDATED: 2025-11-25 - case_id support + "draft" mode för nya onboardings
  * UPDATED: 2025-11-27 - STATE MACHINE REFACTOR: Behavior driven by metadata.state
  * UPDATED: 2025-11-29 - REMOVED DUPLICATE /resume fetch - use metadata from first call
+ * UPDATED: 2025-11-29 - GIT-LIKNANDE VERSIONERING: based_on_version + 409 CONFLICT
  * PURPOSE: Generic hook for form data persistence with state machine architecture
- * FEATURES: Auto-load, auto-save, multi-tab sync, state-driven behavior
+ * FEATURES: Auto-load, auto-save, multi-tab sync, state-driven behavior, version control
  * REF: CHANGELOG_2025-11-26.md - State Machine Refactor
+ * REF: CHANGELOG_2025-11-29.md - Git-liknande Versionering
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { getStateMachineBehavior, STATES } from './useOnboardingStateMachine';
 import { API_URL as API_BASE } from '../config/api';
@@ -79,6 +81,11 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
   const [formState, setFormState] = useState('loading'); // State machine state
   const [caseMetadata, setCaseMetadata] = useState(null); // Case metadata from server
   const [isLoading, setIsLoading] = useState(true);
+  
+  // 🆕 VERSION CONTROL STATE
+  const [localVersion, setLocalVersion] = useState(0); // Case-level version
+  const [conflictInfo, setConflictInfo] = useState(null); // Conflict data for modal
+  const [isSaving, setIsSaving] = useState(false); // Prevent double-saves
 
   // Helper: Get auth token
   const getToken = () => {
@@ -153,6 +160,12 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
 
         const metadata = await response.json();
         setCaseMetadata(metadata);
+        
+        // 🆕 Spara case-level version för conflict detection
+        if (metadata.version !== undefined) {
+          setLocalVersion(metadata.version);
+          console.log(`📊 Case version: ${metadata.version}`);
+        }
 
         // NEW STATE MACHINE: Use centralized state machine logic
         const behavior = getStateMachineBehavior(metadata, slideKey);
@@ -245,14 +258,35 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     loadData();
   }, [slideKey, effectiveCompanyId, effectiveCaseId, storageKey]);
 
+  // 🆕 Draft key för localStorage (separerad från permanent cache)
+  const draftKey = `onboarding_draft_${effectiveCaseId}_${slideKey}`;
+
   // Auto-save to localStorage when formData changes (only if editable)
+  // Sparar som "draft" för conflict detection vid page load
   useEffect(() => {
     if (!isLoading && [STATES.NEW, STATES.DRAFT].includes(formState)) {
+      // Spara draft med version info för conflict detection
+      const draftData = {
+        data: formData,
+        basedOnVersion: localVersion,
+        savedAt: Date.now(),
+        slideKey
+      };
+      localStorage.setItem(draftKey, JSON.stringify(draftData));
+      
+      // Behåll även i permanent cache
       const localData = readFromStorage(storageKey);
-      writeToStorage(storageKey, formData, localData?.version || 0);
-      console.log(`💾 Auto-saved ${slideKey} to localStorage (state: ${formState})`);
+      writeToStorage(storageKey, formData, localVersion);
+      
+      console.log(`💾 Auto-saved ${slideKey} draft (based on v${localVersion})`);
     }
-  }, [formData, slideKey, isLoading, formState, storageKey]);
+  }, [formData, slideKey, isLoading, formState, storageKey, localVersion, draftKey]);
+
+  // 🆕 Rensa draft efter lyckad save
+  const clearDraft = useCallback(() => {
+    localStorage.removeItem(draftKey);
+    console.log(`🗑️ Cleared draft for ${slideKey}`);
+  }, [draftKey, slideKey]);
 
   /**
    * Uppdatera en fråga (SIMPLIFIED: no wrapping)
@@ -319,26 +353,41 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
 
   /**
    * Git-liknande "push" till server med version check
-   * @returns {Promise<boolean>} - true om lyckades, false om conflict eller error
+   * 
+   * VERSION CONTROL:
+   * - Skickar based_on_version för conflict detection
+   * - Vid 409 CONFLICT: Sätter conflictInfo för modal
+   * - Vid success: Uppdaterar localVersion
+   * 
+   * @param {Object} options - { force: boolean } för att tvinga save
+   * @returns {Promise<{success: boolean, conflict?: Object, error?: string}>}
    */
-  const pushToServer = async () => {
+  const pushToServer = useCallback(async (options = {}) => {
+    const { force = false } = options;
+    
     // Skip if in draft mode (no case created yet)
     if (effectiveCompanyId === 'draft' || effectiveCaseId === 'draft') {
       console.log(`[${slideKey}] 📝 Draft mode - not pushing to server yet`);
-      return true; // Success (saved locally)
+      return { success: true }; // Success (saved locally)
     }
     
     // Check if state allows editing
-    if (!canEdit) {
+    if (!canEdit && !force) {
       console.warn(`[${slideKey}] ⚠️ Cannot push - form is in ${formState} state`);
-      return false;
+      return { success: false, error: 'Form is read-only' };
     }
     
-    const localData = readFromStorage(storageKey);
+    // Prevent double-saves
+    if (isSaving) {
+      console.log(`[${slideKey}] ⏳ Already saving, skipping...`);
+      return { success: false, error: 'Already saving' };
+    }
+    
+    setIsSaving(true);
     
     try {
       const response = await fetch(
-        `/api/onboarding/${effectiveCompanyId}/${slideKey}`, 
+        `${API_BASE}/onboarding/${effectiveCompanyId}/${slideKey}`, 
         {
           method: 'POST',
           headers: {
@@ -348,38 +397,128 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
           body: JSON.stringify({ 
             data: formData,
             onboarding_id: effectiveCaseId,
-            expected_version: localData?.version || 0
+            // 🆕 Git-liknande version control
+            based_on_version: force ? null : localVersion,
+            force: force
           })
         }
       );
 
+      // 🆕 409 CONFLICT - Någon annan har sparat under tiden
       if (response.status === 409) {
         const conflict = await response.json();
-        console.error(`[${slideKey}] ⚠️ Version conflict: expected ${localData?.version}, but server has ${conflict.current_version}`);
-        alert('⚠️ Någon annan har uppdaterat denna sida. Hämtar senaste versionen...');
-        window.location.reload();
-        return false;
+        console.warn(`[${slideKey}] ⚠️ Version conflict!`, {
+          yourVersion: conflict.your_version,
+          serverVersion: conflict.server_version,
+          conflictingSlides: conflict.conflicting_slides
+        });
+        
+        // Sätt conflict info för modal
+        setConflictInfo({
+          ...conflict,
+          yourData: formData,
+          slideKey,
+          onResolve: async (resolution) => {
+            if (resolution === 'reload') {
+              // Ladda om från server
+              window.location.reload();
+            } else if (resolution === 'force') {
+              // Force push - skriv över servern
+              setConflictInfo(null);
+              return pushToServer({ force: true });
+            } else if (resolution === 'cancel') {
+              // Avbryt - behåll lokal data men gör inget
+              setConflictInfo(null);
+            }
+          }
+        });
+        
+        return { success: false, conflict };
       }
 
       if (response.ok) {
         const json = await response.json();
-        writeToStorage(storageKey, formData, json.version || 1);
-        console.log(`[${slideKey}] ✅ Pushad till server: v${localData?.version} → v${json.version || 1}`);
-        return true;
+        
+        // 🆕 Uppdatera lokal version efter lyckad save
+        if (json.new_version !== undefined) {
+          setLocalVersion(json.new_version);
+          console.log(`[${slideKey}] ✅ Version updated: ${localVersion} → ${json.new_version}`);
+        }
+        
+        // Uppdatera localStorage med ny version
+        const localData = readFromStorage(storageKey);
+        writeToStorage(storageKey, formData, json.new_version || localVersion + 1);
+        
+        // 🆕 Rensa draft efter lyckad save
+        localStorage.removeItem(draftKey);
+        
+        console.log(`[${slideKey}] ✅ Pushed to server by ${json.modified_by}`);
+        return { success: true, newVersion: json.new_version };
       }
       
-      console.error(`[${slideKey}] ❌ Failed to push to server:`, response.status);
-      return false;
+      const errorText = await response.text();
+      console.error(`[${slideKey}] ❌ Failed to push to server:`, response.status, errorText);
+      return { success: false, error: `Server error: ${response.status}` };
+      
     } catch (e) {
       console.error(`[${slideKey}] ❌ Failed to push to server:`, e);
-      return false;
+      return { success: false, error: e.message };
+    } finally {
+      setIsSaving(false);
     }
-  };
+  }, [effectiveCompanyId, effectiveCaseId, slideKey, formData, formState, localVersion, isSaving, canEdit, storageKey, draftKey]);
 
   // Derived state: Determine capabilities based on formState
   const canEdit = ['draft-offline', 'draft-synced', 'new'].includes(formState);
   const shouldShowLockWarning = formState === 'locked';
   const shouldShowReadOnlyMessage = formState === 'submitted-readonly' || formState === 'completed-archived';
+
+  // 🆕 Funktion för att stänga conflict modal
+  const dismissConflict = useCallback(() => {
+    setConflictInfo(null);
+  }, []);
+
+  // 🆕 Funktion för att hämta senaste data från server
+  const refetchFromServer = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `${API_BASE}/onboarding/resume/${effectiveCompanyId}?onboarding_id=${effectiveCaseId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${getToken()}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      if (response.ok) {
+        const metadata = await response.json();
+        setCaseMetadata(metadata);
+        
+        // Uppdatera version
+        if (metadata.version !== undefined) {
+          setLocalVersion(metadata.version);
+        }
+        
+        // Ladda slide-data från services
+        const slideData = metadata.services?.[slideKey]?.data || 
+                         metadata.data?.[slideKey]?.entireForm || 
+                         metadata.data?.[slideKey];
+        if (slideData) {
+          setFormData(slideData.entireForm || slideData);
+          writeToStorage(storageKey, slideData.entireForm || slideData, metadata.version || 0);
+        }
+        
+        console.log(`🔄 Refetched ${slideKey} from server (version ${metadata.version})`);
+      }
+    } catch (e) {
+      console.error('Failed to refetch:', e);
+    } finally {
+      setIsLoading(false);
+      setConflictInfo(null);
+    }
+  }, [effectiveCompanyId, effectiveCaseId, slideKey, storageKey]);
 
   return {
     formData,
@@ -392,8 +531,14 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     errors: getErrors(),
     resetForm,
     isLoading,
+    isSaving,  // 🆕 För UI feedback
     pushToServer,
     caseMetadata,  // New: Full case metadata
+    // 🆕 Version control exports
+    localVersion,
+    conflictInfo,
+    dismissConflict,
+    refetchFromServer,
     // Export IDs för komponenter som behöver dem
     companyId: effectiveCompanyId,
     caseId: effectiveCaseId,
