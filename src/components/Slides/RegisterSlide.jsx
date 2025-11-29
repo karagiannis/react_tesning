@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// DEV MODE: Disabled - Real API calls only
-const DEV_MODE = false;
+// DEV MODE: Skip API calls and mock responses in development
+const DEV_MODE = import.meta.env.DEV;
+
+// DEV MODE: Bypass Turnstile i development
+const SKIP_TURNSTILE = import.meta.env.DEV;
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
@@ -140,7 +143,7 @@ export default function RegisterSlide({ onNext, onLogin }) {
       return;
     }
 
-    if (!turnstileToken) {
+    if (!turnstileToken && !SKIP_TURNSTILE) {
       setError('Vänligen slutför bot-verifieringen.');
       return;
     }
@@ -387,16 +390,21 @@ export default function RegisterSlide({ onNext, onLogin }) {
           </div>
 
           {/* Cloudflare Turnstile Widget */}
-          <div className="flex justify-center py-2">
-            <div ref={turnstileRef}></div>
-          </div>
-          <p className="text-xs text-center text-brand-600">
-            Vi använder Cloudflare Turnstile för att förhindra missbruk och spam.
-          </p>
+          {/* Cloudflare Turnstile Widget - hidden in dev mode */}
+          {!SKIP_TURNSTILE && (
+            <div className="flex justify-center py-2">
+              <div ref={turnstileRef}></div>
+            </div>
+          )}
+          {!SKIP_TURNSTILE && (
+            <p className="text-xs text-center text-brand-600">
+              Vi använder Cloudflare Turnstile för att förhindra missbruk och spam.
+            </p>
+          )}
 
           <button
             type="submit"
-            disabled={loading || !turnstileToken || !passwordStrength.valid}
+            disabled={loading || (!turnstileToken && !SKIP_TURNSTILE) || !passwordStrength.valid}
             className="w-full bg-brand-600 hover:bg-brand-700 disabled:bg-brand-300 disabled:cursor-not-allowed text-white px-8 py-3 rounded-box font-semibold transition-all"
           >
             {loading ? 'Skapar konto...' : 'Skapa konto'}

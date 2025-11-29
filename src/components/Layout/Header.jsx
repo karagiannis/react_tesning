@@ -66,7 +66,7 @@ export default function Header({ onPanelToggle }) {
         return;
       }
 
-      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/tic-tac-toe-api/api';
+      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
 
       // Hämta alla företag
       const listResponse = await fetch(`${API_BASE}/onboarding/list`, {

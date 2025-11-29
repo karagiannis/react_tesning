@@ -94,8 +94,9 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
       if (!orgnr) return;
       
       try {
+        const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
 const response = await fetchWithAuth(
-          `https://celestial.se/tic-tac-toe-api/api/onboarding/${orgnr}/roaring-data`,
+          `${API_BASE}/onboarding/${orgnr}/roaring-data`,
           {
             headers: {}
           }
@@ -161,8 +162,9 @@ const formDataUpload = new FormData();
       formDataUpload.append('file', file);
       formDataUpload.append('document_type', field);
       
+      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
       const response = await fetchWithAuth(
-        `https://celestial.se/tic-tac-toe-api/api/onboarding/${orgnr}/upload-document`,
+        `${API_BASE}/onboarding/${orgnr}/upload-document`,
         {
           method: 'POST',
           headers: {},

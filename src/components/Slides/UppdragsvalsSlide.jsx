@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Info } from 'lucide-react';
 import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 import { searchCompanies } from '../../data/companySearchAPI';
 import { fetchWithAuth } from '../../utils/auth';
+import { API_URL as API_BASE } from '../../config/api';
 
 /**
  * Content Slide 1: Uppdragsval och introduktion
@@ -176,7 +177,7 @@ export default function UppdragsvalsSlide({ onNext }) {
         companyName: companyName || '',
       };
       
-      const response = await fetchWithAuth('https://celestial.se/tic-tac-toe-api/api/onboarding/uppdrag', {
+      const response = await fetchWithAuth(`${API_BASE}/onboarding/uppdrag`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -82,8 +82,9 @@ const onboardingId = localStorage.getItem('onboardingId');
 
     if (token && onboardingId) {
       try {
+        const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
         const response = await fetchWithAuth(
-          `https://celestial.se/tic-tac-toe-api/api/onboarding/risk-assessment-extended?onboarding_id=${onboardingId}`,
+          `${API_BASE}/onboarding/risk-assessment-extended?onboarding_id=${onboardingId}`,
           {
             method: 'PATCH',
             headers: {'Content-Type': 'application/json'

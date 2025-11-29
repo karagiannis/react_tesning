@@ -90,8 +90,9 @@ export default function useRoaringData() {
 
         // Fetch from backend
         const token = localStorage.getItem('accessToken');
+        const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
         const response = await fetch(
-          `https://celestial.se/tic-tac-toe-api/api/onboarding/${orgnr}/roaring-data`,
+          `${API_BASE}/onboarding/${orgnr}/roaring-data`,
           {
             headers: {
               'Authorization': `Bearer ${token}`,

@@ -35,7 +35,7 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
         throw new Error('Ingen access token hittades');
       }
 
-      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/tic-tac-toe-api/api';
+      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
 
       const response = await fetch(`${API_BASE}/onboarding/list`, {
         headers: { 
@@ -67,7 +67,7 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
       setDeletingOrgnr(company.orgnr);
       
       const token = localStorage.getItem('accessToken');
-      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/tic-tac-toe-api/api';
+      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
 
       const companyId = company.company_id;
       const caseId = company.case_id || company.onboardingId;
@@ -106,7 +106,7 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
   const handleContinue = async (company) => {
     try {
       const token = localStorage.getItem('accessToken');
-      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/tic-tac-toe-api/api';
+      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
 
       const companyId = company.company_id;
       const caseId = company.case_id || company.onboardingId;
@@ -266,23 +266,25 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
                     <ArrowRight className="w-4 h-4" />
                   </button>
 
-                  {/* Radera-knapp */}
-                  <button
-                    onClick={() => handleDelete(company)}
-                    disabled={deletingOrgnr === company.orgnr}
-                    className={`p-2 rounded-lg transition-colors ${
-                      deletingOrgnr === company.orgnr
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'text-red-600 hover:bg-red-50'
-                    }`}
-                    title="Radera onboarding"
-                  >
-                    {deletingOrgnr === company.orgnr ? (
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-600"></div>
-                    ) : (
-                      <Trash2 className="w-5 h-5" />
-                    )}
-                  </button>
+                  {/* Radera-knapp - ENDAST OM INTE LÅST */}
+                  {!company.is_locked && (
+                    <button
+                      onClick={() => handleDelete(company)}
+                      disabled={deletingOrgnr === company.orgnr}
+                      className={`p-2 rounded-lg transition-colors ${
+                        deletingOrgnr === company.orgnr
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'text-red-600 hover:bg-red-50'
+                      }`}
+                      title="Radera onboarding"
+                    >
+                      {deletingOrgnr === company.orgnr ? (
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-600"></div>
+                      ) : (
+                        <Trash2 className="w-5 h-5" />
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

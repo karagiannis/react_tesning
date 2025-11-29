@@ -235,7 +235,7 @@ export default function App() {
           return;
         }
 
-        const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/tic-tac-toe-api/api';
+        const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
         console.log('📡 Fetching onboardings from:', `${API_BASE}/onboarding/list`);
 
         const response = await fetch(`${API_BASE}/onboarding/list`, {
@@ -299,7 +299,7 @@ export default function App() {
     return `onboarding-${userId}-${orgnr}-${key}`;
   };
 
-  // Resume callback: Ladda data och navigera (STATE MACHINE SIMPLIFIED)
+  // Resume callback: Ladda data och navigera (FÖRENKLAD - endast is_locked)
   const handleResume = (data) => {
     console.log('📂 Resuming onboarding:', data);
     
@@ -308,20 +308,18 @@ export default function App() {
       orgnr: data.orgnr,
       companyName: data.companyName,
       currentStep: data.currentStep,
-      state: data.state || 'draft'  // State machine support
+      is_locked: data.is_locked || false  // Endast is_locked behövs
     });
     
-    // ✅ REFACTOR: Only set IDs - state machine will load data
-    // Set resume flags for state machine to detect
+    // Set IDs i localStorage
     localStorage.setItem('onboardingId', data.onboardingId);
     localStorage.setItem('currentCompanyId', data.company_id);
     localStorage.setItem('currentCompanyName', data.companyName);
     localStorage.setItem('currentOrgnr', data.orgnr);
-    localStorage.setItem('resumeMode', 'true');  // Flag for state machine
     
     setShowResumeDialog(false);
     setDialogDismissed(true);
-    // Navigate to current step (IDs will be read from localStorage by state machine)
+    // Navigate to current step
     navigate(`/${data.currentStep}`);
   };
 

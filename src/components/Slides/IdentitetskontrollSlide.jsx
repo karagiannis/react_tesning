@@ -265,7 +265,8 @@ export default function IdentitetskontrollSlide({ onNext }) {
                       formDataUpload.append('orgnr', orgnr);
                       
                       // Upload to backend
-const response = await fetchWithAuth(`https://celestial.se/tic-tac-toe-api/api/onboarding/${orgnr}/upload-identity-photo`, {
+                      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
+const response = await fetchWithAuth(`${API_BASE}/onboarding/${orgnr}/upload-identity-photo`, {
                         method: 'POST',
                         headers: {},
                         body: formDataUpload

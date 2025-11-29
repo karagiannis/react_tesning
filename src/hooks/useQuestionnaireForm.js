@@ -12,8 +12,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { getStateMachineBehavior, STATES } from './useOnboardingStateMachine';
-
-const API_BASE = 'https://celestial.se/tic-tac-toe-api/api';
+import { API_URL as API_BASE } from '../config/api';
 
 /**
  * Generic hook för formulärdata med state machine architecture

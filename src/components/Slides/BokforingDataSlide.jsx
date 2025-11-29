@@ -93,7 +93,7 @@ export default function BokforingDataSlide({ onNext, onBack }) {
       const formDataObj = new FormData();
       formDataObj.append('file', file);
 
-      const API_BASE = import.meta.env.VITE_API_URL || 'https://celestial.se/tic-tac-toe-api/api';
+      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
       const response = await fetchWithAuth(`${API_BASE}/onboarding/upload-sie?orgnr=${orgnr}&onboarding_id=${onboardingId}`, {
         method: 'POST',
         headers: {},
