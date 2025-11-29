@@ -4,6 +4,7 @@
  * UPDATED: 2025-11-25 - Använder useParams för company_id (multi-tab safe)
  * UPDATED: 2025-11-25 - case_id support + "draft" mode för nya onboardings
  * UPDATED: 2025-11-27 - STATE MACHINE REFACTOR: Behavior driven by metadata.state
+ * UPDATED: 2025-11-29 - REMOVED DUPLICATE /resume fetch - use metadata from first call
  * PURPOSE: Generic hook for form data persistence with state machine architecture
  * FEATURES: Auto-load, auto-save, multi-tab sync, state-driven behavior
  * REF: CHANGELOG_2025-11-26.md - State Machine Refactor
@@ -159,48 +160,41 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
         
         let loadedData = null;
         
-        // ✅ CHECK RESUME MODE: Load from Resume endpoint if resuming
+        // ✅ CHECK RESUME MODE: Load from Resume endpoint data (already fetched above!)
         const isResumeMode = localStorage.getItem('resumeMode') === 'true';
         
         if (isResumeMode) {
-          console.log('🔄 Resume mode detected - fetching data from Resume endpoint');
-          try {
-            // Fetch complete Resume data
-            const resumeResponse = await fetch(
-              `${API_BASE}/onboarding/resume/${effectiveCompanyId}?onboarding_id=${effectiveCaseId}`,
-              {
-                headers: {
-                  'Authorization': `Bearer ${getToken()}`,
-                  'Content-Type': 'application/json'
-                }
-              }
-            );
-            
-            if (resumeResponse.ok) {
-              const resumeData = await resumeResponse.json();
-              
-              // Cache ALL slides from Resume endpoint
-              if (resumeData.data) {
-                Object.entries(resumeData.data).forEach(([key, value]) => {
-                  const cacheKey = `onboarding-${userId}-${effectiveCompanyId}-${effectiveCaseId}-${key}`;
-                  writeToStorage(cacheKey, value, 0);
-                  console.log(`✅ Cached ${key} from Resume endpoint`);
-                });
-              }
-              
-              // Load data for current slide
-              if (resumeData.data?.[slideKey]) {
-                loadedData = resumeData.data[slideKey];
-                console.log(`📥 Loaded ${slideKey} from Resume endpoint`);
-              }
-              
-              // Clear resume flag after successful load
-              localStorage.removeItem('resumeMode');
-            }
-          } catch (err) {
-            console.error('Failed to load Resume data:', err);
-            localStorage.removeItem('resumeMode');
+          console.log('🔄 Resume mode detected - using already-fetched metadata');
+          
+          // Use metadata from first fetch - NO DUPLICATE REQUEST!
+          // Cache ALL slides from the metadata we already have
+          if (metadata.static_kyc) {
+            Object.entries(metadata.static_kyc).forEach(([key, value]) => {
+              const cacheKey = `onboarding-${userId}-${effectiveCompanyId}-${effectiveCaseId}-${key}`;
+              writeToStorage(cacheKey, { entireForm: value }, 0);
+              console.log(`✅ Cached ${key} from Resume metadata`);
+            });
           }
+          
+          // Also check legacy data format
+          if (metadata.data) {
+            Object.entries(metadata.data).forEach(([key, value]) => {
+              const cacheKey = `onboarding-${userId}-${effectiveCompanyId}-${effectiveCaseId}-${key}`;
+              writeToStorage(cacheKey, value, 0);
+              console.log(`✅ Cached ${key} from Resume data`);
+            });
+          }
+          
+          // Load data for current slide from static_kyc or data
+          const slideData = metadata.static_kyc?.[slideKey] || metadata.data?.[slideKey];
+          if (slideData) {
+            // Wrap in entireForm if it's raw data
+            loadedData = slideData.entireForm ? slideData : { entireForm: slideData };
+            console.log(`📥 Loaded ${slideKey} from Resume metadata`);
+          }
+          
+          // Clear resume flag after successful load
+          localStorage.removeItem('resumeMode');
         }
         
         // Load from cache if not already loaded from Resume
