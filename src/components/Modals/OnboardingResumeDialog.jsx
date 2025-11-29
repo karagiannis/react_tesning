@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Trash2, ArrowRight, Plus, Clock, TrendingUp } from 'lucide-react';
+import { useAgreements } from '../../contexts/AgreementContext';
+import { fetchWithAuth } from '../../utils/auth';
 
 /**
  * OnboardingResumeDialog - Modal som visas vid login om pågående onboardings finns
@@ -20,6 +22,9 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deletingOrgnr, setDeletingOrgnr] = useState(null);
+  
+  // 🆕 Hook för att synka subscription-status från server
+  const { loadSubscriptionFromServer, clearSubscription } = useAgreements();
 
   useEffect(() => {
     fetchOnboardings();
@@ -93,6 +98,7 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
 
       // Om inga företag kvar, gå direkt till ny session
       if (companies.length === 1) {
+        clearSubscription(); // Rensa subscription för ny session
         onNewSession();
       }
     } catch (err) {
@@ -128,6 +134,16 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
       }
 
       const data = await response.json();
+      
+      // 🆕 Synka subscription-status från server till AgreementContext
+      if (data.subscription) {
+        console.log('📥 Resume: Laddar subscription från server:', data.subscription);
+        loadSubscriptionFromServer(data.subscription);
+      } else {
+        // Rensa eventuellt gammalt subscription-state från tidigare session
+        clearSubscription();
+      }
+      
       onResume(data);  // Callback till App.jsx
     } catch (err) {
       console.error('Error resuming onboarding:', err);
@@ -186,6 +202,7 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
 
   // Om inga företag, gå direkt till ny session
   if (companies.length === 0) {
+    clearSubscription(); // Rensa subscription för ny session
     onNewSession();
     return null;
   }
@@ -294,7 +311,10 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
         {/* Footer: Ny Onboarding-knapp */}
         <div className="p-6 border-t border-gray-200 bg-gray-50">
           <button
-            onClick={onNewSession}
+            onClick={() => {
+              clearSubscription(); // Rensa subscription för ny session
+              onNewSession();
+            }}
             className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold shadow-md"
           >
             <Plus className="w-5 h-5" />

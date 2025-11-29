@@ -285,29 +285,14 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
                 return;
               }
               
-              // Map checkbox keys to Swedish display names for backend
-              const customerTypeMap = {
-                privatpersoner: 'Privatpersoner',
-                foretag: 'Företag',
-                offentligSektor: 'Offentlig sektor'
-              };
-
-              // Prepare request body matching backend RiskAssessmentRequest
+              // 🚗 "Bil-principen": Skicka HELA formData som det är + orgnr/company_name
               const requestBody = {
-                orgnr: orgnrDisplay,  // From localStorage (set by Uppdragsval)
-                company_name: companyNameDisplay,  // From localStorage
-                business_idea: formData.affarsIde,
-                customer_types: Object.entries(formData.kundTyper)
-                  .filter(([_, checked]) => checked)
-                  .map(([key]) => customerTypeMap[key]),  // Map to Swedish names
-                foreign_partners: formData.utlandskaPartners || '',
-                main_suppliers: formData.storaLeverantorer || '',
-                recent_changes: formData.verksamhetAndrad || '',
-                personal_number: formData.personnummer,
-                is_pep: formData.isPEP
+                ...formData,  // ← Hela objektet, opakt!
+                orgnr: orgnrDisplay,
+                company_name: companyNameDisplay
               };
               
-              console.log('📤 Submitting risk assessment:', requestBody);
+              console.log('📤 Submitting risk assessment (opaque):', requestBody);
               
               // Submit to backend with company_id in path and onboarding_id as query
               const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;

@@ -46,6 +46,7 @@ import DocumentSetupSlide from './components/Slides/DocumentSetupSlide';
 import WelcomeSlide from './components/Slides/WelcomeSlide';
 import OngoingRoutinesSlide from './components/Slides/OngoingRoutinesSlide';
 import SupportSlide from './components/Slides/SupportSlide';
+import PaymentSuccessSlide from './components/Slides/PaymentSuccessSlide';
 import UnauthorizedPage from './components/Pages/UnauthorizedPage';
 import ServerErrorPage from './components/Pages/ServerErrorPage';
 //import SettingsPage from './components/Pages/SettingsPage';
@@ -300,6 +301,8 @@ export default function App() {
   };
 
   // Resume callback: Ladda data och navigera (FÖRENKLAD - endast is_locked)
+  // ⚠️ VIKTIGT: handleResume sätter ENDAST IDs och flaggor.
+  // useQuestionnaireForm ansvarar för att hämta och cacha data från server.
   const handleResume = (data) => {
     console.log('📂 Resuming onboarding:', data);
     
@@ -311,15 +314,19 @@ export default function App() {
       is_locked: data.is_locked || false  // Endast is_locked behövs
     });
     
-    // Set IDs i localStorage
+    // Set IDs i localStorage (useQuestionnaireForm behöver dessa för cache keys)
     localStorage.setItem('onboardingId', data.onboardingId);
     localStorage.setItem('currentCompanyId', data.company_id);
     localStorage.setItem('currentCompanyName', data.companyName);
     localStorage.setItem('currentOrgnr', data.orgnr);
     
+    // 🔑 FLAGGA: Signalerar till useQuestionnaireForm att hämta data från Resume endpoint
+    // useQuestionnaireForm kommer läsa denna flagga och hämta ALL slide-data från servern
+    localStorage.setItem('resumeMode', 'true');
+    
     setShowResumeDialog(false);
     setDialogDismissed(true);
-    // Navigate to current step
+    // Navigate to current step - useQuestionnaireForm laddar data automatiskt
     navigate(`/${data.currentStep}`);
   };
 
@@ -453,6 +460,7 @@ export default function App() {
             <Route path="/verify" element={<VerifySlide onNext={handleLogin} />} />
             <Route path="/forgot-password" element={<ForgotPasswordSlide onNext={() => navigate('/reset-password')} onBack={() => navigate('/login')} />} />
             <Route path="/reset-password" element={<ResetPasswordSlide onNext={() => navigate('/login')} onResendCode={() => navigate('/forgot-password')} />} />
+            <Route path="/payment-success" element={<PaymentSuccessSlide />} />
             <Route path="/uppdragsval" element={
               <UppdragsvalsSlide 
                 onNext={(data) => {

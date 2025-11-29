@@ -201,53 +201,56 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
               )}
             </div>
 
-            {/* Fråga 2: Omsättningsandel */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-box border border-gray-200 relative">
-              <button
-                onClick={() => toggleInfo('blockA_question2')}
-                className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
-                title="Varför frågar vi detta?"
-              >
-                <Info className="w-5 h-5" />
-              </button>
+            {/* Fråga 2: Omsättningsandel - visas bara om utländska kunder = ja */}
+            {formData.harUtlandskaKunder === 'ja' && (
+              <div className="mb-6 p-4 bg-gray-50 rounded-box border border-gray-200 relative">
+                <button
+                  onClick={() => toggleInfo('blockA_question2')}
+                  className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
+                  title="Varför frågar vi detta?"
+                >
+                  <Info className="w-5 h-5" />
+                </button>
 
-              <label className="block text-section-title text-brand-800 mb-2 pr-8">
-                2. Ungefär hur stor andel av omsättningen kommer från utländska kunder? *
-              </label>
-              <select
-                value={formData.andelOmsattning}
-                onChange={(e) => handleChange('andelOmsattning', e.target.value)}
-                className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm focus:ring-brand-500"
-              >
-                <option value="">Välj...</option>
-                <option value="<10%">Mindre än 10%</option>
-                <option value="10-30%">10-30%</option>
-                <option value="30-50%">30-50%</option>
-                <option value=">50%">Över 50%</option>
-              </select>
+                <label className="block text-section-title text-brand-800 mb-2 pr-8">
+                  2. Ungefär hur stor andel av omsättningen kommer från utländska kunder? *
+                </label>
+                <select
+                  value={formData.andelOmsattning}
+                  onChange={(e) => handleChange('andelOmsattning', e.target.value)}
+                  className="w-full px-4 py-2 border border-brand-300 rounded-box-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm focus:ring-brand-500"
+                >
+                  <option value="">Välj...</option>
+                  <option value="<10%">Mindre än 10%</option>
+                  <option value="10-30%">10-30%</option>
+                  <option value="30-50%">30-50%</option>
+                  <option value=">50%">Över 50%</option>
+                </select>
 
-              {expandedInfo.blockA_question2 && (
-                <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs">
-                  <p className="font-semibold text-brand-900 mb-2">Varför frågar vi detta?</p>
-                  <p className="text-gray-700 mb-3">
-                    För att kvantifiera geografisk exponering och avgöra om skärpta åtgärder krävs enligt PTL 3 kap. 16 §.
-                  </p>
-                  <div className="space-y-2">
-                    {getLegalTextsForQuestion('steg2', 'blockA_question2').map((legal, idx) => (
-                      <div key={idx} className="border-l-2 border-brand-400 pl-2">
-                        <p className="font-bold text-gray-900">{legal.law}</p>
-                        <p className="text-gray-600 leading-relaxed whitespace-pre-line">
-                          {legal.fullText}
-                        </p>
-                      </div>
-                    ))}
+                {expandedInfo.blockA_question2 && (
+                  <div className="mt-4 p-3 bg-white border border-brand-300 rounded-box text-xs">
+                    <p className="font-semibold text-brand-900 mb-2">Varför frågar vi detta?</p>
+                    <p className="text-gray-700 mb-3">
+                      För att kvantifiera geografisk exponering och avgöra om skärpta åtgärder krävs enligt PTL 3 kap. 16 §.
+                    </p>
+                    <div className="space-y-2">
+                      {getLegalTextsForQuestion('steg2', 'blockA_question2').map((legal, idx) => (
+                        <div key={idx} className="border-l-2 border-brand-400 pl-2">
+                          <p className="font-bold text-gray-900">{legal.law}</p>
+                          <p className="text-gray-600 leading-relaxed whitespace-pre-line">
+                            {legal.fullText}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
-            {/* Fråga 3: Typ av samarbete */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-box border border-gray-200 relative">
+            {/* Fråga 3: Typ av samarbete - visas bara om utländska kunder = ja */}
+            {formData.harUtlandskaKunder === 'ja' && (
+              <div className="mb-6 p-4 bg-gray-50 rounded-box border border-gray-200 relative">
               <button
                 onClick={() => toggleInfo('blockA_question3')}
                 className="absolute top-4 right-4 text-brand-600 hover:text-brand-700 transition-colors"
@@ -317,6 +320,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
                 </div>
               )}
             </div>
+            )}
           </div>
 
           {/* ============================================================ */}
