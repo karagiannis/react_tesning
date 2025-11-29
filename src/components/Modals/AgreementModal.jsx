@@ -1,29 +1,89 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAgreements } from '../../contexts/AgreementContext';
+import { fetchWithAuth } from '../../utils/auth';
 
 export default function AgreementModal({ show, onClose }) {
   const navigate = useNavigate();
   const { oneTimeAgreement, setOneTimeAgreement } = useAgreements();
   const [isSigningOneTime, setIsSigningOneTime] = useState(false);
+  const [error, setError] = useState(null);
+  const [trialInfo, setTrialInfo] = useState(null);
 
-  const handleSignOneTimeAgreement = () => {
+  const handleSignOneTimeAgreement = async () => {
     setIsSigningOneTime(true);
+    setError(null);
     
-    // Mock BankID signing (3 seconds)
-    setTimeout(() => {
-      setOneTimeAgreement({
-        isSigned: true,
-        agreementNumber: 'ONETIME-2025-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
-        signedAt: new Date().toISOString(),
-        signerName: 'Testanvändare',
-        signerPersonnr: '19XXXXXX-XXXX',
-        totalCost: 0, // Räknas ut efter API-anrop
-        isSigningInProgress: false
-      });
+    try {
+      // Get IDs from localStorage
+      const companyId = localStorage.getItem('currentCompanyId');
+      const onboardingId = localStorage.getItem('onboardingId');
+      const personnummer = localStorage.getItem('currentPersonnummer') || '19XXXXXX-XXXX';
+      
+      if (!companyId || !onboardingId) {
+        throw new Error('Saknar company_id eller onboarding_id. Gå tillbaka till Uppdragsval.');
+      }
+      
+      // Call backend to initiate subscription
+      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
+      const response = await fetchWithAuth(
+        `${API_BASE}/onboarding/${companyId}/subscription?onboarding_id=${onboardingId}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'trial',
+            personnummer: personnummer
+          })
+        }
+      );
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        // Check for trial limit reached (402)
+        if (response.status === 402) {
+          const detail = data.detail;
+          setTrialInfo({
+            limitReached: true,
+            used: detail.trials_used,
+            max: detail.trials_max,
+            message: detail.message
+          });
+          throw new Error(detail.message);
+        }
+        throw new Error(data.detail || 'Kunde inte initiera betalning');
+      }
+      
+      console.log('✅ Betalning initierad:', data);
+      
+      // Store trial info for UI
+      if (data.trial_info) {
+        setTrialInfo(data.trial_info);
+      }
+      
+      // Redirect to Stripe payment
+      if (data.payment_url) {
+        // Store company/case info for return from Stripe
+        localStorage.setItem('pendingPayment', JSON.stringify({
+          companyId,
+          onboardingId,
+          initiatedAt: new Date().toISOString()
+        }));
+        
+        // Redirect to Stripe checkout
+        window.location.href = data.payment_url;
+        return;
+      }
+      
+      // If no payment URL, something went wrong
+      throw new Error('Ingen betalnings-URL returnerades');
+      
+    } catch (err) {
+      console.error('❌ Error initiating payment:', err);
+      setError(err.message);
       setIsSigningOneTime(false);
-      onClose(); // Stäng modal
-    }, 3000);
+    }
   };
 
   if (!show) return null;
@@ -64,11 +124,35 @@ export default function AgreementModal({ show, onClose }) {
             <p className="text-sm text-yellow-800 mb-1">
               Om du endast vill testa, teckna engångsavtal med oss till en kostnad av API-anrop + avtalsteckning till ett självkostnadspris.
             </p>
-            <p className="text-xs text-yellow-800 font-semibold mt-2">
-              ⚠️ OBS: Engångsavtal erbjuds endast en gång.
+            <p className="text-sm text-yellow-800 font-semibold">
+              💰 Pris: 2 495 kr (inkl. moms)
+            </p>
+            <p className="text-xs text-yellow-800 mt-2">
+              ⚠️ OBS: Max 3 engångstester per användare.
             </p>
           </div>
         </div>
+
+        {/* Trial limit warning */}
+        {trialInfo?.limitReached && (
+          <div className="mb-4 p-4 bg-orange-50 border-2 border-orange-300 rounded-box">
+            <p className="text-sm text-orange-900 font-semibold mb-1">
+              ⚠️ Du har använt alla dina {trialInfo.max} gratistester
+            </p>
+            <p className="text-sm text-orange-800">
+              Uppgradera till Enterprise för obegränsade onboardings.
+            </p>
+          </div>
+        )}
+
+        {/* Error message */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-box">
+            <p className="text-sm text-red-800">
+              <strong>❌ Fel:</strong> {error}
+            </p>
+          </div>
+        )}
 
         {/* Action buttons */}
         {!isSigningOneTime ? (
@@ -88,12 +172,20 @@ export default function AgreementModal({ show, onClose }) {
 
             <button
               onClick={handleSignOneTimeAgreement}
-              className="w-full px-6 py-3 bg-yellow-600 text-white rounded-box hover:bg-yellow-700 font-semibold flex items-center justify-center gap-2"
+              disabled={trialInfo?.limitReached}
+              className={`w-full px-6 py-3 rounded-box font-semibold flex items-center justify-center gap-2 ${
+                trialInfo?.limitReached 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-yellow-600 text-white hover:bg-yellow-700'
+              }`}
             >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
               </svg>
-              Teckna engångsavtal (endast testa)
+              {trialInfo?.limitReached 
+                ? 'Inga fler gratistester tillgängliga'
+                : 'Betala 2 495 kr → Teckna engångsavtal'
+              }
             </button>
 
             <button
@@ -104,7 +196,7 @@ export default function AgreementModal({ show, onClose }) {
             </button>
           </div>
         ) : (
-          /* BankID Signing in progress */
+          /* Redirecting to Stripe */
           <div className="text-center py-6">
             <div className="mb-4 flex justify-center">
               <svg className="animate-spin h-12 w-12 text-brand-600" fill="none" viewBox="0 0 24 24">
@@ -113,10 +205,10 @@ export default function AgreementModal({ show, onClose }) {
               </svg>
             </div>
             <p className="text-gray-900 font-semibold text-lg mb-2">
-              Signerar engångsavtal med BankID...
+              Omdirigerar till Stripe betalning...
             </p>
             <p className="text-gray-600 text-sm">
-              Mock BankID-process (3 sekunder)
+              Du kommer strax till en säker betalningssida
             </p>
           </div>
         )}

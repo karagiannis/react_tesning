@@ -75,13 +75,13 @@ export default function RiskFragorSteg3Slide({ onNext }) {
     }
 
     // Send data to backend via PATCH
-const onboardingId = localStorage.getItem('onboardingId');
+    const onboardingId = localStorage.getItem('onboardingId');
 
-    if (token && onboardingId) {
+    if (onboardingId && companyId) {
       try {
         const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
         const response = await fetchWithAuth(
-          `${API_BASE}/onboarding/risk-assessment-extended?onboarding_id=${onboardingId}`,
+          `${API_BASE}/onboarding/${companyId}/risk-assessment-extended?onboarding_id=${onboardingId}`,
           {
             method: 'PATCH',
             headers: {'Content-Type': 'application/json'

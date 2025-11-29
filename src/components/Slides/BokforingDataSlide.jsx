@@ -70,13 +70,12 @@ export default function BokforingDataSlide({ onNext, onBack }) {
 
   const uploadSieFile = async (file) => {
     try {
-      // Hämta JWT token och onboardingId från localStorage
-      const token = localStorage.getItem('accessToken') || localStorage.getItem('jwt_token');
+      // BUG FIX 2025-11-29: Use companyId from URL params, not orgnr from localStorage
+      // Old pattern: find_company_id_by_orgnr() could return wrong company if duplicates existed
       const onboardingId = localStorage.getItem('onboardingId');
-      const orgnr = localStorage.getItem('currentOrgnr') || localStorage.getItem('temp_orgnr');
       
-      if (!token) {
-        setUploadStatus('❌ Ingen inloggning hittad. Logga in igen.');
+      if (!companyId) {
+        setUploadStatus('❌ Company ID saknas. Gå tillbaka till Uppdragsval.');
         return;
       }
       
@@ -84,17 +83,12 @@ export default function BokforingDataSlide({ onNext, onBack }) {
         setUploadStatus('❌ onboardingId saknas. Gå tillbaka till Uppdragsval.');
         return;
       }
-      
-      if (!orgnr) {
-        setUploadStatus('❌ Organisationsnummer saknas. Gå tillbaka till Uppdragsval.');
-        return;
-      }
 
       const formDataObj = new FormData();
       formDataObj.append('file', file);
 
       const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
-      const response = await fetchWithAuth(`${API_BASE}/onboarding/upload-sie?orgnr=${orgnr}&onboarding_id=${onboardingId}`, {
+      const response = await fetchWithAuth(`${API_BASE}/onboarding/${companyId}/upload-sie?onboarding_id=${onboardingId}`, {
         method: 'POST',
         headers: {},
         body: formDataObj

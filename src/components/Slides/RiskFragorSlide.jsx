@@ -309,10 +309,10 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
               
               console.log('📤 Submitting risk assessment:', requestBody);
               
-              // Submit to backend with onboarding_id query parameter
+              // Submit to backend with company_id in path and onboarding_id as query
               const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
               const response = await fetchWithAuth(
-                `${API_BASE}/onboarding/risk-assessment?onboarding_id=${onboardingId}`,
+                `${API_BASE}/onboarding/${companyId}/risk-assessment?onboarding_id=${onboardingId}`,
                 {
                   method: 'POST',
                   headers: {'Content-Type': 'application/json'
