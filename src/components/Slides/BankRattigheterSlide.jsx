@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import useSlideStateController from '../../hooks/useSlideStateController';
 import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 
 export default function BankRattigheterSlide({ onNext, onBack }) {
@@ -9,9 +10,19 @@ export default function BankRattigheterSlide({ onNext, onBack }) {
     entireForm: { type: 'object', required: false }
   };
 
-  const { formData: savedFormData, updateQuestion, pushToServer } = useQuestionnaireForm(
+  // 🆕 MASTER/SLAVE Pattern: MASTER fetches and decides data source
+  const { 
+    initialData, 
+    isReady, 
+    source, 
+    metadata 
+  } = useSlideStateController('bank_rattigheter');
+
+  // 🆕 SLAVE receives data - auto-save blocked until initialData is applied
+  const { formData: savedFormData, updateQuestion, pushToServer, initialDataApplied } = useQuestionnaireForm(
     'bank_rattigheter',
-    QUESTIONS_CONFIG
+    QUESTIONS_CONFIG,
+    { initialData, isReady, source, caseMetadata: metadata }
   );
 
   const [selectedBank, setSelectedBank] = useState(savedFormData?.entireForm?.selectedBank || '');

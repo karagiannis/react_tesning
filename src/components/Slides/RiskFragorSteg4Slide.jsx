@@ -1,9 +1,13 @@
+/**
+ * UPDATED: 2025-11-30 - MASTER/SLAVE pattern för race condition fix
+ */
 import { useState } from 'react';
 import { fetchWithAuth } from '../../utils/auth';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Info, ChevronRight } from 'lucide-react';
 import { getLegalTextsForQuestion, legalTexts } from '../../data/legalTexts';
 import StepIndicator from '../Shared/StepIndicator';
+import useSlideStateController from '../../hooks/useSlideStateController';
 import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 
 // BRUTE FORCE CONFIG
@@ -16,15 +20,26 @@ export default function RiskFragorSteg4Slide({ onNext }) {
   const navigate = useNavigate();
   const [expandedInfo, setExpandedInfo] = useState({});
   
+  // 🆕 MASTER/SLAVE Pattern: MASTER fetches and decides data source
+  const { 
+    initialData, 
+    isReady, 
+    source, 
+    metadata 
+  } = useSlideStateController('riskfragor_steg4');
+
+  // 🆕 SLAVE receives data - auto-save blocked until initialData is applied
   const {
     formData: hookFormData,
     updateQuestion,
     isLoading: syncLoading,
     syncStatus,
-    pushToServer
+    pushToServer,
+    initialDataApplied,
   } = useQuestionnaireForm(
     'riskfragor_steg4',
-    QUESTIONS_CONFIG
+    QUESTIONS_CONFIG,
+    { initialData, isReady, source, caseMetadata: metadata }
   );
 
   const formData = hookFormData.entireForm || {

@@ -4,6 +4,8 @@
  * CHANGES: Migrated from useLocalStorage to useQuestionnaireForm with entire form object
  * STRATEGY: Store entire complex formData as single "entireForm" field (no structure parsing needed)
  * REF: CHANGELOG_2025-11-24.md
+ * 
+ * UPDATED: 2025-11-30 - MASTER/SLAVE pattern för race condition fix
  */
 
 import { useState } from 'react';
@@ -11,6 +13,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Info } from 'lucide-react';
 import { getLegalTextsForQuestion } from '../../data/legalTexts';
 import StepIndicator from '../Shared/StepIndicator';
+import useSlideStateController from '../../hooks/useSlideStateController';
 import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 
 // BRUTE FORCE CONFIG: Single field stores entire complex object
@@ -23,16 +26,26 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
   const navigate = useNavigate();
   const [expandedInfo, setExpandedInfo] = useState({});
   
-  // Use hook with company_id from URL
+  // 🆕 MASTER/SLAVE Pattern: MASTER fetches and decides data source
+  const { 
+    initialData, 
+    isReady, 
+    source, 
+    metadata 
+  } = useSlideStateController('riskfragor_steg2');
+
+  // 🆕 SLAVE receives data - auto-save blocked until initialData is applied
   const {
     formData: hookFormData,
     updateQuestion,
     isLoading: syncLoading,
     syncStatus,
     pushToServer,
+    initialDataApplied,
   } = useQuestionnaireForm(
     'riskfragor_steg2',
-    QUESTIONS_CONFIG
+    QUESTIONS_CONFIG,
+    { initialData, isReady, source, caseMetadata: metadata }
   );
 
   // Extract from brute force field (simplified: no wrapping)

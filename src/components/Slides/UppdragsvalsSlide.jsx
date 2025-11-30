@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import useSlideStateController from '../../hooks/useSlideStateController';
 import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 import { searchCompanies } from '../../data/companySearchAPI';
 import { fetchWithAuth } from '../../utils/auth';
@@ -18,6 +19,8 @@ import { API_URL as API_BASE } from '../../config/api';
  * - Beräknar uppskattad kostnad
  * - Returnerar onboardingId (UUID) från backend
  * - Sparar och laddar tillbaka val från localStorage (USER-SCOPED)
+ * 
+ * UPDATED: 2025-11-30 - MASTER/SLAVE pattern för race condition fix
  */
 
 // Question configuration for useQuestionnaireForm
@@ -26,6 +29,15 @@ const QUESTIONS_CONFIG = {
 };
 
 export default function UppdragsvalsSlide({ onNext }) {
+  // 🆕 MASTER/SLAVE Pattern: MASTER fetches and decides data source
+  const { 
+    initialData, 
+    isReady, 
+    source, 
+    metadata 
+  } = useSlideStateController('uppdragsval');
+
+  // 🆕 SLAVE receives data - auto-save blocked until initialData is applied
   const {
     formData,
     updateQuestion,
@@ -35,9 +47,11 @@ export default function UppdragsvalsSlide({ onNext }) {
     syncStatus,
     pushToServer,
     canEditOrgnr,  // NEW: From state machine - false when is_locked=true
+    initialDataApplied,
   } = useQuestionnaireForm(
     'uppdragsval',
-    QUESTIONS_CONFIG
+    QUESTIONS_CONFIG,
+    { initialData, isReady, source, caseMetadata: metadata }
   );
 
   // Expandable sections state

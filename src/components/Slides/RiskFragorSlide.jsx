@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { fetchWithAuth } from '../../utils/auth';
 import { useParams, useNavigate } from 'react-router-dom';
 import StepIndicator from '../Shared/StepIndicator';
+import useSlideStateController from '../../hooks/useSlideStateController';
 import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 import { useAgreements } from '../../contexts/AgreementContext';
 import AgreementModal from '../Modals/AgreementModal';
@@ -11,22 +12,35 @@ const QUESTIONS_CONFIG = {
   entireForm: { type: 'object', required: false }
 };
 
+/**
+ * UPDATED: 2025-11-30 - MASTER/SLAVE pattern för race condition fix
+ */
 export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange }) {
   const { companyId, caseId } = useParams();
   const navigate = useNavigate();
   const { hasAnyAgreement } = useAgreements();
   const [showAgreementModal, setShowAgreementModal] = useState(false);
   
-  // Use hook with company_id from URL
+  // 🆕 MASTER/SLAVE Pattern: MASTER fetches and decides data source
+  const { 
+    initialData, 
+    isReady, 
+    source, 
+    metadata 
+  } = useSlideStateController('riskfragor_steg1');
+
+  // 🆕 SLAVE receives data - auto-save blocked until initialData is applied
   const {
     formData: hookFormData,
     updateQuestion,
     isLoading: syncLoading,
     syncStatus,
-    pushToServer
+    pushToServer,
+    initialDataApplied,
   } = useQuestionnaireForm(
     'riskfragor_steg1',
-    QUESTIONS_CONFIG
+    QUESTIONS_CONFIG,
+    { initialData, isReady, source, caseMetadata: metadata }
   );
 
   // Extract from brute force field (simplified: no wrapping)

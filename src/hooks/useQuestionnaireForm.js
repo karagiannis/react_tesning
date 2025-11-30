@@ -6,16 +6,42 @@
  * UPDATED: 2025-11-27 - STATE MACHINE REFACTOR: Behavior driven by metadata.state
  * UPDATED: 2025-11-29 - REMOVED DUPLICATE /resume fetch - use metadata from first call
  * UPDATED: 2025-11-29 - GIT-LIKNANDE VERSIONERING: based_on_version + 409 CONFLICT
- * UPDATED: 2025-11-30 - DEBUG LOGGER: Aktivera med localStorage.setItem('DEBUG_MODE', 'true')
+ * UPDATED: 2025-11-30 - DEBUG LOGGER: Aktivera med VITE_DEBUG_MODE=true i .env.development
  * UPDATED: 2025-11-30 - NAMESPACED STORAGE KEYS: Använder :: som separator för multi-tab/user
+ * UPDATED: 2025-11-30 - RACE CONDITION FIX: Refaktorerad till SLAVE hook
  * PURPOSE: Generic hook for form data persistence with state machine architecture
  * FEATURES: Auto-load, auto-save, multi-tab sync, state-driven behavior, version control
  * REF: CHANGELOG_2025-11-26.md - State Machine Refactor
  * REF: CHANGELOG_2025-11-29.md - Git-liknande Versionering
- * REF: CHANGELOG_2025-11-30.md - Namespaced Storage Keys
+ * REF: CHANGELOG_2025-11-30.md - Namespaced Storage Keys + MASTER/SLAVE Race Condition Fix
+ * 
+ * ======================== REFAKTORERAD FÖR RACE CONDITION FIX ========================
+ * 
+ * TIDIGARE (BUG): 
+ *   - Hook hämtade data SJÄLV i useEffect
+ *   - formData = {} initialt
+ *   - Auto-save triggas av formData change
+ *   - Auto-save skriver {} INNAN data laddats = RACE CONDITION
+ * 
+ * NU (FIXED):
+ *   - Tar emot initialData från useSlideStateController (MASTER)
+ *   - Sätter formData ENDAST när isReady=true
+ *   - Auto-save körs ENDAST om initialDataApplied=true
+ *   - Ingen egen laddningslogik
+ * 
+ * ANVÄNDNING:
+ *   const { initialData, isReady, source, metadata } = useSlideStateController(slideKey);
+ *   const form = useQuestionnaireForm(slideKey, questionConfig, { 
+ *     initialData,          // Data från MASTER
+ *     isReady,              // MASTER är klar
+ *     source,               // 'server' | 'localStorage' | 'empty'
+ *     caseMetadata: metadata 
+ *   });
+ * 
+ * ====================================================================================
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { getStateMachineBehavior, FORM_STATES } from './useOnboardingStateMachine';
 import { API_URL as API_BASE } from '../config/api';
@@ -24,15 +50,31 @@ import { buildStorageKey, parseStorageKey, clearStorageKeys, findStorageKeys } f
 
 /**
  * Generic hook för formulärdata med state machine architecture
+ * 
+ * 🔄 SLAVE HOOK - Tar emot initialData från useSlideStateController (MASTER)
+ * 
  * @param {string} slideKey - Unik identifierare för slide (t.ex. "riskfragor_steg2")
  * @param {Object} questionConfig - Config från QUESTIONNAIRE_CONFIG
+ * @param {Object} masterData - Data från useSlideStateController (MASTER)
+ * @param {Object} masterData.initialData - Initial form data (från server eller localStorage)
+ * @param {boolean} masterData.isReady - Om MASTER är klar att leverera data
+ * @param {string} masterData.source - Källa: 'server' | 'localStorage' | 'empty'
+ * @param {Object} masterData.caseMetadata - Case metadata från server
  * @returns {Object} - { formData, formState, canEdit, updateQuestion, isValid, errors, resetForm, pushToServer }
  */
-export const useQuestionnaireForm = (slideKey, questionConfig) => {
+export const useQuestionnaireForm = (slideKey, questionConfig, masterData = {}) => {
   // Validate inputs
   if (!slideKey || !questionConfig) {
     throw new Error('useQuestionnaireForm requires slideKey and questionConfig');
   }
+  
+  // 🆕 MASTER/SLAVE: Extrahera data från MASTER hook
+  const { 
+    initialData = null, 
+    isReady = false, 
+    source = 'empty',
+    caseMetadata: masterMetadata = null 
+  } = masterData;
   
   // Get company_id AND case_id from URL params OR localStorage
   // Priority: URL params > localStorage > 'draft'
@@ -80,16 +122,13 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
   console.log(`   companyId: ${effectiveCompanyId} (from ${urlParams.companyId ? 'URL' : 'localStorage'})`);
   console.log(`   caseId: ${effectiveCaseId} (from ${urlParams.caseId ? 'URL' : 'localStorage'})`);
   
-  // State
-  const [formData, setFormData] = useState(() => {
-    // Default: alla frågor har null value (no wrapping)
-    const initialData = {};
-    const questions = questionConfig.questions || questionConfig;
-    Object.keys(questions).forEach(qId => {
-      initialData[qId] = null;
-    });
-    return initialData;
-  });
+  // 🆕 RACE CONDITION FIX: Track om initialData har applicerats
+  // Auto-save körs ENDAST om denna är true
+  const initialDataAppliedRef = useRef(false);
+  const [initialDataApplied, setInitialDataApplied] = useState(false);
+  
+  // State - UTAN initial server fetch (det gör MASTER nu)
+  const [formData, setFormData] = useState({});
   
   const [formState, setFormState] = useState('loading'); // State machine state
   const [caseMetadata, setCaseMetadata] = useState(null); // Case metadata from server
@@ -136,219 +175,72 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     localStorage.setItem(key, JSON.stringify(wrapped));
   };
 
-  // STATE MACHINE: Initial load - fetch case metadata and determine state
+  // ======================== MASTER/SLAVE DATA APPLICATION ========================
+  // 🆕 RACE CONDITION FIX: Applicera initialData från MASTER när isReady=true
+  // Detta ersätter den gamla loadData() useEffect som orsakade race condition
   useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      setFormState('loading');
-      
-      // 🧠 THOUGHT: Triggered on slide
-      debugLog.thought(slideKey, '🚀 Triggered! Starting load sequence', {
-        companyId: effectiveCompanyId,
-        caseId: effectiveCaseId,
-        storageKey
+    // Vänta tills MASTER har levererat data
+    if (!isReady) {
+      debugLog.thought(slideKey, '⏳ Waiting for MASTER to deliver initialData...', {
+        isReady,
+        hasInitialData: !!initialData,
+        source
       });
-
-      // If no case created yet (draft mode), use localStorage only
-      if (effectiveCompanyId === 'draft' || effectiveCaseId === 'draft') {
-        debugLog.thought(slideKey, '📝 Draft mode detected - no server case yet');
-        const localData = readFromStorage(storageKey);
-        if (localData) {
-          debugLog.thought(slideKey, '📦 Found draft data in localStorage', localData);
-          setFormData(localData.value);
-        } else {
-          debugLog.thought(slideKey, '📭 No draft data found - starting fresh');
-        }
-        setFormState('ready');  // Draft mode = ready to edit
-        setIsLoading(false);
-        return;
+      return;
+    }
+    
+    // Förhindra dubbel-applicering
+    if (initialDataAppliedRef.current) {
+      debugLog.thought(slideKey, '⚠️ InitialData already applied, skipping');
+      return;
+    }
+    
+    debugLog.thought(slideKey, '🎯 MASTER is ready! Applying initialData', {
+      source,
+      hasInitialData: !!initialData,
+      initialDataKeys: initialData ? Object.keys(initialData) : []
+    });
+    
+    // Applicera initialData från MASTER
+    if (initialData && Object.keys(initialData).length > 0) {
+      setFormData(initialData);
+      debugLog.thought(slideKey, '✅ Form data set from MASTER initialData', initialData);
+    } else {
+      // Inget data - börja med tomt formulär
+      const emptyData = {};
+      const questions = questionConfig.questions || questionConfig;
+      Object.keys(questions).forEach(qId => {
+        emptyData[qId] = null;
+      });
+      setFormData(emptyData);
+      debugLog.thought(slideKey, '📝 No initialData - form starts empty');
+    }
+    
+    // Applicera metadata från MASTER
+    if (masterMetadata) {
+      setCaseMetadata(masterMetadata);
+      if (masterMetadata.version !== undefined) {
+        setLocalVersion(masterMetadata.version);
       }
-
-      // Fetch case metadata to determine state
-      try {
-        const resumeUrl = `${API_BASE}/onboarding/resume/${effectiveCompanyId}?onboarding_id=${effectiveCaseId}`;
-        
-        // 🧠 THOUGHT: Checking server
-        debugLog.thought(slideKey, '🌐 Fetching case metadata from server...', { url: resumeUrl });
-        
-        // 🆕 DEBUG: Log outgoing GET request
-        debugLog.networkRequest('GET', resumeUrl, null, null, null);
-        
-        const response = await fetch(
-          resumeUrl,
-          {
-            headers: {
-              'Authorization': `Bearer ${getToken()}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Resume failed: ${response.status}`);
-        }
-
-        const metadata = await response.json();
-        
-        // 🧠 THOUGHT: Server responded
-        debugLog.thought(slideKey, '✅ Server responded with metadata', {
-          version: metadata.version,
-          currentStep: metadata.currentStep,
-          is_locked: metadata.is_locked,
-          completed: metadata.completed,
-          hasStaticKyc: !!metadata.static_kyc,
-          hasData: !!metadata.data
-        });
-        
-        // 🆕 DEBUG: Log GET response
-        debugLog.networkRequest('GET', resumeUrl, null, metadata, response.status);
-        
-        setCaseMetadata(metadata);
-        
-        // 🧠 THOUGHT: Sending full state to debug log
-        debugLog.thought(slideKey, '📤 Pushing RAW server metadata + localStorage to debug');
-        
-        // 🆕 DEBUG: Log slide visit with RAW metadata and ALL case-related localStorage
-        // Pass null to let debugLogger collect all case-filtered localStorage automatically
-        debugLog.slideVisited(slideKey, metadata, null);
-        
-        // 🆕 Spara case-level version för conflict detection
-        if (metadata.version !== undefined) {
-          setLocalVersion(metadata.version);
-          debugLog.thought(slideKey, `📊 Saved case version: ${metadata.version}`);
-        }
-
-        // NEW STATE MACHINE: Use centralized state machine logic
-        const behavior = getStateMachineBehavior(metadata, slideKey);
-        console.log(`🎰 State Machine: ${behavior.state} - ${behavior.message}`);
-        
-        // 🧠 THOUGHT: State machine decision
-        debugLog.thought(slideKey, `🎰 State Machine decided: ${behavior.state}`, {
-          state: behavior.state,
-          message: behavior.message,
-          canEdit: behavior.canEdit,
-          shouldLoadFromCache: behavior.shouldLoadFromCache,
-          shouldLoadFromServer: behavior.shouldLoadFromServer
-        });
-        
-        let loadedData = null;
-        
-        // ✅ CHECK RESUME MODE: Load from Resume endpoint data (already fetched above!)
-        const isResumeMode = localStorage.getItem('resumeMode') === 'true';
-        
-        if (isResumeMode) {
-          debugLog.thought(slideKey, '🔄 Resume mode detected - will use metadata from server');
-          console.log('🔄 Resume mode detected - using already-fetched metadata');
-          
-          // Use metadata from first fetch - NO DUPLICATE REQUEST!
-          // Cache ALL slides from the metadata we already have
-          // 🆕 Använder namespaced keys med :: separator
-          if (metadata.static_kyc) {
-            Object.entries(metadata.static_kyc).forEach(([key, value]) => {
-              const cacheKey = buildStorageKey({
-                userId,
-                companyId: effectiveCompanyId,
-                caseId: effectiveCaseId,
-                slideKey: key,
-                type: 'data'
-              });
-              writeToStorage(cacheKey, { entireForm: value }, 0);
-              console.log(`✅ Cached ${key} from Resume metadata`);
-            });
-          }
-          
-          // Also check legacy data format
-          if (metadata.data) {
-            Object.entries(metadata.data).forEach(([key, value]) => {
-              const cacheKey = buildStorageKey({
-                userId,
-                companyId: effectiveCompanyId,
-                caseId: effectiveCaseId,
-                slideKey: key,
-                type: 'data'
-              });
-              writeToStorage(cacheKey, value, 0);
-              console.log(`✅ Cached ${key} from Resume data`);
-            });
-          }
-          
-          // Load data for current slide from static_kyc or data
-          const slideData = metadata.static_kyc?.[slideKey] || metadata.data?.[slideKey];
-          if (slideData) {
-            // Wrap in entireForm if it's raw data
-            loadedData = slideData.entireForm ? slideData : { entireForm: slideData };
-            console.log(`📥 Loaded ${slideKey} from Resume metadata`);
-          }
-          
-          // Clear resume flag after successful load
-          localStorage.removeItem('resumeMode');
-        }
-        
-        // Load from cache if not already loaded from Resume
-        if (!loadedData && behavior.shouldLoadFromCache) {
-          debugLog.thought(slideKey, '📦 Checking localStorage cache...');
-          const cached = readFromStorage(storageKey);
-          if (cached) {
-            loadedData = cached.value;
-            debugLog.thought(slideKey, '✅ Found data in localStorage cache', {
-              version: cached.version,
-              timestamp: cached.timestamp
-            });
-            console.log(`📦 Loaded from cache for slide: ${slideKey}`);
-          } else {
-            debugLog.thought(slideKey, '📭 No cached data found in localStorage');
-          }
-        }
-        
-        // Load from server if no cache or server has priority
-        if (!loadedData && behavior.shouldLoadFromServer) {
-          debugLog.thought(slideKey, '☁️ Checking server data (metadata.data)...');
-          const serverData = metadata.data?.[slideKey];
-          if (serverData) {
-            loadedData = serverData;
-            debugLog.thought(slideKey, '✅ Found slide data in server response', serverData);
-            console.log(`☁️ Loaded from server for slide: ${slideKey}`);
-            // Cache server data for offline access
-            if (behavior.canEdit) {
-              writeToStorage(storageKey, serverData, 0);
-              debugLog.thought(slideKey, '💾 Cached server data to localStorage for offline access');
-            }
-          } else {
-            debugLog.thought(slideKey, '📭 No slide data found in server response');
-          }
-        }
-        
-        // Set form data
-        if (loadedData) {
-          debugLog.thought(slideKey, '✅ Setting form data', { hasData: true });
-          setFormData(loadedData);
-        } else {
-          debugLog.thought(slideKey, '📝 No existing data found - form starts empty');
-        }
-        
-        // Set form state based on state machine
-        debugLog.thought(slideKey, `🏁 Load complete! Final state: ${behavior.state}`);
-        setFormState(behavior.state);
-
-      } catch (error) {
-        console.error('Failed to load case metadata:', error);
-        debugLog.thought(slideKey, '❌ Error loading from server - falling back to localStorage', {
-          error: error.message
-        });
-        // Fallback to localStorage
-        const localData = readFromStorage(storageKey);
-        if (localData) {
-          debugLog.thought(slideKey, '📦 Fallback: Found data in localStorage');
-          setFormData(localData.value);
-        }
-        setFormState('ready');  // Offline = still ready to edit
-      }
-
-      setIsLoading(false);
-    };
-
-    loadData();
-  }, [slideKey, effectiveCompanyId, effectiveCaseId, storageKey]);
+      debugLog.thought(slideKey, '📋 Applied caseMetadata from MASTER', {
+        version: masterMetadata.version,
+        is_locked: masterMetadata.is_locked
+      });
+    }
+    
+    // Markera att initialData är applicerat - KRITISKT för race condition fix
+    initialDataAppliedRef.current = true;
+    setInitialDataApplied(true);
+    setFormState('ready');
+    setIsLoading(false);
+    
+    debugLog.thought(slideKey, '🏁 SLAVE initialization complete!', {
+      source,
+      initialDataApplied: true,
+      formState: 'ready'
+    });
+    
+  }, [isReady, initialData, source, masterMetadata, slideKey, questionConfig]);
 
   // 🆕 Draft key för localStorage (separerad från permanent cache)
   // Format: onboarding_draft::{userId}::{companyId}::{caseId}::{slideKey}
@@ -361,16 +253,28 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
   });
 
   // Auto-save to localStorage when formData changes (only if editable)
-  // FÖRENKLAD: Spara draft om state === 'ready'
-  const canSaveDraft = formState === 'ready';
+  // 🆕 RACE CONDITION FIX: Kör ENDAST om initialDataApplied=true
+  // Detta förhindrar att tom data skrivs innan MASTER levererat data
+  const canSaveDraft = formState === 'ready' && initialDataApplied;
   
   useEffect(() => {
-    console.log(`🔍 Draft save check for ${slideKey}: formState=${formState}, canSaveDraft=${canSaveDraft}`);
+    console.log(`🔍 Draft save check for ${slideKey}: formState=${formState}, initialDataApplied=${initialDataApplied}, canSaveDraft=${canSaveDraft}`);
+    
+    // 🆕 KRITISK: Vänta tills initialData är applicerat
+    if (!initialDataApplied) {
+      debugLog.thought(slideKey, '⏳ Auto-save blocked - waiting for initialData', {
+        initialDataApplied,
+        formState
+      });
+      return;
+    }
+    
     if (!isLoading && canSaveDraft) {
       // 🧠 THOUGHT: Auto-saving draft
       debugLog.thought(slideKey, '💾 Auto-saving draft to localStorage', {
         basedOnVersion: localVersion,
-        formDataKeys: Object.keys(formData || {})
+        formDataKeys: Object.keys(formData || {}),
+        initialDataApplied: true  // Bekräfta att vi passerat race condition check
       });
       
       // Spara draft med version info för conflict detection
@@ -388,7 +292,7 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
       
       console.log(`💾 Auto-saved ${slideKey} draft (based on v${localVersion})`);
     }
-  }, [formData, slideKey, isLoading, canSaveDraft, storageKey, localVersion, draftKey]);
+  }, [formData, slideKey, isLoading, canSaveDraft, storageKey, localVersion, draftKey, initialDataApplied]);
 
   // 🆕 Rensa draft efter lyckad save
   const clearDraft = useCallback(() => {
@@ -679,7 +583,11 @@ export const useQuestionnaireForm = (slideKey, questionConfig) => {
     companyId: effectiveCompanyId,
     caseId: effectiveCaseId,
     userId,
-    isDraftMode: effectiveCompanyId === 'draft' || effectiveCaseId === 'draft'
+    isDraftMode: effectiveCompanyId === 'draft' || effectiveCaseId === 'draft',
+    // 🆕 RACE CONDITION FIX: Indikerar om initialData har applicerats
+    initialDataApplied,
+    // 🆕 MASTER/SLAVE: Källa för initialData
+    dataSource: source
   };
 };
 
