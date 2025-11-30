@@ -69,6 +69,7 @@ import DocumentationPanel from './components/Panels/DocumentationPanel';
 import SupportPanel from './components/Panels/SupportPanel';
 import { AgreementProvider } from './contexts/AgreementContext';
 import OnboardingResumeDialog from './components/Modals/OnboardingResumeDialog';
+import OnboardingPage from './components/Pages/OnboardingPage';
 import { initAuth } from './utils/auth';
 import { clearAllOldFormatKeys, debugStorageSummary } from './utils/storageKeys';
 
@@ -175,48 +176,13 @@ export default function App() {
   }, [formData.organisationsnummer, formData.personnummer, roaringData]);
 
   const handleLogin = async () => {
-    console.log('🔐 handleLogin called - navigating directly');
+    console.log('🔐 handleLogin called');
     setIsLoggedIn(true);
     
-    // Navigate DIRECTLY instead of relying on useEffect
-    // This is more robust and avoids issues with stale state flags
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      console.error('No access token after login');
-      navigate('/uppdragsval');
-      return;
-    }
-    
-    try {
-      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
-      const response = await fetch(`${API_BASE}/onboarding/list`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        console.log('⚠️ Failed to fetch onboardings, navigating to uppdragsval');
-        navigate('/uppdragsval');
-        return;
-      }
-
-      const data = await response.json();
-      console.log('📦 Onboarding data:', data);
-      
-      if (data.companies && data.companies.length > 0) {
-        console.log('✅ Found ongoing onboarding(s) - showing resume dialog');
-        navigate('/uppdragsval');
-        setTimeout(() => setShowResumeDialog(true), 100);
-      } else {
-        console.log('✅ No ongoing onboardings - navigating to /uppdragsval');
-        navigate('/uppdragsval');
-      }
-    } catch (error) {
-      console.error('Error in handleLogin:', error);
-      navigate('/uppdragsval');
-    }
+    // 🆕 2025-11-30: Navigera till /uppdragsval - OnboardingPage hanterar resume-modal
+    // useOnboardingSession hook i OnboardingPage fetchar automatiskt pågående onboardings
+    // och visar modal om det finns några.
+    navigate('/uppdragsval');
   };
 
   const handleDemo = () => {
@@ -491,13 +457,13 @@ export default function App() {
 
   return (
     <AgreementProvider>
-      {/* 🆕 Resume dialog - visas över allt annat när pågående onboardings finns */}
-      {showResumeDialog && (
-        <OnboardingResumeDialog 
-          onResume={handleResume} 
-          onNewSession={handleNewSession} 
-        />
-      )}
+      {/* 
+        🆕 2025-11-30: Resume-dialogen hanteras nu av OnboardingPage
+        useOnboardingSession hook i OnboardingPage fetchar pågående onboardings
+        och visar OnboardingResumeDialogV2 om det finns några.
+        
+        Den gamla showResumeDialog-logiken är borttagen.
+      */}
       
       <div className="flex h-screen overflow-hidden">
         {!isSettingsPage && !isVoucherPage && (
@@ -520,7 +486,7 @@ export default function App() {
             <Route path="/reset-password" element={<ResetPasswordSlide onNext={() => navigate('/login')} onResendCode={() => navigate('/forgot-password')} />} />
             <Route path="/payment-success" element={<PaymentSuccessSlide />} />
             <Route path="/uppdragsval" element={
-              <UppdragsvalsSlide 
+              <OnboardingPage 
                 onNext={(data) => {
                   console.log('✅ Onboarding created:', data);
                   console.log('📋 company_id:', data.company_id);
