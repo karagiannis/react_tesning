@@ -22,24 +22,9 @@ export default function Header({ onPanelToggle }) {
   };
 
   const handleLogout = () => {
-    // Clear all auth data
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('isDemoMode');
-    localStorage.removeItem('jwt_token');
-    localStorage.removeItem('temp_orgnr');
-    
-    // Clear all onboarding-related data
-    const keys = Object.keys(localStorage);
-    keys.forEach(key => {
-      if (key.startsWith('onboarding-') || 
-          key.startsWith('current') || 
-          key === 'activeOnboarding' ||
-          key === 'onboardingId') {
-        localStorage.removeItem(key);
-      }
-    });
+    // FÖRENKLAT: Rensa ALLT i localStorage vid logout
+    localStorage.clear();
+    console.log('✅ localStorage rensat vid logout');
     
     // Force full page reload to Hero page to reset all state
     window.location.href = '/';

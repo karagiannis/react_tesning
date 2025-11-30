@@ -1,11 +1,18 @@
 /**
  * FÖRENKLAD STATE MACHINE
  * 
- * ENDAST is_locked behövs:
- * - is_locked = false → orgnr kan ändras, case kan raderas
- * - is_locked = true  → orgnr KAN EJ ändras, case KAN EJ raderas
+ * Frontend formState har ENDAST 2 värden:
+ * - 'loading' = laddar data
+ * - 'ready' = kan redigera och spara (ALLTID efter loading)
  * 
- * Inget behov av: NEW, DRAFT, SUBMITTED, LOCKED, COMPLETED, ARCHIVED
+ * Server-sidan har ENDAST is_locked (boolean):
+ * - is_locked = false → orgnr KAN ändras
+ * - is_locked = true  → orgnr KAN EJ ändras
+ * 
+ * VIKTIGT: 
+ * - is_locked påverkar ENDAST orgnr-fältet!
+ * - Formulär kan ALLTID redigeras
+ * - Case kan ALLTID raderas (användarens data, användarens ansvar)
  */
 
 /**
@@ -20,10 +27,10 @@ export const isLocked = (metadata) => {
 /**
  * Check if case can be deleted
  * @param {Object} metadata - Case metadata from server
- * @returns {boolean} - true if can delete
+ * @returns {boolean} - ALLTID true (användarens data, användarens ansvar)
  */
 export const canDelete = (metadata) => {
-  return !isLocked(metadata);
+  return true;  // Case kan ALLTID raderas
 };
 
 /**
@@ -36,21 +43,19 @@ export const canEditOrgnr = (metadata) => {
 };
 
 // ============================================================================
-// BACKWARD COMPATIBILITY EXPORTS (for existing code that imports STATES)
-// These are deprecated - use isLocked() instead
+// FÖRENKLAD STATE - endast 2 states för formulär
 // ============================================================================
-export const STATES = {
-  NEW: 'new',           // DEPRECATED
-  DRAFT: 'draft',       // DEPRECATED
-  SUBMITTED: 'submitted', // DEPRECATED  
-  LOCKED: 'locked',     // DEPRECATED
-  COMPLETED: 'completed', // DEPRECATED
-  ARCHIVED: 'archived'  // DEPRECATED
+export const FORM_STATES = {
+  LOADING: 'loading',  // Laddar data
+  READY: 'ready'       // Kan redigera och spara (ALLTID efter loading)
 };
 
 /**
- * DEPRECATED: Use isLocked() instead
- * Kept for backward compatibility with useQuestionnaireForm
+ * FÖRENKLAD STATE MACHINE
+ * 
+ * Formulär kan ALLTID redigeras (state = 'ready')
+ * Case kan ALLTID raderas (användarens data)
+ * is_locked påverkar ENDAST orgnr-fältet
  */
 export const getStateMachineBehavior = (metadata, slideKey) => {
   const locked = isLocked(metadata);
@@ -58,10 +63,11 @@ export const getStateMachineBehavior = (metadata, slideKey) => {
   return {
     shouldLoadFromServer: true,
     shouldLoadFromCache: true,
-    canEdit: true,  // Forms can always be edited (only orgnr is locked)
-    isLocked: locked,
-    canDelete: !locked,
-    canEditOrgnr: !locked,
+    canEdit: true,           // Formulär kan ALLTID redigeras
+    isLocked: locked,        // Endast för orgnr-fältet
+    canDelete: true,         // Case kan ALLTID raderas
+    canEditOrgnr: !locked,   // DETTA är vad is_locked påverkar
+    state: 'ready',          // Formulär är ALLTID ready efter loading
     message: locked 
       ? 'Orgnr låst - kan ej ändras'
       : 'Kan redigeras'

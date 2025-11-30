@@ -5,8 +5,9 @@ import { fetchWithAuth } from '../../utils/auth';
 
 export default function AgreementModal({ show, onClose }) {
   const navigate = useNavigate();
-  const { oneTimeAgreement, setOneTimeAgreement } = useAgreements();
+  const { oneTimeAgreement, setOneTimeAgreement, clearSubscription } = useAgreements();
   const [isSigningOneTime, setIsSigningOneTime] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [error, setError] = useState(null);
   const [trialInfo, setTrialInfo] = useState(null);
 
@@ -83,6 +84,66 @@ export default function AgreementModal({ show, onClose }) {
       console.error('❌ Error initiating payment:', err);
       setError(err.message);
       setIsSigningOneTime(false);
+    }
+  };
+
+  /**
+   * Handle "Avsluta och rensa" - soft delete case and logout
+   */
+  const handleCancelOnboarding = async () => {
+    setIsCancelling(true);
+    setError(null);
+    
+    try {
+      const companyId = localStorage.getItem('currentCompanyId');
+      const onboardingId = localStorage.getItem('onboardingId');
+      
+      if (companyId && onboardingId) {
+        // Call DELETE endpoint to soft-delete the case
+        const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
+        const response = await fetchWithAuth(
+          `${API_BASE}/onboarding/delete/${companyId}?onboarding_id=${onboardingId}`,
+          { method: 'DELETE' }
+        );
+        
+        if (!response.ok) {
+          const data = await response.json();
+          console.warn('⚠️ Delete failed:', data.detail);
+          // Continue with logout anyway
+        } else {
+          console.log('✅ Case soft-deleted successfully');
+        }
+      }
+      
+      // Clear subscription state
+      if (clearSubscription) {
+        clearSubscription();
+      }
+      
+      // Clear all onboarding-related localStorage
+      localStorage.removeItem('currentCompanyId');
+      localStorage.removeItem('onboardingId');
+      localStorage.removeItem('currentOrgnr');
+      localStorage.removeItem('currentCompanyName');
+      localStorage.removeItem('currentPersonnummer');
+      localStorage.removeItem('pendingPayment');
+      localStorage.removeItem('resumeMode');
+      localStorage.removeItem('formState');
+      
+      // Clear auth tokens to force logout
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      
+      // Navigate to home (will show login since tokens are cleared)
+      navigate('/');
+      
+      // Force page reload to reset all React state
+      window.location.reload();
+      
+    } catch (err) {
+      console.error('❌ Error cancelling onboarding:', err);
+      setError('Kunde inte avbryta. Försök igen.');
+      setIsCancelling(false);
     }
   };
 
@@ -189,10 +250,11 @@ export default function AgreementModal({ show, onClose }) {
             </button>
 
             <button
-              onClick={() => navigate('/')}
-              className="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-box hover:bg-gray-300 font-semibold"
+              onClick={handleCancelOnboarding}
+              disabled={isCancelling}
+              className="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-box hover:bg-gray-300 font-semibold disabled:opacity-50"
             >
-              Avbryt onboarding
+              {isCancelling ? 'Avslutar...' : 'Avsluta och rensa'}
             </button>
           </div>
         ) : (

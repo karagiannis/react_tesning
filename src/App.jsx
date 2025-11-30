@@ -3,6 +3,11 @@
  * PURPOSE: Multi-session localStorage scoping (orgnr-based isolation)
  * CHANGES: Added activeOnboarding state, updated getStorageKey() with orgnr scoping
  * REF: CHANGELOG_2025-11-23.md - Problem 5
+ * 
+ * MODIFIED: 2025-11-30
+ * PURPOSE: Namespaced localStorage keys med :: separator
+ * CHANGES: Migrering av gamla nycklar, cleanup av stale data
+ * REF: CHANGELOG_2025-11-30.md - State Controller Design
  */
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -65,11 +70,26 @@ import SupportPanel from './components/Panels/SupportPanel';
 import { AgreementProvider } from './contexts/AgreementContext';
 import OnboardingResumeDialog from './components/Modals/OnboardingResumeDialog';
 import { initAuth } from './utils/auth';
+import { clearAllOldFormatKeys, debugStorageSummary } from './utils/storageKeys';
 
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [activePanel, setActivePanel] = useState(null);
+  
+  // 🆕 2025-11-30: Rensa gamla localStorage-nycklar vid app-start (engångsmigrering)
+  useEffect(() => {
+    const hasMigrated = localStorage.getItem('_storage_migrated_v2');
+    if (!hasMigrated) {
+      console.log('📦 Migrating localStorage to new namespaced format...');
+      const removed = clearAllOldFormatKeys();
+      console.log(`✅ Migration complete: ${removed} old keys removed`);
+      localStorage.setItem('_storage_migrated_v2', 'true');
+      
+      // Debug: Visa översikt över kvarvarande nycklar
+      debugStorageSummary();
+    }
+  }, []);
   
   // 🆕 Active onboarding session state (orgnr-scoped localStorage)
   const [activeOnboarding, setActiveOnboarding] = useState(() => {
@@ -154,11 +174,49 @@ export default function App() {
     validateAndFetch();
   }, [formData.organisationsnummer, formData.personnummer, roaringData]);
 
-  const handleLogin = () => {
-    console.log('🔐 handleLogin called - setting isLoggedIn to true');
+  const handleLogin = async () => {
+    console.log('🔐 handleLogin called - navigating directly');
     setIsLoggedIn(true);
-    // Note: JWT tokens are already saved by LoginSlide
-    // checkForOngoingOnboarding() will handle navigation
+    
+    // Navigate DIRECTLY instead of relying on useEffect
+    // This is more robust and avoids issues with stale state flags
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      console.error('No access token after login');
+      navigate('/uppdragsval');
+      return;
+    }
+    
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
+      const response = await fetch(`${API_BASE}/onboarding/list`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        console.log('⚠️ Failed to fetch onboardings, navigating to uppdragsval');
+        navigate('/uppdragsval');
+        return;
+      }
+
+      const data = await response.json();
+      console.log('📦 Onboarding data:', data);
+      
+      if (data.companies && data.companies.length > 0) {
+        console.log('✅ Found ongoing onboarding(s) - showing resume dialog');
+        navigate('/uppdragsval');
+        setTimeout(() => setShowResumeDialog(true), 100);
+      } else {
+        console.log('✅ No ongoing onboardings - navigating to /uppdragsval');
+        navigate('/uppdragsval');
+      }
+    } catch (error) {
+      console.error('Error in handleLogin:', error);
+      navigate('/uppdragsval');
+    }
   };
 
   const handleDemo = () => {

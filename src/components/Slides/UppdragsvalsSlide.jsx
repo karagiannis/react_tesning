@@ -34,6 +34,7 @@ export default function UppdragsvalsSlide({ onNext }) {
     isLoading: syncLoading,
     syncStatus,
     pushToServer,
+    canEditOrgnr,  // NEW: From state machine - false when is_locked=true
   } = useQuestionnaireForm(
     'uppdragsval',
     QUESTIONS_CONFIG
@@ -170,12 +171,19 @@ export default function UppdragsvalsSlide({ onNext }) {
       // Push to server with version control
       await pushToServer();
 
+      // 🆕 Bug #4 Fix: Skicka med befintligt onboarding_id för "get or create" pattern
+      const existingOnboardingId = localStorage.getItem('onboardingId');
+      
       // Create onboarding with legacy API (BUG #1 FIX: uses fetchWithAuth for auto-refresh)
       const requestBody = {
         ...services,
         orgnr: orgnr.replace('-', ''),
         companyName: companyName || '',
+        // Hängslen och livrem: skicka befintligt ID så backend kan återanvända
+        onboarding_id: existingOnboardingId || '',
       };
+      
+      console.log('📤 POST /onboarding/uppdrag with onboarding_id:', existingOnboardingId || '(none)');
       
       const response = await fetchWithAuth(`${API_BASE}/onboarding/uppdrag`, {
         method: 'POST',
@@ -191,6 +199,13 @@ export default function UppdragsvalsSlide({ onNext }) {
       }
 
       const data = await response.json();
+      
+      // Log om case var nytt eller återanvänt
+      if (data.isNewCase === false) {
+        console.log('♻️ Återanvände befintligt case:', data.onboardingId);
+      } else {
+        console.log('✨ Skapade nytt case:', data.onboardingId);
+      }
       
       // Store critical data in localStorage for subsequent API calls and UI display
       localStorage.setItem('onboardingId', data.onboardingId);
@@ -210,7 +225,16 @@ export default function UppdragsvalsSlide({ onNext }) {
       onNext(data);
     } catch (err) {
       console.error('❌ Error:', err);
-      setError(err.message);
+      // 🆕 Användarvänliga felmeddelanden för vanliga fel
+      if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
+        setError('Ingen internetanslutning. Kontrollera din nätverksanslutning och försök igen.');
+      } else if (err.message.includes('NetworkError') || err.message.includes('network')) {
+        setError('Nätverksfel uppstod. Kontrollera din internetanslutning.');
+      } else if (err.message.includes('timeout') || err.message.includes('Timeout')) {
+        setError('Servern svarar inte. Försök igen om en stund.');
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -337,7 +361,8 @@ export default function UppdragsvalsSlide({ onNext }) {
                   value={companyQuery}
                   onChange={(e) => handleCompanySearch(e.target.value)}
                   placeholder="Börja skriva företagsnamn..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+                  disabled={!canEditOrgnr}
+                  className={`w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500 ${!canEditOrgnr ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   autoComplete="off"
                 />
                 {searchLoading && (
@@ -386,15 +411,17 @@ export default function UppdragsvalsSlide({ onNext }) {
                 onChange={(e) => handleOrgnrChange(e.target.value)}
                 placeholder="NNNNNN-NNNN"
                 maxLength={11}
-                readOnly={companyName !== ''}
+                readOnly={companyName !== '' || !canEditOrgnr}
                 className={`w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500 ${
-                  companyName !== '' ? 'bg-gray-100 cursor-not-allowed' : ''
+                  (companyName !== '' || !canEditOrgnr) ? 'bg-gray-100 cursor-not-allowed' : ''
                 }`}
               />
               <p className="text-sm text-gray-500 mt-1">
-                {companyName !== '' 
-                  ? '✅ Fylls i automatiskt från valt företag' 
-                  : 'Format: 556903-8671 (bindestreck valfritt)'}
+                {!canEditOrgnr
+                  ? '🔒 Organisationsnummer är låst efter att onboardingen startats'
+                  : companyName !== '' 
+                    ? '✅ Fylls i automatiskt från valt företag' 
+                    : 'Format: 556903-8671 (bindestreck valfritt)'}
               </p>
               {errors.orgnr && (
                 <p className="text-sm text-red-500 mt-1">{errors.orgnr}</p>

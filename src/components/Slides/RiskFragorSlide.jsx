@@ -30,7 +30,8 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
   );
 
   // Extract from brute force field (simplified: no wrapping)
-  const formData = hookFormData.entireForm || {
+  // Use deep merge to ensure all nested objects have defaults
+  const defaultFormData = {
     affarsIde: '',
     kundTyper: {
       privatpersoner: false,
@@ -42,6 +43,16 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     verksamhetAndrad: '',
     personnummer: '',
     isPEP: false
+  };
+  
+  const formData = {
+    ...defaultFormData,
+    ...hookFormData.entireForm,
+    // Ensure nested objects are properly merged
+    kundTyper: {
+      ...defaultFormData.kundTyper,
+      ...(hookFormData.entireForm?.kundTyper || {})
+    }
   };
 
   // Setter updates entire form object (simplified: no wrapping)
