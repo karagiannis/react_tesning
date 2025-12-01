@@ -68,7 +68,7 @@ export default function Header({ onPanelToggle }) {
         const deletePromises = (data.companies || []).map(company => {
           // Backend kräver nu company_id + onboarding_id (case_id)
           const companyId = company.company_id;
-          const caseId = company.case_id || company.onboardingId; // case_id är det nya namnet
+          const caseId = company.case_id || company.onboardingId;
           
           return fetch(`${API_BASE}/onboarding/delete/${companyId}?onboarding_id=${caseId}`, {
             method: 'DELETE',

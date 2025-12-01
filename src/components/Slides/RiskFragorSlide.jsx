@@ -88,8 +88,8 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
   }, []);
 
   useEffect(() => {
-    const savedCompanyName = localStorage.getItem('currentCompanyName');
-    const savedOrgnr = localStorage.getItem('currentOrgnr');
+    const savedCompanyName = localStorage.getItem('current_company_name');
+    const savedOrgnr = localStorage.getItem('current_orgnr');
     
     if (savedCompanyName) {
       console.log('📋 Loading company info from localStorage:', savedCompanyName, savedOrgnr);
@@ -304,9 +304,9 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
             
             try {
               // Get required data from localStorage
-              const onboardingId = localStorage.getItem('onboardingId');
+              const onboardingId = localStorage.getItem('onboarding_id');
               if (!onboardingId) {
-                alert('⚠️ onboardingId saknas. Gå tillbaka till Uppdragsval.');
+                alert('⚠️ onboarding_id saknas. Gå tillbaka till Uppdragsval.');
                 return;
               }
               

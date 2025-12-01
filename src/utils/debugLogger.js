@@ -31,7 +31,7 @@ const timestamp = () => new Date().toISOString();
 // Get current case_id from localStorage (for case-specific log files)
 const getCaseId = () => {
   try {
-    return localStorage.getItem('onboardingId') || 'no_case';
+    return localStorage.getItem('onboarding_id') || 'no_case';
   } catch {
     return 'no_case';
   }
@@ -41,8 +41,8 @@ const getCaseId = () => {
 const collectCaseLocalStorage = () => {
   const result = {};
   const caseId = getCaseId();
-  const onboardingId = localStorage.getItem('onboardingId');
-  const companyId = localStorage.getItem('currentCompanyId');
+  const onboardingId = localStorage.getItem('onboarding_id');
+  const companyId = localStorage.getItem('current_company_id');
   
   // Add key metadata
   result._case_id = caseId;

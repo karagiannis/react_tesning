@@ -154,8 +154,8 @@ export const useOnboardingSession = () => {
       debugLog.thought('session', `✅ MASTER SESSION: Found ${companies.length} onboarding(s)`, {
         companies: companies.map(c => ({ 
           company_id: c.company_id, 
-          companyName: c.companyName,
-          currentStep: c.currentStep 
+          company_name: c.company_name,
+          current_step: c.current_step 
         }))
       });
       
@@ -194,7 +194,7 @@ export const useOnboardingSession = () => {
     debugLog.thought('session', '🎯 MASTER SESSION: User selected onboarding', {
       company_id: selected.company_id,
       case_id: selected.case_id,
-      companyName: selected.companyName
+      company_name: selected.company_name
     });
     
     try {
@@ -220,7 +220,7 @@ export const useOnboardingSession = () => {
       
       debugLog.thought('session', '✅ MASTER SESSION: Loaded full data', {
         version: data.version,
-        currentStep: data.currentStep,
+        current_step: data.current_step,
         is_locked: data.is_locked,
         hasStaticKyc: !!data.static_kyc
       });
@@ -267,10 +267,10 @@ export const useOnboardingSession = () => {
       }
       
       // Set localStorage IDs for backwards compatibility
-      localStorage.setItem('onboardingId', caseId);
-      localStorage.setItem('currentCompanyId', companyId);
-      localStorage.setItem('currentCompanyName', data.companyName || selected.companyName);
-      localStorage.setItem('currentOrgnr', data.orgnr || selected.orgnr);
+      localStorage.setItem('onboarding_id', caseId);
+      localStorage.setItem('current_company_id', companyId);
+      localStorage.setItem('current_company_name', data.company_name || selected.company_name);
+      localStorage.setItem('current_orgnr', data.orgnr || selected.orgnr);
       
       if (!isMounted.current) return;
       
@@ -279,8 +279,8 @@ export const useOnboardingSession = () => {
         companyId,
         caseId,
         orgnr: data.orgnr || selected.orgnr,
-        companyName: data.companyName || selected.companyName,
-        currentStep: data.currentStep,
+        companyName: data.company_name || selected.company_name,
+        currentStep: data.current_step,
         isNewSession: false,
         metadata: data,
         // Include subscription data for AgreementContext
@@ -303,11 +303,11 @@ export const useOnboardingSession = () => {
     debugLog.thought('session', '✨ MASTER SESSION: User chose new session');
     
     // Clear old localStorage IDs
-    localStorage.removeItem('onboardingId');
-    localStorage.removeItem('currentCompanyId');
-    localStorage.removeItem('currentCompanyName');
-    localStorage.removeItem('currentOrgnr');
-    localStorage.removeItem('resumeMode');
+    localStorage.removeItem('onboarding_id');
+    localStorage.removeItem('current_company_id');
+    localStorage.removeItem('current_company_name');
+    localStorage.removeItem('current_orgnr');
+    localStorage.removeItem('resume_mode');
     
     setSession({
       companyId: null,

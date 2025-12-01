@@ -40,7 +40,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { API_URL as API_BASE } from '../config/api';
 import { debugLog } from '../utils/debugLogger';
 import { buildStorageKey } from '../utils/storageKeys';
@@ -76,9 +76,31 @@ export const useSlideStateController = (slideKey) => {
   const isMounted = useRef(true);
   
   // ══════════════════════════════════════════════════════════════════
-  // EXTRACT IDs (samma logik som useQuestionnaireForm)
+  // EXTRACT IDs
+  // Priority: 1. URL query param (?case=xxx) 2. URL path param 3. localStorage
   // ══════════════════════════════════════════════════════════════════
   const urlParams = useParams();
+  const [searchParams] = useSearchParams();
+  
+  // 🆕 2025-12-01: Read caseId from URL query parameter first
+  const getCaseId = () => {
+    // Priority 1: URL query param ?case=xxx
+    const queryCase = searchParams.get('case');
+    if (queryCase) return queryCase;
+    
+    // Priority 2: URL path param (for /onboarding/:companyId/:caseId routes)
+    if (urlParams.caseId) return urlParams.caseId;
+    
+    // Priority 3: localStorage (legacy fallback)
+    const stored = localStorage.getItem('onboarding_id');
+    if (stored && stored !== 'null' && stored !== 'undefined') return stored;
+    
+    // Priority 4: temp_case_id from login
+    const tempCaseId = localStorage.getItem('temp_case_id');
+    if (tempCaseId) return tempCaseId;
+    
+    return 'draft';
+  };
   
   const getEffectiveId = (urlValue, localStorageKey) => {
     if (urlValue) return urlValue;
@@ -88,7 +110,7 @@ export const useSlideStateController = (slideKey) => {
   };
   
   const effectiveCompanyId = getEffectiveId(urlParams.companyId, 'currentCompanyId');
-  const effectiveCaseId = getEffectiveId(urlParams.caseId, 'onboardingId');
+  const effectiveCaseId = getCaseId(); // 🆕 Using new getCaseId function
   
   // Extract userId from JWT
   const getUserId = () => {

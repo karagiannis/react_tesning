@@ -72,7 +72,7 @@ export default function BokforingDataSlide({ onNext, onBack }) {
     try {
       // BUG FIX 2025-11-29: Use companyId from URL params, not orgnr from localStorage
       // Old pattern: find_company_id_by_orgnr() could return wrong company if duplicates existed
-      const onboardingId = localStorage.getItem('onboardingId');
+      const onboardingId = localStorage.getItem('onboarding_id');
       
       if (!companyId) {
         setUploadStatus('❌ Company ID saknas. Gå tillbaka till Uppdragsval.');
@@ -80,7 +80,7 @@ export default function BokforingDataSlide({ onNext, onBack }) {
       }
       
       if (!onboardingId) {
-        setUploadStatus('❌ onboardingId saknas. Gå tillbaka till Uppdragsval.');
+        setUploadStatus('❌ onboarding_id saknas. Gå tillbaka till Uppdragsval.');
         return;
       }
 

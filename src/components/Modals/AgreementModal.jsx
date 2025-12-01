@@ -17,9 +17,9 @@ export default function AgreementModal({ show, onClose }) {
     
     try {
       // Get IDs from localStorage
-      const companyId = localStorage.getItem('currentCompanyId');
-      const onboardingId = localStorage.getItem('onboardingId');
-      const personnummer = localStorage.getItem('currentPersonnummer') || '19XXXXXX-XXXX';
+      const companyId = localStorage.getItem('current_company_id');
+      const onboardingId = localStorage.getItem('onboarding_id');
+      const personnummer = localStorage.getItem('current_personnummer') || '19XXXXXX-XXXX';
       
       if (!companyId || !onboardingId) {
         throw new Error('Saknar company_id eller onboarding_id. Gå tillbaka till Uppdragsval.');
@@ -66,7 +66,7 @@ export default function AgreementModal({ show, onClose }) {
       // Redirect to Stripe payment
       if (data.payment_url) {
         // Store company/case info for return from Stripe
-        localStorage.setItem('pendingPayment', JSON.stringify({
+        localStorage.setItem('pending_payment', JSON.stringify({
           companyId,
           onboardingId,
           initiatedAt: new Date().toISOString()
@@ -95,8 +95,8 @@ export default function AgreementModal({ show, onClose }) {
     setError(null);
     
     try {
-      const companyId = localStorage.getItem('currentCompanyId');
-      const onboardingId = localStorage.getItem('onboardingId');
+      const companyId = localStorage.getItem('current_company_id');
+      const onboardingId = localStorage.getItem('onboarding_id');
       
       if (companyId && onboardingId) {
         // Call DELETE endpoint to soft-delete the case
@@ -121,14 +121,14 @@ export default function AgreementModal({ show, onClose }) {
       }
       
       // Clear all onboarding-related localStorage
-      localStorage.removeItem('currentCompanyId');
-      localStorage.removeItem('onboardingId');
-      localStorage.removeItem('currentOrgnr');
-      localStorage.removeItem('currentCompanyName');
-      localStorage.removeItem('currentPersonnummer');
-      localStorage.removeItem('pendingPayment');
-      localStorage.removeItem('resumeMode');
-      localStorage.removeItem('formState');
+      localStorage.removeItem('current_company_id');
+      localStorage.removeItem('onboarding_id');
+      localStorage.removeItem('current_orgnr');
+      localStorage.removeItem('current_company_name');
+      localStorage.removeItem('current_personnummer');
+      localStorage.removeItem('pending_payment');
+      localStorage.removeItem('resume_mode');
+      localStorage.removeItem('form_state');
       
       // Clear auth tokens to force logout
       localStorage.removeItem('accessToken');

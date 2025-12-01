@@ -4,13 +4,19 @@ import useSlideStateController from '../../hooks/useSlideStateController';
 import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 import { searchCompanies } from '../../data/companySearchAPI';
 import { fetchWithAuth } from '../../utils/auth';
+import { migrateTempToRealCaseId } from '../../utils/storageKeys';
 import { API_URL as API_BASE } from '../../config/api';
 
 /**
  * Content Slide 1: Uppdragsval och introduktion
  * 
- * Skapar ny onboarding-process och returnerar UUID.
- * API: POST /api/onboarding/uppdrag
+ * Skapar/uppdaterar onboarding-process via /commit endpoint.
+ * API: POST /api/onboarding/commit
+ * 
+ * 🆕 2025-12-01: Migrerat från /uppdrag till /commit
+ * /commit hanterar BÅDA scenarion automatiskt:
+ *   A) temp_case_id (från login) → skapar company + case
+ *   B) befintligt case_id → uppdaterar services
  * 
  * Features:
  * - Sektionsbaserad layout med numrerade steg
@@ -20,7 +26,7 @@ import { API_URL as API_BASE } from '../../config/api';
  * - Returnerar onboardingId (UUID) från backend
  * - Sparar och laddar tillbaka val från localStorage (USER-SCOPED)
  * 
- * UPDATED: 2025-11-30 - MASTER/SLAVE pattern för race condition fix
+ * UPDATED: 2025-12-01 - Använder /commit istället för /uppdrag
  */
 
 // Question configuration for useQuestionnaireForm
@@ -185,21 +191,37 @@ export default function UppdragsvalsSlide({ onNext }) {
       // Push to server with version control
       await pushToServer();
 
-      // 🆕 Bug #4 Fix: Skicka med befintligt onboarding_id för "get or create" pattern
-      const existingOnboardingId = localStorage.getItem('onboardingId');
+      // 🆕 2025-12-01: Använd /commit endpoint istället för /uppdrag
+      // /commit hanterar BÅDA scenarion:
+      //   A) temp_case_id → skapa ny company + case
+      //   B) befintligt case_id → uppdatera services
+      const tempCaseId = localStorage.getItem('temp_case_id');
+      const existingOnboardingId = localStorage.getItem('onboarding_id');
       
-      // Create onboarding with legacy API (BUG #1 FIX: uses fetchWithAuth for auto-refresh)
+      // Bestäm case_id att skicka
+      // Prioritet: 1) Befintligt permanent case, 2) Temp case från login
+      const caseIdToSend = existingOnboardingId || tempCaseId || '';
+      
+      // 🚗 Bil-principen: Skicka form_data som opak dict
+      // Backend behandlar det utan att decomponera
       const requestBody = {
-        ...services,
+        company_id: localStorage.getItem('current_company_id') || '',  // 👑 KING
+        case_id: caseIdToSend,
         orgnr: orgnr.replace('-', ''),
-        companyName: companyName || '',
-        // Hängslen och livrem: skicka befintligt ID så backend kan återanvända
-        onboarding_id: existingOnboardingId || '',
+        company_name: companyName || '',  // snake_case!
+        form_data: {  // 🚗 Opak form data
+          ...services,
+          orgnr: orgnr.replace('-', ''),
+          companyName: companyName || '',  // Behåll originalt format i form_data
+        }
       };
       
-      console.log('📤 POST /onboarding/uppdrag with onboarding_id:', existingOnboardingId || '(none)');
+      console.log('📤 POST /onboarding/commit with case_id:', caseIdToSend);
+      console.log('   Is temp:', caseIdToSend.startsWith('temp_'));
+      console.log('   company_id (KING):', requestBody.company_id || '(not set - will be generated)');
+      console.log('   form_data:', requestBody.form_data);
       
-      const response = await fetchWithAuth(`${API_BASE}/onboarding/uppdrag`, {
+      const response = await fetchWithAuth(`${API_BASE}/onboarding/commit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -214,26 +236,36 @@ export default function UppdragsvalsSlide({ onNext }) {
 
       const data = await response.json();
       
-      // Log om case var nytt eller återanvänt
-      if (data.isNewCase === false) {
-        console.log('♻️ Återanvände befintligt case:', data.onboardingId);
+      // Log om case var nytt eller återanvänt (snake_case from API)
+      if (data.was_temp) {
+        console.log('✨ Transformerade temp → permanent case:', data.onboarding_id);
+      } else if (data.is_new_case === false) {
+        console.log('♻️ Uppdaterade befintligt case:', data.onboarding_id);
       } else {
-        console.log('✨ Skapade nytt case:', data.onboardingId);
+        console.log('✨ Skapade nytt case:', data.onboarding_id);
+      }
+      
+      // 🆕 2025-12-01: Migrera temp-nycklar till permanent case_id
+      if (tempCaseId && data.onboarding_id && tempCaseId !== data.onboarding_id) {
+        const migratedCount = migrateTempToRealCaseId(tempCaseId, data.onboarding_id);
+        console.log(`🔄 Migrated ${migratedCount} temp keys to permanent case: ${data.onboarding_id}`);
+        // Rensa temp_case_id från localStorage - vi har nu permanent case
+        localStorage.removeItem('temp_case_id');
       }
       
       // Store critical data in localStorage for subsequent API calls and UI display
-      localStorage.setItem('onboardingId', data.onboardingId);
-      localStorage.setItem('currentCompanyId', data.company_id);
-      localStorage.setItem('currentCompanyName', data.companyName || '');
-      localStorage.setItem('currentOrgnr', data.orgnr || '');
+      localStorage.setItem('onboarding_id', data.onboarding_id);
+      localStorage.setItem('current_company_id', data.company_id);
+      localStorage.setItem('current_company_name', data.company_name || '');
+      localStorage.setItem('current_orgnr', data.orgnr || '');
       
       console.log('✅ Uppdragsval sparat:', data);
-      console.log('📋 onboardingId:', data.onboardingId);
+      console.log('📋 onboarding_id:', data.onboarding_id);
       console.log('🏢 company_id:', data.company_id);
-      console.log('🏷️ companyName:', data.companyName);
+      console.log('🏷️ company_name:', data.company_name);
       console.log('🔢 orgnr:', data.orgnr);
-      console.log('💰 Uppskattad kostnad:', data.uppskattadKostnad);
-      console.log('📝 Valda tjänster:', data.selectedServices);
+      console.log('💰 Uppskattad kostnad:', data.uppskattad_kostnad);
+      console.log('📝 Valda tjänster:', data.selected_services);
       
       // Navigate to next step
       onNext(data);

@@ -36,7 +36,7 @@ export default function OnboardingResumeDialog({
   const [deletingId, setDeletingId] = useState(null);
 
   const handleDelete = async (company) => {
-    const companyName = company.companyName || 'detta företag';
+    const companyName = company.company_name || 'detta företag';
     
     if (!confirm(`Är du säker på att du vill radera onboarding för ${companyName}?\n\nDetta kommer att permanent radera all data för detta företag.`)) {
       return;
@@ -116,7 +116,7 @@ export default function OnboardingResumeDialog({
                 {/* Företagsinfo */}
                 <div className="flex-1 min-w-0 mr-4">
                   <h3 className="font-semibold text-lg text-gray-900 truncate">
-                    {company.companyName}
+                    {company.company_name}
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">
                     Org.nr: {company.orgnr_formatted || company.orgnr}
@@ -126,11 +126,11 @@ export default function OnboardingResumeDialog({
                   <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
                     <div className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      <span>{formatDate(company.lastModified)}</span>
+                      <span>{formatDate(company.last_modified)}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <TrendingUp className="w-3 h-3" />
-                      <span className="capitalize">{company.currentStep?.replace('-', ' ') || 'uppdragsval'}</span>
+                      <span className="capitalize">{company.current_step?.replace('-', ' ') || 'uppdragsval'}</span>
                     </div>
                   </div>
 

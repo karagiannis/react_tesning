@@ -42,7 +42,7 @@
  */
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { getStateMachineBehavior, FORM_STATES } from './useOnboardingStateMachine';
 import { API_URL as API_BASE } from '../config/api';
 import { debugLog } from '../utils/debugLogger';
@@ -77,8 +77,29 @@ export const useQuestionnaireForm = (slideKey, questionConfig, masterData = {}) 
   } = masterData;
   
   // Get company_id AND case_id from URL params OR localStorage
-  // Priority: URL params > localStorage > 'draft'
+  // Priority: URL query params > URL path params > localStorage > 'draft'
   const urlParams = useParams();
+  const [searchParams] = useSearchParams();
+  
+  // 🆕 2025-12-01: Read caseId from URL query parameter first
+  const getCaseId = () => {
+    // Priority 1: URL query param ?case=xxx
+    const queryCase = searchParams.get('case');
+    if (queryCase) return queryCase;
+    
+    // Priority 2: URL path param (for /onboarding/:companyId/:caseId routes)
+    if (urlParams.caseId) return urlParams.caseId;
+    
+    // Priority 3: localStorage (legacy fallback)
+    const stored = localStorage.getItem('onboarding_id');
+    if (stored && stored !== 'null' && stored !== 'undefined') return stored;
+    
+    // Priority 4: temp_case_id from login
+    const tempCaseId = localStorage.getItem('temp_case_id');
+    if (tempCaseId) return tempCaseId;
+    
+    return 'draft';
+  };
   
   const getEffectiveId = (urlValue, localStorageKey, idType) => {
     if (urlValue) return urlValue;
@@ -88,7 +109,7 @@ export const useQuestionnaireForm = (slideKey, questionConfig, masterData = {}) 
   };
   
   const effectiveCompanyId = getEffectiveId(urlParams.companyId, 'currentCompanyId', 'companyId');
-  const effectiveCaseId = getEffectiveId(urlParams.caseId, 'onboardingId', 'caseId');
+  const effectiveCaseId = getCaseId(); // 🆕 Using new getCaseId function
   
   // Extract userId from JWT token  
   const getUserId = () => {
@@ -285,10 +306,6 @@ export const useQuestionnaireForm = (slideKey, questionConfig, masterData = {}) 
         slideKey
       };
       localStorage.setItem(draftKey, JSON.stringify(draftData));
-      
-      // Behåll även i permanent cache
-      const localData = readFromStorage(storageKey);
-      writeToStorage(storageKey, formData, localVersion);
       
       console.log(`💾 Auto-saved ${slideKey} draft (based on v${localVersion})`);
     }

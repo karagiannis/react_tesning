@@ -90,7 +90,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
     }
 
     // Send data to backend via PATCH
-    const onboardingId = localStorage.getItem('onboardingId');
+    const onboardingId = localStorage.getItem('onboarding_id');
 
     if (onboardingId && companyId) {
       try {

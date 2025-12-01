@@ -32,7 +32,7 @@ export default function PaymentSuccessSlide() {
       // Hämta payment info från URL och localStorage
       // Stripe Checkout Session returnerar session_id
       const sessionId = searchParams.get('session_id');
-      const pendingPayment = JSON.parse(localStorage.getItem('pendingPayment') || '{}');
+      const pendingPayment = JSON.parse(localStorage.getItem('pending_payment') || '{}');
       
       const { companyId, onboardingId } = pendingPayment;
       
@@ -67,7 +67,7 @@ export default function PaymentSuccessSlide() {
       });
       
       // Rensa pending payment
-      localStorage.removeItem('pendingPayment');
+      localStorage.removeItem('pending_payment');
       
       setStatus('success');
       setMessage('Betalning genomförd!');
@@ -134,7 +134,7 @@ export default function PaymentSuccessSlide() {
             
             <button
               onClick={() => {
-                const pendingPayment = JSON.parse(localStorage.getItem('pendingPayment') || '{}');
+                const pendingPayment = JSON.parse(localStorage.getItem('pending_payment') || '{}');
                 navigate(`/riskfragor/${pendingPayment.companyId || ''}`);
               }}
               className="mt-4 px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700"

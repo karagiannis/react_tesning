@@ -10,11 +10,11 @@ function AccountingAnalysisWizard() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(() => {
     // Återställ från localStorage
-    return parseInt(localStorage.getItem('analysisWizardStep') || '1');
+    return parseInt(localStorage.getItem('analysis_wizard_step') || '1');
   });
   
   const [completedSteps, setCompletedSteps] = useState(() => {
-    const saved = localStorage.getItem('analysisWizardCompleted');
+    const saved = localStorage.getItem('analysis_wizard_completed');
     return saved ? JSON.parse(saved) : [];
   });
   
@@ -28,11 +28,11 @@ function AccountingAnalysisWizard() {
   
   // Spara progress i localStorage
   useEffect(() => {
-    localStorage.setItem('analysisWizardStep', currentStep.toString());
+    localStorage.setItem('analysis_wizard_step', currentStep.toString());
   }, [currentStep]);
   
   useEffect(() => {
-    localStorage.setItem('analysisWizardCompleted', JSON.stringify(completedSteps));
+    localStorage.setItem('analysis_wizard_completed', JSON.stringify(completedSteps));
   }, [completedSteps]);
   
   const goToStep = (stepId) => {
@@ -59,8 +59,8 @@ function AccountingAnalysisWizard() {
   };
   
   const resetWizard = () => {
-    localStorage.removeItem('analysisWizardStep');
-    localStorage.removeItem('analysisWizardCompleted');
+    localStorage.removeItem('analysis_wizard_step');
+    localStorage.removeItem('analysis_wizard_completed');
     setCurrentStep(1);
     setCompletedSteps([]);
   };

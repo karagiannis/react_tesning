@@ -106,7 +106,7 @@ export default function LoginSlide({ onNext, onRegister }) {
     }
 
     // Clear old onboarding data before login
-    localStorage.removeItem('onboardingId');
+    localStorage.removeItem('onboarding_id');
     localStorage.removeItem('onboarding-wizard-steg1');
     localStorage.removeItem('uppdragsval-services');
 
@@ -151,6 +151,12 @@ export default function LoginSlide({ onNext, onRegister }) {
         // Success: Save tokens to localStorage
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('refreshToken', data.refreshToken);
+        
+        // 🆕 Save temp_case_id for new onboarding session
+        if (data.tempCaseId) {
+          localStorage.setItem('temp_case_id', data.tempCaseId);
+          console.log('🆕 Temp case ID saved:', data.tempCaseId);
+        }
         
         // Navigate based on user role
         if (data.user && data.user.role === 'admin') {
@@ -233,7 +239,7 @@ export default function LoginSlide({ onNext, onRegister }) {
   // Handle Google OAuth callback
   const handleGoogleCallback = async (code) => {
     // Clear old onboarding data before Google OAuth login
-    localStorage.removeItem('onboardingId');
+    localStorage.removeItem('onboarding_id');
     localStorage.removeItem('onboarding-wizard-steg1');
     localStorage.removeItem('uppdragsval-services');
 
@@ -283,6 +289,12 @@ export default function LoginSlide({ onNext, onRegister }) {
         // Success: Save tokens to localStorage
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('refreshToken', data.refreshToken);
+        
+        // 🆕 Save temp_case_id for new onboarding session
+        if (data.tempCaseId) {
+          localStorage.setItem('temp_case_id', data.tempCaseId);
+          console.log('🆕 Google OAuth: Temp case ID saved:', data.tempCaseId);
+        }
         
         // Clean URL (remove code parameter)
         window.history.replaceState({}, document.title, '/login');

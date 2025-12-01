@@ -194,27 +194,58 @@ export function clearAllOldFormatKeys() {
   let removed = 0;
   
   allKeys.forEach(key => {
+    // 🆕 2025-12-01: Ta bort buggiga ::draft::draft:: nycklar
+    // Dessa skapas om hook körs innan temp_case_id sparats i localStorage
+    if (key.includes('::draft::draft::')) {
+      localStorage.removeItem(key);
+      removed++;
+      console.log(`🗑️ Removed buggy draft::draft key: ${key}`);
+      return;
+    }
+    
     // Behåll nycklar i nytt format (innehåller ::)
     if (key.includes(SEPARATOR)) return;
     
-    // Behåll auth-nycklar
+    // Behåll auth-nycklar (undantag från snake_case)
     if (key === 'accessToken' || key === 'refreshToken') return;
     
-    // Behåll andra viktiga nycklar
-    if (key === 'isDemoMode') return;
+    // Behåll snake_case-nycklar
+    if (key === 'is_demo_mode') return;
     
-    // Ta bort gamla onboarding-nycklar
+    // Ta bort gamla onboarding-nycklar (både camelCase och gamla format)
     if (key.startsWith('onboarding-') || 
         key.startsWith('onboarding_draft_') ||
-        key === 'currentCompanyId' ||
-        key === 'currentCompanyName' ||
-        key === 'currentOrgnr' ||
-        key === 'onboardingId' ||
-        key === 'resumeMode' ||
-        key === 'activeOnboarding') {
+        key === 'currentCompanyId' ||  // legacy camelCase
+        key === 'currentCompanyName' || // legacy camelCase
+        key === 'currentOrgnr' ||       // legacy camelCase
+        key === 'onboardingId' ||       // legacy camelCase
+        key === 'resumeMode' ||         // legacy camelCase
+        key === 'activeOnboarding' ||   // legacy camelCase
+        key === 'tempCaseId' ||         // legacy camelCase
+        key === 'isDemoMode') {         // legacy camelCase
       localStorage.removeItem(key);
       removed++;
       console.log(`🗑️ Removed old format key: ${key}`);
+    }
+  });
+  
+  return removed;
+}
+
+/**
+ * 🆕 2025-12-01: Rensar buggiga ::draft::draft:: nycklar
+ * Dessa skapas om formulär-hooks körs innan tempCaseId sparats i localStorage
+ * @returns {number} Antal borttagna nycklar
+ */
+export function clearBuggyDraftKeys() {
+  const allKeys = Object.keys(localStorage);
+  let removed = 0;
+  
+  allKeys.forEach(key => {
+    if (key.includes('::draft::draft::')) {
+      localStorage.removeItem(key);
+      removed++;
+      console.log(`🗑️ Removed buggy draft::draft key: ${key}`);
     }
   });
   
@@ -261,6 +292,81 @@ export function debugStorageSummary() {
   return summary;
 }
 
+/**
+ * 🆕 2025-12-01: Rensar alla localStorage-nycklar för ett temp_case_id
+ * Används efter commit för att ta bort temp-nycklar
+ * 
+ * @param {string} tempCaseId - Full temp case ID (t.ex. "temp_2d4f54t5y65y7yu7u8")
+ * @returns {number} Antal borttagna nycklar
+ */
+export function clearTempCaseKeys(tempCaseId) {
+  if (!tempCaseId) {
+    console.warn('clearTempCaseKeys: No tempCaseId provided');
+    return 0;
+  }
+  
+  const allKeys = Object.keys(localStorage);
+  let removedCount = 0;
+  
+  allKeys.forEach(key => {
+    // Matcha nycklar som innehåller tempCaseId
+    if (key.includes(tempCaseId)) {
+      localStorage.removeItem(key);
+      console.log(`🗑️ Removed temp key: ${key}`);
+      removedCount++;
+    }
+  });
+  
+  // Ta också bort temp_case_id från localStorage
+  if (localStorage.getItem('temp_case_id') === tempCaseId) {
+    localStorage.removeItem('temp_case_id');
+    console.log('🗑️ Removed temp_case_id from localStorage');
+    removedCount++;
+  }
+  
+  return removedCount;
+}
+
+/**
+ * 🆕 2025-12-01: Migrerar nycklar från temp_case_id till permanent case_id
+ * Används efter commit för att behålla localStorage-data med nytt case_id
+ * 
+ * @param {string} tempCaseId - Temp case ID (t.ex. "temp_abc123")
+ * @param {string} realCaseId - Permanent case ID (t.ex. "abc123")
+ * @returns {number} Antal migrerade nycklar
+ */
+export function migrateTempToRealCaseId(tempCaseId, realCaseId) {
+  if (!tempCaseId || !realCaseId) {
+    console.warn('migrateTempToRealCaseId: Missing parameters');
+    return 0;
+  }
+  
+  const allKeys = Object.keys(localStorage);
+  let migratedCount = 0;
+  
+  allKeys.forEach(key => {
+    if (key.includes(tempCaseId)) {
+      const value = localStorage.getItem(key);
+      const newKey = key.replace(tempCaseId, realCaseId);
+      
+      localStorage.setItem(newKey, value);
+      localStorage.removeItem(key);
+      
+      console.log(`🔄 Migrated key: ${key} → ${newKey}`);
+      migratedCount++;
+    }
+  });
+  
+  // Uppdatera temp_case_id till permanent
+  if (localStorage.getItem('temp_case_id') === tempCaseId) {
+    localStorage.setItem('onboarding_id', realCaseId);
+    localStorage.removeItem('temp_case_id');
+    console.log(`🔄 Updated onboarding_id: ${realCaseId}`);
+  }
+  
+  return migratedCount;
+}
+
 export default {
   buildStorageKey,
   parseStorageKey,
@@ -268,5 +374,8 @@ export default {
   clearStorageKeys,
   migrateOldStorageKeys,
   clearAllOldFormatKeys,
-  debugStorageSummary
+  clearBuggyDraftKeys,
+  debugStorageSummary,
+  clearTempCaseKeys,
+  migrateTempToRealCaseId
 };

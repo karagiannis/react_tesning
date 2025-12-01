@@ -63,8 +63,8 @@ export default function Sidebar({ currentPath, hasRoaringData = false }) {
     
     // If path requires companyId or caseId, get them from localStorage
     if (requiresCompanyId || requiresCaseId) {
-      const companyId = localStorage.getItem('currentCompanyId');
-      const caseId = localStorage.getItem('onboardingId');
+      const companyId = localStorage.getItem('current_company_id');
+      const caseId = localStorage.getItem('onboarding_id');
       
       if (requiresCompanyId && !companyId) {
         console.error('❌ No currentCompanyId found in localStorage for navigation to', path);

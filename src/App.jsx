@@ -71,7 +71,7 @@ import { AgreementProvider } from './contexts/AgreementContext';
 import OnboardingResumeDialog from './components/Modals/OnboardingResumeDialog';
 import OnboardingPage from './components/Pages/OnboardingPage';
 import { initAuth } from './utils/auth';
-import { clearAllOldFormatKeys, debugStorageSummary } from './utils/storageKeys';
+import { clearAllOldFormatKeys, clearBuggyDraftKeys, debugStorageSummary } from './utils/storageKeys';
 
 export default function App() {
   const navigate = useNavigate();
@@ -90,20 +90,57 @@ export default function App() {
       // Debug: Visa översikt över kvarvarande nycklar
       debugStorageSummary();
     }
+    
+    // 🆕 2025-12-01: Migrera camelCase → snake_case nycklar
+    const hasMigratedV3 = localStorage.getItem('_storage_migrated_v3');
+    if (!hasMigratedV3) {
+      console.log('📦 Migrating localStorage keys to snake_case...');
+      const keyMigrations = [
+        ['tempCaseId', 'temp_case_id'],
+        ['onboardingId', 'onboarding_id'],
+        ['currentCompanyId', 'current_company_id'],
+        ['currentCompanyName', 'current_company_name'],
+        ['currentOrgnr', 'current_orgnr'],
+        ['activeOnboarding', 'active_onboarding'],
+        ['isDemoMode', 'is_demo_mode'],
+        ['resumeMode', 'resume_mode'],
+        ['pendingPayment', 'pending_payment'],
+        ['analysisWizardStep', 'analysis_wizard_step'],
+        ['analysisWizardCompleted', 'analysis_wizard_completed'],
+      ];
+      let migratedCount = 0;
+      for (const [oldKey, newKey] of keyMigrations) {
+        const value = localStorage.getItem(oldKey);
+        if (value !== null) {
+          localStorage.setItem(newKey, value);
+          localStorage.removeItem(oldKey);
+          migratedCount++;
+        }
+      }
+      localStorage.setItem('_storage_migrated_v3', 'true');
+      console.log(`✅ V3 Migration complete: ${migratedCount} keys renamed to snake_case`);
+    }
+    
+    // 🆕 2025-12-01: Rensa buggiga ::draft::draft:: nycklar vid varje app-start
+    // Dessa skapas om hooks körs innan tempCaseId sparats i localStorage
+    const buggyRemoved = clearBuggyDraftKeys();
+    if (buggyRemoved > 0) {
+      console.log(`🗑️ Removed ${buggyRemoved} buggy draft::draft keys`);
+    }
   }, []);
   
   // 🆕 Active onboarding session state (orgnr-scoped localStorage)
   const [activeOnboarding, setActiveOnboarding] = useState(() => {
-    const cached = localStorage.getItem('activeOnboarding');
+    const cached = localStorage.getItem('active_onboarding');
     return cached ? JSON.parse(cached) : null;
   });
   
   // Save activeOnboarding to localStorage whenever it changes
   useEffect(() => {
     if (activeOnboarding) {
-      localStorage.setItem('activeOnboarding', JSON.stringify(activeOnboarding));
+      localStorage.setItem('active_onboarding', JSON.stringify(activeOnboarding));
     } else {
-      localStorage.removeItem('activeOnboarding');
+      localStorage.removeItem('active_onboarding');
     }
   }, [activeOnboarding]);
   
@@ -136,7 +173,7 @@ export default function App() {
   
   // Demo mode - doesn't require real login
   const [isDemoMode, setIsDemoMode] = useState(() => {
-    return localStorage.getItem('isDemoMode') === 'true';
+    return localStorage.getItem('is_demo_mode') === 'true';
   });
   
   // Resume dialog state
@@ -179,15 +216,22 @@ export default function App() {
     console.log('🔐 handleLogin called');
     setIsLoggedIn(true);
     
-    // 🆕 2025-11-30: Navigera till /uppdragsval - OnboardingPage hanterar resume-modal
-    // useOnboardingSession hook i OnboardingPage fetchar automatiskt pågående onboardings
-    // och visar modal om det finns några.
-    navigate('/uppdragsval');
+    // 🆕 2025-12-01: Navigera med temp_case_id i URL
+    // temp_case_id sparas av LoginSlide efter lyckad login
+    const tempCaseId = localStorage.getItem('temp_case_id');
+    if (tempCaseId) {
+      console.log('🆕 Navigating with temp_case_id:', tempCaseId);
+      navigate(`/uppdragsval?case=${tempCaseId}`);
+    } else {
+      // Fallback om tempCaseId saknas (borde inte hända)
+      console.warn('⚠️ No tempCaseId found, navigating without case param');
+      navigate('/uppdragsval');
+    }
   };
 
   const handleDemo = () => {
     setIsDemoMode(true);
-    localStorage.setItem('isDemoMode', 'true');
+    localStorage.setItem('is_demo_mode', 'true');
     navigate('/uppdragsval');  // Demo mode går direkt till uppdragsval
   };
 
@@ -330,28 +374,28 @@ export default function App() {
   const handleResume = (data) => {
     console.log('📂 Resuming onboarding:', data);
     
-    // Set active onboarding session
+    // Set active onboarding session (API returns snake_case)
     setActiveOnboarding({
       orgnr: data.orgnr,
-      companyName: data.companyName,
-      currentStep: data.currentStep,
-      is_locked: data.is_locked || false  // Endast is_locked behövs
+      companyName: data.company_name,  // snake_case from API
+      currentStep: data.current_step,  // snake_case from API
+      is_locked: data.is_locked || false
     });
     
     // Set IDs i localStorage (useQuestionnaireForm behöver dessa för cache keys)
-    localStorage.setItem('onboardingId', data.onboardingId);
-    localStorage.setItem('currentCompanyId', data.company_id);
-    localStorage.setItem('currentCompanyName', data.companyName);
-    localStorage.setItem('currentOrgnr', data.orgnr);
+    localStorage.setItem('onboarding_id', data.onboarding_id);  // snake_case
+    localStorage.setItem('current_company_id', data.company_id);
+    localStorage.setItem('current_company_name', data.company_name);
+    localStorage.setItem('current_orgnr', data.orgnr);
     
     // 🔑 FLAGGA: Signalerar till useQuestionnaireForm att hämta data från Resume endpoint
     // useQuestionnaireForm kommer läsa denna flagga och hämta ALL slide-data från servern
-    localStorage.setItem('resumeMode', 'true');
+    localStorage.setItem('resume_mode', 'true');
     
     setShowResumeDialog(false);
     setDialogDismissed(true);
     // Navigate to current step - useQuestionnaireForm laddar data automatiskt
-    navigate(`/${data.currentStep}`);
+    navigate(`/${data.current_step}`);  // snake_case from API
   };
 
   // 🆕 New session callback: Stäng dialog och gå till uppdragsval
@@ -402,11 +446,11 @@ export default function App() {
         </div>
         <button
           onClick={() => {
-            const companyId = localStorage.getItem('currentCompanyId');
+            const companyId = localStorage.getItem('current_company_id');
             if (companyId) {
               navigate(`/riskfragor/${companyId}`);
             } else {
-              console.error('❌ No currentCompanyId found in localStorage');
+              console.error('❌ No current_company_id found in localStorage');
               alert('Inget pågående onboarding-ärende hittat. Börja om från Uppdragsval.');
             }
           }}
@@ -490,9 +534,9 @@ export default function App() {
                 onNext={(data) => {
                   console.log('✅ Onboarding created:', data);
                   console.log('📋 company_id:', data.company_id);
-                  console.log('📋 onboardingId:', data.onboardingId);
+                  console.log('📋 onboarding_id:', data.onboarding_id);  // snake_case from API
                   // Navigate to riskfragor with company_id AND caseId
-                  navigate(`/riskfragor/${data.company_id}/${data.onboardingId}`);
+                  navigate(`/riskfragor/${data.company_id}/${data.onboarding_id}`);
                 }} 
               />
             } />
@@ -500,9 +544,9 @@ export default function App() {
               <UppdragsvalsSlide 
                 onNext={(data) => {
                   console.log('✅ Onboarding created:', data);
-                  console.log('📋 company_id:', data.onboardingId);
+                  console.log('📋 company_id:', data.company_id);  // Fixed: was using onboardingId
                   // Navigate to riskfragor with company_id + case_id
-                  navigate(`/riskfragor/${data.companyId}/${data.caseId}`);
+                  navigate(`/riskfragor/${data.company_id}/${data.case_id}`);  // snake_case from API
                 }} 
               />
             } />
@@ -510,12 +554,12 @@ export default function App() {
               <RiskFragorSlide 
                 onNext={(companyId, caseId) => {
                   // Navigate to steg 2 with companyId + caseId
-                  const effectiveCaseId = caseId || localStorage.getItem('onboardingId');
+                  const effectiveCaseId = caseId || localStorage.getItem('onboarding_id');
                   navigate(`/riskfragor/steg2/${companyId}/${effectiveCaseId}`);
                 }}
                 onSkipPEP={(companyId, caseId) => {
                   setIsPEP(false);
-                  const effectiveCaseId = caseId || localStorage.getItem('onboardingId');
+                  const effectiveCaseId = caseId || localStorage.getItem('onboarding_id');
                   navigate(`/riskfragor/steg2/${companyId}/${effectiveCaseId}`);
                 }}
                 onFormDataChange={(data) => {
@@ -530,7 +574,7 @@ export default function App() {
               <RiskFragorSteg2Slide 
                 onNext={(companyId, caseId) => {
                   console.log('Steg 2 complete, company:', companyId);
-                  const effectiveCaseId = caseId || localStorage.getItem('onboardingId');
+                  const effectiveCaseId = caseId || localStorage.getItem('onboarding_id');
                   navigate(`/riskfragor/steg3/${companyId}/${effectiveCaseId}`);
                 }}
               />
@@ -539,7 +583,7 @@ export default function App() {
               <RiskFragorSteg3Slide 
                 onNext={(companyId, caseId) => {
                   console.log('Steg 3 complete, company:', companyId);
-                  const effectiveCaseId = caseId || localStorage.getItem('onboardingId');
+                  const effectiveCaseId = caseId || localStorage.getItem('onboarding_id');
                   navigate(`/riskfragor/steg4/${companyId}/${effectiveCaseId}`);
                 }}
               />

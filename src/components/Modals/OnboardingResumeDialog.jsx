@@ -64,7 +64,7 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
   };
 
   const handleDelete = async (company) => {
-    if (!confirm(`Är du säker på att du vill radera onboarding för ${company.companyName}?\n\nDetta kommer att permanent radera all data för detta företag.`)) {
+    if (!confirm(`Är du säker på att du vill radera onboarding för ${company.company_name}?\n\nDetta kommer att permanent radera all data för detta företag.`)) {
       return;
     }
 
@@ -232,7 +232,7 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
                 {/* Företagsinfo */}
                 <div className="flex-1 min-w-0 mr-4">
                   <h3 className="font-semibold text-lg text-gray-900 truncate">
-                    {company.companyName}
+                    {company.company_name}
                   </h3>
                   <p className="text-sm text-gray-500 mt-1">
                     Org.nr: {company.orgnr_formatted}
@@ -242,11 +242,11 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
                   <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
                     <div className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      <span>{formatDate(company.lastModified)}</span>
+                      <span>{formatDate(company.last_modified)}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <TrendingUp className="w-3 h-3" />
-                      <span className="capitalize">{company.currentStep.replace('-', ' ')}</span>
+                      <span className="capitalize">{company.current_step?.replace('-', ' ')}</span>
                     </div>
                   </div>
 
