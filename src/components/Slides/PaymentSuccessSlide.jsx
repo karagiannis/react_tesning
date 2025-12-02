@@ -4,6 +4,21 @@ import { useAgreements } from '../../contexts/AgreementContext';
 import { fetchWithAuth } from '../../utils/auth';
 
 /**
+ * Helper: Get userId from JWT token
+ */
+function getUserIdFromToken() {
+  const token = localStorage.getItem('accessToken');
+  if (!token) return null;
+  try {
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    return decoded.sub || decoded.user_id || decoded.email;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
  * PaymentSuccessSlide - Visas efter lyckad Stripe-betalning
  * 
  * URL: /payment-success?payment_intent=pi_xxx
@@ -22,6 +37,7 @@ export default function PaymentSuccessSlide() {
   const [status, setStatus] = useState('confirming'); // 'confirming' | 'success' | 'error'
   const [message, setMessage] = useState('Bekräftar betalning...');
   const [trialsRemaining, setTrialsRemaining] = useState(null);
+  const [redirectInfo, setRedirectInfo] = useState({ companyId: null, onboardingId: null });
 
   useEffect(() => {
     confirmPayment();
@@ -35,6 +51,9 @@ export default function PaymentSuccessSlide() {
       const pendingPayment = JSON.parse(localStorage.getItem('pending_payment') || '{}');
       
       const { companyId, onboardingId } = pendingPayment;
+      
+      // Spara för redirect senare (innan vi rensar localStorage)
+      setRedirectInfo({ companyId, onboardingId });
       
       if (!companyId || !onboardingId) {
         throw new Error('Kunde inte hitta betalningsinformation. Försök igen.');
@@ -55,6 +74,14 @@ export default function PaymentSuccessSlide() {
       const data = await response.json();
       console.log('✅ Betalning bekräftad:', data);
       
+      // 🆕 2025-12-02: Sätt hasRoaringData-flaggan så att Output-slides låses upp
+      // Backend triggar Roaring.io API-anrop som del av betalningsbekräftelsen
+      const userId = getUserIdFromToken();
+      if (userId) {
+        localStorage.setItem(`onboarding-${userId}-hasRoaringData`, 'true');
+        console.log('🔓 hasRoaringData flag set - Output slides unlocked');
+      }
+      
       // Uppdatera AgreementContext
       setOneTimeAgreement({
         isSigned: true,
@@ -73,9 +100,10 @@ export default function PaymentSuccessSlide() {
       setMessage('Betalning genomförd!');
       setTrialsRemaining(data.trials_remaining);
       
-      // Redirect tillbaka efter 3 sekunder
+      // 🆕 2025-12-02: Redirect till Steg 2 (inte Steg 1!)
+      // Data för Steg 1 är redan sparad INNAN betalningen initierades
       setTimeout(() => {
-        navigate(`/riskfragor/${companyId}`);
+        navigate(`/riskfragor-steg2/${companyId}/${onboardingId}`);
       }, 3000);
       
     } catch (err) {
@@ -134,12 +162,15 @@ export default function PaymentSuccessSlide() {
             
             <button
               onClick={() => {
-                const pendingPayment = JSON.parse(localStorage.getItem('pending_payment') || '{}');
-                navigate(`/riskfragor/${pendingPayment.companyId || ''}`);
+                if (redirectInfo.companyId && redirectInfo.onboardingId) {
+                  navigate(`/riskfragor-steg2/${redirectInfo.companyId}/${redirectInfo.onboardingId}`);
+                } else {
+                  navigate('/uppdragsval');
+                }
               }}
               className="mt-4 px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700"
             >
-              Fortsätt till Riskfrågor →
+              Fortsätt till Riskfrågor Steg 2 →
             </button>
           </>
         )}

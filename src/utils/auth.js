@@ -92,13 +92,15 @@ export async function refreshAccessToken() {
 export async function fetchWithAuth(url, options = {}) {
   let token = localStorage.getItem('accessToken');
   
+  console.log('🔐 fetchWithAuth called:', { url, hasToken: !!token });
+  
   // Check if token is expired or will expire soon
   if (isTokenExpired(token)) {
     console.log('⏰ Token expired or expiring soon - auto-refreshing...');
     try {
       token = await refreshAccessToken();
     } catch (error) {
-      console.error('❌ Auto-refresh failed - user must re-login');
+      console.error('❌ Auto-refresh failed - user must re-login:', error);
       // Redirect to login if refresh fails
       window.location.href = '/login';
       throw error;
@@ -112,7 +114,15 @@ export async function fetchWithAuth(url, options = {}) {
   };
   
   // Make request with refreshed token
-  return fetch(url, { ...options, headers });
+  console.log('🌐 Making fetch request to:', url);
+  try {
+    const response = await fetch(url, { ...options, headers });
+    console.log('✅ Fetch response:', response.status, response.statusText);
+    return response;
+  } catch (fetchError) {
+    console.error('❌ Fetch failed:', fetchError.message, { url, options });
+    throw fetchError;
+  }
 }
 
 /**

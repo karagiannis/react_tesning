@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Trash2, ArrowRight, Plus, Clock, TrendingUp } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Trash2, ArrowRight, Plus, Clock, TrendingUp, X } from 'lucide-react';
 
 /**
  * OnboardingResumeDialog - Modal som visas om pågående onboardings finns
@@ -25,15 +25,29 @@ import { Trash2, ArrowRight, Plus, Clock, TrendingUp } from 'lucide-react';
  * - onDelete: (company) => Promise<void> - User vill radera denna onboarding
  * - onNewSession: () => void - User vill starta ny session
  * - onClearSubscription: () => void - Callback för att rensa subscription (optional)
+ * - onClose: () => void - Callback för att stänga modalen utan val (optional)
  */
 export default function OnboardingResumeDialog({ 
   companies = [],
   onSelect,
   onDelete,
   onNewSession,
-  onClearSubscription
+  onClearSubscription,
+  onClose
 }) {
   const [deletingId, setDeletingId] = useState(null);
+
+  // ESC-tangent stänger modalen
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === 'Escape' && onClose) {
+      onClose();
+    }
+  }, [onClose]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 
   const handleDelete = async (company) => {
     const companyName = company.company_name || 'detta företag';
@@ -95,7 +109,17 @@ export default function OnboardingResumeDialog({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-brand-50 to-brand-100">
+        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-brand-50 to-brand-100 relative">
+          {/* Stäng-knapp (X) */}
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-700 hover:bg-white/50 rounded-lg transition-colors"
+              title="Stäng (ESC)"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
           <h2 className="text-2xl font-bold text-brand-900 mb-2">
             Pågående Onboarding
           </h2>

@@ -43,12 +43,14 @@ export default function OnboardingPage({ onNext }) {
     onSelectOnboarding,
     onNewSession,
     onDelete,
+    onDismissModal,
     isChecking,
     showResumeModal,
     isReady
   } = useOnboardingSession();
   
   // Synka subscription från session metadata
+  // OBS: loadSubscriptionFromServer och clearSubscription är stabila (useCallback)
   useEffect(() => {
     if (isReady && session) {
       if (session.subscription) {
@@ -115,6 +117,7 @@ export default function OnboardingPage({ onNext }) {
           onDelete={onDelete}
           onNewSession={onNewSession}
           onClearSubscription={clearSubscription}
+          onClose={onDismissModal}
         />
       </>
     );

@@ -319,6 +319,14 @@ export const useOnboardingSession = () => {
   }, []);
   
   // ══════════════════════════════════════════════════════════════════
+  // DISMISS MODAL (User klickar X eller ESC) - Same as new session
+  // ══════════════════════════════════════════════════════════════════
+  const onDismissModal = useCallback(() => {
+    debugLog.thought('session', '❌ MASTER SESSION: User dismissed modal → starting new session');
+    onNewSession();
+  }, [onNewSession]);
+  
+  // ══════════════════════════════════════════════════════════════════
   // DELETE ONBOARDING (User klickar "Radera")
   // ══════════════════════════════════════════════════════════════════
   const onDelete = useCallback(async (selected) => {
@@ -412,6 +420,7 @@ export const useOnboardingSession = () => {
     onSelectOnboarding,
     onNewSession,
     onDelete,
+    onDismissModal,   // Close modal without selection
     
     // Helpers
     isChecking: phase === PHASES.CHECKING,

@@ -72,8 +72,9 @@ export const useSlideStateController = (slideKey) => {
   const [error, setError] = useState(null);
   
   // Prevent double-fetching (React Strict Mode, etc.)
-  const hasFetched = useRef(false);
   const isMounted = useRef(true);
+  // 🆕 2025-12-01: Track vilken fetchKey vi senast hämtade för
+  const lastFetchKey = useRef(null);
   
   // ══════════════════════════════════════════════════════════════════
   // EXTRACT IDs
@@ -109,7 +110,7 @@ export const useSlideStateController = (slideKey) => {
     return 'draft';
   };
   
-  const effectiveCompanyId = getEffectiveId(urlParams.companyId, 'currentCompanyId');
+  const effectiveCompanyId = getEffectiveId(urlParams.companyId, 'current_company_id');
   const effectiveCaseId = getCaseId(); // 🆕 Using new getCaseId function
   
   // Extract userId from JWT
@@ -166,21 +167,35 @@ export const useSlideStateController = (slideKey) => {
   // ══════════════════════════════════════════════════════════════════
   // MAIN EFFECT: Fetch and decide initial data
   // ══════════════════════════════════════════════════════════════════
+  
+  // 🆕 2025-12-01: Beräkna fetchKey för att förhindra race condition
+  // Problemet: useEffect körde fetchAndDecide() parallellt flera gånger 
+  const fetchKey = `${slideKey}::${effectiveCompanyId}::${effectiveCaseId}`;
+  
   useEffect(() => {
     // Reset isMounted for this effect run
     isMounted.current = true;
     
-    // Reset state on slideKey change
+    // 🆕 KRITISK FIX: Kolla om vi redan har hämtat för denna exakta kombination
+    // Om fetchKey inte ändrats, skippa (förhindrar dubbla körningar)
+    if (lastFetchKey.current === fetchKey && isReady) {
+      debugLog.thought(slideKey, '⏭️ MASTER: Already fetched for this key, skipping', { fetchKey });
+      return;
+    }
+    
+    // Reset state on slideKey/case change
     setIsReady(false);
     setInitialData(null);
     setSource(null);
     setError(null);
-    hasFetched.current = false;
     
     const fetchAndDecide = async () => {
-      // Prevent double-fetch
-      if (hasFetched.current) return;
-      hasFetched.current = true;
+      // 🆕 Dubbel-check: Om någon annan effect-instans redan startat
+      if (lastFetchKey.current === fetchKey) {
+        debugLog.thought(slideKey, '⏭️ MASTER: Fetch already in progress, skipping');
+        return;
+      }
+      lastFetchKey.current = fetchKey;
       
       debugLog.thought(slideKey, '🎯 MASTER: Starting fetch and decide sequence', {
         companyId: effectiveCompanyId,
@@ -358,13 +373,13 @@ export const useSlideStateController = (slideKey) => {
     return () => {
       isMounted.current = false;
     };
-  }, [slideKey, effectiveCompanyId, effectiveCaseId, storageKey, getToken, readFromStorage]);
+  }, [slideKey, effectiveCompanyId, effectiveCaseId, storageKey, getToken, readFromStorage, fetchKey, isReady]);
   
   // ══════════════════════════════════════════════════════════════════
   // REFETCH: Allow manual refetch
   // ══════════════════════════════════════════════════════════════════
   const refetch = useCallback(() => {
-    hasFetched.current = false;
+    lastFetchKey.current = null; // 🆕 Reset fetch key to allow re-fetch
     setIsReady(false);
     setInitialData(null);
     setSource(null);

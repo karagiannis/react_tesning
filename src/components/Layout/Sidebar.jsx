@@ -67,7 +67,7 @@ export default function Sidebar({ currentPath, hasRoaringData = false }) {
       const caseId = localStorage.getItem('onboarding_id');
       
       if (requiresCompanyId && !companyId) {
-        console.error('❌ No currentCompanyId found in localStorage for navigation to', path);
+        console.error('❌ No current_company_id found in localStorage for navigation to', path);
         alert('Inget pågående onboarding-ärende hittat. Börja om från Uppdragsval.');
         return;
       }

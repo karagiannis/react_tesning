@@ -15,19 +15,23 @@
 import { useState, useEffect } from 'react';
 
 /**
- * Helper: Get orgnr from localStorage
+ * Helper: Get companyId from URL
+ * Returns full companyId (orgnr_hash) for API calls
  */
-function getOrgnrFromStorage() {
-  const token = localStorage.getItem('accessToken');
-  if (!token) return null;
-  try {
-    const payload = token.split('.')[1];
-    const decoded = JSON.parse(atob(payload));
-    const userId = decoded.sub || decoded.user_id || decoded.email;
-    return localStorage.getItem(`onboarding-${userId}-roaring-orgnr`) || null;
-  } catch (e) {
-    return null;
+function getCompanyIdFromContext() {
+  // Get from URL path (e.g., /verksamhet/5594286394_d26f1302)
+  const pathParts = window.location.pathname.split('/');
+  const companyId = pathParts[pathParts.length - 1];
+  if (companyId && companyId.includes('_')) {
+    // Format: orgnr_hash -> validate and return full companyId
+    const orgnr = companyId.split('_')[0];
+    if (orgnr && /^\d{10}$/.test(orgnr)) {
+      console.log('📍 Got companyId from URL:', companyId);
+      return companyId;
+    }
   }
+  
+  return null;
 }
 
 /**
@@ -56,9 +60,9 @@ export default function useRoaringData() {
       setError(null);
 
       try {
-        const orgnr = getOrgnrFromStorage();
-        if (!orgnr) {
-          throw new Error('Organisationsnummer saknas i localStorage');
+        const companyId = getCompanyIdFromContext();
+        if (!companyId) {
+          throw new Error('CompanyId saknas i URL');
         }
 
         const userId = getUserIdFromToken();
@@ -67,7 +71,7 @@ export default function useRoaringData() {
         }
 
         // Check if data exists in localStorage (cache)
-        const cacheKey = `onboarding-${userId}-roaring-data`;
+        const cacheKey = `roaring-data-${companyId}`;
         const cachedData = localStorage.getItem(cacheKey);
         
         if (cachedData) {
@@ -92,7 +96,7 @@ export default function useRoaringData() {
         const token = localStorage.getItem('accessToken');
         const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
         const response = await fetch(
-          `${API_BASE}/onboarding/${orgnr}/roaring-data`,
+          `${API_BASE}/onboarding/${companyId}/roaring-data`,
           {
             headers: {
               'Authorization': `Bearer ${token}`,

@@ -55,7 +55,7 @@ const collectCaseLocalStorage = () => {
     
     // Include if key contains case_id, onboardingId, or companyId
     // Also include essential session keys
-    const essentialKeys = ['onboardingId', 'currentCompanyId', 'accessToken', 'resumeMode', 'userId'];
+    const essentialKeys = ['onboarding_id', 'current_company_id', 'accessToken', 'resume_mode', 'user_id'];
     const isEssential = essentialKeys.includes(key);
     const matchesCase = caseId && caseId !== 'no_case' && key.includes(caseId);
     const matchesCompany = companyId && key.includes(companyId);

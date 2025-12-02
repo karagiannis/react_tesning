@@ -108,7 +108,7 @@ export const useQuestionnaireForm = (slideKey, questionConfig, masterData = {}) 
     return 'draft';
   };
   
-  const effectiveCompanyId = getEffectiveId(urlParams.companyId, 'currentCompanyId', 'companyId');
+  const effectiveCompanyId = getEffectiveId(urlParams.companyId, 'current_company_id', 'companyId');
   const effectiveCaseId = getCaseId(); // 🆕 Using new getCaseId function
   
   // Extract userId from JWT token  

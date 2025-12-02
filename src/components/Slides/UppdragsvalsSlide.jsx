@@ -209,10 +209,10 @@ export default function UppdragsvalsSlide({ onNext }) {
         case_id: caseIdToSend,
         orgnr: orgnr.replace('-', ''),
         company_name: companyName || '',  // snake_case!
-        form_data: {  // 🚗 Opak form data
-          ...services,
+        form_data: {  // 🚗 Opak form data - behåll strukturen intakt
+          services: services,  // ← Behåll services som egen nyckel
           orgnr: orgnr.replace('-', ''),
-          companyName: companyName || '',  // Behåll originalt format i form_data
+          companyName: companyName || '',
         }
       };
       

@@ -215,7 +215,7 @@ export function clearAllOldFormatKeys() {
     // Ta bort gamla onboarding-nycklar (både camelCase och gamla format)
     if (key.startsWith('onboarding-') || 
         key.startsWith('onboarding_draft_') ||
-        key === 'currentCompanyId' ||  // legacy camelCase
+        key === 'current_company_id' ||  // snake_case
         key === 'currentCompanyName' || // legacy camelCase
         key === 'currentOrgnr' ||       // legacy camelCase
         key === 'onboardingId' ||       // legacy camelCase

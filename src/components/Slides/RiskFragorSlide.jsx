@@ -98,22 +98,8 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
     }
   }, []); // Run only once on mount
 
-  // Kolla om agreement krävs när kritisk data finns
-  useEffect(() => {
-    const hasCompanyName = companyNameDisplay && companyNameDisplay.trim() !== '';
-    const hasOrgNr = orgnrDisplay && orgnrDisplay.trim() !== '';
-    const hasPersonNr = formData.personnummer && formData.personnummer.trim() !== '';
-    const hasBusinessDescription = formData.affarsIde && formData.affarsIde.trim() !== '';
-    
-    // Alla 3 kritiska fält är ifyllda
-    const allCriticalDataFilled = hasCompanyName && hasOrgNr && hasPersonNr && hasBusinessDescription;
-    
-    if (allCriticalDataFilled && !hasAnyAgreement()) {
-      setShowAgreementModal(true);
-    } else {
-      setShowAgreementModal(false);
-    }
-  }, [companyNameDisplay, orgnrDisplay, formData.personnummer, formData.affarsIde, hasAnyAgreement]);
+  // 🆕 2025-12-01: Borttagen useEffect som auto-visade modalen vid varje keystroke
+  // Modalen visas nu ENDAST när användaren klickar Nästa (se onClick nedan)
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -310,38 +296,51 @@ export default function RiskFragorSlide({ onNext, onSkipPEP, onFormDataChange })
                 return;
               }
               
-              // 🚗 "Bil-principen": Skicka HELA formData som det är + orgnr/company_name
+              // 🆕 Validera att companyId finns (kan saknas om URL är fel)
+              if (!companyId) {
+                console.error('❌ companyId saknas i URL params!');
+                alert('⚠️ Företags-ID saknas. Gå tillbaka till Uppdragsval.');
+                return;
+              }
+              
+              // 🆕 2025-12-02: SPARA DATA FÖRST innan agreement-check!
+              // Så att data finns när användaren kommer tillbaka från Stripe
               const requestBody = {
-                ...formData,  // ← Hela objektet, opakt!
+                ...formData,
                 orgnr: orgnrDisplay,
                 company_name: companyNameDisplay
               };
               
-              console.log('📤 Submitting risk assessment (opaque):', requestBody);
+              console.log('📤 Pre-saving risk assessment:', { companyId, onboardingId, requestBody });
               
-              // Submit to backend with company_id in path and onboarding_id as query
               const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
-              const response = await fetchWithAuth(
-                `${API_BASE}/onboarding/${companyId}/risk-assessment?onboarding_id=${onboardingId}`,
+              const url = `${API_BASE}/onboarding/${companyId}/risk-assessment?onboarding_id=${onboardingId}`;
+              console.log('📤 POST URL:', url);
+              
+              const preSaveResponse = await fetchWithAuth(
+                url,
                 {
                   method: 'POST',
-                  headers: {'Content-Type': 'application/json'
-                  },
+                  headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(requestBody)
                 }
               );
               
-              if (!response.ok) {
-                const errorData = await response.json();
+              if (!preSaveResponse.ok) {
+                const errorData = await preSaveResponse.json();
                 throw new Error(errorData.detail || 'Kunde inte spara riskbedömning');
               }
               
-              const data = await response.json();
-              console.log('✅ Riskfrågor Steg 1 saved:', data);
+              console.log('✅ Riskfrågor Steg 1 pre-saved successfully');
               
-              // Data already saved via useQuestionnaireForm auto-save (entireForm)
+              // 🆕 Nu när data är sparad, kolla agreement
+              if (!hasAnyAgreement()) {
+                setShowAgreementModal(true);
+                return; // Data är redan sparad - säkert att gå till Stripe!
+              }
               
-              // Pass companyId + caseId to parent callback
+              // Om agreement redan finns, fortsätt direkt till nästa steg
+              // (data redan sparad ovan)
               if (formData.isPEP) {
                 onSkipPEP(companyId, caseId);
               } else {

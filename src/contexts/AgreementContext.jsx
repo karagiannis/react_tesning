@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 
 const AgreementContext = createContext();
 
@@ -32,7 +32,7 @@ export function AgreementProvider({ children }) {
   };
 
   // 🔄 Ladda subscription-status från server (vid resume)
-  const loadSubscriptionFromServer = (subscription) => {
+  const loadSubscriptionFromServer = useCallback((subscription) => {
     if (subscription && subscription.type) {
       console.log('📥 AgreementContext: Laddar subscription från server:', subscription);
       
@@ -62,10 +62,10 @@ export function AgreementProvider({ children }) {
         console.log('⚠️ Subscription finns men är inte bekräftad:', subscription.status);
       }
     }
-  };
+  }, []);
 
   // 🗑️ Rensa subscription-status (vid logout eller case-byte)
-  const clearSubscription = () => {
+  const clearSubscription = useCallback(() => {
     setOneTimeAgreement({
       isSigned: false,
       agreementNumber: null,
@@ -85,7 +85,7 @@ export function AgreementProvider({ children }) {
       status: 'Ej signerat',
       isSigningInProgress: false
     });
-  };
+  }, []);
 
   const value = {
     platformAgreement,

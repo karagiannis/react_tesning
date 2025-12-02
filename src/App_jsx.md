@@ -1,3 +1,17 @@
+# App.jsx - Dokumentation och Analys
+
+## Syfte
+Huvudkomponenten för React-appen. Hanterar:
+- Routing
+- Autentisering (login/logout)
+- Session state (activeOnboarding)
+- Resume-dialog för pågående onboardings
+
+---
+
+## Fullständig kod
+
+```jsx
 /**
  * MODIFIED: 2025-11-23
  * PURPOSE: Multi-session localStorage scoping (orgnr-based isolation)
@@ -75,14 +89,47 @@ import { clearAllOldFormatKeys, clearBuggyDraftKeys, debugStorageSummary } from 
 
 export default function App() {
   const navigate = useNavigate();
+// 📍 React Router hook - ger en funktion för programmatisk navigation
+// Användning: navigate('/path') byter URL utan sidladdning (SPA)
+// Exempel: navigate('/login'), navigate(-1) för bakåt
+
   const location = useLocation();
+// 📍 React Router hook - läser aktuell URL-information
+// Returnerar objekt med: pathname, search, hash, state, key
+// Användning: location.pathname ger t.ex. "/riskfragor/123"
+
   const [activePanel, setActivePanel] = useState(null);
+// 🎛️ useState hook - skapar reaktiv state för vilken sidopanel som är öppen
+//avser högerpanelerna - de slide-in panelerna som öppnas när man klickar på knapparna i headern:
+// activePanel: null | 'llm' | 'documentation' | 'support'
+// setActivePanel: funktion för att ändra värdet (triggar re-render)
+
   
   // 🆕 Active onboarding session state (orgnr-scoped localStorage)
-  const [activeOnboarding, setActiveOnboarding] = useState(() => {
-    const cached = localStorage.getItem('active_onboarding');
-    return cached ? JSON.parse(cached) : null;
-  });
+ const [activeOnboarding, setActiveOnboarding] = useState(() => {
+  const cached = localStorage.getItem('active_onboarding');
+  return cached ? JSON.parse(cached) : null;
+});
+// 📦 useState med lazy initializer (funktion som körs EN gång vid mount)
+// Läser 'active_onboarding' från localStorage och parsar JSON
+// Innehåller: { orgnr, companyName, currentStep, is_locked }
+// Används för att isolera data mellan olika företags onboardings
+/**
+ * Lazy Initializer
+ * ================
+ * En lazy initializer är när du skickar en funktion till useState() istället för ett värde direkt:
+ * 
+ * // UTAN lazy initializer (körs varje render):
+ * const [data, setData] = useState(localStorage.getItem('key'));
+ * 
+ * // MED lazy initializer (körs BARA första gången):
+ * const [data, setData] = useState(() => localStorage.getItem('key'));
+ * 
+ * Skillnaden:
+ * - Utan () =>: localStorage.getItem() körs vid VARJE render (slöseri)
+ * - Med () =>: Funktionen körs bara EN gång vid första mount
+ */
+
   
   // Save activeOnboarding to localStorage whenever it changes
   useEffect(() => {
@@ -636,3 +683,65 @@ export default function App() {
     </AgreementProvider>
   );
 }
+```
+
+---
+
+## Analys - Identifierade Problem
+
+### 🔴 Problem 1: company_id vs orgnr Mismatch
+
+**Symptom:** `case_aee1c150.../metadata.json` har:
+- `company_id: 5566177837_70375182` (mappen)
+- `orgnr: 556240-0829` (annat företag!)
+- `company_name: AB - Lanzen Öckerö` (annat företag!)
+
+**Rotorsak:** TBD - Behöver spåra var orgnr/company_name sätts efter att case skapats.
+
+---
+
+## Nästa steg
+
+1. Dokumentera `OnboardingPage.jsx` - var skapas case?
+2. Dokumentera `UppdragsvalsSlide.jsx` - var kan orgnr ändras?
+3. Spåra backend endpoint som sparar metadata.json
+
+---
+
+## Allmän teori
+
+### Vad är en React Hook?
+
+En **hook** är en speciell funktion i React som låter dig "haka in" (hook into) React-funktionalitet från funktionskomponenter. Innan hooks (React 16.8, 2019) behövde man använda klasskomponenter för att hantera state och livscykel.
+
+**Grundregler för hooks:**
+1. **Anropas endast på toppnivå** - aldrig inuti loopar, villkor eller nästlade funktioner
+2. **Anropas endast från React-funktioner** - inte från vanliga JavaScript-funktioner
+3. **Börjar alltid med `use`** - t.ex. `useState`, `useEffect`, `useNavigate`
+
+**Vanliga inbyggda hooks:**
+
+| Hook | Syfte |
+|------|-------|
+| `useState` | Skapar lokal state i komponenten |
+| `useEffect` | Kör sidoeffekter (API-anrop, subscriptions) |
+| `useRef` | Referens som överlever renderingar utan att trigga re-render |
+| `useMemo` | Memoiserar beräknade värden |
+| `useCallback` | Memoiserar funktioner |
+| `useContext` | Läser värden från React Context |
+
+**Hooks från bibliotek:**
+
+| Hook | Bibliotek | Syfte |
+|------|-----------|-------|
+| `useNavigate` | react-router-dom | Programmatisk navigation |
+| `useLocation` | react-router-dom | Läser aktuell URL/path |
+| `useParams` | react-router-dom | Läser URL-parametrar (`:companyId`) |
+
+**Custom hooks:**
+Man kan skapa egna hooks för att extrahera och återanvända logik. I denna app finns t.ex.:
+- `useQuestionnaireForm` - hanterar formulärdata och auto-save
+- `useSlideStateController` - MASTER-hook för slide-datahantering
+- `useOnboardingSession` - hanterar pågående onboarding-sessioner
+
+
