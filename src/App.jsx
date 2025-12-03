@@ -68,8 +68,10 @@ import LLMPanel from './components/Panels/LLMPanel';
 import DocumentationPanel from './components/Panels/DocumentationPanel';
 import SupportPanel from './components/Panels/SupportPanel';
 import { AgreementProvider } from './contexts/AgreementContext';
+import { MasterStateContext } from './contexts/MasterStateContext';
+import useMasterState from './hooks/useMasterState';
 import OnboardingResumeDialog from './components/Modals/OnboardingResumeDialog';
-import OnboardingPage from './components/Pages/OnboardingPage';
+// OnboardingPage_legacy - removed, using UppdragsvalsSlide directly
 import { initAuth } from './utils/auth';
 import { clearAllOldFormatKeys, clearBuggyDraftKeys, debugStorageSummary } from './utils/storageKeys';
 
@@ -77,6 +79,9 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [activePanel, setActivePanel] = useState(null);
+  
+  // 🆕 2025-12-03: Master state hook - centralized app-level state
+  const masterState = useMasterState();
   
   // 🆕 Active onboarding session state (orgnr-scoped localStorage)
   const [activeOnboarding, setActiveOnboarding] = useState(() => {
@@ -415,16 +420,9 @@ export default function App() {
   const authPages = ['/', '/login', '/register', '/verify'];
   const isAuthPage = authPages.includes(location.pathname);
 
-  // Check if Roaring.io data is available (OUTPUT slides unlocked)
-  // ⚠️ MUST be called before any conditional returns (Rules of Hooks)
-  const hasRoaringData = React.useMemo(() => {
-    if (roaringData !== null) return true; // Demo mode or existing data
-    
-    const userId = getUserIdFromToken();
-    if (!userId) return false;
-    
-    return localStorage.getItem(`onboarding-${userId}-hasRoaringData`) === 'true';
-  }, [roaringData, location.pathname]); // Re-check on navigation
+  // 🆕 2025-12-03: hasRoaringData now comes from useMasterState + MasterStateContext
+  // OLD CODE REMOVED: const hasRoaringData = React.useMemo(...)
+  // Sidebar now uses useMasterStateContext() to get hasRoaringData directly
 
   // Show auth layout (no sidebar) for auth pages OR when not logged in (unless in demo mode)
   if (isAuthPage || (!isLoggedIn && !isDemoMode)) {
@@ -449,6 +447,7 @@ export default function App() {
   const isVoucherPage = location.pathname.startsWith('/voucher/');
 
   return (
+    <MasterStateContext.Provider value={masterState}>
     <AgreementProvider>
       {/* 
         🆕 2025-11-30: Resume-dialogen hanteras nu av OnboardingPage
@@ -456,15 +455,16 @@ export default function App() {
         och visar OnboardingResumeDialogV2 om det finns några.
         
         Den gamla showResumeDialog-logiken är borttagen.
+        
+        🆕 2025-12-03: MasterStateContext.Provider wraps entire app to provide
+        centralized state to all components via useMasterStateContext() hook.
       */}
       
       <div className="flex h-screen overflow-hidden">
         {!isSettingsPage && !isVoucherPage && (
           <Sidebar 
             currentPath={location.pathname}
-            onNavigate={(path) => navigate(path)}
-            hasRoaringData={hasRoaringData}
-            isDemoMode={isDemoMode}
+            /* 🆕 2025-12-03: hasRoaringData removed - Sidebar now uses useMasterStateContext() */
           />
         )}
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -479,7 +479,7 @@ export default function App() {
             <Route path="/reset-password" element={<ResetPasswordSlide onNext={() => navigate('/login')} onResendCode={() => navigate('/forgot-password')} />} />
             <Route path="/payment-success" element={<PaymentSuccessSlide />} />
             <Route path="/uppdragsval" element={
-              <OnboardingPage 
+              <UppdragsvalsSlide 
                 onNext={(data) => {
                   console.log('✅ Onboarding created:', data);
                   console.log('📋 company_id:', data.company_id);
@@ -632,7 +632,29 @@ export default function App() {
         </MainContent>
       </div>
       {renderPanel()}
+      
+      {/* 🆕 2025-12-03: Resume Modal - visas som overlay baserat på masterState */}
+      {masterState.showResumeModal && masterState.pendingOnboardings?.length > 0 && (
+        <OnboardingResumeDialog
+          companies={masterState.pendingOnboardings}
+          onSelect={async (selected) => {
+            const selectedCompanyId = selected.company_id;
+            const selectedCaseId = selected.case_id || selected.onboardingId;
+            await masterState.setActiveCase(selectedCompanyId, selectedCaseId);
+            // Navigera till rätt steg
+            const step = selected.current_step || 'uppdragsval';
+            if (step.startsWith('riskfragor')) {
+              navigate(`/${step}/${selectedCompanyId}/${selectedCaseId}`);
+            } else if (step !== 'uppdragsval') {
+              navigate(`/${step}/${selectedCompanyId}`);
+            }
+          }}
+          onNewSession={() => masterState.setShowResumeModal(false)}
+          onClose={() => masterState.setShowResumeModal(false)}
+        />
+      )}
     </div>
     </AgreementProvider>
+    </MasterStateContext.Provider>
   );
 }

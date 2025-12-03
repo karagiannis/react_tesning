@@ -1,9 +1,25 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../Shared/Icon';
+import { useMasterStateContext } from '../../contexts/MasterStateContext';
 
-export default function Sidebar({ currentPath, hasRoaringData = false }) {
+/**
+ * Sidebar navigation component
+ * 
+ * 🆕 2025-12-03: Refactored to use MasterStateContext instead of hasRoaringData prop.
+ * Result slides (Verksamhet, Ägarstruktur, Styrelse, Riskindikatorer, Övriga data)
+ * are locked until Roaring.io data is fetched after Stripe payment.
+ * 
+ * @param {Object} props
+ * @param {string} props.currentPath - Current URL path for highlighting
+ */
+export default function Sidebar({ currentPath }) {
   const navigate = useNavigate();
+  
+  // 🆕 2025-12-03: Get hasRoaringData from MasterStateContext instead of prop
+  const masterState = useMasterStateContext();
+  const hasRoaringData = masterState?.hasRoaringData ?? false;
+  
   const [isExpanded, setIsExpanded] = useState(true);
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     const saved = localStorage.getItem('sidebarWidth');

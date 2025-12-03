@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Trash2, ArrowRight, Plus, Clock, TrendingUp } from 'lucide-react';
 import { useAgreements } from '../../contexts/AgreementContext';
+import { useMasterStateContext } from '../../contexts/MasterStateContext';
 import { fetchWithAuth } from '../../utils/auth';
 
 /**
@@ -22,6 +23,9 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deletingOrgnr, setDeletingOrgnr] = useState(null);
+  
+  // 🆕 2025-12-03: MasterStateContext för att sätta aktiv case
+  const { setActiveCase } = useMasterStateContext();
   
   // 🆕 Hook för att synka subscription-status från server
   const { loadSubscriptionFromServer, clearSubscription } = useAgreements();
@@ -143,6 +147,10 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
         // Rensa eventuellt gammalt subscription-state från tidigare session
         clearSubscription();
       }
+      
+      // 🆕 2025-12-03: Uppdatera MasterState med aktiv case
+      // Detta synkar hasRoaringData till Sidebar automatiskt
+      setActiveCase(companyId, caseId);
       
       onResume(data);  // Callback till App.jsx
     } catch (err) {

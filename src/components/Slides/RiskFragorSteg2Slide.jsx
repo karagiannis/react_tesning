@@ -6,11 +6,12 @@
  * REF: CHANGELOG_2025-11-24.md
  * 
  * UPDATED: 2025-11-30 - MASTER/SLAVE pattern för race condition fix
+ * UPDATED: 2025-12-03 - Hantera ?payment=success från Stripe callback
  */
 
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Info } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { Info, CheckCircle } from 'lucide-react';
 import { getLegalTextsForQuestion } from '../../data/legalTexts';
 import StepIndicator from '../Shared/StepIndicator';
 import useSlideStateController from '../../hooks/useSlideStateController';
@@ -23,8 +24,30 @@ const QUESTIONS_CONFIG = {
 
 export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
   const { companyId, caseId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [expandedInfo, setExpandedInfo] = useState({});
+  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
+  
+  // 🆕 2025-12-03: Hantera ?payment=success från Stripe backend-callback
+  useEffect(() => {
+    if (searchParams.get('payment') === 'success') {
+      // Rensa pending_payment - betalningen är bekräftad av backend
+      localStorage.removeItem('pending_payment');
+      
+      // Visa bekräftelse
+      setShowPaymentSuccess(true);
+      
+      // Rensa URL-parametern
+      searchParams.delete('payment');
+      setSearchParams(searchParams, { replace: true });
+      
+      // Dölj efter 5 sekunder
+      setTimeout(() => setShowPaymentSuccess(false), 5000);
+      
+      console.log('✅ Payment confirmed via backend callback - pending_payment cleared');
+    }
+  }, [searchParams, setSearchParams]);
   
   // 🆕 MASTER/SLAVE Pattern: MASTER fetches and decides data source
   const { 
@@ -134,6 +157,18 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
       <div className="max-w-4xl w-full bg-white rounded-card shadow-2xl p-10">
+        
+        {/* 🆕 2025-12-03: Payment success notification */}
+        {showPaymentSuccess && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3 animate-fade-in">
+            <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+            <div>
+              <p className="font-semibold text-green-800">Betalning genomförd!</p>
+              <p className="text-sm text-green-700">Engångsavtalet är nu aktiverat. Fortsätt med riskfrågorna.</p>
+            </div>
+          </div>
+        )}
+        
         <h1 className="text-page-title text-brand-900 mb-2">
           Steg 2: Geografisk risk & Affärsrelationer
         </h1>

@@ -185,11 +185,17 @@ export default function AgreementModal({ show, onClose }) {
             <p className="text-sm text-yellow-800 mb-1">
               Om du endast vill testa, teckna engångsavtal med oss till en kostnad av API-anrop + avtalsteckning till ett självkostnadspris.
             </p>
-            <p className="text-sm text-yellow-800 font-semibold">
-              💰 Pris: 2 495 kr (inkl. moms)
+            <p className="text-sm text-yellow-800 font-semibold flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Pris: 2 495 kr (inkl. moms)
             </p>
-            <p className="text-xs text-yellow-800 mt-2">
-              ⚠️ OBS: Max 3 engångstester per användare.
+            <p className="text-xs text-yellow-800 mt-2 flex items-center gap-1">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              OBS: Max 3 engångstester per användare.
             </p>
           </div>
         </div>
@@ -197,8 +203,11 @@ export default function AgreementModal({ show, onClose }) {
         {/* Trial limit warning */}
         {trialInfo?.limitReached && (
           <div className="mb-4 p-4 bg-orange-50 border-2 border-orange-300 rounded-box">
-            <p className="text-sm text-orange-900 font-semibold mb-1">
-              ⚠️ Du har använt alla dina {trialInfo.max} gratistester
+            <p className="text-sm text-orange-900 font-semibold mb-1 flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              Du har använt alla dina {trialInfo.max} gratistester
             </p>
             <p className="text-sm text-orange-800">
               Uppgradera till Enterprise för obegränsade onboardings.
@@ -209,8 +218,11 @@ export default function AgreementModal({ show, onClose }) {
         {/* Error message */}
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-box">
-            <p className="text-sm text-red-800">
-              <strong>❌ Fel:</strong> {error}
+            <p className="text-sm text-red-800 flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <strong>Fel:</strong> {error}
             </p>
           </div>
         )}

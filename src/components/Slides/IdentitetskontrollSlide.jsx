@@ -2,41 +2,39 @@ import { useState, useRef, useEffect } from 'react';
 import { fetchWithAuth } from '../../utils/auth';
 import { useParams, useNavigate } from 'react-router-dom';
 import Icon from '../Shared/Icon';
-import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 
-// BRUTE FORCE CONFIG
-const QUESTIONS_CONFIG = {
-  entireForm: { type: 'object', required: false }
-};
+/**
+ * IdentitetskontrollSlide
+ * 
+ * Denna slide har INGA formulärfält - endast en webbkamera för att ta foto.
+ * Fotot laddas upp direkt via API och filnamnet sparas i localStorage.
+ * 
+ * Sync-indikator borttagen eftersom det inte finns data att synkronisera.
+ */
 
 export default function IdentitetskontrollSlide({ onNext }) {
   const { companyId } = useParams();
   const navigate = useNavigate();
   
-  const {
-    formData: hookFormData,
-    updateQuestion,
-    isLoading: syncLoading,
-    syncStatus,
-    pushToServer
-  } = useQuestionnaireForm(
-    'identitetskontroll',
-    QUESTIONS_CONFIG
-  );
-
-  const formData = hookFormData.entireForm || {
-    photoFilename: null,
-    photoUploaded: false
+  // Hämta sparat filnamn från localStorage
+  const getStoredFilename = () => {
+    const caseId = localStorage.getItem('onboarding_id');
+    if (!companyId || !caseId) return null;
+    const key = `id_photo_${companyId}_${caseId}`;
+    return localStorage.getItem(key);
   };
-
-  const setFormData = (updater) => {
-    const newData = typeof updater === 'function' ? updater(formData) : updater;
-    updateQuestion('entireForm', newData);
+  
+  // Spara filnamn till localStorage
+  const storeFilename = (filename) => {
+    const caseId = localStorage.getItem('onboarding_id');
+    if (!companyId || !caseId) return;
+    const key = `id_photo_${companyId}_${caseId}`;
+    localStorage.setItem(key, filename);
   };
 
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
-  const [uploadedFilename, setUploadedFilename] = useState(formData.photoFilename);
+  const [uploadedFilename, setUploadedFilename] = useState(getStoredFilename());
   const [stream, setStream] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -160,17 +158,10 @@ export default function IdentitetskontrollSlide({ onNext }) {
           </div>
         </div>
 
-        {/* Sync Status */}
-        {syncLoading && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-box">
-            <p className="text-sm text-blue-700">🔄 Synkroniserar data...</p>
-          </div>
-        )}
-        {syncStatus === 'conflict' && (
-          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-box">
-            <p className="text-sm text-amber-700">⚠️ Data har uppdaterats från servern</p>
-          </div>
-        )}
+        {/* 
+          Sync Status borttagen - denna slide har inga formulärfält att synkronisera.
+          Fotot sparas direkt via API när det tas.
+        */}
 
         {/* Camera Section */}
         <div className="bg-gray-100 rounded-box p-6 mb-6">
@@ -248,9 +239,12 @@ export default function IdentitetskontrollSlide({ onNext }) {
               <div className="flex gap-4">
                 <button
                   onClick={retakePhoto}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-box font-semibold transition-all"
+                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-box font-semibold transition-all flex items-center justify-center gap-2"
                 >
-                  🔄 Ta om foto
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Ta om foto
                 </button>
                 <button
                   onClick={async () => {
@@ -262,11 +256,11 @@ export default function IdentitetskontrollSlide({ onNext }) {
                       // Create FormData for multipart upload
                       const formDataUpload = new FormData();
                       formDataUpload.append('photo', blob, 'identity_photo.png');
-                      formDataUpload.append('orgnr', orgnr);
+                      formDataUpload.append('orgnr', companyId);
                       
                       // Upload to backend
                       const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
-const response = await fetchWithAuth(`${API_BASE}/onboarding/${orgnr}/upload-identity-photo`, {
+                      const response = await fetchWithAuth(`${API_BASE}/onboarding/${companyId}/upload-identity-photo`, {
                         method: 'POST',
                         headers: {},
                         body: formDataUpload
@@ -279,17 +273,9 @@ const response = await fetchWithAuth(`${API_BASE}/onboarding/${orgnr}/upload-ide
                       const data = await response.json();
                       const filename = data.filename;
                       
-                      // Save filename in formData
-                      setFormData(prev => ({
-                        ...prev,
-                        photoFilename: filename,
-                        photoUploaded: true
-                      }));
-                      
+                      // Spara filnamn i localStorage
+                      storeFilename(filename);
                       setUploadedFilename(filename);
-                      
-                      // Push to versioned endpoint
-                      await pushToServer();
                       
                       alert(`✅ Foto sparat som: ${filename}`);
                     } catch (err) {
