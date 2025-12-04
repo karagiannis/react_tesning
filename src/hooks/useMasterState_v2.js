@@ -21,15 +21,10 @@ import { useNavigate } from 'react-router-dom';
 // SLIDE CONFIGURATION - Definierar ordningen och metadata för alla slides
 // =============================================================================
 const SLIDE_ORDER = [
-  // Pre-auth (hanteras separat, men definierade för fullständighet)
-  { key: 'hero', path: '/', requiresAuth: false },
-  { key: 'login', path: '/login', requiresAuth: false },
-  { key: 'register', path: '/register', requiresAuth: false },
-  { key: 'verify', path: '/verify', requiresAuth: false },
+  // Pre-auth (hanteras utanför React - vanlig HTML/JS)
+  // hero, login, register, verify - inte definierade här
   
-  // Onboarding flow (kräver auth)
-  { key: 'welcome', path: '/inledning', requiresAuth: true },
-  { key: 'intro', path: '/intro', requiresAuth: true },
+  // Onboarding flow (kräver auth) - uppdragsval är FÖRSTA sidan efter login
   { key: 'uppdragsval', path: '/uppdragsval', requiresAuth: true },
   { key: 'riskfragor', path: '/riskfragor', requiresAuth: true },
   { key: 'riskfragor-steg2', path: '/riskfragor-steg2', requiresAuth: true },
@@ -63,9 +58,15 @@ const SLIDE_ORDER = [
 // INITIAL STATE
 // =============================================================================
 const initialState = {
+  // 🎯 STATE MACHINE - Aktuellt app-tillstånd
+  appState: 'UNINITIALIZED',  // Startar här, går till INITIALIZING → READY
+  
   // Navigation
   currentSlideKey: null,
   currentSlideIndex: -1,
+  
+  // 🎯 TIC-TAC-TOE: Historik över alla navigeringar (som Game.history)
+  navigationHistory: [],  // [{ slideKey, timestamp, action }]
   
   // Auth
   isAuthenticated: false,
@@ -76,6 +77,9 @@ const initialState = {
   
   // Form data - alla slides formulärdata
   formData: {},  // { [slideKey]: { field1: value1, ... } }
+  
+  // 🎯 TIC-TAC-TOE: Historik över alla form-ändringar (som Game.squares history)
+  formHistory: [],  // [{ slideKey, field, oldValue, newValue, timestamp }]
   
   // Server data - data hämtad från API
   serverData: {
@@ -147,6 +151,34 @@ const ActionTypes = {
   
   // Hydrate from localStorage
   HYDRATE: 'HYDRATE',
+  
+  // =============================================================================
+  // 🎯 STATE MACHINE - App states
+  // =============================================================================
+  SET_APP_STATE: 'SET_APP_STATE',
+};
+
+// =============================================================================
+// 🎯 APP STATES - Tillståndsmaskin
+// =============================================================================
+// Precis som i ett UML state diagram
+const AppState = {
+  // Initial states
+  UNINITIALIZED: 'UNINITIALIZED',      // App just mounted
+  INITIALIZING: 'INITIALIZING',         // Running initialize()
+  
+  // Post-init states
+  CHECKING_PENDING: 'CHECKING_PENDING', // Kollar om pågående onboardings finns
+  SHOWING_RESUME: 'SHOWING_RESUME',     // Visar resume modal
+  RESUMING: 'RESUMING',                 // Laddar metadata från server
+  
+  // Ready states
+  READY: 'READY',                       // Redo för interaktion
+  NAVIGATING: 'NAVIGATING',             // Byter slide
+  SAVING: 'SAVING',                     // Sparar till server
+  
+  // Error states
+  ERROR: 'ERROR',                       // Något gick fel
 };
 
 // =============================================================================
@@ -154,13 +186,35 @@ const ActionTypes = {
 // =============================================================================
 function masterReducer(state, action) {
   switch (action.type) {
-    // Navigation
+    // ==========================================================================
+    // 🎯 STATE MACHINE TRANSITION
+    // ==========================================================================
+    case ActionTypes.SET_APP_STATE: {
+      console.log(`[STATE MACHINE] ${state.appState} → ${action.appState}`);
+      return {
+        ...state,
+        appState: action.appState,
+      };
+    }
+    
+    // Navigation - 🎯 TIC-TAC-TOE: Spara historik precis som Game.handlePlay
     case ActionTypes.SET_CURRENT_SLIDE: {
       const slideIndex = SLIDE_ORDER.findIndex(s => s.key === action.slideKey);
+      
+      // Skapa historik-entry
+      const historyEntry = {
+        slideKey: action.slideKey,
+        timestamp: Date.now(),
+        action: action.navigationAction || 'goto',  // 'next', 'back', 'goto', 'resume'
+        fromSlide: state.currentSlideKey,
+      };
+      
       return {
         ...state,
         currentSlideKey: action.slideKey,
         currentSlideIndex: slideIndex,
+        // 🎯 Lägg till i historiken
+        navigationHistory: [...state.navigationHistory, historyEntry],
       };
     }
     
@@ -193,18 +247,35 @@ function masterReducer(state, action) {
         completedSlides: [],
       };
     
-    // Form data
-    case ActionTypes.UPDATE_FIELD:
+    // Form data - 🎯 TIC-TAC-TOE: Spara historik för varje fältändring
+    case ActionTypes.UPDATE_FIELD: {
+      const slideKey = action.slideKey;
+      const field = action.field;
+      const oldValue = state.formData[slideKey]?.[field];
+      const newValue = action.value;
+      
+      // Skapa form history entry
+      const formHistoryEntry = {
+        slideKey,
+        field,
+        oldValue,
+        newValue,
+        timestamp: Date.now(),
+      };
+      
       return {
         ...state,
         formData: {
           ...state.formData,
-          [action.slideKey]: {
-            ...state.formData[action.slideKey],
-            [action.field]: action.value,
+          [slideKey]: {
+            ...state.formData[slideKey],
+            [field]: newValue,
           },
         },
+        // 🎯 Lägg till i form historiken
+        formHistory: [...state.formHistory, formHistoryEntry],
       };
+    }
     
     case ActionTypes.SET_SLIDE_DATA:
       return {
@@ -556,8 +627,12 @@ export function useMasterState() {
         storage.setCompletedSlides([...state.completedSlides, state.currentSlideKey]);
         storage.setFormData(state.formData);
         
-        // Navigate
-        dispatch({ type: ActionTypes.SET_CURRENT_SLIDE, slideKey: nextSlide.key });
+        // Navigate - 🎯 TIC-TAC-TOE: Skicka med action type för historik
+        dispatch({ 
+          type: ActionTypes.SET_CURRENT_SLIDE, 
+          slideKey: nextSlide.key,
+          navigationAction: 'next'  // 🎯 Historik
+        });
         navigate(nextSlide.path);
       }
     }, [state.currentSlideIndex, state.currentSlideKey, state.completedSlides, state.formData, navigate]),
@@ -567,7 +642,11 @@ export function useMasterState() {
       const currentIndex = state.currentSlideIndex;
       if (currentIndex > 0) {
         const prevSlide = SLIDE_ORDER[currentIndex - 1];
-        dispatch({ type: ActionTypes.SET_CURRENT_SLIDE, slideKey: prevSlide.key });
+        dispatch({ 
+          type: ActionTypes.SET_CURRENT_SLIDE, 
+          slideKey: prevSlide.key,
+          navigationAction: 'back'  // 🎯 Historik
+        });
         navigate(prevSlide.path);
       }
     }, [state.currentSlideIndex, navigate]),
@@ -576,7 +655,11 @@ export function useMasterState() {
     goTo: useCallback((slideKey) => {
       const slide = SLIDE_ORDER.find(s => s.key === slideKey);
       if (slide) {
-        dispatch({ type: ActionTypes.SET_CURRENT_SLIDE, slideKey: slide.key });
+        dispatch({ 
+          type: ActionTypes.SET_CURRENT_SLIDE, 
+          slideKey: slide.key,
+          navigationAction: 'goto'  // 🎯 Historik
+        });
         navigate(slide.path);
       }
     }, [navigate]),
@@ -585,7 +668,11 @@ export function useMasterState() {
     goToPath: useCallback((path) => {
       const slide = SLIDE_ORDER.find(s => s.path === path);
       if (slide) {
-        dispatch({ type: ActionTypes.SET_CURRENT_SLIDE, slideKey: slide.key });
+        dispatch({ 
+          type: ActionTypes.SET_CURRENT_SLIDE, 
+          slideKey: slide.key,
+          navigationAction: 'goto_path'  // 🎯 Historik
+        });
       }
       navigate(path);
     }, [navigate]),
@@ -818,6 +905,22 @@ export function useMasterState() {
       
       // Initialize
       initialize,
+      
+      // 🎯 TIC-TAC-TOE: "Jump to" historik - gå tillbaka till ett tidigare state
+      jumpToHistory: useCallback((historyIndex) => {
+        if (historyIndex >= 0 && historyIndex < state.navigationHistory.length) {
+          const historyEntry = state.navigationHistory[historyIndex];
+          const slide = SLIDE_ORDER.find(s => s.key === historyEntry.slideKey);
+          if (slide) {
+            dispatch({ 
+              type: ActionTypes.SET_CURRENT_SLIDE, 
+              slideKey: slide.key,
+              navigationAction: 'history_jump'
+            });
+            navigate(slide.path);
+          }
+        }
+      }, [state.navigationHistory, navigate]),
     },
     
     // Helpers
@@ -843,6 +946,12 @@ export function useMasterState() {
         const prevSlide = SLIDE_ORDER[slideIndex - 1];
         return state.completedSlides.includes(prevSlide?.key);
       },
+      
+      // 🎯 TIC-TAC-TOE: Hämta navigationHistory för att visa i UI
+      getNavigationHistory: () => state.navigationHistory,
+      
+      // 🎯 TIC-TAC-TOE: Hämta formHistory för debugging/audit
+      getFormHistory: () => state.formHistory,
     },
   };
 }

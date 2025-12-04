@@ -14,14 +14,12 @@ import { useMasterContext } from './context/MasterStateContext_v2';
 // =============================================================================
 // LAYOUT
 // =============================================================================
-import Sidebar_v2 from './components/Layout/Sidebar_v2';
+import Sidebar_v2 from './components/Layout/Sidebar_v2_explicit';  // EXPLICIT version
 import Header_v2 from './components/Layout/Header_v2';
 
 // =============================================================================
-// SLIDES - Alla använder useMasterContext()
+// SLIDES - Explicit import av de som används
 // =============================================================================
-// TODO: Migrera dessa till v2-versioner en i taget
-import WelcomeSlide from './components/Slides/WelcomeSlide';
 import UppdragsvalsSlide from './components/Slides/UppdragsvalsSlide';
 import RiskFragorSlide from './components/Slides/RiskFragorSlide';
 import RiskFragorSteg2Slide from './components/Slides/RiskFragorSteg2Slide';
@@ -37,23 +35,10 @@ import BokforingsunderlagSlide from './components/Slides/BokforingsunderlagSlide
 import ResultatanalysSlide from './components/Slides/ResultatanalysSlide';
 import LikviditetsanalysSlide from './components/Slides/LikviditetsanalysSlide';
 import OmsattningsanalysSlide from './components/Slides/OmsattningsanalysSlide';
-import BokforingsanalysSlide from './components/Slides/BokforingsanalysSlide';
-import PenningflodesanalysSlide from './components/Slides/PenningflodesanalysSlide';
-import BranschjamforelseSlide from './components/Slides/BranschjamforelseSlide';
 import RiskbedomningSlide from './components/Slides/RiskbedomningSlide';
 import AvtalSlide from './components/Slides/AvtalSlide';
 import PaymentSuccessSlide from './components/Slides/PaymentSuccessSlide';
 import SupportSlide from './components/Slides/SupportSlide';
-import FortnoxPackageSlide from './components/Slides/FortnoxPackageSlide';
-import DeklarationsombudSlide from './components/Slides/DeklarationsombudSlide';
-import SkyldigheterSlide from './components/Slides/SkyldigheterSlide';
-import DocumentSetupSlide from './components/Slides/DocumentSetupSlide';
-import BankRattigheterSlide from './components/Slides/BankRattigheterSlide';
-import DocumentDeliverySlide from './components/Slides/DocumentDeliverySlide';
-import IdentitetskontrollSlide from './components/Slides/IdentitetskontrollSlide';
-import KontrolltabellSlide from './components/Slides/KontrolltabellSlide';
-import OngoingRoutinesSlide from './components/Slides/OngoingRoutinesSlide';
-import PEPSlide from './components/Slides/PEPSlide';
 
 // =============================================================================
 // MODALS
@@ -72,79 +57,252 @@ import ExampleSlide_v2 from './components/Slides/ExampleSlide_v2';
 export default function AuthenticatedApp() {
   const { state, actions } = useMasterContext();
   
-  // Wrapper som ger onNext/onBack till gamla slides under migrering
-  const withNavigation = (SlideComponent) => {
-    return (props) => (
-      <SlideComponent 
-        {...props}
-        onNext={actions.next}
-        onBack={actions.back}
-      />
-    );
+  // =============================================================================
+  // INITIALISERING - Körs EN gång när användaren först når AuthenticatedApp
+  // =============================================================================
+  // 
+  // PSEUDO-KOD (state-maskin):
+  // 
+  // 1. LOGGA INLOGGNING
+  //    - Hämta: användarnamn, IP, webbläsare, tid
+  //    - Anropa: POST /api/logger { message: "Användare X inloggad...", metadata }
+  //    - Skriv till usermap på server
+  //
+  // 2. HÄMTA PÅGÅENDE ONBOARDINGS
+  //    - Anropa: GET /api/onboardings/pending
+  //    - Logga: "Användare X har N pågående onboardings"
+  //
+  // 3. SET INITIAL STATE
+  //    state = {
+  //      user: { name, email, loginTime, browser, ip },
+  //      pendingOnboardings: [...],
+  //      currentSlide: 'uppdragsval',
+  //      showResumeModal: pendingOnboardings.length > 0
+  //    }
+  //
+  // 4. CASE: RESUME MODAL
+  //    if (showResumeModal) {
+  //      - Visa ResumeDialog
+  //      - if (user väljer resume) {
+  //          - Hämta metadata.json från server
+  //          - Skriv till localStorage
+  //          - Populera Uppdragsval med content
+  //          - if (metadata.lastSlide !== 'uppdragsval') {
+  //              navigate(metadata.lastSlide)
+  //          }
+  //      }
+  //      - if (user väljer starta ny) {
+  //          - Rensa localStorage
+  //          - navigate('/uppdragsval')
+  //      }
+  //    }
+  //
+  // =============================================================================
+  
+  React.useEffect(() => {
+    // Kör initialisering
+    actions.initialize();
+  }, []);  // Tom dependency = körs EN gång
+
+  // =============================================================================
+  // HANDLERS - Explicit, inga wrappers!
+  // =============================================================================
+  
+  // Sidebar click - navigera till slide
+  const handleSidebarClick = (slideKey) => {
+    actions.goTo(slideKey);
   };
+  
+  // Sidebar lock - kolla om slide är låst
+  const handleSidebarLock = (slideKey) => {
+    // TODO: Implementera i useMasterState
+    return false;
+  };
+
+  // =============================================================================
+  // RENDER
+  // =============================================================================
   
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <Sidebar_v2 />
+      {/* Sidebar - EXPLICIT PROPS */}
+      <Sidebar_v2 
+        currentSlideKey={state.currentSlideKey}
+        completedSlides={state.completedSlides}
+        activeCase={state.activeCase}
+        handleClick={handleSidebarClick}
+        handleLock={handleSidebarLock}
+      />
       
       {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <Header_v2 />
         
-        {/* Content */}
+        {/* Content - EXPLICIT ROUTES utan wrapper! */}
         <main className="flex-1 overflow-auto">
           <Routes>
-            {/* Onboarding flow */}
-            <Route path="/inledning" element={withNavigation(WelcomeSlide)({})} />
-            <Route path="/uppdragsval" element={withNavigation(UppdragsvalsSlide)({})} />
-            <Route path="/riskfragor" element={withNavigation(RiskFragorSlide)({})} />
-            <Route path="/riskfragor-steg2" element={withNavigation(RiskFragorSteg2Slide)({})} />
-            <Route path="/riskfragor-steg3" element={withNavigation(RiskFragorSteg3Slide)({})} />
-            <Route path="/riskfragor-steg4" element={withNavigation(RiskFragorSteg4Slide)({})} />
+            {/* ============================================================= */}
+            {/* SLIDES - Varje slide får EXPLICIT props                       */}
+            {/* Precis som: <Square value={squares[0]} onClick={...} />       */}
+            {/* ============================================================= */}
             
-            {/* Result slides (Roaring data) */}
-            <Route path="/verksamhet" element={withNavigation(VerksamhetSlide)({})} />
-            <Route path="/agarstruktur" element={withNavigation(AgarstrukturSlide)({})} />
-            <Route path="/styrelse" element={withNavigation(StyrelseSlide)({})} />
-            <Route path="/ovriga-data" element={withNavigation(OvrigaDataSlide)({})} />
+            {/* Första slide efter login */}
+            <Route path="/uppdragsval" element={
+              <UppdragsvalsSlide 
+                formData={state.formData['uppdragsval']}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+                onFieldChange={(field, value) => actions.updateField('uppdragsval', field, value)}
+              />
+            } />
             
-            {/* Document & data collection */}
-            <Route path="/bokforing-data" element={withNavigation(BokforingDataSlide)({})} />
-            <Route path="/foretagsdokumentation" element={withNavigation(ForetagsdokumentationSlide)({})} />
-            <Route path="/bokforingsunderlag" element={withNavigation(BokforingsunderlagSlide)({})} />
+            {/* Riskfrågor */}
+            <Route path="/riskfragor" element={
+              <RiskFragorSlide 
+                formData={state.formData['riskfragor']}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+                onFieldChange={(field, value) => actions.updateField('riskfragor', field, value)}
+              />
+            } />
+            <Route path="/riskfragor-steg2" element={
+              <RiskFragorSteg2Slide 
+                formData={state.formData['riskfragor-steg2']}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+                onFieldChange={(field, value) => actions.updateField('riskfragor-steg2', field, value)}
+              />
+            } />
+            <Route path="/riskfragor-steg3" element={
+              <RiskFragorSteg3Slide 
+                formData={state.formData['riskfragor-steg3']}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+                onFieldChange={(field, value) => actions.updateField('riskfragor-steg3', field, value)}
+              />
+            } />
+            <Route path="/riskfragor-steg4" element={
+              <RiskFragorSteg4Slide 
+                formData={state.formData['riskfragor-steg4']}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+                onFieldChange={(field, value) => actions.updateField('riskfragor-steg4', field, value)}
+              />
+            } />
             
-            {/* Analysis slides */}
-            <Route path="/resultatanalys" element={withNavigation(ResultatanalysSlide)({})} />
-            <Route path="/likviditetsanalys" element={withNavigation(LikviditetsanalysSlide)({})} />
-            <Route path="/omsattningsanalys" element={withNavigation(OmsattningsanalysSlide)({})} />
-            <Route path="/bokforingsanalys" element={withNavigation(BokforingsanalysSlide)({})} />
-            <Route path="/penningflodesanalys" element={withNavigation(PenningflodesanalysSlide)({})} />
-            <Route path="/branschjamforelse" element={withNavigation(BranschjamforelseSlide)({})} />
+            {/* Företagsdata (Roaring) */}
+            <Route path="/verksamhet" element={
+              <VerksamhetSlide 
+                roaringData={state.serverData?.roaring}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+              />
+            } />
+            <Route path="/agarstruktur" element={
+              <AgarstrukturSlide 
+                roaringData={state.serverData?.roaring}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+              />
+            } />
+            <Route path="/styrelse" element={
+              <StyrelseSlide 
+                roaringData={state.serverData?.roaring}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+              />
+            } />
+            <Route path="/ovriga-data" element={
+              <OvrigaDataSlide 
+                roaringData={state.serverData?.roaring}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+              />
+            } />
             
-            {/* Final steps */}
-            <Route path="/riskbedomning" element={withNavigation(RiskbedomningSlide)({})} />
-            <Route path="/avtal" element={withNavigation(AvtalSlide)({})} />
-            <Route path="/payment-success" element={withNavigation(PaymentSuccessSlide)({})} />
-            <Route path="/support" element={withNavigation(SupportSlide)({})} />
+            {/* Dokument */}
+            <Route path="/bokforing-data" element={
+              <BokforingDataSlide 
+                formData={state.formData['bokforing-data']}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+                onFieldChange={(field, value) => actions.updateField('bokforing-data', field, value)}
+              />
+            } />
+            <Route path="/foretagsdokumentation" element={
+              <ForetagsdokumentationSlide 
+                formData={state.formData['foretagsdokumentation']}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+                onFieldChange={(field, value) => actions.updateField('foretagsdokumentation', field, value)}
+              />
+            } />
+            <Route path="/bokforingsunderlag" element={
+              <BokforingsunderlagSlide 
+                formData={state.formData['bokforingsunderlag']}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+                onFieldChange={(field, value) => actions.updateField('bokforingsunderlag', field, value)}
+              />
+            } />
             
-            {/* Additional slides */}
-            <Route path="/fortnox-paket" element={withNavigation(FortnoxPackageSlide)({})} />
-            <Route path="/deklarationsombud" element={withNavigation(DeklarationsombudSlide)({})} />
-            <Route path="/skyldigheter" element={withNavigation(SkyldigheterSlide)({})} />
-            <Route path="/dokument-setup" element={withNavigation(DocumentSetupSlide)({})} />
-            <Route path="/bank-rattigheter" element={withNavigation(BankRattigheterSlide)({})} />
-            <Route path="/dokument-leverans" element={withNavigation(DocumentDeliverySlide)({})} />
-            <Route path="/identitetskontroll" element={withNavigation(IdentitetskontrollSlide)({})} />
-            <Route path="/kontrolltabell" element={withNavigation(KontrolltabellSlide)({})} />
-            <Route path="/lopande-rutiner" element={withNavigation(OngoingRoutinesSlide)({})} />
-            <Route path="/pep" element={withNavigation(PEPSlide)({})} />
+            {/* Analys */}
+            <Route path="/resultatanalys" element={
+              <ResultatanalysSlide 
+                sieData={state.serverData?.sie}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+              />
+            } />
+            <Route path="/likviditetsanalys" element={
+              <LikviditetsanalysSlide 
+                sieData={state.serverData?.sie}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+              />
+            } />
+            <Route path="/omsattningsanalys" element={
+              <OmsattningsanalysSlide 
+                sieData={state.serverData?.sie}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+              />
+            } />
+            
+            {/* Slutför */}
+            <Route path="/riskbedomning" element={
+              <RiskbedomningSlide 
+                formData={state.formData}
+                roaringData={state.serverData?.roaring}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+              />
+            } />
+            <Route path="/avtal" element={
+              <AvtalSlide 
+                activeCase={state.activeCase}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+              />
+            } />
+            <Route path="/payment-success" element={
+              <PaymentSuccessSlide 
+                activeCase={state.activeCase}
+                onNext={() => actions.next()}
+                onBack={() => actions.back()}
+              />
+            } />
+            <Route path="/support" element={
+              <SupportSlide 
+                onBack={() => actions.back()}
+              />
+            } />
             
             {/* Test slide */}
             <Route path="/example-v2" element={<ExampleSlide_v2 />} />
             
-            {/* Default redirect */}
+            {/* Default */}
             <Route path="*" element={<div className="p-8">404 - Sidan hittades inte</div>} />
           </Routes>
         </main>
