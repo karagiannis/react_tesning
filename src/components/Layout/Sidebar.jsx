@@ -1,242 +1,308 @@
-import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Icon from '../Shared/Icon';
-import { useMasterStateContext } from '../../contexts/MasterStateContext';
-
 /**
- * Sidebar navigation component
+ * Sidebar_v2_explicit.jsx
  * 
- * 🆕 2025-12-03: Refactored to use MasterStateContext instead of hasRoaringData prop.
- * Result slides (Verksamhet, Ägarstruktur, Styrelse, Riskindikatorer, Övriga data)
- * are locked until Roaring.io data is fetched after Stripe payment.
+ * TIC-TAC-TOE ARKITEKTUR - EXPLICIT VERSION
  * 
- * @param {Object} props
- * @param {string} props.currentPath - Current URL path for highlighting
+ * Precis som i tutorialen:
+ *   <Square value={squares[0]} onSquareClick={() => handleClick(0)} />
+ *   <Square value={squares[1]} onSquareClick={() => handleClick(1)} />
+ *   ...
+ * 
+ * Här skriver vi ut varje slide explicit:
+ *   <SlideButton slideKey="uppdragsval" onClick={() => handleClick('uppdragsval')} />
+ *   <SlideButton slideKey="riskfragor" onClick={() => handleClick('riskfragor')} />
+ *   ...
+ * 
+ * PROPS:
+ *   - handleClick(slideKey) - navigera till slide
+ *   - handleLock(slideKey)  - lås/validera slide innan navigation
  */
-export default function Sidebar({ currentPath }) {
-  const navigate = useNavigate();
-  
-  // 🆕 2025-12-03: Get hasRoaringData from MasterStateContext instead of prop
-  const masterState = useMasterStateContext();
-  const hasRoaringData = masterState?.hasRoaringData ?? false;
-  
-  const [isExpanded, setIsExpanded] = useState(true);
-  const [sidebarWidth, setSidebarWidth] = useState(() => {
-    const saved = localStorage.getItem('sidebarWidth');
-    return saved ? parseInt(saved) : 256; // 256px = w-64 default
-  });
-  const [isResizing, setIsResizing] = useState(false);
-  const sidebarRef = useRef(null);
 
-  const slides = [
-    // Hem-ikon removed - was duplicate of Uppdragsval causing both to be highlighted
-    // User enters onboarding flow directly at Uppdragsval after login
-    { path: '/uppdragsval', title: 'Uppdragsval', icon: 'checkList' },
-    { path: '/riskfragor/:companyId/:caseId', title: 'Riskfrågor', icon: 'question', requiresCompanyId: true, requiresCaseId: true },
-    { path: '/identitetskontroll/:companyId', title: 'Identitetskontroll', icon: 'idCard', requiresCompanyId: true },
-    { path: '/kontrolltabell/:companyId', title: 'Kontrolltabell', icon: 'checkList', requiresCompanyId: true },
-    // Result slides - locked until API data available
-    { path: '/verksamhet/:companyId', title: 'Verksamhet', icon: 'chart', locked: !hasRoaringData, requiresCompanyId: true },
-    { path: '/agarstruktur/:companyId', title: 'Ägarstruktur', icon: 'users', locked: !hasRoaringData, requiresCompanyId: true },
-    { path: '/styrelse/:companyId', title: 'Styrelse', icon: 'building', locked: !hasRoaringData, requiresCompanyId: true },
-    { path: '/riskindikatorer/:companyId', title: 'Riskindikatorer', icon: 'shield', locked: !hasRoaringData, requiresCompanyId: true },
-    { path: '/ovrigadata/:companyId', title: 'Övriga data', icon: 'collection', locked: !hasRoaringData, requiresCompanyId: true },
-    // Company documentation (slide 13.5)
-    { path: '/dokumentation/:companyId', title: 'Företagsdokumentation', icon: 'document', requiresCompanyId: true },
-    // Accounting documents (slide 14.5)
-    { path: '/underlag/:companyId', title: 'Bokföringsunderlag', icon: 'collection', requiresCompanyId: true },
-    // Accounting data slide (Skattekonto OAuth)
-    { path: '/bokforing/:companyId', title: 'Bokföringsdata', icon: 'document', requiresCompanyId: true },
-    // Economic advisory slides (11-14)
-    { path: '/likviditet/:companyId', title: 'Likviditetsanalys', icon: 'chart', requiresCompanyId: true },
-    { path: '/omsattning/:companyId', title: 'Omsättningsanalys', icon: 'trendingUp', requiresCompanyId: true },
-    { path: '/resultat/:companyId', title: 'Resultatanalys', icon: 'pieChart', requiresCompanyId: true },
-    { path: '/bransch/:companyId', title: 'Branschjämförelse', icon: 'comparison', requiresCompanyId: true },
-    // Deep dive analysis (slides 19-20)
-    { path: '/bokanalys/:companyId', title: 'Bokföringsanalys', icon: 'documentSearch', requiresCompanyId: true },
-    { path: '/penningflodes/:companyId', title: 'Penningflödesanalys', icon: 'map', requiresCompanyId: true },
-    // Risk assessment and decision (slide 20)
-    { path: '/riskbedomning', title: 'Riskbedömning', icon: 'shield' },
-    // Customer obligations (slide 18)
-    { path: '/skyldigheter', title: 'Skyldigheter', icon: 'checkList' },
-    // Contract signing (slide 19)
-    { path: '/avtal', title: 'Avtal & Signering', icon: 'document' },
-    // Document delivery (slide 20)
-    { path: '/dokument', title: 'Dokumentleverans', icon: 'mail' },
-    // Post-contract setup (slides 21-30)
-    { path: '/fortnox', title: 'Fortnox-paket', icon: 'settings' },
-    { path: '/bank', title: 'Bankkoppling', icon: 'building' },
-    { path: '/ombud', title: 'Deklarationsombud', icon: 'document' },
-    { path: '/dokument-setup', title: 'Digital dokumenthantering', icon: 'collection' },
-    // Final onboarding slides
-    { path: '/welcome', title: 'Välkommen!', icon: 'check' },
-    { path: '/rutiner', title: 'Löpande rutiner', icon: 'refresh' },
-    { path: '/support', title: 'Support & kontakt', icon: 'support' },
-  ];
+import React, { useState } from 'react';
 
-  const handleNavigation = (path, isLocked, requiresCompanyId, requiresCaseId) => {
-    if (isLocked) return;
-    
-    // If path requires companyId or caseId, get them from localStorage
-    if (requiresCompanyId || requiresCaseId) {
-      const companyId = localStorage.getItem('current_company_id');
-      const caseId = localStorage.getItem('onboarding_id');
-      
-      if (requiresCompanyId && !companyId) {
-        console.error('❌ No current_company_id found in localStorage for navigation to', path);
-        alert('Inget pågående onboarding-ärende hittat. Börja om från Uppdragsval.');
-        return;
-      }
-      
-      if (requiresCaseId && !caseId) {
-        console.error('❌ No onboardingId found in localStorage for navigation to', path);
-        alert('Inget pågående onboarding-ärende hittat. Börja om från Uppdragsval.');
-        return;
-      }
-      
-      // Replace placeholders with actual values
-      let resolvedPath = path;
-      if (requiresCompanyId) {
-        resolvedPath = resolvedPath.replace(':companyId', companyId);
-      }
-      if (requiresCaseId) {
-        resolvedPath = resolvedPath.replace(':caseId', caseId);
-      }
-      
-      navigate(resolvedPath);
-    } else {
-      navigate(path);
-    }
-  };
-
-  // Resize handlers
-  const handleMouseDown = (e) => {
-    e.preventDefault();
-    setIsResizing(true);
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (!isResizing) return;
-
-      const newWidth = e.clientX;
-      // Constrain between 200px (min) and 400px (max)
-      if (newWidth >= 200 && newWidth <= 400) {
-        setSidebarWidth(newWidth);
-        localStorage.setItem('sidebarWidth', newWidth.toString());
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsResizing(false);
-    };
-
-    if (isResizing) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isResizing]);
-
+// =============================================================================
+// SlideButton - motsvarar Square i tic-tac-toe
+// =============================================================================
+function SlideButton({ label, isActive, isCompleted, isLocked, onClick }) {
   return (
-    <aside
-      ref={sidebarRef}
-      style={{ width: isExpanded ? `${sidebarWidth}px` : '80px' }}
+    <button
+      onClick={onClick}
+      disabled={isLocked}
       className={`
-        scrollbar-hide-until-hover
-        bg-gradient-to-b from-brand-50 to-brand-50 border-r border-brand-200 
-        flex-shrink-0 overflow-y-auto transition-all duration-300 ease-in-out
-        relative
+        w-full text-left px-3 py-2 rounded-lg text-sm
+        transition-colors duration-150
+        ${isActive 
+          ? 'bg-brand-100 text-brand-900 font-medium' 
+          : isCompleted
+            ? 'text-brand-700 hover:bg-brand-50'
+            : isLocked
+              ? 'text-gray-400 cursor-not-allowed'
+              : 'text-gray-600 hover:bg-gray-100'
+        }
       `}
     >
-      {/* Resize handle - vertical bar on right edge */}
-      {isExpanded && (
-        <div
-          onMouseDown={handleMouseDown}
-          className={`
-            absolute top-0 right-0 w-1 h-full cursor-ew-resize
-            hover:bg-brand-400 transition-colors z-50
-            ${isResizing ? 'bg-brand-500' : 'bg-transparent'}
-          `}
+      <span className="flex items-center gap-2">
+        {isCompleted && <span className="text-green-500">✓</span>}
+        {isLocked && <span className="text-gray-400">🔒</span>}
+        {label}
+      </span>
+    </button>
+  );
+}
+
+// =============================================================================
+// GroupHeader - rubrik för slide-grupp
+// =============================================================================
+function GroupHeader({ title, isExpanded }) {
+  if (!isExpanded) return null;
+  return (
+    <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+      {title}
+    </div>
+  );
+}
+
+// =============================================================================
+// Sidebar_v2 - motsvarar Board i tic-tac-toe
+// =============================================================================
+export default function Sidebar_v2({ 
+  // State från useMasterState (som squares i tic-tac-toe)
+  currentSlideKey,
+  completedSlides = [],
+  activeCase,
+  
+  // Handlers från useMasterState (som handleClick i tic-tac-toe)
+  handleClick,
+  handleLock,
+}) {
+  // Lokal UI-state (OK - bara visuellt)
+  const [isExpanded, setIsExpanded] = useState(true);
+  
+  // Helper: kolla om slide är completed
+  const isCompleted = (key) => completedSlides.includes(key);
+  
+  // Helper: kolla om slide är aktiv
+  const isActive = (key) => currentSlideKey === key;
+  
+  // Helper: kolla om slide är låst (kan inte nås ännu)
+  // I tic-tac-toe: en ruta kan inte klickas om spelet är över
+  // Här: en slide kan inte nås om föregående inte är klar
+  const isLocked = (key) => {
+    if (handleLock) {
+      return handleLock(key);
+    }
+    return false;
+  };
+
+  return (
+    <aside 
+      className={`
+        ${isExpanded ? 'w-64' : 'w-16'} 
+        bg-white border-r border-gray-200 flex flex-col
+        transition-all duration-300 ease-in-out
+      `}
+    >
+      {/* Header */}
+      <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+        {isExpanded && (
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg font-semibold text-brand-900 truncate">
+              Onboarding
+            </h2>
+            {activeCase && (
+              <p className="text-sm text-gray-600 truncate mt-1">
+                {activeCase.companyName}
+              </p>
+            )}
+          </div>
+        )}
+        
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+          title={isExpanded ? 'Minimera' : 'Expandera'}
         >
-          {/* Visible indicator on hover */}
-          <div className="absolute top-1/2 -translate-y-1/2 right-0 w-1 h-12 bg-brand-300 opacity-0 hover:opacity-100 transition-opacity" />
+          <svg 
+            className={`w-5 h-5 text-gray-500 transition-transform duration-300 ${isExpanded ? '' : 'rotate-180'}`}
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+          </svg>
+        </button>
+      </div>
+      
+      {/* Navigation - EXPLICIT som i tic-tac-toe! */}
+      <nav className="flex-1 overflow-y-auto p-2">
+        
+        {/* ============= GRUNDINFO ============= */}
+        <GroupHeader title="Grundinfo" isExpanded={isExpanded} />
+        <SlideButton 
+          label="Uppdragsval" 
+          isActive={isActive('uppdragsval')}
+          isCompleted={isCompleted('uppdragsval')}
+          isLocked={isLocked('uppdragsval')}
+          onClick={() => handleClick('uppdragsval')}
+        />
+        
+        {/* ============= RISKBEDÖMNING ============= */}
+        <GroupHeader title="Riskbedömning" isExpanded={isExpanded} />
+        <SlideButton 
+          label="Riskfrågor" 
+          isActive={isActive('riskfragor')}
+          isCompleted={isCompleted('riskfragor')}
+          isLocked={isLocked('riskfragor')}
+          onClick={() => handleClick('riskfragor')}
+        />
+        <SlideButton 
+          label="Riskfrågor steg 2" 
+          isActive={isActive('riskfragor-steg2')}
+          isCompleted={isCompleted('riskfragor-steg2')}
+          isLocked={isLocked('riskfragor-steg2')}
+          onClick={() => handleClick('riskfragor-steg2')}
+        />
+        <SlideButton 
+          label="Riskfrågor steg 3" 
+          isActive={isActive('riskfragor-steg3')}
+          isCompleted={isCompleted('riskfragor-steg3')}
+          isLocked={isLocked('riskfragor-steg3')}
+          onClick={() => handleClick('riskfragor-steg3')}
+        />
+        <SlideButton 
+          label="Riskfrågor steg 4" 
+          isActive={isActive('riskfragor-steg4')}
+          isCompleted={isCompleted('riskfragor-steg4')}
+          isLocked={isLocked('riskfragor-steg4')}
+          onClick={() => handleClick('riskfragor-steg4')}
+        />
+        
+        {/* ============= FÖRETAGSDATA ============= */}
+        <GroupHeader title="Företagsdata" isExpanded={isExpanded} />
+        <SlideButton 
+          label="Verksamhet" 
+          isActive={isActive('verksamhet')}
+          isCompleted={isCompleted('verksamhet')}
+          isLocked={isLocked('verksamhet')}
+          onClick={() => handleClick('verksamhet')}
+        />
+        <SlideButton 
+          label="Ägarstruktur" 
+          isActive={isActive('agarstruktur')}
+          isCompleted={isCompleted('agarstruktur')}
+          isLocked={isLocked('agarstruktur')}
+          onClick={() => handleClick('agarstruktur')}
+        />
+        <SlideButton 
+          label="Styrelse" 
+          isActive={isActive('styrelse')}
+          isCompleted={isCompleted('styrelse')}
+          isLocked={isLocked('styrelse')}
+          onClick={() => handleClick('styrelse')}
+        />
+        <SlideButton 
+          label="Övriga data" 
+          isActive={isActive('ovriga-data')}
+          isCompleted={isCompleted('ovriga-data')}
+          isLocked={isLocked('ovriga-data')}
+          onClick={() => handleClick('ovriga-data')}
+        />
+        
+        {/* ============= DOKUMENT ============= */}
+        <GroupHeader title="Dokument" isExpanded={isExpanded} />
+        <SlideButton 
+          label="Bokföringsdata" 
+          isActive={isActive('bokforing-data')}
+          isCompleted={isCompleted('bokforing-data')}
+          isLocked={isLocked('bokforing-data')}
+          onClick={() => handleClick('bokforing-data')}
+        />
+        <SlideButton 
+          label="Företagsdokumentation" 
+          isActive={isActive('foretagsdokumentation')}
+          isCompleted={isCompleted('foretagsdokumentation')}
+          isLocked={isLocked('foretagsdokumentation')}
+          onClick={() => handleClick('foretagsdokumentation')}
+        />
+        <SlideButton 
+          label="Bokföringsunderlag" 
+          isActive={isActive('bokforingsunderlag')}
+          isCompleted={isCompleted('bokforingsunderlag')}
+          isLocked={isLocked('bokforingsunderlag')}
+          onClick={() => handleClick('bokforingsunderlag')}
+        />
+        
+        {/* ============= ANALYS ============= */}
+        <GroupHeader title="Analys" isExpanded={isExpanded} />
+        <SlideButton 
+          label="Resultatanalys" 
+          isActive={isActive('resultatanalys')}
+          isCompleted={isCompleted('resultatanalys')}
+          isLocked={isLocked('resultatanalys')}
+          onClick={() => handleClick('resultatanalys')}
+        />
+        <SlideButton 
+          label="Likviditetsanalys" 
+          isActive={isActive('likviditetsanalys')}
+          isCompleted={isCompleted('likviditetsanalys')}
+          isLocked={isLocked('likviditetsanalys')}
+          onClick={() => handleClick('likviditetsanalys')}
+        />
+        <SlideButton 
+          label="Omsättningsanalys" 
+          isActive={isActive('omsattningsanalys')}
+          isCompleted={isCompleted('omsattningsanalys')}
+          isLocked={isLocked('omsattningsanalys')}
+          onClick={() => handleClick('omsattningsanalys')}
+        />
+        
+        {/* ============= SLUTFÖR ============= */}
+        <GroupHeader title="Slutför" isExpanded={isExpanded} />
+        <SlideButton 
+          label="Riskbedömning" 
+          isActive={isActive('riskbedomning')}
+          isCompleted={isCompleted('riskbedomning')}
+          isLocked={isLocked('riskbedomning')}
+          onClick={() => handleClick('riskbedomning')}
+        />
+        <SlideButton 
+          label="Avtal" 
+          isActive={isActive('avtal')}
+          isCompleted={isCompleted('avtal')}
+          isLocked={isLocked('avtal')}
+          onClick={() => handleClick('avtal')}
+        />
+        <SlideButton 
+          label="Betalning klar" 
+          isActive={isActive('payment-success')}
+          isCompleted={isCompleted('payment-success')}
+          isLocked={isLocked('payment-success')}
+          onClick={() => handleClick('payment-success')}
+        />
+        <SlideButton 
+          label="Support" 
+          isActive={isActive('support')}
+          isCompleted={isCompleted('support')}
+          isLocked={isLocked('support')}
+          onClick={() => handleClick('support')}
+        />
+        
+      </nav>
+      
+      {/* Footer med progress */}
+      {isExpanded && (
+        <div className="p-4 border-t border-gray-200">
+          <div className="text-sm text-gray-600 mb-2">
+            Progress: {completedSlides.length} / 18 slides
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-brand-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${(completedSlides.length / 18) * 100}%` }}
+            />
+          </div>
         </div>
       )}
-
-      {/* Toggle button - centered when collapsed, top-right when expanded */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className={`absolute bg-brand-600 hover:bg-brand-700 text-white rounded-full p-1.5 shadow-lg z-50 transition-all ${
-          isExpanded 
-            ? 'right-2 top-6' 
-            : 'left-1/2 -translate-x-1/2 top-6'
-        }`}
-        aria-label={isExpanded ? "Kollapsa sidebar" : "Expandera sidebar"}
-      >
-        <svg 
-          className={`w-4 h-4 transition-transform duration-300 ${isExpanded ? '' : 'rotate-180'}`}
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-
-      {/* Add top padding when collapsed to make room for centered button */}
-      <div className={isExpanded ? 'p-6' : 'pt-20 px-2 pb-6'}>
-        {isExpanded && <h2 className="text-lg font-bold text-brand-900 mb-4">Navigation</h2>}
-        <nav className="space-y-2">
-          {slides.map((slide) => {
-            // Handle path matching for dynamic routes
-            let isActive;
-            if (slide.requiresCompanyId) {
-              // Match /riskfragor/:companyId pattern with actual /riskfragor/5569...
-              const basePattern = slide.path.split('/:')[0];
-              isActive = currentPath.startsWith(basePattern);
-            } else {
-              isActive = currentPath === slide.path;
-            }
-            
-            const isLocked = slide.locked;
-
-            return (
-              <button
-                key={slide.path}
-                onClick={() => handleNavigation(slide.path, isLocked, slide.requiresCompanyId, slide.requiresCaseId)}
-                disabled={isLocked}
-                title={!isExpanded ? slide.title : ''}
-                className={`
-                  w-full flex items-center gap-3 px-4 py-3 rounded-box text-left transition-all
-                  ${isActive
-                    ? 'bg-gradient-to-r from-brand-500 to-brand-500 text-white shadow-md'
-                    : isLocked
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-white text-brand-900 hover:bg-brand-100 hover:shadow-sm'
-                  }
-                  ${!isExpanded ? 'justify-center' : ''}
-                `}
-              >
-                <span className="flex-shrink-0">
-                  {isLocked ? (
-                    <Icon name="lock" className="w-5 h-5" />
-                  ) : (
-                    <Icon name={slide.icon} className="w-5 h-5" />
-                  )}
-                </span>
-                {isExpanded && (
-                  <span className="text-sm font-medium truncate">{slide.title}</span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
     </aside>
   );
 }

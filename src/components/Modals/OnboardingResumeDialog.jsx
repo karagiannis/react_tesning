@@ -1,164 +1,133 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Trash2, ArrowRight, Plus, Clock, TrendingUp } from 'lucide-react';
-import { useAgreements } from '../../contexts/AgreementContext';
-import { useMasterStateContext } from '../../contexts/MasterStateContext';
-import { fetchWithAuth } from '../../utils/auth';
 
 /**
- * OnboardingResumeDialog - Modal som visas vid login om pågående onboardings finns
+ * OnboardingResumeDialog_v2 - Modal som visas vid login om pågående onboardings finns
  * 
- * Features:
- * - Lista alla företag med progress bar
- * - "Fortsätt"-knapp → Laddar data och navigerar till currentStep
- * - "Radera"-knapp → DELETE endpoint, tar bort från lista
- * - "Ny Onboarding Session"-knapp → Stänger dialog, går till Uppdragsval
- * - Dynamisk lista (uppdateras när företag raderas)
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * SLAV-PATTERN: Denna komponent är en "dum" presentationskomponent
+ * ═══════════════════════════════════════════════════════════════════════════════
  * 
- * Props:
- * - onResume: (data) => void - Callback när användare klickar "Fortsätt"
- * - onNewSession: () => void - Callback när användare klickar "Ny Onboarding Session"
+ * - GÖR INGEN EGEN FETCH
+ * - Tar emot ALL data via props
+ * - Anropar callbacks för alla actions (parent hanterar logik)
+ * - Har endast lokal UI-state (t.ex. deletingId för spinner)
+ * 
+ * PROPS:
+ * ──────────────────────────────────────────────────────────────────────────────
+ * @param {Array} pendingOnboardings - Lista av pågående onboardings från parent
+ *   Varje objekt innehåller:
+ *   - company_id: string
+ *   - case_id: string
+ *   - company_name: string
+ *   - orgnr: string
+ *   - orgnr_formatted: string (t.ex. "556677-8899")
+ *   - last_modified: ISO date string
+ *   - current_step: string (t.ex. "riskfragor")
+ *   - progress: number (0-100)
+ *   - is_locked: boolean (orgnr låst - point of no return passerat)
+ *   - is_completed: boolean (avtal signerat - kan ej raderas)
+ * 
+ * @param {boolean} isLoading - Visar loading spinner om true
+ * @param {string|null} error - Visar felmeddelande om satt
+ * 
+ * CALLBACKS:
+ * ──────────────────────────────────────────────────────────────────────────────
+ * @param {Function} onResume - (companyId, caseId, companyName) => void
+ *   Anropas när användaren klickar "Fortsätt" på en onboarding
+ * 
+ * @param {Function} onDelete - (companyId, caseId) => Promise<void>
+ *   Anropas när användaren bekräftar radering
+ *   Parent ansvarar för API-anrop och att uppdatera pendingOnboardings
+ * 
+ * @param {Function} onStartNew - () => void
+ *   Anropas när användaren klickar "Ny Onboarding Session"
+ * 
+ * @param {Function} onRetry - () => void
+ *   Anropas när användaren klickar "Försök igen" efter fel
+ * 
+ * FLÖDE I PARENT (AuthenticatedApp_v3):
+ * ──────────────────────────────────────────────────────────────────────────────
+ * 
+ * CHECKING_PENDING:
+ *   → fetchPendingOnboardings()
+ *   → setPendingOnboardings(result)
+ *   → setAppState(SHOWING_RESUME)
+ * 
+ * SHOWING_RESUME:
+ *   → Renderar <OnboardingResumeDialog_v2 ... />
+ *   → Väntar på callback
+ * 
+ * onResume(companyId, caseId, companyName):
+ *   → setActiveCase({ companyId, caseId, companyName })
+ *   → setAppState(RESUMING)
+ * 
+ * onDelete(companyId, caseId):
+ *   → API: DELETE /onboarding/delete/{companyId}?onboarding_id={caseId}
+ *   → setPendingOnboardings(prev => prev.filter(...))
+ *   → Om listan tom: onStartNew()
+ * 
+ * onStartNew():
+ *   → Rensa state
+ *   → setAppState(READY)
+ * 
  */
-export default function OnboardingResumeDialog({ onResume, onNewSession }) {
-  const [companies, setCompanies] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [deletingOrgnr, setDeletingOrgnr] = useState(null);
+export default function OnboardingResumeDialog_v2({
+  // Data props
+  pendingOnboardings = [],
+  isLoading = false,
+  error = null,
   
-  // 🆕 2025-12-03: MasterStateContext för att sätta aktiv case
-  const { setActiveCase } = useMasterStateContext();
+  // Callbacks
+  onResume,
+  onDelete,
+  onStartNew,
+  onRetry,
+}) {
+  // ─────────────────────────────────────────────────────────────────────────
+  // LOKAL UI-STATE: Endast för visuell feedback
+  // ─────────────────────────────────────────────────────────────────────────
+  const [deletingId, setDeletingId] = useState(null);
+  // deletingId = "companyId::caseId" när radering pågår
   
-  // 🆕 Hook för att synka subscription-status från server
-  const { loadSubscriptionFromServer, clearSubscription } = useAgreements();
-
-  useEffect(() => {
-    fetchOnboardings();
-  }, []);
-
-  const fetchOnboardings = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        throw new Error('Ingen access token hittades');
-      }
-
-      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
-
-      const response = await fetch(`${API_BASE}/onboarding/list`, {
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      setCompanies(data.companies || []);
-    } catch (err) {
-      console.error('Error fetching onboardings:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // ─────────────────────────────────────────────────────────────────────────
+  // handleDelete - Visa confirm, anropa parent callback
+  // ─────────────────────────────────────────────────────────────────────────
   const handleDelete = async (company) => {
-    if (!confirm(`Är du säker på att du vill radera onboarding för ${company.company_name}?\n\nDetta kommer att permanent radera all data för detta företag.`)) {
+    const confirmMessage = `Är du säker på att du vill radera onboarding för ${company.company_name}?\n\nDetta kommer att permanent radera all data för detta företag.`;
+    
+    if (!confirm(confirmMessage)) {
       return;
     }
-
+    
+    const deleteKey = `${company.company_id}::${company.case_id}`;
+    setDeletingId(deleteKey);
+    
     try {
-      setDeletingOrgnr(company.orgnr);
-      
-      const token = localStorage.getItem('accessToken');
-      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
-
-      const companyId = company.company_id;
-      const caseId = company.case_id || company.onboardingId;
-
-      if (!companyId || !caseId) {
-        throw new Error('company_id eller case_id saknas');
-      }
-
-      const response = await fetch(`${API_BASE}/onboarding/delete/${companyId}?onboarding_id=${caseId}`, {
-        method: 'DELETE',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      // Ta bort från listan
-      setCompanies(prev => prev.filter(c => c.orgnr !== company.orgnr));
-
-      // Om inga företag kvar, gå direkt till ny session
-      if (companies.length === 1) {
-        clearSubscription(); // Rensa subscription för ny session
-        onNewSession();
-      }
+      // Parent hanterar API-anrop och uppdaterar pendingOnboardings
+      await onDelete(company.company_id, company.case_id);
     } catch (err) {
-      console.error('Error deleting onboarding:', err);
+      // Parent kan kasta fel - vi visar det
       alert(`Kunde inte radera onboarding: ${err.message}`);
     } finally {
-      setDeletingOrgnr(null);
+      setDeletingId(null);
     }
   };
-
-  const handleContinue = async (company) => {
-    try {
-      const token = localStorage.getItem('accessToken');
-      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
-
-      const companyId = company.company_id;
-      const caseId = company.case_id || company.onboardingId;
-
-      if (!companyId || !caseId) {
-        alert('company_id eller case_id saknas');
-        return;
-      }
-
-      const response = await fetch(`${API_BASE}/onboarding/resume/${companyId}?onboarding_id=${caseId}`, {
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      
-      // 🆕 Synka subscription-status från server till AgreementContext
-      if (data.subscription) {
-        console.log('📥 Resume: Laddar subscription från server:', data.subscription);
-        loadSubscriptionFromServer(data.subscription);
-      } else {
-        // Rensa eventuellt gammalt subscription-state från tidigare session
-        clearSubscription();
-      }
-      
-      // 🆕 2025-12-03: Uppdatera MasterState med aktiv case
-      // Detta synkar hasRoaringData till Sidebar automatiskt
-      setActiveCase(companyId, caseId);
-      
-      onResume(data);  // Callback till App.jsx
-    } catch (err) {
-      console.error('Error resuming onboarding:', err);
-      alert(`Kunde inte ladda onboarding: ${err.message}`);
-    }
+  
+  // ─────────────────────────────────────────────────────────────────────────
+  // handleContinue - Anropa parent callback med valda IDs
+  // ─────────────────────────────────────────────────────────────────────────
+  const handleContinue = (company) => {
+    onResume(
+      company.company_id,
+      company.case_id || company.onboarding_id,
+      company.company_name
+    );
   };
-
+  
+  // ─────────────────────────────────────────────────────────────────────────
+  // formatDate - Formatera ISO-datum till läsbart format
+  // ─────────────────────────────────────────────────────────────────────────
   const formatDate = (isoString) => {
     if (!isoString) return 'Okänt datum';
     
@@ -176,8 +145,10 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
     }
   };
 
-  // Om loading, visa spinner
-  if (loading) {
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RENDER: Loading state
+  // ═══════════════════════════════════════════════════════════════════════════
+  if (isLoading) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-8">
@@ -190,7 +161,9 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
     );
   }
 
-  // Om error, visa felmeddelande
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RENDER: Error state
+  // ═══════════════════════════════════════════════════════════════════════════
   if (error) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -198,7 +171,7 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
           <h2 className="text-xl font-bold text-red-600 mb-3">Fel vid laddning</h2>
           <p className="text-gray-700 mb-4">{error}</p>
           <button
-            onClick={() => fetchOnboardings()}
+            onClick={onRetry}
             className="w-full px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
           >
             Försök igen
@@ -208,121 +181,159 @@ export default function OnboardingResumeDialog({ onResume, onNewSession }) {
     );
   }
 
-  // Om inga företag, gå direkt till ny session
-  if (companies.length === 0) {
-    clearSubscription(); // Rensa subscription för ny session
-    onNewSession();
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RENDER: Empty state - Inga pending onboardings
+  // ═══════════════════════════════════════════════════════════════════════════
+  //
+  // OBS: Detta borde normalt inte hända eftersom parent (CHECKING_PENDING)
+  //      bara går till SHOWING_RESUME om pendingOnboardings.length > 0.
+  //      Men vi hanterar det ändå för robusthet.
+  //
+  if (pendingOnboardings.length === 0) {
+    // Anropa onStartNew direkt - ingen modal behövs
+    onStartNew();
     return null;
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RENDER: Lista av pågående onboardings
+  // ═══════════════════════════════════════════════════════════════════════════
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
+        
+        {/* ═══════════════════════════════════════════════════════════════════
+            HEADER
+            ═══════════════════════════════════════════════════════════════════ */}
         <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-brand-50 to-brand-100">
           <h2 className="text-2xl font-bold text-brand-900 mb-2">
             Pågående Onboarding
           </h2>
           <p className="text-gray-700">
-            Du har {companies.length} pågående onboarding{companies.length > 1 ? 's' : ''}. 
+            Du har {pendingOnboardings.length} pågående onboarding{pendingOnboardings.length > 1 ? 's' : ''}. 
             Vill du fortsätta eller starta en ny?
           </p>
         </div>
 
-        {/* Lista över företag (scrollable) */}
+        {/* ═══════════════════════════════════════════════════════════════════
+            LISTA (scrollable)
+            ═══════════════════════════════════════════════════════════════════ */}
         <div className="flex-1 overflow-y-auto p-6">
           <div className="space-y-4">
-            {companies.map((company) => (
-              <div
-                key={company.orgnr}
-                className="flex items-center justify-between p-5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
-              >
-                {/* Företagsinfo */}
-                <div className="flex-1 min-w-0 mr-4">
-                  <h3 className="font-semibold text-lg text-gray-900 truncate">
-                    {company.company_name}
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Org.nr: {company.orgnr_formatted}
-                  </p>
-                  
-                  {/* Metadata: Last modified + current step */}
-                  <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      <span>{formatDate(company.last_modified)}</span>
+            {pendingOnboardings.map((company) => {
+              const deleteKey = `${company.company_id}::${company.case_id}`;
+              const isDeleting = deletingId === deleteKey;
+              
+              return (
+                <div
+                  key={company.company_id + '::' + company.case_id}
+                  className="flex items-center justify-between p-5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
+                >
+                  {/* ─────────────────────────────────────────────────────────
+                      Företagsinfo (vänster)
+                      ───────────────────────────────────────────────────────── */}
+                  <div className="flex-1 min-w-0 mr-4">
+                    <h3 className="font-semibold text-lg text-gray-900 truncate">
+                      {company.company_name}
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Org.nr: {company.orgnr_formatted || company.orgnr}
+                    </p>
+                    
+                    {/* Metadata: Last modified + current step */}
+                    <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        <span>{formatDate(company.last_modified)}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <TrendingUp className="w-3 h-3" />
+                        <span className="capitalize">
+                          {company.current_step?.replace(/-/g, ' ') || 'Ej påbörjad'}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <TrendingUp className="w-3 h-3" />
-                      <span className="capitalize">{company.current_step?.replace('-', ' ')}</span>
+
+                    {/* Progress bar */}
+                    <div className="mt-3">
+                      <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                        <span>Progress</span>
+                        <span className="font-semibold">{company.progress || 0}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div
+                          className={`h-2.5 rounded-full transition-all ${
+                            (company.progress || 0) < 30 
+                              ? 'bg-red-500' 
+                              : (company.progress || 0) < 70 
+                              ? 'bg-yellow-500' 
+                              : 'bg-green-500'
+                          }`}
+                          style={{ width: `${company.progress || 0}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  {/* Progress bar */}
-                  <div className="mt-3">
-                    <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
-                      <span>Progress</span>
-                      <span className="font-semibold">{company.progress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className={`h-2.5 rounded-full transition-all ${
-                          company.progress < 30 
-                            ? 'bg-red-500' 
-                            : company.progress < 70 
-                            ? 'bg-yellow-500' 
-                            : 'bg-green-500'
-                        }`}
-                        style={{ width: `${company.progress}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action buttons */}
-                <div className="flex gap-2">
-                  {/* Fortsätt-knapp */}
-                  <button
-                    onClick={() => handleContinue(company)}
-                    className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium shadow-sm"
-                    title="Fortsätt onboarding"
-                  >
-                    Fortsätt
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-
-                  {/* Radera-knapp - ENDAST OM INTE LÅST */}
-                  {!company.is_locked && (
+                  {/* ─────────────────────────────────────────────────────────
+                      Action buttons (höger)
+                      ───────────────────────────────────────────────────────── */}
+                  <div className="flex gap-2">
+                    {/* Fortsätt-knapp */}
                     <button
-                      onClick={() => handleDelete(company)}
-                      disabled={deletingOrgnr === company.orgnr}
-                      className={`p-2 rounded-lg transition-colors ${
-                        deletingOrgnr === company.orgnr
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          : 'text-red-600 hover:bg-red-50'
-                      }`}
-                      title="Radera onboarding"
+                      onClick={() => handleContinue(company)}
+                      disabled={isDeleting}
+                      className="flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Fortsätt onboarding"
                     >
-                      {deletingOrgnr === company.orgnr ? (
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-600"></div>
-                      ) : (
-                        <Trash2 className="w-5 h-5" />
-                      )}
+                      Fortsätt
+                      <ArrowRight className="w-4 h-4" />
                     </button>
-                  )}
+
+                    {/* ─────────────────────────────────────────────────────────
+                        Radera-knapp
+                        ─────────────────────────────────────────────────────────
+                        
+                        OBS: is_locked betyder att ORGNR är låst (point of no 
+                        return passerat), INTE att man inte kan radera!
+                        
+                        Alla pending onboardings kan raderas (soft delete på 
+                        servern sätter status='cancelled').
+                        
+                        Undantag: Om company.is_completed === true (avtal 
+                        signerat) bör vi inte tillåta radering.
+                    */}
+                    {!company.is_completed && (
+                      <button
+                        onClick={() => handleDelete(company)}
+                        disabled={isDeleting}
+                        className={`p-2 rounded-lg transition-colors ${
+                          isDeleting
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'text-red-600 hover:bg-red-50'
+                        }`}
+                        title="Radera onboarding"
+                      >
+                        {isDeleting ? (
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-600"></div>
+                        ) : (
+                          <Trash2 className="w-5 h-5" />
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Footer: Ny Onboarding-knapp */}
+        {/* ═══════════════════════════════════════════════════════════════════
+            FOOTER: Ny Onboarding-knapp
+            ═══════════════════════════════════════════════════════════════════ */}
         <div className="p-6 border-t border-gray-200 bg-gray-50">
           <button
-            onClick={() => {
-              clearSubscription(); // Rensa subscription för ny session
-              onNewSession();
-            }}
+            onClick={onStartNew}
             className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold shadow-md"
           >
             <Plus className="w-5 h-5" />
