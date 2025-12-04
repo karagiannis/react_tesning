@@ -1,45 +1,157 @@
-/**
- * AgreementModal - DUMB COMPONENT (Tic-Tac-Toe Pattern)
- * 
- * ═══════════════════════════════════════════════════════════════════════════════
- * ARKITEKTUR: Ren presentation - all logik finns i AuthenticatedApp.jsx
- * ═══════════════════════════════════════════════════════════════════════════════
- * 
- * PROPS:
- *   - onSelectEngångsavtal: () => void     - Callback när user klickar "Betala"
- *   - onSelectFöretagsavtal: () => void    - Callback för enterprise
- *   - onCancel: () => void                  - Callback för "Avsluta och rensa"
- *   - trialsUsed: number                    - Antal använda gratistester
- *   - trialsMax: number                     - Max antal gratistester (vanligtvis 3)
- *   - isLoading: boolean                    - Visar spinner under API-anrop
- *   - error: string | null                  - Visar felmeddelande
- * 
- * LOGIK SOM HANTERAS AV AuthenticatedApp:
- *   - Stripe checkout initiering
- *   - localStorage pending_payment
- *   - DELETE /onboarding vid cancel
- *   - Redirect till Stripe
- *   - showAgreementModal state
- */
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAgreements } from '../../contexts/AgreementContext';
+import { fetchWithAuth } from '../../utils/auth';
 
-export default function AgreementModal({
-  onSelectEngångsavtal,
-  onSelectFöretagsavtal,
-  onCancel,
-  trialsUsed = 0,
-  trialsMax = 3,
-  isLoading = false,
-  isCancelling = false,
-  error = null
-}) {
-  // Räkna ut om trial limit är nådd
-  const trialLimitReached = trialsUsed >= trialsMax;
-  
+export default function AgreementModal({ show, onClose }) {
+  const navigate = useNavigate();
+  const { oneTimeAgreement, setOneTimeAgreement, clearSubscription } = useAgreements();
+  const [isSigningOneTime, setIsSigningOneTime] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [error, setError] = useState(null);
+  const [trialInfo, setTrialInfo] = useState(null);
+
+  const handleSignOneTimeAgreement = async () => {
+    setIsSigningOneTime(true);
+    setError(null);
+    
+    try {
+      // Get IDs from localStorage
+      const companyId = localStorage.getItem('current_company_id');
+      const onboardingId = localStorage.getItem('onboarding_id');
+      const personnummer = localStorage.getItem('current_personnummer') || '19XXXXXX-XXXX';
+      
+      if (!companyId || !onboardingId) {
+        throw new Error('Saknar company_id eller onboarding_id. Gå tillbaka till Uppdragsval.');
+      }
+      
+      // Call backend to initiate subscription
+      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
+      const response = await fetchWithAuth(
+        `${API_BASE}/onboarding/${companyId}/subscription?onboarding_id=${onboardingId}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'trial',
+            personnummer: personnummer
+          })
+        }
+      );
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        // Check for trial limit reached (402)
+        if (response.status === 402) {
+          const detail = data.detail;
+          setTrialInfo({
+            limitReached: true,
+            used: detail.trials_used,
+            max: detail.trials_max,
+            message: detail.message
+          });
+          throw new Error(detail.message);
+        }
+        throw new Error(data.detail || 'Kunde inte initiera betalning');
+      }
+      
+      console.log('✅ Betalning initierad:', data);
+      
+      // Store trial info for UI
+      if (data.trial_info) {
+        setTrialInfo(data.trial_info);
+      }
+      
+      // Redirect to Stripe payment
+      if (data.payment_url) {
+        // Store company/case info for return from Stripe
+        localStorage.setItem('pending_payment', JSON.stringify({
+          companyId,
+          onboardingId,
+          initiatedAt: new Date().toISOString()
+        }));
+        
+        // Redirect to Stripe checkout
+        window.location.href = data.payment_url;
+        return;
+      }
+      
+      // If no payment URL, something went wrong
+      throw new Error('Ingen betalnings-URL returnerades');
+      
+    } catch (err) {
+      console.error('❌ Error initiating payment:', err);
+      setError(err.message);
+      setIsSigningOneTime(false);
+    }
+  };
+
+  /**
+   * Handle "Avsluta och rensa" - soft delete case and logout
+   */
+  const handleCancelOnboarding = async () => {
+    setIsCancelling(true);
+    setError(null);
+    
+    try {
+      const companyId = localStorage.getItem('current_company_id');
+      const onboardingId = localStorage.getItem('onboarding_id');
+      
+      if (companyId && onboardingId) {
+        // Call DELETE endpoint to soft-delete the case
+        const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
+        const response = await fetchWithAuth(
+          `${API_BASE}/onboarding/delete/${companyId}?onboarding_id=${onboardingId}`,
+          { method: 'DELETE' }
+        );
+        
+        if (!response.ok) {
+          const data = await response.json();
+          console.warn('⚠️ Delete failed:', data.detail);
+          // Continue with logout anyway
+        } else {
+          console.log('✅ Case soft-deleted successfully');
+        }
+      }
+      
+      // Clear subscription state
+      if (clearSubscription) {
+        clearSubscription();
+      }
+      
+      // Clear all onboarding-related localStorage
+      localStorage.removeItem('current_company_id');
+      localStorage.removeItem('onboarding_id');
+      localStorage.removeItem('current_orgnr');
+      localStorage.removeItem('current_company_name');
+      localStorage.removeItem('current_personnummer');
+      localStorage.removeItem('pending_payment');
+      localStorage.removeItem('resume_mode');
+      localStorage.removeItem('form_state');
+      
+      // Clear auth tokens to force logout
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      
+      // Navigate to home (will show login since tokens are cleared)
+      navigate('/');
+      
+      // Force page reload to reset all React state
+      window.location.reload();
+      
+    } catch (err) {
+      console.error('❌ Error cancelling onboarding:', err);
+      setError('Kunde inte avbryta. Försök igen.');
+      setIsCancelling(false);
+    }
+  };
+
+  if (!show) return null;
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-card shadow-2xl p-8 max-w-2xl w-full mx-4">
-        
-        {/* Header */}
         <div className="mb-6">
           <h2 className="text-page-title text-brand-900 mb-2 flex items-center gap-2">
             <svg className="w-icon-md h-icon-md text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,7 +166,6 @@ export default function AgreementModal({
 
         {/* Info boxes */}
         <div className="space-y-4 mb-6">
-          {/* Företagsavtal info */}
           <div className="p-4 bg-brand-50 border-2 border-brand-200 rounded-box">
             <p className="text-sm text-brand-900 mb-2">
               <strong>Företagsanvändare betalar i efterskott efter signerat avtal</strong>
@@ -67,7 +178,6 @@ export default function AgreementModal({
             </p>
           </div>
 
-          {/* Engångsavtal info */}
           <div className="p-4 bg-yellow-50 border-2 border-yellow-300 rounded-box">
             <p className="text-sm text-yellow-900 mb-2">
               <strong>Vill endast testa?</strong>
@@ -85,19 +195,19 @@ export default function AgreementModal({
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              OBS: Max {trialsMax} engångstester per användare. Du har använt {trialsUsed}.
+              OBS: Max 3 engångstester per användare.
             </p>
           </div>
         </div>
 
         {/* Trial limit warning */}
-        {trialLimitReached && (
+        {trialInfo?.limitReached && (
           <div className="mb-4 p-4 bg-orange-50 border-2 border-orange-300 rounded-box">
             <p className="text-sm text-orange-900 font-semibold mb-1 flex items-center gap-1">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              Du har använt alla dina {trialsMax} gratistester
+              Du har använt alla dina {trialInfo.max} gratistester
             </p>
             <p className="text-sm text-orange-800">
               Uppgradera till Enterprise för obegränsade onboardings.
@@ -117,12 +227,14 @@ export default function AgreementModal({
           </div>
         )}
 
-        {/* Action buttons - Normal state */}
-        {!isLoading ? (
+        {/* Action buttons */}
+        {!isSigningOneTime ? (
           <div className="flex flex-col gap-3">
-            {/* Företagsavtal button */}
             <button
-              onClick={onSelectFöretagsavtal}
+              onClick={() => {
+                navigate('/settings?section=firm-sign-agreement');
+                onClose();
+              }}
               className="w-full px-6 py-3 bg-brand-600 text-white rounded-box hover:bg-brand-700 font-semibold flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,12 +243,11 @@ export default function AgreementModal({
               Gå till Inställningar → Teckna företagsavtal
             </button>
 
-            {/* Engångsavtal button */}
             <button
-              onClick={onSelectEngångsavtal}
-              disabled={trialLimitReached}
+              onClick={handleSignOneTimeAgreement}
+              disabled={trialInfo?.limitReached}
               className={`w-full px-6 py-3 rounded-box font-semibold flex items-center justify-center gap-2 ${
-                trialLimitReached 
+                trialInfo?.limitReached 
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : 'bg-yellow-600 text-white hover:bg-yellow-700'
               }`}
@@ -144,15 +255,14 @@ export default function AgreementModal({
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
               </svg>
-              {trialLimitReached 
+              {trialInfo?.limitReached 
                 ? 'Inga fler gratistester tillgängliga'
                 : 'Betala 2 495 kr → Teckna engångsavtal'
               }
             </button>
 
-            {/* Cancel button */}
             <button
-              onClick={onCancel}
+              onClick={handleCancelOnboarding}
               disabled={isCancelling}
               className="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-box hover:bg-gray-300 font-semibold disabled:opacity-50"
             >
@@ -160,7 +270,7 @@ export default function AgreementModal({
             </button>
           </div>
         ) : (
-          /* Loading state - Redirecting to Stripe */
+          /* Redirecting to Stripe */
           <div className="text-center py-6">
             <div className="mb-4 flex justify-center">
               <svg className="animate-spin h-12 w-12 text-brand-600" fill="none" viewBox="0 0 24 24">

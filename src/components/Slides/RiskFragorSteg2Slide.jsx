@@ -14,8 +14,8 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Info, CheckCircle } from 'lucide-react';
 import { getLegalTextsForQuestion } from '../../data/legalTexts';
 import StepIndicator from '../Shared/StepIndicator';
-import useSlideStateController from '../../hooks/useSlideStateController';
-import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
+import useSlideStateController from '../../legacy/hooks/useSlideStateController';
+import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 // BRUTE FORCE CONFIG: Single field stores entire complex object
 const QUESTIONS_CONFIG = {

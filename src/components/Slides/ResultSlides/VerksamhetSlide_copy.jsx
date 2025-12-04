@@ -1,5 +1,5 @@
 import React from 'react';
-import useRoaringData from '../../../hooks/useRoaringData';
+import useRoaringData from '../../../legacy/hooks/useRoaringData';
 
 export default function VerksamhetSlide({ onNext, onBack, hideNavigation = false }) {
   const { data: roaringData, loading, error } = useRoaringData();

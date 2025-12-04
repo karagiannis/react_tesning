@@ -30,7 +30,7 @@ export default function SupportPanel({ onClose }) {
   };
 
   return (
-    <aside className="fixed right-0 top-0 h-full w-96 bg-white border-l border-brand-300 shadow-2xl flex flex-col z-50">
+    <aside className="fixed right-0 top-16 h-[calc(100vh-4rem)] w-96 bg-white border-l border-gray-200 shadow-2xl flex flex-col z-40">
       {/* Header */}
       <div className="bg-brand-600 text-white px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">

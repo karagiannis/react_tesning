@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
+import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
   const { companyId } = useParams();

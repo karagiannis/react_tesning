@@ -25,12 +25,16 @@ export default function LoginSlide({ onNext, onRegister }) {
   const turnstileRef = useRef(null);
   const turnstileWidgetId = useRef(null);
 
-  // Clear any existing auth state when visiting login page
-  useEffect(() => {
-    console.log('🧹 LoginSlide mounted - clearing old auth state');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-  }, []);
+  // NOTE: Vi rensar INTE auth state här längre!
+  // Om användaren har en giltig token borde de inte komma till login-sidan alls
+  // (App.jsx ProtectedRoute hanterar redirect)
+  // Tidigare rensades accessToken/refreshToken här, vilket orsakade buggar
+  // där inloggade användare fick sina tokens raderade vid page reload.
+  // useEffect(() => {
+  //   console.log('🧹 LoginSlide mounted - clearing old auth state');
+  //   localStorage.removeItem('accessToken');
+  //   localStorage.removeItem('refreshToken');
+  // }, []);
 
   // Load Cloudflare Turnstile script
   useEffect(() => {

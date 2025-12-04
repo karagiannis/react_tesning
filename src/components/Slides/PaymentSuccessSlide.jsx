@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAgreements } from '../../contexts/AgreementContext';
-import { useMasterStateContext } from '../../contexts/MasterStateContext';
 import { fetchWithAuth } from '../../utils/auth';
 
 /**
@@ -14,14 +13,14 @@ import { fetchWithAuth } from '../../utils/auth';
  * 2. Vi anropar backend för att bekräfta betalningen
  * 3. Backend uppdaterar case metadata + users_org trial_usage
  * 4. Användaren redirectas tillbaka till riskfrågor
+ * 
+ * TODO: Refaktorera till "dumb" pattern - ta emot callbacks via props
+ *       från AuthenticatedApp istället för egen API-logik
  */
 export default function PaymentSuccessSlide() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { setOneTimeAgreement } = useAgreements();
-  
-  // 🆕 2025-12-03: Använd MasterStateContext istället för direkt localStorage
-  const { confirmPaymentAndFetchRoaring, roaringStatus } = useMasterStateContext();
   
   const [status, setStatus] = useState('confirming'); // 'confirming' | 'success' | 'error'
   const [message, setMessage] = useState('Bekräftar betalning...');
@@ -63,14 +62,9 @@ export default function PaymentSuccessSlide() {
       const data = await response.json();
       console.log('✅ Betalning bekräftad:', data);
       
-      // 🆕 2025-12-03: Använd MasterStateContext för att uppdatera hasRoaringData
-      // Detta triggar polling för roaring_data och uppdaterar Sidebar automatiskt
-      try {
-        await confirmPaymentAndFetchRoaring(sessionId);
-        console.log('🔓 MasterState updated - Output slides will unlock when roaring_data ready');
-      } catch (err) {
-        console.warn('⚠️ Failed to trigger roaring fetch, but payment confirmed:', err);
-      }
+      // TODO: Flytta denna logik till AuthenticatedApp handlePaymentConfirm()
+      // För nu - vi litar på att backend satt has_paid=true i case metadata
+      console.log('🔓 Payment confirmed - Output slides will unlock on next navigation');
       
       // Uppdatera AgreementContext
       setOneTimeAgreement({

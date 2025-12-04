@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { fetchWithAuth } from '../../utils/auth';
 import { useParams } from 'react-router-dom';
 import FileDropZone from '../Shared/FileDropZone';
-import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
+import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 export default function BokforingDataSlide({ onNext, onBack }) {
   const { companyId } = useParams();

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import useSlideStateController from '../../hooks/useSlideStateController';
-import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
+import useSlideStateController from '../../legacy/hooks/useSlideStateController';
+import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 export default function BankRattigheterSlide({ onNext, onBack }) {
   const { companyId } = useParams();

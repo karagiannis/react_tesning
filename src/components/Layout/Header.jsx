@@ -1,152 +1,133 @@
 /**
- * MODIFIED: 2025-11-23
- * PURPOSE: Multi-session localStorage scoping (orgnr-based isolation)
- * CHANGES: Updated handleLogout to preserve activeOnboarding if needed
- * NOTE: Currently clears ALL localStorage on logout - may need refinement
- * REF: CHANGELOG_2025-11-23.md - Problem 5
+ * Header.jsx
+ * 
+ * Huvudheader för Onboarding-appen (tic-tac-toe mönster)
+ * All data kommer via props från AuthenticatedApp
+ * 
+ * Innehåller:
+ * - Logo/titel
+ * - LLM panel toggle
+ * - Dokumentation panel toggle  
+ * - Settings navigation
+ * - User dropdown med logout + cancel
+ * 
+ * Props:
+ *   @param {Object} user - Inloggad användare { email, role }
+ *   @param {Object} activeCase - Aktivt case { companyName, orgnr }
+ *   @param {boolean} isLoading - Om data laddas
+ *   @param {string} loadingMessage - Vad som laddas
+ *   @param {Function} onLogout - Logout callback
+ *   @param {Function} onCancelAndReset - Avsluta och rensa callback (soft delete + logout)
+ *   @param {boolean} isDraftMode - Om vi är i utkastläge
+ *   @param {string} activePanel - Aktiv sidopanel ('llm' | 'documentation' | null)
+ *   @param {Function} onPanelToggle - Callback för att toggla panel
+ *   @param {string} syncStatus - 'idle' | 'saving' | 'saved' | 'conflict' | 'offline'
  */
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Icon from '../Shared/Icon';
+import { 
+  LogOut, 
+  User, 
+  ChevronDown, 
+  ChevronUp, 
+  Settings, 
+  Trash2,
+  Shield,
+  FileText,
+  MessageSquare,
+  Building
+} from 'lucide-react';
 
-export default function Header({ onPanelToggle }) {
-  const [activePanel, setActivePanel] = useState(null);
+export default function Header({ 
+  user,
+  activeCase,
+  isLoading,
+  loadingMessage,
+  onLogout,
+  onCancelAndReset,
+  isDraftMode,
+  activePanel,
+  onPanelToggle,
+  syncStatus = 'idle'
+}) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
 
-  const handlePanelClick = (panel) => {
-    const newPanel = activePanel === panel ? null : panel;
-    setActivePanel(newPanel);
-    onPanelToggle(newPanel);
-  };
-
-  const handleLogout = (e) => {
-    // Prevent multiple calls and event bubbling
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
-    // Check if already logging out (prevent double-click)
-    if (window._isLoggingOut) {
-      console.log('⏳ Logout already in progress...');
-      return;
-    }
-    window._isLoggingOut = true;
-    
-    // Close the menu first
-    setShowUserMenu(false);
-    
-    // FÖRENKLAT: Rensa ALLT i localStorage vid logout
-    localStorage.clear();
-    console.log('✅ localStorage rensat vid logout');
-    
-    // Force full page reload to Hero page to reset all state
-    // Use replace to prevent back-button issues
-    window.location.replace('/');
-  };
-
-  const handleClearAll = async () => {
-    const confirmed = window.confirm(
-      '⚠️ Är du säker på att du vill radera ALLA pågående onboardings?\n\n' +
-      'Detta kommer att:\n' +
-      '• Radera all sparad företagsdata från backend\n' +
-      '• Rensa localStorage helt\n' +
-      '• Logga ut dig från systemet\n\n' +
-      'Denna åtgärd kan INTE ångras!'
-    );
-
-    if (!confirmed) return;
-
-    try {
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        console.warn('Ingen token finns - kan inte radera från backend');
-        localStorage.clear();
-        navigate('/login');
-        return;
-      }
-
-      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
-
-      // Hämta alla företag
-      const listResponse = await fetch(`${API_BASE}/onboarding/list`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (listResponse.ok) {
-        const data = await listResponse.json();
-        
-        // Radera alla cases (backend ändrat till case-based structure)
-        const deletePromises = (data.companies || []).map(company => {
-          // Backend kräver nu company_id + onboarding_id (case_id)
-          const companyId = company.company_id;
-          const caseId = company.case_id || company.onboardingId;
-          
-          return fetch(`${API_BASE}/onboarding/delete/${companyId}?onboarding_id=${caseId}`, {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          });
-        });
-
-        await Promise.all(deletePromises);
-        console.log('✅ Alla företag raderade från backend');
-      } else {
-        console.warn('Kunde inte hämta företag från backend:', listResponse.status);
-      }
-
-      // Rensa localStorage
-      localStorage.clear();
-      console.log('✅ localStorage rensat');
-
-      // Logga ut
-      navigate('/login');
-    } catch (error) {
-      console.error('Error clearing all onboardings:', error);
-      alert(`Kunde inte radera alla onboardings: ${error.message}\n\nFörsök igen eller kontakta support.`);
+  // Sync status indicator
+  const getSyncStatusDisplay = () => {
+    switch (syncStatus) {
+      case 'saving':
+        return (
+          <div className="flex items-center text-sm text-gray-500">
+            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-brand-600 mr-2"></div>
+            <span>Sparar...</span>
+          </div>
+        );
+      case 'saved':
+        return (
+          <div className="flex items-center text-sm text-green-600">
+            <span>✓ Sparat</span>
+          </div>
+        );
+      case 'conflict':
+        return (
+          <div className="flex items-center text-sm text-amber-600">
+            <span>⚠ Konflikt</span>
+          </div>
+        );
+      case 'offline':
+        return (
+          <div className="flex items-center text-sm text-gray-400">
+            <span>Offline</span>
+          </div>
+        );
+      default:
+        return null;
     }
   };
-
-  // Get user info from localStorage or JWT
-  const getUserInfo = () => {
-    const accessToken = localStorage.getItem('accessToken');
-    if (accessToken) {
-      try {
-        const payload = JSON.parse(atob(accessToken.split('.')[1]));
-        return {
-          email: payload.email || 'Användare',
-          role: payload.role || 'user'
-        };
-      } catch {
-        return { email: 'Användare', role: 'user' };
-      }
-    }
-    return { email: 'Användare', role: 'user' };
-  };
-
-  const userInfo = getUserInfo();
 
   return (
-    <header className="bg-white border-b border-brand-200 px-6 py-3 flex items-center justify-between">
-      {/* Logo/Title */}
+    <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shadow-sm">
+      {/* Left side - Logo/Title + Company info */}
       <div className="flex items-center gap-3">
-        <Icon name="building" className="w-icon-md h-icon-md text-brand-600" />
-        <h1 className="text-section-title text-brand-900">Kundonboarding</h1>
+        <Building className="w-6 h-6 text-brand-600" />
+        <h1 className="text-lg font-bold text-brand-900">Kundonboarding</h1>
+        
+        {/* Company info if we have an active case */}
+        {activeCase && (
+          <>
+            <span className="text-gray-300">|</span>
+            <span className="text-sm font-medium text-gray-700">{activeCase.companyName}</span>
+            <span className="text-sm text-gray-400">({activeCase.orgnr})</span>
+          </>
+        )}
+        
+        {/* Draft mode indicator */}
+        {isDraftMode && (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 ml-2">
+            Utkast
+          </span>
+        )}
       </div>
 
-      {/* Icon Menu */}
+      {/* Center/Right - Panel buttons + Status + User menu */}
       <div className="flex items-center gap-4">
-        {/* LLM Assistent */}
+        {/* Sync status */}
+        {getSyncStatusDisplay()}
+        
+        {/* Loading indicator */}
+        {isLoading && (
+          <div className="flex items-center text-sm text-gray-500">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-brand-600 mr-2"></div>
+            <span>{loadingMessage || 'Laddar...'}</span>
+          </div>
+        )}
+
+        {/* LLM Assistent Button */}
         <button
-          onClick={() => handlePanelClick('llm')}
-          className={`px-4 py-2 rounded-box transition-all font-mono font-bold text-base tracking-tight ${
+          onClick={() => onPanelToggle?.('llm')}
+          className={`px-4 py-2 rounded-lg transition-all font-mono font-bold text-sm tracking-tight ${
             activePanel === 'llm'
               ? 'bg-brand-600 text-white'
               : 'bg-brand-100 text-brand-800 hover:bg-brand-200'
@@ -156,125 +137,131 @@ export default function Header({ onPanelToggle }) {
           LLM
         </button>
 
-        {/* Documentation Icon */}
+        {/* Documentation Button */}
         <button
-          onClick={() => handlePanelClick('documentation')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-box transition-all ${
+          onClick={() => onPanelToggle?.('documentation')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
             activePanel === 'documentation'
               ? 'bg-brand-600 text-white'
               : 'bg-brand-100 text-brand-800 hover:bg-brand-200'
           }`}
           title="Dokumentation - Hur programmet används och vilka tester som körs"
         >
-          <Icon name="document" className="w-5 h-5" />
-          <span className="text-sm font-medium">Dokumentation</span>
+          <FileText className="w-5 h-5" />
+          <span className="text-sm font-medium hidden sm:inline">Dokumentation</span>
         </button>
 
-        {/* Support Icon */}
-        <button
-          onClick={() => handlePanelClick('support')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-box transition-all ${
-            activePanel === 'support'
-              ? 'bg-brand-600 text-white'
-              : 'bg-brand-100 text-brand-800 hover:bg-brand-200'
-          }`}
-          title="Support - Chatt och skärmdelning (likt Fortnox)"
-        >
-          <Icon name="question" className="w-5 h-5" />
-          <span className="text-sm font-medium">Support</span>
-        </button>
-
-        {/* Settings Icon */}
+        {/* Settings Button */}
         <button
           onClick={() => navigate('/settings')}
-          className="p-2 rounded-box bg-brand-100 text-brand-800 hover:bg-brand-200 transition-all"
+          className="p-2 rounded-lg bg-brand-100 text-brand-800 hover:bg-brand-200 transition-all"
           title="Inställningar - Firmakonfiguration, användare, prenumeration"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
+          <Settings className="w-5 h-5" />
         </button>
 
         {/* User Profile Dropdown */}
-        <div className="relative ml-4 border-l border-brand-200 pl-4">
-          <button
-            onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 px-3 py-2 rounded-box hover:bg-brand-50 transition-all"
-          >
-            <div className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-semibold">
-              {userInfo.email.charAt(0).toUpperCase()}
-            </div>
-            <div className="text-left hidden sm:block">
-              <div className="text-sm font-medium text-brand-900">{userInfo.email}</div>
-              {userInfo.role === 'admin' && (
-                <div className="text-xs text-brand-600 font-semibold">Administratör</div>
-              )}
-            </div>
-            <svg 
-              className={`w-4 h-4 text-brand-600 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
+        {user && (
+          <div className="relative ml-2 border-l border-gray-200 pl-4">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-all"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-
-          {/* Dropdown Menu */}
-          {showUserMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-box shadow-lg border border-brand-200 py-1 z-50">
-              <button
-                onClick={() => {
-                  setShowUserMenu(false);
-                  navigate('/settings');
-                }}
-                className="w-full text-left px-4 py-2 text-sm text-brand-800 hover:bg-brand-50 flex items-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                Profil
-              </button>
-              {userInfo.role === 'admin' && (
-                <button
-                  onClick={() => {
-                    setShowUserMenu(false);
-                    navigate('/admin');
-                  }}
-                  className="w-full text-left px-4 py-2 text-sm text-brand-800 hover:bg-brand-50 flex items-center gap-2"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                  Admin Dashboard
-                </button>
+              <div className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-semibold text-sm">
+                {(user.email || 'U').charAt(0).toUpperCase()}
+              </div>
+              <div className="text-left hidden sm:block">
+                <div className="text-sm font-medium text-gray-900">{user.email}</div>
+                {user.role === 'admin' && (
+                  <div className="text-xs text-brand-600 font-semibold">Administratör</div>
+                )}
+              </div>
+              {showUserMenu ? (
+                <ChevronUp className="w-4 h-4 text-gray-600" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-gray-600" />
               )}
-              <hr className="my-1 border-brand-200" />
-              <button
-                onClick={() => {
-                  setShowUserMenu(false);
-                  handleClearAll();
-                }}
-                className="w-full text-left px-4 py-2 text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Avsluta (rensar)
-              </button>
-              <button
-                onClick={(e) => handleLogout(e)}
-                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                Logga ut
-              </button>
-            </div>
-          )}
-        </div>
+            </button>
+
+            {/* Dropdown Menu */}
+            {showUserMenu && (
+              <>
+                {/* Backdrop to close menu */}
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setShowUserMenu(false)}
+                />
+                
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                  {/* Profile */}
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      navigate('/settings');
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <User className="w-4 h-4" />
+                    Profil
+                  </button>
+                  
+                  {/* Admin Dashboard (if admin) */}
+                  {user.role === 'admin' && (
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        navigate('/admin');
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-50 flex items-center gap-2"
+                    >
+                      <Shield className="w-4 h-4" />
+                      Admin Dashboard
+                    </button>
+                  )}
+                  
+                  <hr className="my-1 border-gray-200" />
+                  
+                  {/* Cancel and Reset - Rensa all data och börja om */}
+                  {/* ALLTID synlig - användaren ska alltid kunna starta om */}
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      // Bekräftelse innan soft delete
+                      const caseName = activeCase?.companyName || 'pågående onboarding';
+                      const confirmed = window.confirm(
+                        `⚠️ Är du säker på att du vill avsluta och rensa?\n\n` +
+                        `Detta kommer att:\n` +
+                        `• Radera ${caseName}\n` +
+                        `• Rensa all insamlad data\n` +
+                        `• Logga ut dig från systemet\n\n` +
+                        `OBS: ${activeCase ? 'Caset kan återställas av admin vid behov.' : 'Utkastet raderas permanent.'}`
+                      );
+                      if (confirmed) {
+                        onCancelAndReset?.();
+                      }
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-amber-600 hover:bg-amber-50 flex items-center gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Avsluta (rensa)
+                  </button>
+                  
+                  {/* Logout */}
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      onLogout?.();
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logga ut
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Icon from '../Shared/Icon';
 import FileDropZone from '../Shared/FileDropZone';
-import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
+import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 // Inline SVG icons
 const CloudIcon = ({ className }) => (

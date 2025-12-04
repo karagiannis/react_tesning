@@ -1,103 +1,114 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Info, Lock } from 'lucide-react';
-import useSlideStateController from '../../hooks/useSlideStateController';
-import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
 import { searchCompanies } from '../../data/companySearchAPI';
-import { fetchWithAuth } from '../../utils/auth';
-import { migrateTempToRealCaseId } from '../../utils/storageKeys';
-import { API_URL as API_BASE } from '../../config/api';
 
 /**
- * Content Slide 1: Uppdragsval och introduktion
+ * ═══════════════════════════════════════════════════════════════════════════
+ * UppdragsvalsSlide - "DUM" PRESENTATIONSKOMPONENT
+ * ═══════════════════════════════════════════════════════════════════════════
  * 
- * Skapar/uppdaterar onboarding-process via /commit endpoint.
- * API: POST /api/onboarding/commit
+ * REFAKTORERAD: 2025-12-04
  * 
- * 🆕 2025-12-01: Migrerat från /uppdrag till /commit
- * /commit hanterar BÅDA scenarion automatiskt:
- *   A) temp_case_id (från login) → skapar company + case
- *   B) befintligt case_id → uppdaterar services
+ * Denna slide är nu en REN presentationskomponent enligt Tic-Tac-Toe-mönstret:
  * 
- * Features:
- * - Sektionsbaserad layout med numrerade steg
- * - Runda info-knappar (ⓘ) med utfällbar lagtext
- * - 9 tjänsteval som checkboxes
- * - Beräknar uppskattad kostnad
- * - Returnerar onboardingId (UUID) från backend
- * - Sparar och laddar tillbaka val från localStorage (USER-SCOPED)
+ * ┌─────────────────────────────────────────────────────────────────────────┐
+ * │  AuthenticatedApp.jsx (GAME)                                           │
+ * │  ─────────────────────────────────────────────────────────────────────  │
+ * │  • Håller ALL state (formData, activeCase, etc.)                       │
+ * │  • Hanterar ALLA API-anrop                                             │
+ * │  • Hanterar ALL localStorage                                           │
+ * │  • Skickar props NER till slides                                       │
+ * └───────────────────────────────────┬─────────────────────────────────────┘
+ *                                     │
+ *                                     │ Props: formData, onFieldChange, onNext
+ *                                     ▼
+ * ┌─────────────────────────────────────────────────────────────────────────┐
+ * │  UppdragsvalsSlide (SQUARE)                                            │
+ * │  ─────────────────────────────────────────────────────────────────────  │
+ * │  • Tar emot formData via props                                         │
+ * │  • Anropar onFieldChange() vid varje ändring                          │
+ * │  • Anropar onNext() vid "Fortsätt"                                    │
+ * │  • INGEN egen state för data                                          │
+ * │  • INGA API-anrop                                                      │
+ * │  • INGEN localStorage                                                  │
+ * └─────────────────────────────────────────────────────────────────────────┘
  * 
- * UPDATED: 2025-12-01 - Använder /commit istället för /uppdrag
+ * Props:
+ *   @param {Object} formData - Slide-data från AuthenticatedApp
+ *   @param {Function} onFieldChange - (field, value) => void
+ *   @param {Function} onNext - () => void (navigerar till nästa slide)
+ *   @param {Function} onBack - () => void (navigerar bakåt)
+ *   @param {boolean} isLocked - Om orgnr är låst (efter onboarding startats)
+ *   @param {boolean} isLoading - Visar loading-state
+ *   @param {string} error - Felmeddelande att visa
+ *   @param {string} syncStatus - 'idle' | 'saving' | 'saved' | 'conflict' | 'offline'
  */
 
-// Question configuration for useQuestionnaireForm
-const QUESTIONS_CONFIG = {
-  entireForm: { type: 'object', required: false }
+// Service options configuration
+const SERVICE_OPTIONS = [
+  { key: 'lopandeBokforing', label: 'Löpande bokföring', price: '5000 kr/år' },
+  { key: 'arsbokslut', label: 'Årsbokslut', price: '8000 kr/år' },
+  { key: 'deklarationer', label: 'Deklarationer (moms, arbetsgivardeklaration, inkomstdeklaration)', price: '3000 kr/år' },
+  { key: 'loneadministration', label: 'Löneadministration', price: '4000 kr/år' },
+  { key: 'ekonomiskRadgivning', label: 'Ekonomisk rådgivning', price: '10000 kr/år' },
+  { key: 'foretagsregistrering', label: 'Företagsregistrering (nystartad verksamhet)', price: '15000 kr (engångsavgift)' },
+  { key: 'finansiellRapportering', label: 'Finansiell rapportering och analys', price: '6000 kr/år' },
+  { key: 'foretagsforsaljning', label: 'Företagsförsäljning/succession', price: 'Offert' },
+];
+
+// Default form state
+const DEFAULT_FORM_STATE = {
+  services: {
+    lopandeBokforing: false,
+    arsbokslut: false,
+    deklarationer: false,
+    loneadministration: false,
+    ekonomiskRadgivning: false,
+    foretagsregistrering: false,
+    finansiellRapportering: false,
+    foretagsforsaljning: false,
+    annat: '',
+  },
+  orgnr: '',
+  companyName: ''
 };
 
-export default function UppdragsvalsSlide({ onNext }) {
-  // 🆕 MASTER/SLAVE Pattern: MASTER fetches and decides data source
-  const { 
-    initialData, 
-    isReady, 
-    source, 
-    metadata 
-  } = useSlideStateController('uppdragsval');
-
-  // 🆕 SLAVE receives data - auto-save blocked until initialData is applied
-  const {
-    formData,
-    updateQuestion,
-    isValid,
-    errors,
-    isLoading: syncLoading,
-    syncStatus,
-    pushToServer,
-    canEditOrgnr,  // NEW: From state machine - false when is_locked=true
-    initialDataApplied,
-  } = useQuestionnaireForm(
-    'uppdragsval',
-    QUESTIONS_CONFIG,
-    { initialData, isReady, source, caseMetadata: metadata }
-  );
-
-  // Expandable sections state
+export default function UppdragsvalsSlide({ 
+  formData = DEFAULT_FORM_STATE,
+  onFieldChange,
+  onNext,
+  onBack,
+  isLocked = false,
+  isLoading = false,
+  error = null,
+  syncStatus = 'idle'
+}) {
+  // ═══════════════════════════════════════════════════════════════════════
+  // LOKAL UI-STATE (endast för presentation, inte data)
+  // ═══════════════════════════════════════════════════════════════════════
+  
+  // Expanderbara sektioner
   const [expandedSections, setExpandedSections] = useState({
     intro: false,
     sanctions: false,
     orgnr: false,
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  // Extract values from entireForm (simplified: no wrapping)
-  const formState = formData.entireForm || {
-    services: {
-      lopandeBokforing: false,
-      arsbokslut: false,
-      deklarationer: false,
-      loneadministration: false,
-      ekonomiskRadgivning: false,
-      foretagsregistrering: false,
-      finansiellRapportering: false,
-      foretagsforsaljning: false,
-      annat: '',
-    },
-    orgnr: '',
-    companyName: ''
-  };
-  const services = formState.services;
-  const orgnr = formState.orgnr;
-  const companyName = formState.companyName;
-
-  // Autocomplete state (now companyName is defined)
-  const [companyQuery, setCompanyQuery] = useState(companyName || '');
+  // Autocomplete för företagssök (UI-only)
+  const [companyQuery, setCompanyQuery] = useState(formData.companyName || '');
   const [companySuggestions, setCompanySuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
   const autocompleteRef = useRef(null);
 
-  // Close suggestions when clicking outside
+  // Lokal validering för submit-knapp
+  const [localError, setLocalError] = useState(null);
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // EFFECTS - Synka UI med props
+  // ═══════════════════════════════════════════════════════════════════════
+
+  // Stäng suggestions vid klick utanför
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
@@ -108,10 +119,14 @@ export default function UppdragsvalsSlide({ onNext }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Sync companyQuery with formData
+  // Synka companyQuery med formData (om ändras utifrån)
   useEffect(() => {
-    setCompanyQuery(companyName || '');
-  }, [companyName]);
+    setCompanyQuery(formData.companyName || '');
+  }, [formData.companyName]);
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // HANDLERS - Anropar onFieldChange uppåt
+  // ═══════════════════════════════════════════════════════════════════════
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
@@ -120,26 +135,39 @@ export default function UppdragsvalsSlide({ onNext }) {
     }));
   };
 
-  const handleServiceChange = (service, value) => {
-    const updatedServices = { ...services, [service]: value };
-    updateQuestion('entireForm', { ...formState, services: updatedServices });
+  const handleServiceChange = (serviceKey, checked) => {
+    const updatedServices = { 
+      ...formData.services, 
+      [serviceKey]: checked 
+    };
+    onFieldChange('services', updatedServices);
+  };
+
+  const handleAnnatChange = (value) => {
+    const updatedServices = { 
+      ...formData.services, 
+      annat: value 
+    };
+    onFieldChange('services', updatedServices);
   };
 
   const handleOrgnrChange = (value) => {
-    updateQuestion('entireForm', { ...formState, orgnr: value });
+    onFieldChange('orgnr', value);
   };
 
   const handleCompanyNameChange = (value) => {
-    updateQuestion('entireForm', { ...formState, companyName: value });
+    onFieldChange('companyName', value);
   };
 
+  // Företagssök med autocomplete
   const handleCompanySearch = async (query) => {
     setCompanyQuery(query);
     
     if (query.trim() === '') {
       setCompanySuggestions([]);
       setShowSuggestions(false);
-      updateQuestion('entireForm', { ...formState, companyName: '', orgnr: '' });
+      onFieldChange('companyName', '');
+      onFieldChange('orgnr', '');
       return;
     }
     
@@ -149,8 +177,8 @@ export default function UppdragsvalsSlide({ onNext }) {
         const results = await searchCompanies(query, 10);
         setCompanySuggestions(results);
         setShowSuggestions(true);
-      } catch (error) {
-        console.error('Company search failed:', error);
+      } catch (err) {
+        console.error('Company search failed:', err);
         setCompanySuggestions([]);
       } finally {
         setSearchLoading(false);
@@ -163,128 +191,52 @@ export default function UppdragsvalsSlide({ onNext }) {
 
   const handleCompanySelect = (company) => {
     setCompanyQuery(company.name);
-    updateQuestion('entireForm', { ...formState, companyName: company.name, orgnr: company.orgnr });
+    onFieldChange('companyName', company.name);
+    onFieldChange('orgnr', company.orgnr);
     setShowSuggestions(false);
   };
 
-  const handleSubmit = async () => {
-    // Validate at least one service selected
+  // ═══════════════════════════════════════════════════════════════════════
+  // SUBMIT - Validera lokalt och anropa onNext
+  // ═══════════════════════════════════════════════════════════════════════
+
+  const handleSubmit = () => {
+    setLocalError(null);
+
+    // Validera: minst en tjänst vald
+    const services = formData.services || {};
     const hasService = Object.entries(services)
       .filter(([key]) => key !== 'annat')
-      .some(([_, value]) => value === true) || services.annat.trim() !== '';
+      .some(([_, value]) => value === true) || (services.annat || '').trim() !== '';
 
     if (!hasService) {
-      setError('Vänligen välj minst en tjänst');
+      setLocalError('Vänligen välj minst en tjänst');
       return;
     }
 
-    // Hook validation for orgnr
-    if (!isValid) {
-      setError(errors.orgnr || 'Vänligen fyll i alla obligatoriska fält');
+    // Validera: orgnr måste finnas
+    if (!formData.orgnr || formData.orgnr.trim() === '') {
+      setLocalError('Vänligen ange organisationsnummer');
       return;
     }
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Push to server with version control
-      await pushToServer();
-
-      // 🆕 2025-12-01: Använd /commit endpoint istället för /uppdrag
-      // /commit hanterar BÅDA scenarion:
-      //   A) temp_case_id → skapa ny company + case
-      //   B) befintligt case_id → uppdatera services
-      const tempCaseId = localStorage.getItem('temp_case_id');
-      const existingOnboardingId = localStorage.getItem('onboarding_id');
-      
-      // Bestäm case_id att skicka
-      // Prioritet: 1) Befintligt permanent case, 2) Temp case från login
-      const caseIdToSend = existingOnboardingId || tempCaseId || '';
-      
-      // 🚗 Bil-principen: Skicka form_data som opak dict
-      // Backend behandlar det utan att decomponera
-      const requestBody = {
-        company_id: localStorage.getItem('current_company_id') || '',  // 👑 KING
-        case_id: caseIdToSend,
-        orgnr: orgnr.replace('-', ''),
-        company_name: companyName || '',  // snake_case!
-        form_data: {  // 🚗 Opak form data - behåll strukturen intakt
-          services: services,  // ← Behåll services som egen nyckel
-          orgnr: orgnr.replace('-', ''),
-          companyName: companyName || '',
-        }
-      };
-      
-      console.log('📤 POST /onboarding/commit with case_id:', caseIdToSend);
-      console.log('   Is temp:', caseIdToSend.startsWith('temp_'));
-      console.log('   company_id (KING):', requestBody.company_id || '(not set - will be generated)');
-      console.log('   form_data:', requestBody.form_data);
-      
-      const response = await fetchWithAuth(`${API_BASE}/onboarding/commit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || errorData.error || 'Något gick fel');
-      }
-
-      const data = await response.json();
-      
-      // Log om case var nytt eller återanvänt (snake_case from API)
-      if (data.was_temp) {
-        console.log('✨ Transformerade temp → permanent case:', data.onboarding_id);
-      } else if (data.is_new_case === false) {
-        console.log('♻️ Uppdaterade befintligt case:', data.onboarding_id);
-      } else {
-        console.log('✨ Skapade nytt case:', data.onboarding_id);
-      }
-      
-      // 🆕 2025-12-01: Migrera temp-nycklar till permanent case_id
-      if (tempCaseId && data.onboarding_id && tempCaseId !== data.onboarding_id) {
-        const migratedCount = migrateTempToRealCaseId(tempCaseId, data.onboarding_id);
-        console.log(`🔄 Migrated ${migratedCount} temp keys to permanent case: ${data.onboarding_id}`);
-        // Rensa temp_case_id från localStorage - vi har nu permanent case
-        localStorage.removeItem('temp_case_id');
-      }
-      
-      // Store critical data in localStorage for subsequent API calls and UI display
-      localStorage.setItem('onboarding_id', data.onboarding_id);
-      localStorage.setItem('current_company_id', data.company_id);
-      localStorage.setItem('current_company_name', data.company_name || '');
-      localStorage.setItem('current_orgnr', data.orgnr || '');
-      
-      console.log('✅ Uppdragsval sparat:', data);
-      console.log('📋 onboarding_id:', data.onboarding_id);
-      console.log('🏢 company_id:', data.company_id);
-      console.log('🏷️ company_name:', data.company_name);
-      console.log('🔢 orgnr:', data.orgnr);
-      console.log('💰 Uppskattad kostnad:', data.uppskattad_kostnad);
-      console.log('📝 Valda tjänster:', data.selected_services);
-      
-      // Navigate to next step
-      onNext(data);
-    } catch (err) {
-      console.error('❌ Error:', err);
-      // 🆕 Användarvänliga felmeddelanden för vanliga fel
-      if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
-        setError('Ingen internetanslutning. Kontrollera din nätverksanslutning och försök igen.');
-      } else if (err.message.includes('NetworkError') || err.message.includes('network')) {
-        setError('Nätverksfel uppstod. Kontrollera din internetanslutning.');
-      } else if (err.message.includes('timeout') || err.message.includes('Timeout')) {
-        setError('Servern svarar inte. Försök igen om en stund.');
-      } else {
-        setError(err.message);
-      }
-    } finally {
-      setLoading(false);
-    }
+    // Allt OK - låt GAME hantera resten
+    onNext();
   };
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // DERIVED VALUES
+  // ═══════════════════════════════════════════════════════════════════════
+
+  const services = formData.services || DEFAULT_FORM_STATE.services;
+  const orgnr = formData.orgnr || '';
+  const companyName = formData.companyName || '';
+  const displayError = error || localError;
+  const canEditOrgnr = !isLocked;
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════════════════
 
   return (
     <div className="max-w-5xl mx-auto p-8">
@@ -298,36 +250,39 @@ export default function UppdragsvalsSlide({ onNext }) {
         </p>
         
         {/* Sync Status Indicator */}
-        {syncLoading && (
-          <div className="mt-4 p-3 bg-brand-50 border border-brand-200 rounded-box flex items-center gap-2">
+        {syncStatus === 'saving' && (
+          <div className="mt-4 p-3 bg-brand-50 border border-brand-200 rounded-lg flex items-center gap-2">
             <svg className="w-4 h-4 text-brand-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <p className="text-sm text-brand-700">Synkroniserar data...</p>
+            <p className="text-sm text-brand-700">Sparar...</p>
+          </div>
+        )}
+        {syncStatus === 'saved' && (
+          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
+            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <p className="text-sm text-green-700">Sparat</p>
           </div>
         )}
         {syncStatus === 'conflict' && (
-          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-box flex items-center gap-2">
+          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2">
             <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <p className="text-sm text-amber-700">Data har uppdaterats från servern (nyare version)</p>
-          </div>
-        )}
-        {syncStatus === 'restored' && (
-          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-box">
-            <p className="text-sm text-green-700">♻️ Data återställd från servern</p>
+            <p className="text-sm text-amber-700">Data har uppdaterats från servern</p>
           </div>
         )}
         {syncStatus === 'offline' && (
-          <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-box">
+          <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
             <p className="text-sm text-gray-700">📴 Arbetar offline – data sparas lokalt</p>
           </div>
         )}
       </div>
 
-      {/* Section 1: Service Selection (FIRST - Customer-centric!) */}
-      <div className="bg-white rounded-box shadow-md border border-gray-200 p-6 mb-6">
+      {/* Section 1: Service Selection */}
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-6">
         <div className="flex items-center gap-3 mb-5">
           <span className="flex items-center justify-center w-8 h-8 bg-brand-600 text-white rounded-full font-bold text-sm">
             1
@@ -343,23 +298,14 @@ export default function UppdragsvalsSlide({ onNext }) {
 
         {/* Service checkboxes grid */}
         <div className="ml-11 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[
-            { key: 'lopandeBokforing', label: 'Löpande bokföring', price: '5000 kr/år' },
-            { key: 'arsbokslut', label: 'Årsbokslut', price: '8000 kr/år' },
-            { key: 'deklarationer', label: 'Deklarationer (moms, arbetsgivardeklaration, inkomstdeklaration)', price: '3000 kr/år' },
-            { key: 'loneadministration', label: 'Löneadministration', price: '4000 kr/år' },
-            { key: 'ekonomiskRadgivning', label: 'Ekonomisk rådgivning', price: '10000 kr/år' },
-            { key: 'foretagsregistrering', label: 'Företagsregistrering (nystartad verksamhet)', price: '15000 kr (engångsavgift)' },
-            { key: 'finansiellRapportering', label: 'Finansiell rapportering och analys', price: '6000 kr/år' },
-            { key: 'foretagsforsaljning', label: 'Företagsförsäljning/succession', price: 'Offert' },
-          ].map((service) => (
+          {SERVICE_OPTIONS.map((service) => (
             <label
               key={service.key}
-              className="flex items-start gap-3 p-4 border border-gray-300 rounded-box hover:bg-gray-50 cursor-pointer transition-colors"
+              className="flex items-start gap-3 p-4 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
             >
               <input
                 type="checkbox"
-                checked={services[service.key]}
+                checked={services[service.key] || false}
                 onChange={(e) => handleServiceChange(service.key, e.target.checked)}
                 className="mt-1 w-5 h-5 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
               />
@@ -377,17 +323,17 @@ export default function UppdragsvalsSlide({ onNext }) {
             Annat (specificera andra tjänster):
           </label>
           <textarea
-            value={services.annat}
-            onChange={(e) => handleServiceChange('annat', e.target.value)}
+            value={services.annat || ''}
+            onChange={(e) => handleAnnatChange(e.target.value)}
             placeholder="T.ex. Succession till nästa generation, företagsanalys, etc."
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
           />
         </div>
       </div>
 
-      {/* NEW SECTION 1B: Organisationsnummer (moved from Riskfrågor steg 1) */}
-      <div className="bg-white rounded-box shadow-md border border-gray-200 p-6 mb-6">
+      {/* Section 1B: Organisationsnummer */}
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
@@ -402,7 +348,7 @@ export default function UppdragsvalsSlide({ onNext }) {
               Ange ditt företags organisationsnummer för att vi ska kunna hämta företagsdata från offentliga register.
             </p>
 
-            {/* Company name search (autocomplete from Bolagsverket) */}
+            {/* Company name search (autocomplete) */}
             <div className="ml-11 mb-4" ref={autocompleteRef}>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Sök företagsnamn: <span className="text-red-500">*</span>
@@ -414,7 +360,7 @@ export default function UppdragsvalsSlide({ onNext }) {
                   onChange={(e) => handleCompanySearch(e.target.value)}
                   placeholder="Börja skriva företagsnamn..."
                   disabled={!canEditOrgnr}
-                  className={`w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500 ${!canEditOrgnr ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 ${!canEditOrgnr ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   autoComplete="off"
                 />
                 {searchLoading && (
@@ -425,7 +371,7 @@ export default function UppdragsvalsSlide({ onNext }) {
                 
                 {/* Autocomplete suggestions */}
                 {showSuggestions && companySuggestions.length > 0 && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-box shadow-lg max-h-60 overflow-y-auto">
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                     {companySuggestions.map((company, index) => (
                       <button
                         key={index}
@@ -442,13 +388,13 @@ export default function UppdragsvalsSlide({ onNext }) {
                 )}
                 
                 {showSuggestions && companySuggestions.length === 0 && !searchLoading && companyQuery.length >= 2 && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-box shadow-lg p-4 text-center text-gray-500">
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500">
                     Inga företag hittades
                   </div>
                 )}
               </div>
               <p className="text-sm text-gray-500 mt-1">
-                ✅ Söker i 2.9 miljoner företag från Bolagsverket (uppdateras veckovis)
+                ✅ Söker i 2.9 miljoner företag från Bolagsverket
               </p>
             </div>
 
@@ -464,7 +410,7 @@ export default function UppdragsvalsSlide({ onNext }) {
                 placeholder="NNNNNN-NNNN"
                 maxLength={11}
                 readOnly={companyName !== '' || !canEditOrgnr}
-                className={`w-full px-4 py-2 border border-gray-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-brand-500 ${
+                className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 ${
                   (companyName !== '' || !canEditOrgnr) ? 'bg-gray-100 cursor-not-allowed' : ''
                 }`}
               />
@@ -477,13 +423,10 @@ export default function UppdragsvalsSlide({ onNext }) {
                   'Format: 556903-8671 (bindestreck valfritt)'
                 )}
               </p>
-              {errors.orgnr && (
-                <p className="text-sm text-red-500 mt-1">{errors.orgnr}</p>
-              )}
             </div>
           </div>
 
-          {/* Info button - Why we collect this */}
+          {/* Info button */}
           <button
             onClick={() => toggleSection('orgnr')}
             className="flex-shrink-0 ml-4 p-2 text-brand-600 hover:bg-brand-50 rounded-full transition-colors"
@@ -495,35 +438,22 @@ export default function UppdragsvalsSlide({ onNext }) {
 
         {/* Expandable explanation */}
         {expandedSections.orgnr && (
-          <div className="mt-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-box ml-11">
-            <h3 className="font-semibold text-gray-900 mb-2">Arkitektonisk anledning:</h3>
+          <div className="mt-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-lg ml-11">
+            <h3 className="font-semibold text-gray-900 mb-2">Varför behöver vi detta?</h3>
             <p className="text-sm text-gray-700 mb-3">
-              Organisationsnummer krävs för att skapa företagsmappen i backend-systemet 
-              (<code className="bg-gray-100 px-1 py-0.5 rounded">data/{'{user_id}'}/{'{orgnr}'}/</code>). 
-              Detta möjliggör:
+              Organisationsnummer krävs för att identifiera ditt företag och hämta data från offentliga register.
             </p>
-            <ul className="list-disc list-inside text-sm text-gray-700 space-y-1 ml-4">
-              <li><strong>"Parkera och Avsluta"</strong> – Spara onboarding-session för senare</li>
-              <li><strong>Partiell datainsamling</strong> – Spara progress även om användaren avbryter</li>
-              <li><strong>Strukturerad datalagring</strong> – Alla företagsdata organiseras per orgnr</li>
-            </ul>
-            
             <h3 className="font-semibold text-gray-900 mt-4 mb-2">Juridisk grund (Penningtvättslagen):</h3>
             <p className="text-sm text-gray-700">
               Organisationsnummer är grunden för identifiering av juridisk person enligt 
-              <strong> 3 kap. 7 § PTL</strong> och <strong>01FS 2024:20, 3 kap. 3 §</strong>.
-            </p>
-            <p className="text-sm text-gray-700 mt-2">
-              Vi måste kontrollera identiteten genom oberoende källor (Bolagsverket = 
-              offentligt register = tillförlitlig källa). Denna kontroll måste dokumenteras 
-              och sparas, oavsett om vi känner kunden sedan tidigare.
+              <strong> 3 kap. 7 § PTL</strong>.
             </p>
           </div>
         )}
       </div>
 
-      {/* Section 2: Why we need to ask tough questions */}
-      <div className="bg-white rounded-box shadow-md border border-gray-200 p-6 mb-6">
+      {/* Section 2: Why tough questions */}
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
@@ -535,56 +465,33 @@ export default function UppdragsvalsSlide({ onNext }) {
               </h2>
             </div>
             <p className="text-gray-700 leading-relaxed ml-11">
-              För att vi ska kunna ta oss an ditt uppdrag måste vi säkerställa att byrån uppfyller <strong>penningtvättslagstiftningens krav</strong> vid 
-              antagandet av nya kunder. Processen efterlever tillsynsmyndighetens krav där verksamhetsutövaren (byrån) 
-              är skyldig att redovisa hur man säkerställt att byrån inte gör sig skyldig till penningtvätt.
-            </p>
-            <p className="text-gray-700 leading-relaxed ml-11 mt-3">
-              <strong>Länsstyrelserna</strong>, som ansvarar för tillsynen, har skärpt kraven på redovisningsbyråer 
-              och utfärdar <span className="text-red-600 font-semibold">sanktionsavgifter på hundratusentals kronor</span> vid 
-              bristande efterlevnad.
+              För att vi ska kunna ta oss an ditt uppdrag måste vi säkerställa att byrån uppfyller <strong>penningtvättslagstiftningens krav</strong>.
             </p>
           </div>
           
-          {/* Info button - Fortnox style (no background, brand colors) */}
           <button
             onClick={() => toggleSection('intro')}
             className="ml-4 flex-shrink-0 w-10 h-10 flex items-center justify-center transition-colors group"
-            aria-label="Visa lagtext"
           >
             <Info className="w-6 h-6 text-brand-600 group-hover:text-brand-700" />
           </button>
         </div>
 
-        {/* Expandable legal text - YELLOW/AMBER consistently */}
         {expandedSections.intro && (
           <div className="ml-11 mt-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
             <p className="text-sm italic text-gray-700 mb-3">
               <strong>Viktiga juridiska aspekter:</strong>
             </p>
             <ul className="text-sm italic text-gray-600 space-y-2 list-disc list-inside">
-              <li>
-                Även ageranden som <strong>inte sker i ett bevisat syfte att tvätta pengar</strong> kan bestraffas
-              </li>
-              <li>
-                Även agerande som <strong>inte har med illegal egendom att göra</strong> kan bestraffas enligt lagen, 
-                om de anses vara tillräckligt riskfyllda
-              </li>
-              <li>
-                Brottet <strong>näringspenningtvätt enligt 1 kap. 7§ penningtvättsbrottlagen</strong> innebär att ett 
-                så kallat klandervärt risktagande gjorts straffbart
-              </li>
+              <li>Även ageranden som inte sker i syfte att tvätta pengar kan bestraffas</li>
+              <li>Brottet näringspenningtvätt enligt 1 kap. 7§ innebär att risktagande gjorts straffbart</li>
             </ul>
-            <p className="text-xs text-gray-500 mt-3">
-              Källa: <em>Penningtvätt och Straffrätten - EN HANDBOK</em>, sid. 44<br />
-              Marie Wallin, jurist, tidigare kammaråklagare och specialist inom finansiell brottslighet
-            </p>
           </div>
         )}
       </div>
 
       {/* Section 3: Sanctions */}
-      <div className="bg-white rounded-box shadow-md border border-gray-200 p-6 mb-8">
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
@@ -596,76 +503,35 @@ export default function UppdragsvalsSlide({ onNext }) {
               </h2>
             </div>
             <p className="text-gray-700 leading-relaxed ml-11">
-              Länsstyrelserna har möjlighet att utfärda <strong>sanktionsavgifter</strong> som kan uppgå till 
-              mycket stora belopp för både företag och enskilda personer.
+              Länsstyrelserna kan utfärda <strong>sanktionsavgifter</strong> upp till <span className="text-red-600 font-semibold">en miljon euro</span>.
             </p>
           </div>
           
-          {/* Info button - Fortnox style (no background, brand colors) */}
           <button
             onClick={() => toggleSection('sanctions')}
             className="ml-4 flex-shrink-0 w-10 h-10 flex items-center justify-center transition-colors group"
-            aria-label="Visa lagtext"
           >
             <Info className="w-6 h-6 text-brand-600 group-hover:text-brand-700" />
           </button>
         </div>
 
-        {/* Expandable legal text - YELLOW/AMBER consistently */}
         {expandedSections.sanctions && (
           <div className="ml-11 mt-4 p-4 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
             <p className="text-sm font-semibold text-gray-800 mb-3">
               7 kap. 14-16 §§ PTL (2017:630) – Sanktionsavgift
             </p>
-            
-            <div className="space-y-4 text-sm italic text-gray-700">
-              <div>
-                <p className="font-semibold text-gray-800 not-italic mb-1">14 § Juridisk person</p>
-                <p>
-                  Sanktionsavgiften för en verksamhetsutövare som är en juridisk person ska som högst fastställas till det högsta av:
-                </p>
-                <ol className="list-decimal list-inside ml-4 mt-2 space-y-1">
-                  <li>två gånger den vinst som verksamhetsutövaren gjort till följd av överträdelsen, om beloppet går att fastställa, eller</li>
-                  <li>ett belopp i kronor motsvarande <strong className="text-red-600 not-italic">en miljon euro</strong>.</li>
-                </ol>
-                <p className="mt-2">
-                  Sanktionsavgiften får inte bestämmas till ett lägre belopp än <strong className="not-italic">5 000 kronor</strong>.
-                </p>
-              </div>
-
-              <div>
-                <p className="font-semibold text-gray-800 not-italic mb-1">15 § Fysisk person</p>
-                <p>
-                  Sanktionsavgiften för en fysisk person ska som högst fastställas till det högsta av:
-                </p>
-                <ol className="list-decimal list-inside ml-4 mt-2 space-y-1">
-                  <li>två gånger den vinst som den fysiska personen gjort till följd av överträdelsen, om beloppet går att fastställa, eller</li>
-                  <li>ett belopp i kronor motsvarande <strong className="text-red-600 not-italic">en miljon euro</strong>.</li>
-                </ol>
-              </div>
-
-              <div>
-                <p className="font-semibold text-gray-800 not-italic mb-1">16 § Bedömning av avgiftens storlek</p>
-                <p>
-                  När sanktionsavgiftens storlek fastställs, ska särskild hänsyn tas till sådana omständigheter som anges i 13 § 
-                  samt till den juridiska eller fysiska personens <strong className="not-italic">finansiella ställning</strong> och, 
-                  om det går att fastställa, den vinst som gjorts till följd av överträdelsen.
-                </p>
-              </div>
-            </div>
-
-            <p className="text-xs text-gray-500 mt-3 not-italic">
-              Avgiften tillfaller staten.
+            <p className="text-sm text-gray-700">
+              Sanktionsavgiften för en juridisk person ska som högst fastställas till 
+              <strong className="text-red-600"> en miljon euro</strong> eller två gånger vinsten.
             </p>
           </div>
         )}
       </div>
-      
 
       {/* Error message */}
-      {error && (
+      {displayError && (
         <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
-          <p className="text-red-800 font-medium">{error}</p>
+          <p className="text-red-800 font-medium">{displayError}</p>
         </div>
       )}
 
@@ -676,10 +542,10 @@ export default function UppdragsvalsSlide({ onNext }) {
         </p>
         <button
           onClick={handleSubmit}
-          disabled={loading}
-          className="px-8 py-3 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-400 text-white font-semibold rounded-box shadow-md transition-colors"
+          disabled={isLoading}
+          className="px-8 py-3 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-400 text-white font-semibold rounded-lg shadow-md transition-colors"
         >
-          {loading ? 'Sparar...' : 'Fortsätt →'}
+          {isLoading ? 'Sparar...' : 'Fortsätt →'}
         </button>
       </div>
 

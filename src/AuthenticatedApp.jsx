@@ -82,8 +82,8 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 // =============================================================================
 // LAYOUT
 // =============================================================================
-import Sidebar_v2 from './components/Layout/Sidebar_v2_explicit';
-import Header_v2 from './components/Layout/Header_v2';
+import Sidebar_v2 from './components/Layout/Sidebar';
+import Header from './components/Layout/Header';
 
 // =============================================================================
 // SLIDES
@@ -111,7 +111,20 @@ import SupportSlide from './components/Slides/SupportSlide';
 // =============================================================================
 // MODALS
 // =============================================================================
-import OnboardingResumeDialog from './components/Modals/OnboardingResumeDialog_v2';
+import OnboardingResumeDialog from './components/Modals/OnboardingResumeDialogV2';
+import MergeConflictModal from './components/Modals/MergeConflictModal';
+import AgreementModal from './components/Modals/AgreementModal';
+
+// =============================================================================
+// PANELS
+// =============================================================================
+import LLMPanel from './components/Panels/LLMPanel';
+
+// =============================================================================
+// HOOKS
+// =============================================================================
+import useVersionSync from './hooks/useVersionSync';
+import useAutoSave from './hooks/useAutoSave';
 
 // =============================================================================
 // SLIDE ORDER - Explicit lista
@@ -196,7 +209,7 @@ const AppState = {
 // =============================================================================
 // API BASE URL
 // =============================================================================
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 // =============================================================================
 // 🔑 STORAGE KEY BUILDER - localStorage nycklar
@@ -390,6 +403,26 @@ export default function AuthenticatedApp() {
   // ─────────────────────────────────────────────────────────────────────────
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [syncStatus, setSyncStatus] = useState('idle');
+  // syncStatus: 'idle' | 'saving' | 'saved' | 'conflict' | 'offline'
+  
+  const [activePanel, setActivePanel] = useState(null);
+  // activePanel: null | 'llm' | 'documentation'
+  
+  // ─────────────────────────────────────────────────────────────────────────
+  // Agreement/Payment State - Stripe integration
+  // ─────────────────────────────────────────────────────────────────────────
+  const [showAgreementModal, setShowAgreementModal] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState('idle');
+  // paymentStatus: 'idle' | 'initiating' | 'redirecting' | 'confirmed' | 'error'
+  const [hasAgreement, setHasAgreement] = useState(false);
+  
+  // ─────────────────────────────────────────────────────────────────────────
+  // Version Conflict State (multi-user editing)
+  // ─────────────────────────────────────────────────────────────────────────
+  const [showConflictModal, setShowConflictModal] = useState(false);
+  const [conflictInfo, setConflictInfo] = useState(null);
+  // conflictInfo = { your_version, server_version, conflicting_slides, message }
   
   // ─────────────────────────────────────────────────────────────────────────
   // Draft/Permanent Mode - Hanterar localStorage-nycklar
@@ -822,9 +855,24 @@ export default function AuthenticatedApp() {
     // ]
     //
     fetchPendingOnboardings: async () => {
-      const response = await api.fetch('/onboarding/pending');
+      // Använd /onboarding/active-cases som returnerar:
+      // { success: true, active_cases: [...], count: N }
+      const response = await api.fetch('/onboarding/active-cases');
       if (response.ok) {
-        return await response.json();
+        const data = await response.json();
+        // Transformera till det format som frontend förväntar sig
+        // active-cases returnerar: { case_id, company_id, company_name, orgnr, current_slide, ... }
+        // Frontend förväntar sig: { company_id, company_name, onboarding_id (=case_id), ... }
+        const activeCases = data.active_cases || [];
+        return activeCases.map(c => ({
+          company_id: c.company_id,
+          company_name: c.company_name,
+          orgnr: c.orgnr,
+          onboarding_id: c.case_id,  // Frontend använder onboarding_id
+          current_slide: c.current_slide,
+          updated_at: c.updated_at,
+          services: c.services,
+        }));
       }
       return [];
     },
@@ -840,6 +888,20 @@ export default function AuthenticatedApp() {
       throw new Error('Kunde inte hämta metadata');
     },
   };
+
+  // ===========================================================================
+  // 🔄 AUTO-SAVE HOOK - Sparar till localStorage vid varje formData-ändring
+  // ===========================================================================
+  //
+  // Använder debounce (300ms) för att undvika för många skrivningar.
+  // Uppdaterar också localVersion timestamp för version conflict detection.
+  //
+  const { lastSaved, isSaving, forceSave } = useAutoSave({
+    formData,
+    storage,
+    debounceMs: 300,
+    enabled: appState === AppState.READY, // Bara i READY state
+  });
 
   // ===========================================================================
   // 🎯 STATE MACHINE - switch-case!
@@ -1000,7 +1062,29 @@ export default function AuthenticatedApp() {
         
         setIsLoading(false);
         
-        if (currentTabSession && currentTabSession.sessionId) {
+        // ─────────────────────────────────────────────────────────────────
+        // VIKTIG VALIDERING: Kontrollera att sessionen tillhör DENNA användare!
+        // ─────────────────────────────────────────────────────────────────
+        // SessionID har formatet: onboarding::{companyId}::{caseId}::{userId}
+        // eller: onboarding::draft::{tempCaseId}::{userId}
+        // Vi måste verifiera att userId i sessionId matchar den inloggade användaren.
+        //
+        let sessionBelongsToUser = false;
+        if (currentTabSession && currentTabSession.sessionId && user?.id) {
+          const sessionParts = currentTabSession.sessionId.split('::');
+          const sessionUserId = sessionParts[sessionParts.length - 1];
+          sessionBelongsToUser = (sessionUserId === user.id);
+          
+          if (!sessionBelongsToUser) {
+            console.warn('[INIT] ⚠️ Session belongs to different user!');
+            console.warn(`[INIT]   Session user: ${sessionUserId}`);
+            console.warn(`[INIT]   Current user: ${user.id}`);
+            console.log('[INIT] Clearing stale tab session...');
+            storage.clearCurrentTabSession();
+          }
+        }
+        
+        if (currentTabSession && currentTabSession.sessionId && sessionBelongsToUser) {
           // ═══════════════════════════════════════════════════════════════
           // PAGE RELOAD: Användaren var mitt i en session i denna flik
           // ═══════════════════════════════════════════════════════════════
@@ -1011,7 +1095,7 @@ export default function AuthenticatedApp() {
           // ═══════════════════════════════════════════════════════════════
           // NY LOGIN/NY FLIK: Ingen aktiv session - kolla pending på servern
           // ═══════════════════════════════════════════════════════════════
-          console.log('[INIT] No tab session found');
+          console.log('[INIT] No valid tab session found for this user');
           console.log('[INIT] → Going to CHECKING_PENDING');
           setAppState(AppState.CHECKING_PENDING);
         }
@@ -1143,6 +1227,16 @@ export default function AuthenticatedApp() {
           storage.setCompletedSlides(metadata.completedSlides || []);
           storage.setActiveCase(activeCase);
           
+          // 📌 SPARA SERVER VERSION för conflict detection
+          const serverVersion = metadata?.metadata?.version || metadata?.version || 0;
+          const versionStorageKey = `case_${activeCase.companyId}_${activeCase.onboardingId}_version`;
+          localStorage.setItem(versionStorageKey, JSON.stringify({
+            version: serverVersion,
+            timestamp: new Date().toISOString(),
+            syncedFromServer: true
+          }));
+          console.log('[RESUMING] 📌 Sparade server version:', serverVersion);
+          
           // Uppdatera React state
           setFormData(metadata.formData || {});
           setCompletedSlides(metadata.completedSlides || []);
@@ -1176,9 +1270,12 @@ export default function AuthenticatedApp() {
           }
           
           // Sätt tab session för denna flik
+          // OBS: activeCase kan ha antingen caseId (från handleConfirmCompanySelection)
+          // eller onboardingId (från handleResumeChoice) - hantera båda!
+          const caseOrOnboardingId = activeCase.caseId || activeCase.onboardingId;
           const sessionId = storage.buildSessionId(
             activeCase.companyId,
-            activeCase.onboardingId,
+            caseOrOnboardingId,
             user?.id
           );
           storage.setCurrentTabSession({
@@ -1272,6 +1369,17 @@ export default function AuthenticatedApp() {
               setCompletedSlides(metadata.completedSlides);
               storage.setCompletedSlides(metadata.completedSlides);
             }
+            
+            // 📌 SPARA SERVER VERSION för conflict detection
+            const serverVersion = metadata?.metadata?.version || metadata?.version || 0;
+            const caseId = savedActiveCase.caseId || savedActiveCase.onboardingId;
+            const versionStorageKey = `case_${savedActiveCase.companyId}_${caseId}_version`;
+            localStorage.setItem(versionStorageKey, JSON.stringify({
+              version: serverVersion,
+              timestamp: new Date().toISOString(),
+              syncedFromServer: true
+            }));
+            console.log('[RESTORE] 📌 Sparade server version:', serverVersion);
             
             // 🔓 Synka roaring_data för att låsa upp företagsdata-slides
             if (metadata.roaring_data) {
@@ -1710,6 +1818,282 @@ export default function AuthenticatedApp() {
   };
   
   // ─────────────────────────────────────────────────────────────────────────
+  // AGREEMENT/PAYMENT HANDLERS - Stripe integration
+  // ─────────────────────────────────────────────────────────────────────────
+  //
+  // Dessa handlers anropas av AgreementModal (som är en dum komponent)
+  // All logik för att initiera Stripe-betalning finns här.
+  //
+  
+  /**
+   * handleSelectEngångsavtal - Initiera Stripe checkout
+   * 
+   * Anropas av AgreementModal när användaren klickar "Teckna engångsavtal"
+   * 
+   * FLÖDE:
+   * 1. POST /onboarding/{company_id}/subscription
+   * 2. Få tillbaka payment_url
+   * 3. Spara pending_payment i localStorage
+   * 4. Redirect till Stripe checkout
+   * 5. Stripe redirectar tillbaka till /payment-callback (server)
+   * 6. Server redirectar till /riskfragor-steg2
+   */
+  const handleSelectEngångsavtal = async () => {
+    console.log('[PAYMENT] Initiating Stripe checkout...');
+    setPaymentStatus('initiating');
+    
+    try {
+      const companyId = activeCase?.companyId;
+      const caseId = activeCase?.caseId;
+      const personnummer = formData['riskfragor']?.personnummer || '';
+      
+      if (!companyId || !caseId) {
+        throw new Error('Saknar company_id eller case_id. Gå tillbaka till Uppdragsval.');
+      }
+      
+      const response = await api.post(
+        `/onboarding/${companyId}/subscription?onboarding_id=${caseId}`,
+        {
+          type: 'trial',
+          personnummer: personnummer
+        }
+      );
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        
+        // Kolla om trial-limit är nådd (402)
+        if (response.status === 402) {
+          throw new Error(errorData.detail?.message || 'Du har använt alla gratistester. Uppgradera till Enterprise.');
+        }
+        throw new Error(errorData.detail || 'Kunde inte initiera betalning');
+      }
+      
+      const data = await response.json();
+      console.log('[PAYMENT] Stripe session created:', data);
+      
+      if (!data.payment_url) {
+        throw new Error('Ingen betalnings-URL returnerades från servern');
+      }
+      
+      // Spara info för return från Stripe
+      localStorage.setItem('pending_payment', JSON.stringify({
+        companyId,
+        caseId,
+        slideKey: 'riskfragor',
+        initiatedAt: new Date().toISOString()
+      }));
+      
+      setPaymentStatus('redirecting');
+      
+      // Redirect till Stripe checkout
+      window.location.href = data.payment_url;
+      
+    } catch (err) {
+      console.error('[PAYMENT] Error:', err);
+      setPaymentStatus('error');
+      setError(err.message);
+      // Stäng INTE modalen vid fel så användaren kan försöka igen
+    }
+  };
+  
+  /**
+   * handleSelectFöretagsavtal - För framtida implementation
+   * 
+   * Enterprise-avtal faktureras separat och behöver ingen Stripe checkout.
+   */
+  const handleSelectFöretagsavtal = async () => {
+    console.log('[PAYMENT] Enterprise agreement selected');
+    // TODO: Implementera enterprise-flöde
+    // För nu, stäng modalen och visa ett meddelande
+    setShowAgreementModal(false);
+    alert('Företagsavtal kräver kontakt med säljteamet. Vi kontaktar dig inom kort!');
+  };
+  
+  /**
+   * handleCancelOnboarding - Avbryt och rensa allt
+   * 
+   * Anropas av AgreementModal när användaren klickar "Avsluta och rensa"
+   */
+  const handleCancelOnboarding = async () => {
+    console.log('[PAYMENT] User cancelled - cleaning up...');
+    setShowAgreementModal(false);
+    
+    try {
+      const companyId = activeCase?.companyId;
+      const caseId = activeCase?.caseId;
+      
+      if (companyId && caseId) {
+        // Soft-delete case på server
+        await api.delete(`/onboarding/delete/${companyId}?onboarding_id=${caseId}`);
+        console.log('[PAYMENT] Case soft-deleted on server');
+      }
+    } catch (err) {
+      console.warn('[PAYMENT] Failed to delete case on server:', err);
+      // Fortsätt med cleanup ändå
+    }
+    
+    // Använd befintlig logout-funktion
+    await handleLogoutAndReset();
+  };
+  
+  // ─────────────────────────────────────────────────────────────────────────
+  // checkVersionConflict - Kolla om server har nyare version
+  // ─────────────────────────────────────────────────────────────────────────
+  //
+  // ANROPAS FRÅN: handleSidebarClick, handleNext (vid slide-navigation)
+  // RETURNERAR: true om konflikt finns (visa modal), false om OK att fortsätta
+  //
+  // STRATEGI:
+  //   1. Hämta metadata.version från server
+  //   2. Jämför med localStorage localVersion
+  //   3. Om server > local → setShowConflictModal(true)
+  //   4. Returnera true (blockera navigation)
+  //
+  const checkVersionConflict = async () => {
+    // Skippa check om vi inte har ett aktivt ärende
+    if (!activeCase?.companyId || !activeCase?.caseId) {
+      console.log('[VERSION-CHECK] Ingen aktiv case, skippar conflict check');
+      return false;
+    }
+    
+    // Skippa check om vi är i draft-mode (ingen server-data ännu)
+    if (isDraftMode) {
+      console.log('[VERSION-CHECK] Draft mode, skippar conflict check');
+      return false;
+    }
+    
+    try {
+      console.log('[VERSION-CHECK] Kontrollerar server-version...');
+      
+      // 1. Hämta server metadata
+      const serverMeta = await api.fetchMetadata(activeCase.companyId, activeCase.caseId);
+      const serverVersion = serverMeta?.metadata?.version || serverMeta?.version || 0;
+      const serverLastModified = serverMeta?.metadata?.lastModified || serverMeta?.metadata?.last_modified || serverMeta?.lastModified;
+      const serverModifiedBy = serverMeta?.metadata?.updated_by || serverMeta?.updated_by || 'Annan användare';
+      
+      // 2. Hämta local version från localStorage
+      // Format: { version: N, timestamp: ISO-string }
+      const storageKey = `case_${activeCase.companyId}_${activeCase.caseId}_version`;
+      const localVersionStr = localStorage.getItem(storageKey);
+      const localVersionObj = localVersionStr ? JSON.parse(localVersionStr) : { version: 0 };
+      const localVersion = localVersionObj.version || 0;
+      
+      console.log('[VERSION-CHECK] Server version:', serverVersion, 'Local version:', localVersion);
+      console.log('[VERSION-CHECK] Server lastModified:', serverLastModified, 'by:', serverModifiedBy);
+      
+      // 3. Jämför version integers (Git-liknande!)
+      // Server > Local = någon annan har sparat efter att vi laddade
+      if (serverVersion > localVersion) {
+        console.log('[VERSION-CHECK] ⚠️ KONFLIKT! Server version', serverVersion, '> Local version', localVersion);
+        
+        // Hämta conflicting_slides info (vilka slides ändrades)
+        const services = serverMeta?.metadata?.services || serverMeta?.services || {};
+        const conflictingSlides = Object.entries(services)
+          .filter(([_, data]) => data?.modified_at)
+          .map(([slideId, data]) => ({
+            slide_id: slideId,
+            modified_by: data.modified_by || 'unknown',
+            modified_at: data.modified_at
+          }));
+        
+        // Spara konflikt-info för modal
+        setConflictInfo({
+          your_version: localVersion,
+          server_version: serverVersion,
+          server_last_modified: serverLastModified,
+          modified_by: serverModifiedBy,
+          conflicting_slides: conflictingSlides,
+          message: `Servern har version ${serverVersion}, du har version ${localVersion}. Ändrad av ${serverModifiedBy}.`
+        });
+        setShowConflictModal(true);
+        
+        return true; // Konflikt hittad - blockera navigation
+      }
+      
+      console.log('[VERSION-CHECK] ✅ Ingen konflikt (server:', serverVersion, 'local:', localVersion, ')');
+      return false;
+      
+    } catch (err) {
+      console.error('[VERSION-CHECK] ❌ Fel vid version-check:', err);
+      // Vid nätverksfel, fortsätt utan att blockera
+      return false;
+    }
+  };
+  
+  // ─────────────────────────────────────────────────────────────────────────
+  // handleConflictReload - Ladda om från server
+  // ─────────────────────────────────────────────────────────────────────────
+  const handleConflictReload = async () => {
+    console.log('[CONFLICT] Användaren valde: Ladda om från server');
+    setShowConflictModal(false);
+    setConflictInfo(null);
+    
+    try {
+      // Hämta färsk data från server
+      const serverMeta = await api.fetchMetadata(activeCase.companyId, activeCase.caseId);
+      const serverVersion = serverMeta?.metadata?.version || serverMeta?.version || 0;
+      
+      // Uppdatera lokal state med server-data
+      if (serverMeta?.form_data) {
+        setFormData(serverMeta.form_data);
+        storage.setFormData(serverMeta.form_data);
+      }
+      
+      if (serverMeta?.completed_slides) {
+        setCompletedSlides(serverMeta.completed_slides);
+        storage.setCompletedSlides(serverMeta.completed_slides);
+      }
+      
+      // Uppdatera local version (samma key som checkVersionConflict använder)
+      const storageKey = `case_${activeCase.companyId}_${activeCase.caseId}_version`;
+      localStorage.setItem(storageKey, JSON.stringify({
+        version: serverVersion,
+        timestamp: new Date().toISOString(),
+        syncedFromServer: true
+      }));
+      
+      console.log('[CONFLICT] ✅ Data laddad från server, version:', serverVersion);
+      
+    } catch (err) {
+      console.error('[CONFLICT] ❌ Fel vid reload:', err);
+      setError('Kunde inte ladda om från server');
+    }
+  };
+  
+  // ─────────────────────────────────────────────────────────────────────────
+  // handleConflictForceSave - Skriv över serverns data
+  // ─────────────────────────────────────────────────────────────────────────
+  const handleConflictForceSave = async () => {
+    console.log('[CONFLICT] Användaren valde: Skriv över server');
+    setShowConflictModal(false);
+    
+    const serverVersion = conflictInfo?.server_version || 0;
+    
+    // Uppdatera local version till server+1 (vi "tar ägandeskap")
+    const storageKey = `case_${activeCase.companyId}_${activeCase.caseId}_version`;
+    localStorage.setItem(storageKey, JSON.stringify({
+      version: serverVersion + 1,
+      timestamp: new Date().toISOString(),
+      forcedOverwrite: true
+    }));
+    
+    setConflictInfo(null);
+    
+    // TODO: Push till server med force-flagga
+    console.log('[CONFLICT] ✅ Lokal version uppdaterad till', serverVersion + 1, '(force overwrite)');
+  };
+  
+  // ─────────────────────────────────────────────────────────────────────────
+  // handleConflictCancel - Avbryt
+  // ─────────────────────────────────────────────────────────────────────────
+  const handleConflictCancel = () => {
+    console.log('[CONFLICT] Användaren valde: Avbryt');
+    setShowConflictModal(false);
+    setConflictInfo(null);
+  };
+  
+  // ─────────────────────────────────────────────────────────────────────────
   // handleSidebarClick - Navigering via sidebar
   // ─────────────────────────────────────────────────────────────────────────
   //
@@ -1720,29 +2104,45 @@ export default function AuthenticatedApp() {
   // I tic-tac-toe har vi history för att "gå tillbaka" till tidigare drag.
   // Här har vi navigationHistory för att se hur användaren navigerade.
   //
-  const handleSidebarClick = (slideKey) => {
+  // 🔒 VERSION-CHECK: Kontrollerar server-version INNAN navigation!
+  //
+  const handleSidebarClick = async (slideKey) => {
     const slide = SLIDE_ORDER.find(s => s.key === slideKey);
-    if (slide) {
-      // Lägg till i historik (för audit trail och eventuell undo)
-      setNavigationHistory(prev => [...prev, {
-        slideKey,
-        timestamp: Date.now(),
-        action: 'sidebar_click',
-        fromSlide: currentSlideKey,
-      }]);
-      
-      // Uppdatera tab session (för page reload)
-      const sessionId = isDraftMode 
-        ? `onboarding::draft::${tempCaseId}::${user?.id}`
-        : storage.buildSessionId(activeCase?.companyId, activeCase?.caseId, user?.id);
-      storage.setCurrentTabSession({
-        sessionId,
-        currentSlide: slideKey,
-      });
-      
-      setCurrentSlideKey(slideKey);
-      navigate(slide.path);
+    if (!slide) return;
+    
+    // ─────────────────────────────────────────────────────────────────────
+    // 🔒 STEG 1: Kolla om server har nyare version
+    // ─────────────────────────────────────────────────────────────────────
+    const hasConflict = await checkVersionConflict();
+    if (hasConflict) {
+      console.log('[SIDEBAR] ⚠️ Konflikt - blockerar navigation till', slideKey);
+      return; // Modal visas automatiskt av checkVersionConflict
     }
+    
+    // ─────────────────────────────────────────────────────────────────────
+    // STEG 2: Lägg till i historik (för audit trail och eventuell undo)
+    // ─────────────────────────────────────────────────────────────────────
+    setNavigationHistory(prev => [...prev, {
+      slideKey,
+      timestamp: Date.now(),
+      action: 'sidebar_click',
+      fromSlide: currentSlideKey,
+    }]);
+    
+    // Uppdatera tab session (för page reload)
+    // OBS: activeCase kan ha antingen caseId (från handleConfirmCompanySelection)
+    // eller onboardingId (från handleResumeChoice) - hantera båda!
+    const caseOrOnboardingId = activeCase?.caseId || activeCase?.onboardingId;
+    const sessionId = isDraftMode 
+      ? `onboarding::draft::${tempCaseId}::${user?.id}`
+      : storage.buildSessionId(activeCase?.companyId, caseOrOnboardingId, user?.id);
+    storage.setCurrentTabSession({
+      sessionId,
+      currentSlide: slideKey,
+    });
+    
+    setCurrentSlideKey(slideKey);
+    navigate(slide.path);
   };
   
   // ─────────────────────────────────────────────────────────────────────────
@@ -1752,33 +2152,29 @@ export default function AuthenticatedApp() {
   // ANROPAS FRÅN: Sidebar_v2 för varje SlideButton
   // RETURNERAR: true om sliden är låst, false om tillgänglig
   //
-  // REGLER:
-  // 1. Första sliden är alltid tillgänglig
-  // 2. En slide är låst om föregående slide inte är klar
-  // 3. FÖRETAGSDATA-slides kräver OCKSÅ att roaringData finns
-  //    (användaren måste ha betalat för extern API-anrop)
+  // REGLER (UPPDATERADE 2025-01-XX):
+  // 1. Alla vanliga slides (GRUNDINFO, RISKBEDÖMNING, DOKUMENT) är ALLTID ÖPPNA
+  // 2. ENDAST FÖRETAGSDATA-slides är låsta - dessa kräver roaringData
+  //    (användaren måste ha betalat för extern API-anrop till Skatteverket/Bolagsverket)
+  //
+  // FÖRKLARING:
+  // Tidigare var slides låsta tills föregående slide var klar. Detta ändrades
+  // för att ge användaren frihet att hoppa mellan sektioner. Bara extern data
+  // (som kostar pengar att hämta) kräver betalning först.
   //
   const handleSidebarLock = (slideKey) => {
-    const slideIndex = SLIDE_ORDER.findIndex(s => s.key === slideKey);
-    
-    // Första sliden är alltid tillgänglig
-    if (slideIndex === 0) return false;
-    
     // ─────────────────────────────────────────────────────────────────────
-    // 🔒 FÖRETAGSDATA-SLIDES: Kräver roaringData (betalat API-anrop)
+    // 🔒 ENDAST FÖRETAGSDATA-SLIDES: Kräver roaringData (betalat API-anrop)
     // ─────────────────────────────────────────────────────────────────────
     const ROARING_DEPENDENT_SLIDES = ['verksamhet', 'agarstruktur', 'styrelse', 'ovriga-data'];
     
     if (ROARING_DEPENDENT_SLIDES.includes(slideKey)) {
-      // Om roaringData saknas → LÅST (även om föregående är klar)
-      if (!roaringData) {
-        return true;
-      }
+      // Om roaringData saknas → LÅST
+      return !roaringData;
     }
     
-    // Annars: kolla om föregående är klar
-    const prevSlide = SLIDE_ORDER[slideIndex - 1];
-    return !completedSlides.includes(prevSlide.key);
+    // Alla andra slides är ALLTID tillgängliga
+    return false;
   };
   
   // ─────────────────────────────────────────────────────────────────────────
@@ -1794,41 +2190,203 @@ export default function AuthenticatedApp() {
   // JÄMFÖR MED TIC-TAC-TOE:
   // Detta är som att lägga ett drag - vi uppdaterar state och "går vidare"
   //
-  const handleNext = () => {
+  // 🔒 VERSION-CHECK: Kontrollerar server-version INNAN navigation!
+  //
+  // 🆕 2025-12-04: handleNext gör nu API-anrop baserat på currentSlideKey!
+  //
+  // SLIDE → ENDPOINT MAPPNING:
+  //   uppdragsval     → /onboarding/commit (skapar case på server)
+  //   riskfragor      → /onboarding/slide/riskfragor
+  //   riskfragor-steg2→ /onboarding/slide/riskfragor-steg2
+  //   ... etc
+  //
+  // FLÖDE:
+  //   1. Kolla version conflict
+  //   2. POST slide-data till server
+  //   3. Uppdatera localStorage + state
+  //   4. Navigera till nästa slide
+  //
+  const handleNext = async () => {
     const currentIndex = SLIDE_ORDER.findIndex(s => s.key === currentSlideKey);
     
     // Kolla att det finns en nästa slide
-    if (currentIndex < SLIDE_ORDER.length - 1) {
-      // 1. Markera nuvarande som klar (immutable update!)
-      const newCompleted = [...completedSlides, currentSlideKey];
-      setCompletedSlides(newCompleted);
-      storage.setCompletedSlides(newCompleted);
-      
-      // 2. Spara formData till localStorage
-      storage.setFormData(formData);
-      
-      // 3. Lägg till i navigation history
-      const nextSlide = SLIDE_ORDER[currentIndex + 1];
-      setNavigationHistory(prev => [...prev, {
-        slideKey: nextSlide.key,
-        timestamp: Date.now(),
-        action: 'next',
-        fromSlide: currentSlideKey,
-      }]);
-      
-      // 4. Uppdatera tab session (för page reload)
-      const sessionId = isDraftMode 
-        ? `onboarding::draft::${tempCaseId}::${user?.id}`
-        : storage.buildSessionId(activeCase?.companyId, activeCase?.caseId, user?.id);
-      storage.setCurrentTabSession({
-        sessionId,
-        currentSlide: nextSlide.key,
-      });
-      
-      // 5. Navigera
-      setCurrentSlideKey(nextSlide.key);
-      navigate(nextSlide.path);
+    if (currentIndex >= SLIDE_ORDER.length - 1) return;
+    
+    // ─────────────────────────────────────────────────────────────────────
+    // 🔒 STEG 0: Kolla om server har nyare version (om inte draft mode)
+    // ─────────────────────────────────────────────────────────────────────
+    if (!isDraftMode) {
+      const hasConflict = await checkVersionConflict();
+      if (hasConflict) {
+        console.log('[NEXT] ⚠️ Konflikt - blockerar navigation');
+        return; // Modal visas automatiskt av checkVersionConflict
+      }
     }
+    
+    // ─────────────────────────────────────────────────────────────────────
+    // 💳 STEG 0.5: Agreement check för riskfragor (Steg 1)
+    // ─────────────────────────────────────────────────────────────────────
+    //
+    // När användaren trycker "Nästa" på riskfragor slide:
+    // - Om de inte har betalat (hasAgreement = false), visa AgreementModal
+    // - Användaren väljer betalningsmetod → Stripe → callback → fortsätt
+    // - Om de HAR betalat (hasAgreement = true), fortsätt normalt
+    //
+    if (currentSlideKey === 'riskfragor' && !hasAgreement && !isDraftMode) {
+      console.log('[NEXT] 💳 Riskfrågor utan avtal - visar AgreementModal');
+      setShowAgreementModal(true);
+      return; // Blockera navigation tills betalning är klar
+    }
+    
+    // ─────────────────────────────────────────────────────────────────────
+    // 📤 STEG 1: PUSH TILL SERVER
+    // ─────────────────────────────────────────────────────────────────────
+    //
+    // Varje slide har sin egen endpoint. AuthenticatedApp vet vilken slide
+    // som är aktiv och anropar rätt endpoint.
+    //
+    setIsLoading(true);
+    setSyncStatus('saving');
+    setError(null);
+    
+    try {
+      const slideData = formData[currentSlideKey] || {};
+      
+      // ═══════════════════════════════════════════════════════════════════
+      // SPECIAL CASE: uppdragsval (POINT OF NO RETURN)
+      // ═══════════════════════════════════════════════════════════════════
+      if (currentSlideKey === 'uppdragsval') {
+        // Detta hanteras av wrappern i Route - den anropar handleConfirmCompanySelection
+        // Se Route path="/uppdragsval" nedan
+        console.log('[NEXT] uppdragsval - handled by wrapper, should not reach here');
+        setIsLoading(false);
+        setSyncStatus('idle');
+        return;
+      }
+      
+      // ═══════════════════════════════════════════════════════════════════
+      // NORMAL CASE: Alla andra slides
+      // ═══════════════════════════════════════════════════════════════════
+      //
+      // POST /api/onboarding/slide/{slide_key}
+      //
+      // Body:
+      // {
+      //   case_id: "uuid",
+      //   company_id: "orgnr_prefix",
+      //   slide_data: { ... all form data for this slide ... }
+      // }
+      //
+      // Response:
+      // {
+      //   success: true,
+      //   version: 5,  // New server version
+      //   slide_key: "riskfragor"
+      // }
+      //
+      if (!isDraftMode && activeCase?.caseId) {
+        console.log(`[NEXT] 📤 Pushing slide data: ${currentSlideKey}`);
+        
+        const response = await api.fetch(`/onboarding/slide/${currentSlideKey}`, {
+          method: 'POST',
+          body: JSON.stringify({
+            case_id: activeCase.caseId,
+            company_id: activeCase.companyId,
+            slide_data: slideData,
+          }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          
+          // Hantera version conflict
+          if (response.status === 409) {
+            console.log('[NEXT] ⚠️ Server returnerade 409 - version conflict');
+            setConflictInfo(errorData);
+            setShowConflictModal(true);
+            setIsLoading(false);
+            setSyncStatus('conflict');
+            return;
+          }
+          
+          throw new Error(errorData.detail || `HTTP ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log(`[NEXT] ✅ Server saved slide, new version: ${result.version}`);
+        
+        // Uppdatera lokal version
+        const versionKey = `case_${activeCase.companyId}_${activeCase.caseId}_version`;
+        localStorage.setItem(versionKey, JSON.stringify({
+          version: result.version,
+          timestamp: new Date().toISOString(),
+          lastSlide: currentSlideKey,
+        }));
+        
+      } else {
+        // Draft mode - bara spara lokalt
+        console.log(`[NEXT] 📝 Draft mode - only saving to localStorage`);
+      }
+      
+      setSyncStatus('saved');
+      
+    } catch (err) {
+      console.error('[NEXT] Error pushing to server:', err);
+      setError(`Kunde inte spara: ${err.message}`);
+      setSyncStatus('idle');
+      setIsLoading(false);
+      return; // Avbryt navigation vid fel
+    }
+    
+    // ─────────────────────────────────────────────────────────────────────
+    // ✅ STEG 2: Uppdatera state och navigera
+    // ─────────────────────────────────────────────────────────────────────
+    
+    // 1. Markera nuvarande som klar (immutable update!)
+    const newCompleted = [...completedSlides, currentSlideKey];
+    setCompletedSlides(newCompleted);
+    storage.setCompletedSlides(newCompleted);
+    
+    // 2. Spara formData till localStorage
+    storage.setFormData(formData);
+    
+    // 3. Uppdatera local version timestamp
+    localStorage.setItem('localVersion', JSON.stringify({
+      version: (JSON.parse(localStorage.getItem('localVersion') || '{}')?.version || 0) + 1,
+      timestamp: new Date().toISOString(),
+      lastSlide: currentSlideKey
+    }));
+    
+    // 4. Lägg till i navigation history
+    const nextSlide = SLIDE_ORDER[currentIndex + 1];
+    setNavigationHistory(prev => [...prev, {
+      slideKey: nextSlide.key,
+      timestamp: Date.now(),
+      action: 'next',
+      fromSlide: currentSlideKey,
+    }]);
+    
+    // 5. Uppdatera tab session (för page reload)
+    // OBS: activeCase kan ha antingen caseId (från handleConfirmCompanySelection)
+    // eller onboardingId (från handleResumeChoice) - hantera båda!
+    const caseOrOnboardingId = activeCase?.caseId || activeCase?.onboardingId;
+    const sessionId = isDraftMode 
+      ? `onboarding::draft::${tempCaseId}::${user?.id}`
+      : storage.buildSessionId(activeCase?.companyId, caseOrOnboardingId, user?.id);
+    storage.setCurrentTabSession({
+      sessionId,
+      currentSlide: nextSlide.key,
+    });
+    
+    // 6. Navigera
+    setCurrentSlideKey(nextSlide.key);
+    navigate(nextSlide.path);
+    
+    // 7. Reset loading state
+    setIsLoading(false);
+    
+    // 8. Reset sync status efter kort delay (så användaren ser "Saved")
+    setTimeout(() => setSyncStatus('idle'), 1500);
   };
   
   // ─────────────────────────────────────────────────────────────────────────
@@ -1854,9 +2412,12 @@ export default function AuthenticatedApp() {
       }]);
       
       // Uppdatera tab session (för page reload)
+      // OBS: activeCase kan ha antingen caseId (från handleConfirmCompanySelection)
+      // eller onboardingId (från handleResumeChoice) - hantera båda!
+      const caseOrOnboardingId = activeCase?.caseId || activeCase?.onboardingId;
       const sessionId = isDraftMode 
         ? `onboarding::draft::${tempCaseId}::${user?.id}`
-        : storage.buildSessionId(activeCase?.companyId, activeCase?.caseId, user?.id);
+        : storage.buildSessionId(activeCase?.companyId, caseOrOnboardingId, user?.id);
       storage.setCurrentTabSession({
         sessionId,
         currentSlide: prevSlide.key,
@@ -1891,6 +2452,8 @@ export default function AuthenticatedApp() {
   //   newFormData[slideKey][field] = value;  // Uppdatera
   //   setFormData(newFormData);              // Spara
   //
+  // OBS: localStorage-sparning hanteras av useAutoSave (debounced!)
+  //
   const handleFieldChange = (slideKey, field, value) => {
     // 1. Lägg till i form history (för audit trail och undo)
     setFormHistory(prev => [...prev, {
@@ -1910,9 +2473,9 @@ export default function AuthenticatedApp() {
       },
     };
     
-    // 3. Uppdatera React state OCH localStorage
+    // 3. Uppdatera React state
+    //    (localStorage-sparning sker automatiskt via useAutoSave med debounce)
     setFormData(newFormData);
-    storage.setFormData(newFormData);
   };
   
   // ─────────────────────────────────────────────────────────────────────────
@@ -1985,23 +2548,37 @@ export default function AuthenticatedApp() {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* ─────────────────────────────────────────────────────────────────
-            HEADER - Med logout-knappar
+            HEADER - Med LLM, Dokumentation, Settings, Logout, Cancel
             ─────────────────────────────────────────────────────────────────
             
             Props:
-            - onLogout: Normal logout (bevarar data)
-            - onLogoutAndReset: "Avsluta & rensa" (tar bort all draft-data)
-            - isDraftMode: Visar vilken logout-typ som är relevant
-            - user: Användarinfo för att visa namn
+            - user: Användarinfo { email, role }
+            - activeCase: Case-info { companyName, orgnr }
+            - isLoading: Visa spinner
+            - onLogout: Logout callback
+            - onCancelAndReset: Soft delete + logout callback
+            - isDraftMode: Visar "Utkast" badge
+            - activePanel: Vilken panel som är aktiv (llm/documentation)
+            - onPanelToggle: Toggle panel callback
+            - syncStatus: Spara-status (idle/saving/saved/conflict)
         */}
-        <Header_v2 
-          onLogout={handleLogout}
-          onLogoutAndReset={handleLogoutAndReset}
-          isDraftMode={isDraftMode}
+        <Header 
           user={user}
+          activeCase={activeCase}
+          isLoading={isLoading}
+          loadingMessage="Laddar..."
+          onLogout={handleLogout}
+          onCancelAndReset={handleCancelOnboarding}
+          isDraftMode={isDraftMode}
+          activePanel={activePanel}
+          onPanelToggle={(panel) => setActivePanel(activePanel === panel ? null : panel)}
+          syncStatus={syncStatus}
         />
         
-        <main className="flex-1 overflow-auto">
+        {/* Main content area - skjuts åt vänster när panel är öppen */}
+        <main className={`flex-1 overflow-auto transition-all duration-300 ${
+          activePanel ? 'mr-96' : ''
+        }`}>
           {/* ─────────────────────────────────────────────────────────────────
               ROUTES - Explicit, varje slide får sina props
               ─────────────────────────────────────────────────────────────────
@@ -2047,15 +2624,39 @@ export default function AuthenticatedApp() {
                 
                 Detta är "point of no return" - efter detta sparas all data
                 permanent under company_id istället för draft.
+                
+                🆕 REFAKTORERAD 2025-12-04:
+                - Sliden är nu "dum" och anropar bara onNext()
+                - onNext för DENNA slide är handleUppdragsvalsNext som:
+                  1. Hämtar companyName/orgnr från formData['uppdragsval']
+                  2. Anropar handleConfirmCompanySelection()
+                  3. Den i sin tur navigerar vidare efter commit
             */}
             <Route path="/uppdragsval" element={
               <UppdragsvalsSlide 
-                formData={formData['uppdragsval']}
-                isDraftMode={isDraftMode}
-                onNext={handleNext}
+                formData={formData['uppdragsval'] || {}}
+                onNext={() => {
+                  // WRAPPER: När sliden kallar onNext(), 
+                  // triggar vi /commit med data från formData
+                  const uppdragsvalsData = formData['uppdragsval'] || {};
+                  const orgnr = uppdragsvalsData.orgnr || '';
+                  const companyName = uppdragsvalsData.companyName || '';
+                  
+                  if (!orgnr) {
+                    console.error('[UPPDRAGSVAL] Ingen orgnr i formData!');
+                    setError('Organisationsnummer saknas');
+                    return;
+                  }
+                  
+                  // Anropa /commit - den navigerar vidare efter success
+                  handleConfirmCompanySelection(null, companyName, orgnr);
+                }}
                 onBack={handleBack}
                 onFieldChange={(field, value) => handleFieldChange('uppdragsval', field, value)}
-                onConfirmCompanySelection={handleConfirmCompanySelection}
+                isLocked={!isDraftMode}
+                isLoading={isLoading}
+                error={error}
+                syncStatus={syncStatus}
               />
             } />
             
@@ -2254,6 +2855,83 @@ export default function AuthenticatedApp() {
           onDelete={handleDeleteOnboarding}
           onStartNew={handleStartNew}
           onRetry={handleRetryPending}
+        />
+      )}
+      
+      {/* ─────────────────────────────────────────────────────────────────────
+          MergeConflictModal - Visas vid versionskonflikter (multi-user editing)
+          ─────────────────────────────────────────────────────────────────────
+          
+          NÄR: showConflictModal === true (sätts i checkVersionConflict)
+          VAD: Modal med val: ladda om från server / skriv över / avbryt
+          
+          CALLBACKS:
+            - onReload() → handleConflictReload → Hämta data från server
+            - onForceSave() → handleConflictForceSave → Markera lokal som auktoritativ
+            - onCancel() → handleConflictCancel → Stäng modal
+      */}
+      {showConflictModal && (
+        <MergeConflictModal
+          conflictInfo={conflictInfo}
+          onReload={handleConflictReload}
+          onForceSave={handleConflictForceSave}
+          onCancel={handleConflictCancel}
+        />
+      )}
+      
+      {/* ─────────────────────────────────────────────────────────────────────
+          AgreementModal - Visas när användaren ska välja betalningsmetod
+          ─────────────────────────────────────────────────────────────────────
+          
+          NÄR: showAgreementModal === true (sätts i handleNext för riskfragor)
+          VAD: Modal med val: Engångsavtal / Företagsavtal / Avbryt
+          
+          CALLBACKS:
+            - onSelectEngångsavtal() → handleSelectEngångsavtal → Stripe checkout
+            - onSelectFöretagsavtal() → handleSelectFöretagsavtal → Enterprise flow
+            - onCancel() → handleCancelOnboarding → Stäng modal, gå tillbaka
+          
+          PROPS:
+            - trialsUsed/trialsMax: Visar hur många gratis onboardings som är kvar
+            - isLoading: Visar spinner under paymentStatus === 'initiating'
+            - error: Visar felmeddelande om Stripe-anrop misslyckas
+      */}
+      {showAgreementModal && (
+        <AgreementModal
+          onSelectEngångsavtal={handleSelectEngångsavtal}
+          onSelectFöretagsavtal={handleSelectFöretagsavtal}
+          onCancel={handleCancelOnboarding}
+          trialsUsed={user?.trialsUsed || 0}
+          trialsMax={user?.trialsMax || 3}
+          isLoading={paymentStatus === 'initiating'}
+          error={error}
+        />
+      )}
+      
+      {/* ─────────────────────────────────────────────────────────────────────
+          LLMPanel - Kontextmedveten AI-assistent
+          ─────────────────────────────────────────────────────────────────────
+          
+          NÄR: activePanel === 'llm'
+          VAD: Sidopanel med AI-chatt som har tillgång till all insamlad data
+          
+          PROPS:
+            - currentSlide: Vilken slide användaren är på
+            - formData: All insamlad data för kontextmedvetna svar
+            - companyInfo: Företagsinfo { companyName, orgnr }
+            - onClose: Stäng panelen
+          
+          POSITIONERING: top-16 = börjar under header, z-40 = under modaler
+      */}
+      {activePanel === 'llm' && (
+        <LLMPanel
+          currentSlide={currentSlideKey}
+          formData={formData}
+          companyInfo={{
+            companyName: activeCase?.companyName,
+            orgnr: activeCase?.orgnr
+          }}
+          onClose={() => setActivePanel(null)}
         />
       )}
       

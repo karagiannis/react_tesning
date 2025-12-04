@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Icon from '../Shared/Icon';
+import Icon from '../../components/Shared/Icon';
 import {
   DndContext,
   closestCenter,

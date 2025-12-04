@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
+import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 /**
  * DocumentSetupSlide - Steg 3: Digital dokumenthantering

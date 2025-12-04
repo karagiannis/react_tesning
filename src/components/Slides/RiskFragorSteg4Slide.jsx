@@ -7,8 +7,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Info, ChevronRight } from 'lucide-react';
 import { getLegalTextsForQuestion, legalTexts } from '../../data/legalTexts';
 import StepIndicator from '../Shared/StepIndicator';
-import useSlideStateController from '../../hooks/useSlideStateController';
-import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
+import useSlideStateController from '../../legacy/hooks/useSlideStateController';
+import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 // BRUTE FORCE CONFIG
 const QUESTIONS_CONFIG = {

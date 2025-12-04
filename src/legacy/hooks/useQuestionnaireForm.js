@@ -44,9 +44,9 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { getStateMachineBehavior, FORM_STATES } from './useOnboardingStateMachine';
-import { API_URL as API_BASE } from '../config/api';
-import { debugLog } from '../utils/debugLogger';
-import { buildStorageKey, parseStorageKey, clearStorageKeys, findStorageKeys } from '../utils/storageKeys';
+import { API_URL as API_BASE } from '../../config/api';
+import { debugLog } from '../../utils/debugLogger';
+import { buildStorageKey, parseStorageKey, clearStorageKeys, findStorageKeys } from '../../utils/storageKeys';
 
 /**
  * Generic hook för formulärdata med state machine architecture

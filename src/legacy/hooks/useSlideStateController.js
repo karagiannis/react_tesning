@@ -41,9 +41,9 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { API_URL as API_BASE } from '../config/api';
-import { debugLog } from '../utils/debugLogger';
-import { buildStorageKey } from '../utils/storageKeys';
+import { API_URL as API_BASE } from '../../config/api';
+import { debugLog } from '../../utils/debugLogger';
+import { buildStorageKey } from '../../utils/storageKeys';
 
 /**
  * MASTER hook - hämtar och bestämmer initial data för en slide

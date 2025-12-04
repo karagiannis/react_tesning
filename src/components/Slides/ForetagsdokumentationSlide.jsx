@@ -3,7 +3,7 @@ import { fetchWithAuth } from '../../utils/auth';
 import { useParams } from 'react-router-dom';
 import Icon from '../Shared/Icon';
 import FileDropZone from '../Shared/FileDropZone';
-import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
+import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 // Simple inline SVG icons for missing icons
 const UploadIcon = ({ className }) => (

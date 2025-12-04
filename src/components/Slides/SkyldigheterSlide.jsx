@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { legalTexts } from '../../data/legalTexts';
-import useQuestionnaireForm from '../../hooks/useQuestionnaireForm';
+import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 export default function SkyldigheterSlide({ onNext, onBack }) {
   const { companyId } = useParams();
