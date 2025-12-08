@@ -118,9 +118,17 @@ export default function OnboardingResumeDialog_v2({
   // handleContinue - Anropa parent callback med valda IDs
   // ─────────────────────────────────────────────────────────────────────────
   const handleContinue = (company) => {
+    // Backend returnerar case_id, men frontend använder onboardingId
+    const onboardingId = company.case_id || company.onboarding_id;
+    console.log('[OnboardingResumeDialog] 🚀 Resume clicked:', {
+      company_id: company.company_id,
+      case_id: company.case_id,
+      onboarding_id: company.onboarding_id,
+      resolved_onboardingId: onboardingId
+    });
     onResume(
       company.company_id,
-      company.case_id || company.onboarding_id,
+      onboardingId,
       company.company_name
     );
   };

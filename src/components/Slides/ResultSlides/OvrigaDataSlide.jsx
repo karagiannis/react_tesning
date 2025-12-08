@@ -1,13 +1,12 @@
 import React from 'react';
-import { mockRoaringData } from '../../../data/mockRoaringData';
 
-export default function OvrigaDataSlide({ onNext, onBack }) {
-  const propertyData = mockRoaringData.propertyInformation;
-  const engagementsData = mockRoaringData.companyEngagements;
-  const caseData = mockRoaringData.companyCaseRegister;
-  const financialData = mockRoaringData.financialInformation;
-  const establishmentsData = mockRoaringData.establishments;
-  const shareData = mockRoaringData.shareFacts;
+export default function OvrigaDataSlide({ onNext, onBack, formData = {} }) {
+  const propertyData = formData.propertyInformation || {};
+  const engagementsData = formData.companyEngagements || {};
+  const caseData = formData.companyCaseRegister || {};
+  const financialData = formData.financialInformation || {};
+  const establishmentsData = formData.establishments || {};
+  const shareData = formData.shareFacts || mockRoaringData.shareFacts;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">

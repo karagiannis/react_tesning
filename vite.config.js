@@ -4,6 +4,12 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: '/',  // ← Viktigt: servas från roten
   plugins: [react()],
+  
+  // Source maps för VS Code debugging
+  build: {
+    sourcemap: true,
+  },
+  
   server: {
     proxy: {
       '/tic-tac-toe-api': {

@@ -29,6 +29,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 export default function useAutoSave({
   formData,
   storage,
+  currentSlideKey,  // NY: Vilken slide är vi på? (t.ex. 'uppdragsval', 'riskfragor-steg-1')
   debounceMs = 300,
   enabled = true,
 }) {
@@ -40,8 +41,14 @@ export default function useAutoSave({
   // ─────────────────────────────────────────────────────────────────────────
   // Debounced save function
   // ─────────────────────────────────────────────────────────────────────────
-  const debouncedSave = useCallback((data) => {
+  const debouncedSave = useCallback((data, slideKey) => {
     if (!enabled || !storage) return;
+    
+    // Skippa om ingen slideKey (t.ex. på resultslide)
+    if (!slideKey) {
+      console.log('[AUTO-SAVE] ⚠️ No slideKey provided, skipping save');
+      return;
+    }
 
     // Clear previous timeout
     if (timeoutRef.current) {
@@ -53,18 +60,26 @@ export default function useAutoSave({
     // Set new timeout
     timeoutRef.current = setTimeout(() => {
       try {
-        // Save formData
-        storage.setFormData(data);
+        // NYTT: Spara BARA nuvarande slides data
+        const slideData = data[slideKey];
+        if (!slideData) {
+          console.log(`[AUTO-SAVE] ⚠️ No data for slide '${slideKey}', skipping save`);
+          setIsSaving(false);
+          return;
+        }
         
-        // Update local version timestamp
+        storage.setSlideData(slideKey, slideData);
+        
+        // Update local version timestamp (per slide)
         const now = new Date().toISOString();
-        localStorage.setItem('localVersion', JSON.stringify({
+        const versionKey = `localVersion_${slideKey}`;
+        localStorage.setItem(versionKey, JSON.stringify({
           timestamp: now,
-          formDataHash: simpleHash(JSON.stringify(data)),
+          dataHash: simpleHash(JSON.stringify(slideData)),
         }));
         
         setLastSaved(now);
-        console.log('[AUTO-SAVE] ✅ Saved to localStorage at', now);
+        console.log(`[AUTO-SAVE] ✅ Saved slide '${slideKey}' to localStorage at`, now);
       } catch (err) {
         console.error('[AUTO-SAVE] ❌ Failed to save:', err);
       } finally {
@@ -83,8 +98,8 @@ export default function useAutoSave({
     }
     
     previousFormDataRef.current = formData;
-    debouncedSave(formData);
-  }, [formData, debouncedSave]);
+    debouncedSave(formData, currentSlideKey);  // Pass currentSlideKey
+  }, [formData, currentSlideKey, debouncedSave]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Force save (bypass debounce)
@@ -94,21 +109,28 @@ export default function useAutoSave({
       clearTimeout(timeoutRef.current);
     }
     
-    if (!storage) return;
+    if (!storage || !currentSlideKey) return;
     
     try {
-      storage.setFormData(formData);
+      const slideData = formData[currentSlideKey];
+      if (!slideData) {
+        console.log(`[AUTO-SAVE] ⚠️ Force save: No data for slide '${currentSlideKey}'`);
+        return;
+      }
+      
+      storage.setSlideData(currentSlideKey, slideData);
       const now = new Date().toISOString();
-      localStorage.setItem('localVersion', JSON.stringify({
+      const versionKey = `localVersion_${currentSlideKey}`;
+      localStorage.setItem(versionKey, JSON.stringify({
         timestamp: now,
-        formDataHash: simpleHash(JSON.stringify(formData)),
+        dataHash: simpleHash(JSON.stringify(slideData)),
       }));
       setLastSaved(now);
-      console.log('[AUTO-SAVE] ✅ Force saved at', now);
+      console.log(`[AUTO-SAVE] ✅ Force saved slide '${currentSlideKey}' at`, now);
     } catch (err) {
       console.error('[AUTO-SAVE] ❌ Force save failed:', err);
     }
-  }, [formData, storage]);
+  }, [formData, storage, currentSlideKey]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Cleanup on unmount

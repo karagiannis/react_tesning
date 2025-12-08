@@ -190,10 +190,17 @@ export default function UppdragsvalsSlide({
   };
 
   const handleCompanySelect = (company) => {
+    console.log('[AUTOCOMPLETE] Selected company:', company);
     setCompanyQuery(company.name);
+    
+    console.log('[AUTOCOMPLETE] Calling onFieldChange for companyName:', company.name);
     onFieldChange('companyName', company.name);
+    
+    console.log('[AUTOCOMPLETE] Calling onFieldChange for orgnr:', company.orgnr);
     onFieldChange('orgnr', company.orgnr);
+    
     setShowSuggestions(false);
+    console.log('[AUTOCOMPLETE] Company selection complete');
   };
 
   // ═══════════════════════════════════════════════════════════════════════

@@ -1,107 +1,36 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAgreements } from '../../contexts/AgreementContext';
-import { fetchWithAuth } from '../../utils/auth';
-
 /**
  * PaymentSuccessSlide - Visas efter lyckad Stripe-betalning
  * 
- * URL: /payment-success?payment_intent=pi_xxx
+ * TIC-TAC-TOE PATTERN:
+ * Detta är en "dumb component" som bara visar UI baserat på props.
+ * INGA API-anrop görs här - allt sker i AuthenticatedApp state machine.
  * 
- * Flöde:
- * 1. Stripe redirectar hit efter lyckad betalning
- * 2. Vi anropar backend för att bekräfta betalningen
- * 3. Backend uppdaterar case metadata + users_org trial_usage
- * 4. Användaren redirectas tillbaka till riskfrågor
+ * FLÖDE:
+ * 1. AuthenticatedApp ser att URL är /payment-success
+ * 2. State machine går till VERIFYING_PAYMENT state
+ * 3. State machine anropar /subscription/status endpoint
+ * 4. State machine sätter paymentVerificationStatus
+ * 5. Denna component renderar baserat på status
+ * 6. Användaren klickar "OK" → onPaymentConfirmed() callback
  * 
- * TODO: Refaktorera till "dumb" pattern - ta emot callbacks via props
- *       från AuthenticatedApp istället för egen API-logik
+ * PROPS:
+ * - status: 'verifying' | 'success' | 'error'
+ * - message: Felmeddelande (om error)
+ * - onPaymentConfirmed: Callback när användaren klickar OK
+ * - onRetry: Callback när användaren klickar Försök igen
  */
-export default function PaymentSuccessSlide() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { setOneTimeAgreement } = useAgreements();
-  
-  const [status, setStatus] = useState('confirming'); // 'confirming' | 'success' | 'error'
-  const [message, setMessage] = useState('Bekräftar betalning...');
-  const [trialsRemaining, setTrialsRemaining] = useState(null);
-  const [redirectInfo, setRedirectInfo] = useState({ companyId: null, onboardingId: null });
-
-  useEffect(() => {
-    confirmPayment();
-  }, []);
-
-  const confirmPayment = async () => {
-    try {
-      // Hämta payment info från URL och localStorage
-      // Stripe Checkout Session returnerar session_id
-      const sessionId = searchParams.get('session_id');
-      const pendingPayment = JSON.parse(localStorage.getItem('pending_payment') || '{}');
-      
-      const { companyId, onboardingId } = pendingPayment;
-      
-      // Spara för redirect senare (innan vi rensar localStorage)
-      setRedirectInfo({ companyId, onboardingId });
-      
-      if (!companyId || !onboardingId) {
-        throw new Error('Kunde inte hitta betalningsinformation. Försök igen.');
-      }
-      
-      // Anropa backend för att bekräfta
-      const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
-      const response = await fetchWithAuth(
-        `${API_BASE}/onboarding/${companyId}/subscription/confirm?onboarding_id=${onboardingId}&session_id=${sessionId || ''}`,
-        { method: 'POST' }
-      );
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Kunde inte bekräfta betalning');
-      }
-      
-      const data = await response.json();
-      console.log('✅ Betalning bekräftad:', data);
-      
-      // TODO: Flytta denna logik till AuthenticatedApp handlePaymentConfirm()
-      // För nu - vi litar på att backend satt has_paid=true i case metadata
-      console.log('🔓 Payment confirmed - Output slides will unlock on next navigation');
-      
-      // Uppdatera AgreementContext
-      setOneTimeAgreement({
-        isSigned: true,
-        agreementNumber: data.trial_id,
-        signedAt: data.subscription.signed_at,
-        signerName: 'Via Stripe',
-        signerPersonnr: data.subscription.personnummer,
-        totalCost: 2495,
-        isSigningInProgress: false
-      });
-      
-      // Rensa pending payment
-      localStorage.removeItem('pending_payment');
-      
-      setStatus('success');
-      setMessage('Betalning genomförd!');
-      setTrialsRemaining(data.trials_remaining);
-      
-      // 🆕 2025-12-02: Redirect till Steg 2 (inte Steg 1!)
-      // Data för Steg 1 är redan sparad INNAN betalningen initierades
-      setTimeout(() => {
-        navigate(`/riskfragor/steg2/${companyId}/${onboardingId}`);
-      }, 3000);
-      
-    } catch (err) {
-      console.error('❌ Error confirming payment:', err);
-      setStatus('error');
-      setMessage(err.message);
-    }
-  };
+export default function PaymentSuccessSlide({ 
+  status = 'verifying',
+  message = '',
+  onPaymentConfirmed,
+  onRetry
+}) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-8">
       <div className="max-w-md w-full bg-white rounded-card shadow-2xl p-8 text-center">
         
-        {status === 'confirming' && (
+        {status === 'verifying' && (
           <>
             <div className="mb-6">
               <svg className="animate-spin h-16 w-16 text-brand-600 mx-auto" fill="none" viewBox="0 0 24 24">
@@ -129,32 +58,18 @@ export default function PaymentSuccessSlide() {
               Betalning genomförd! ✅
             </h1>
             <p className="text-gray-600 mb-4">
-              Ditt engångsavtal är nu aktiverat.
+              Din prenumeration är nu aktiv.
             </p>
             
-            {trialsRemaining !== null && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg mb-4">
-                <p className="text-sm text-blue-800">
-                  Du har <strong>{trialsRemaining}</strong> engångstester kvar.
-                </p>
-              </div>
-            )}
-            
-            <p className="text-sm text-gray-500">
-              Du omdirigeras automatiskt om 3 sekunder...
+            <p className="text-sm text-gray-600 mb-6">
+              Företagsdata hämtas i bakgrunden och kommer vara tillgänglig när du navigerar till Verksamhet-sliden.
             </p>
             
             <button
-              onClick={() => {
-                if (redirectInfo.companyId && redirectInfo.onboardingId) {
-                  navigate(`/riskfragor/steg2/${redirectInfo.companyId}/${redirectInfo.onboardingId}`);
-                } else {
-                  navigate('/uppdragsval');
-                }
-              }}
-              className="mt-4 px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700"
+              onClick={() => onPaymentConfirmed()}
+              className="w-full px-6 py-3 bg-brand-600 text-white rounded-lg hover:bg-brand-700 font-medium"
             >
-              Fortsätt till Riskfrågor Steg 2 →
+              OK, fortsätt till Riskfrågor Steg 2 →
             </button>
           </>
         )}
@@ -170,23 +85,15 @@ export default function PaymentSuccessSlide() {
               Något gick fel
             </h1>
             <p className="text-gray-600 mb-4">
-              {message}
+              {message || 'Kunde inte bekräfta betalning'}
             </p>
             
-            <div className="space-y-3">
-              <button
-                onClick={() => window.location.reload()}
-                className="w-full px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700"
-              >
-                Försök igen
-              </button>
-              <button
-                onClick={() => navigate('/uppdragsval')}
-                className="w-full px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-              >
-                Tillbaka till Uppdragsval
-              </button>
-            </div>
+            <button
+              onClick={() => onRetry()}
+              className="w-full px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700"
+            >
+              Försök igen
+            </button>
           </>
         )}
         

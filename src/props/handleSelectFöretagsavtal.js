@@ -1,29 +1,42 @@
 /**
  * handleSelectFöretagsavtal
  * 
- * 🏢 Enterprise-avtal (för framtida implementation)
+ * 🏢 Rapporterar user intent: "Användaren valde Företagsavtal"
  *
  * ============================================================================
  * ANROPAS FRÅN: AgreementModal när användaren klickar "Teckna företagsavtal"
  * ============================================================================
  *
- * NUVARANDE BETEENDE:
- * - Stänger modalen
- * - Visar meddelande att säljteamet kontaktar användaren
+ * TIC-TAC-TOE PATTERN:
+ * - Modal (Square) rapporterar bara: "användaren klickade här"
+ * - State Machine (Board) bestämmer vad som händer
+ *
+ * FLÖDE:
+ * 1. Stäng modal
+ * 2. Navigera till /settings/subscription
+ * 3. Sätt state till READY
  *
  * FRAMTIDA IMPLEMENTATION:
  * - Enterprise-avtal faktureras separat
- * - Behöver ingen Stripe checkout
+ * - Inställningssidan kan visa kontaktformulär
  * - Kan kräva godkännande av admin
  */
 export const createHandleSelectFöretagsavtal = ({
-  setShowAgreementModal
+  setShowAgreementModal,
+  navigate,
+  setAppState,
+  AppState
 }) => {
-  return async () => {
-    console.log('[PAYMENT] Enterprise agreement selected');
-    // TODO: Implementera enterprise-flöde
-    // För nu, stäng modalen och visa ett meddelande
+  return () => {
+    console.log('[PAYMENT] User selected Företagsavtal - navigating to settings');
+    
+    // Stäng modalen
     setShowAgreementModal(false);
-    alert('Företagsavtal kräver kontakt med säljteamet. Vi kontaktar dig inom kort!');
+    
+    // Navigera till inställningar för subscription
+    navigate('/settings/subscription');
+    
+    // Sätt state till READY
+    setAppState(AppState.READY);
   };
 };

@@ -1,9 +1,8 @@
 import React from 'react';
-import { mockRoaringData } from '../../../data/mockRoaringData';
 
-export default function StyrelseSlide({ onNext, onBack }) {
-  const boardData = mockRoaringData.boardMembers;
-  const signatoryData = mockRoaringData.signatories;
+export default function StyrelseSlide({ onNext, onBack, formData = {} }) {
+  const boardData = formData.boardMembers || {};
+  const signatories = formData.signatories || {};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">

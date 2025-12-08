@@ -1,12 +1,11 @@
 import React from 'react';
-import { mockRoaringData } from '../../../data/mockRoaringData';
 
-export default function RiskindikatorerSlide({ onNext, onBack }) {
-  const riskData = mockRoaringData.riskIndicators;
-  const ratingData = mockRoaringData.companyRating;
-  const sanctionsData = mockRoaringData.sanctionsList;
-  const pepData = mockRoaringData.politicallyExposedPerson;
-  const amlData = mockRoaringData.amlRegistry;
+export default function RiskindikatorerSlide({ onNext, onBack, formData = {} }) {
+  const riskData = formData.riskIndicators || {};
+  const companyRating = formData.companyRating || {};
+  const sanctionsData = formData.sanctionsList || {};
+  const pepData = formData.politicallyExposedPerson || {};
+  const amlData = formData.amlRegistry || {};
   const legalData = mockRoaringData.legalInformation;
   const prohibitionData = mockRoaringData.businessProhibition;
 

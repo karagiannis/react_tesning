@@ -111,7 +111,7 @@ import SupportSlide from './components/Slides/SupportSlide';
 // =============================================================================
 // MODALS
 // =============================================================================
-import OnboardingResumeDialog from './components/Modals/OnboardingResumeDialogV2';
+import OnboardingResumeDialog from './components/Modals/OnboardingResumeDialog';
 import MergeConflictModal from './components/Modals/MergeConflictModal';
 import AgreementModal from './components/Modals/AgreementModal';
 
@@ -131,8 +131,6 @@ import useAutoSave from './hooks/useAutoSave';
 // =============================================================================
 import { createHandleClearError } from './props/handleClearError';
 import { createHandleFieldChange } from './props/handleFieldChange';
-import { createHandleBack } from './props/handleBack';
-import { createHandleNext } from './props/handleNext';
 import { createHandleSidebarLock } from './props/handleSidebarLock';
 import { createHandleSidebarClick } from './props/handleSidebarClick';
 import { createHandleConflictCancel } from './props/handleConflictCancel';
@@ -148,6 +146,7 @@ import { createHandleLogoutAndReset } from './props/handleLogoutAndReset';
 import { createHandleCancelOnboarding } from './props/handleCancelOnboarding';
 import { createHandleSelectEngångsavtal } from './props/handleSelectEngångsavtal';
 import { createHandleSelectFöretagsavtal } from './props/handleSelectFöretagsavtal';
+import { createHandlePaymentConfirmed } from './props/handlePaymentConfirmed';
 
 // =============================================================================
 // UTILS
@@ -223,6 +222,18 @@ const AppState = {
   // ─────────────────────────────────────────────────────────────────────────
   READY: 'READY',                   // Normal drift - väntar på användarinteraktion
                                      // Användaren kan navigera, fylla i formulär, etc.
+  
+  PROCESSING_NEXT: 'PROCESSING_NEXT', // Användaren klickade "Nästa" - processar logik
+  PROCESSING_BACK: 'PROCESSING_BACK', // Användaren klickade "Tillbaka" - processar logik
+  
+  INITIATING_PAYMENT: 'INITIATING_PAYMENT', // Skapar Stripe session och redirectar
+                                             // → Anropar POST /subscription
+                                             // → Sparar pending_payment till localStorage
+                                             // → window.location.href = stripe_url
+  
+  VERIFYING_PAYMENT: 'VERIFYING_PAYMENT', // Verifierar betalning efter Stripe redirect
+                                           // → Anropar /subscription/status
+                                           // → Går till READY när klart
   
   NAVIGATING: 'NAVIGATING',         // (Framtida) Byter slide
   SAVING: 'SAVING',                 // (Framtida) Sparar till server
@@ -328,6 +339,13 @@ export default function AuthenticatedApp() {
   const [paymentStatus, setPaymentStatus] = useState('idle');
   // paymentStatus: 'idle' | 'initiating' | 'redirecting' | 'confirmed' | 'error'
   const [hasAgreement, setHasAgreement] = useState(false);
+  const [paymentPending, setPaymentPending] = useState(false);
+  // paymentPending: true när vi väntar på betalning från Stripe
+  
+  // Payment Verification State (för PaymentSuccessSlide)
+  const [paymentVerificationStatus, setPaymentVerificationStatus] = useState('verifying');
+  // 'verifying' | 'success' | 'error'
+  const [paymentVerificationMessage, setPaymentVerificationMessage] = useState('');
   
   // ─────────────────────────────────────────────────────────────────────────
   // Version Conflict State (multi-user editing)
@@ -534,21 +552,76 @@ export default function AuthenticatedApp() {
     // ─────────────────────────────────────────────────────────────────────
     // Formulärdata (alla slides) - Använder preamble
     // ─────────────────────────────────────────────────────────────────────
+    // DEPRECATED: Använd getSlideData/setSlideData istället!
+    // Behålls för bakåtkompatibilitet under migration.
     getFormData: () => {
       const key = storage._buildKey('formData');
       const data = localStorage.getItem(key);
-      console.log(`[STORAGE] getFormData from key: ${key}`);
+      console.log(`[STORAGE] getFormData from key: ${key} (DEPRECATED)`);
       return data ? JSON.parse(data) : {};
     },
     setFormData: (data) => {
       const key = storage._buildKey('formData');
-      console.log(`[STORAGE] setFormData to key: ${key}`);
+      console.log(`[STORAGE] setFormData to key: ${key} (DEPRECATED)`);
       localStorage.setItem(key, JSON.stringify(data));
     },
     clearFormData: () => {
       const key = storage._buildKey('formData');
       console.log(`[STORAGE] clearFormData from key: ${key}`);
       localStorage.removeItem(key);
+    },
+    
+    // ─────────────────────────────────────────────────────────────────────
+    // Per-slide data storage - NY ARKITEKTUR (URL-aware)
+    // ─────────────────────────────────────────────────────────────────────
+    // Sparar varje sida separat med slideKey som identifierare.
+    // Detta matchar exakt samma struktur som metadata.json på backend.
+    //
+    // Exempel:
+    //   localStorage['onboarding::556677::case_001::user_42::uppdragsval']
+    //   localStorage['onboarding::556677::case_001::user_42::riskfragor-steg-1']
+    //
+    getSlideData: (slideKey) => {
+      const key = storage._buildKey(slideKey);
+      const data = localStorage.getItem(key);
+      console.log(`[STORAGE] getSlideData(${slideKey}) from key: ${key}`);
+      return data ? JSON.parse(data) : null;
+    },
+    setSlideData: (slideKey, data) => {
+      const key = storage._buildKey(slideKey);
+      console.log(`[STORAGE] setSlideData(${slideKey}) to key: ${key}`, data);
+      localStorage.setItem(key, JSON.stringify(data));
+    },
+    clearSlideData: (slideKey) => {
+      const key = storage._buildKey(slideKey);
+      console.log(`[STORAGE] clearSlideData(${slideKey}) from key: ${key}`);
+      localStorage.removeItem(key);
+    },
+    
+    // Hämta alla slides som ett objekt (för bakåtkompatibilitet)
+    getAllSlidesData: () => {
+      const allSlides = {};
+      const prefix = isDraftMode 
+        ? `onboarding::draft::${tempCaseId}::${user?.id || 'anonymous'}::`
+        : `onboarding::${activeCase?.companyId}::${activeCase?.caseId || activeCase?.onboardingId}::${user?.id || 'anonymous'}::`;
+      
+      // Iterera genom localStorage och hitta alla keys med rätt prefix
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(prefix)) {
+          const slideKey = key.replace(prefix, '');
+          // Skippa metadata-nycklar (activeCase, completedSlides, etc.)
+          if (!['activeCase', 'completedSlides', 'formData'].includes(slideKey)) {
+            try {
+              allSlides[slideKey] = JSON.parse(localStorage.getItem(key));
+            } catch (e) {
+              console.error(`[STORAGE] Failed to parse ${key}:`, e);
+            }
+          }
+        }
+      }
+      console.log(`[STORAGE] getAllSlidesData:`, Object.keys(allSlides));
+      return allSlides;
     },
     
     // ─────────────────────────────────────────────────────────────────────
@@ -837,6 +910,7 @@ export default function AuthenticatedApp() {
           company_id: c.company_id,
           company_name: c.company_name,
           orgnr: c.orgnr,
+          case_id: c.case_id,        // Behåll original case_id
           onboarding_id: c.case_id,  // Frontend använder onboarding_id
           current_slide: c.current_slide,
           updated_at: c.updated_at,
@@ -866,12 +940,14 @@ export default function AuthenticatedApp() {
   // 🔄 AUTO-SAVE HOOK - Sparar till localStorage vid varje formData-ändring
   // ===========================================================================
   //
-  // Använder debounce (300ms) för att undvika för många skrivningar.
-  // Uppdaterar också localVersion timestamp för version conflict detection.
+  // NYTT: Sparar varje slide SEPARAT (URL-aware).
+  // currentSlideKey identifierar vilken sida som ska sparas.
+  // Resultsidor (utan inputs) triggar INTE autosave.
   //
   const { lastSaved, isSaving, forceSave } = useAutoSave({
     formData,
     storage,
+    currentSlideKey: currentSlideKey,  // NY: URL-identifierare för nuvarande slide
     debounceMs: 300,
     enabled: appState === AppState.READY, // Bara i READY state
   });
@@ -891,6 +967,131 @@ export default function AuthenticatedApp() {
   //
   // Detta ger en DETERMINISTISK loop som är lätt att följa och debugga.
   //
+  
+  // ===========================================================================
+  // saveSlideAndNavigate - Helper för standard slide save & navigate
+  // ===========================================================================
+  //
+  // Används av PROCESSING_NEXT för alla slides som inte har special-logik
+  //
+  const saveSlideAndNavigate = async (slideKey, currentIndex) => {
+    setIsLoading(true);
+    setSyncStatus('saving');
+    setError(null);
+    
+    try {
+      const slideData = formData[slideKey] || {};
+      
+      // ─────────────────────────────────────────────────────────────────
+      // Steg 1: Kolla version conflict (om permanent mode)
+      // ─────────────────────────────────────────────────────────────────
+      if (!isDraftMode) {
+        const hasConflict = await checkVersionConflict();
+        if (hasConflict) {
+          console.log('[SAVE] ⚠️ Konflikt - blockerar navigation');
+          setIsLoading(false);
+          setSyncStatus('conflict');
+          setAppState(AppState.READY);
+          return;
+        }
+      }
+      
+      // ─────────────────────────────────────────────────────────────────
+      // Steg 2: Push till server (om permanent mode)
+      // ─────────────────────────────────────────────────────────────────
+      if (!isDraftMode && activeCase?.caseId) {
+        console.log(`[SAVE] 📤 Pushing slide data: ${slideKey}`);
+        
+        const response = await api.fetch(`/onboarding/slide/${slideKey}`, {
+          method: 'POST',
+          body: JSON.stringify({
+            case_id: activeCase.caseId,
+            company_id: activeCase.companyId,
+            slide_data: slideData,
+          }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          
+          if (response.status === 409) {
+            console.log('[SAVE] ⚠️ Server returnerade 409 - version conflict');
+            setConflictInfo(errorData);
+            setShowConflictModal(true);
+            setIsLoading(false);
+            setSyncStatus('conflict');
+            setAppState(AppState.READY);
+            return;
+          }
+          
+          throw new Error(errorData.detail || `HTTP ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log(`[SAVE] ✅ Server saved slide, new version: ${result.version}`);
+        
+        // Uppdatera lokal version
+        const versionKey = `case_${activeCase.companyId}_${activeCase.caseId}_version`;
+        localStorage.setItem(versionKey, JSON.stringify({
+          version: result.version,
+          timestamp: new Date().toISOString(),
+          lastSlide: slideKey,
+        }));
+      } else {
+        console.log(`[SAVE] 📝 Draft mode - only saving to localStorage`);
+      }
+      
+      setSyncStatus('saved');
+      
+      // ─────────────────────────────────────────────────────────────────
+      // Steg 3: Uppdatera state och navigera
+      // ─────────────────────────────────────────────────────────────────
+      
+      // Markera som klar
+      const newCompleted = [...completedSlides, slideKey];
+      setCompletedSlides(newCompleted);
+      storage.setCompletedSlides(newCompleted);
+      
+      // Spara formData
+      storage.setFormData(formData);
+      
+      // Navigera till nästa slide
+      const nextSlide = SLIDE_ORDER[currentIndex + 1];
+      console.log(`[SAVE] ✅ Navigating to: ${nextSlide.key}`);
+      
+      setNavigationHistory(prev => [...prev, {
+        slideKey: nextSlide.key,
+        timestamp: Date.now(),
+        action: 'next',
+        fromSlide: slideKey,
+      }]);
+      
+      // Uppdatera session
+      const caseOrOnboardingId = activeCase?.caseId || activeCase?.onboardingId;
+      const sessionId = isDraftMode
+        ? `onboarding::draft::${tempCaseId}::${user?.id}`
+        : storage.buildSessionId(activeCase?.companyId, caseOrOnboardingId, user?.id);
+      storage.setCurrentTabSession({
+        sessionId,
+        currentSlide: nextSlide.key,
+      });
+      
+      setCurrentSlideKey(nextSlide.key);
+      navigate(nextSlide.path);
+      
+      setIsLoading(false);
+      setTimeout(() => setSyncStatus('idle'), 1500);
+      setAppState(AppState.READY);
+      
+    } catch (err) {
+      console.error('[SAVE] Error:', err);
+      setError(`Kunde inte spara: ${err.message}`);
+      setSyncStatus('idle');
+      setIsLoading(false);
+      setAppState(AppState.READY);
+    }
+  };
+  
   const processState = useCallback(async () => {
     console.log(`[STATE MACHINE] Processing: ${appState}`);
     
@@ -1093,7 +1294,6 @@ export default function AuthenticatedApp() {
         // Fråga API om pågående onboardings
         const onboardings = await api.fetchPendingOnboardings();
         console.log('[CHECKING_PENDING] ✅ API response:', onboardings);
-        setPendingOnboardings(onboardings);
         
         setIsLoading(false);
         console.log('[CHECKING_PENDING] ⚖️ Deciding next state, onboardings.length =', onboardings.length);
@@ -1101,6 +1301,11 @@ export default function AuthenticatedApp() {
         // Beslut: Visa resume-modal eller gå till normal drift?
         if (onboardings.length > 0) {
           console.log('[CHECKING_PENDING] ➡️ Going to SHOWING_RESUME (found pending onboardings)');
+          
+          // 🔥 KRITISKT: Sätt pendingOnboardings INNAN state-övergång
+          // Annars får modal tom array vid första render!
+          setPendingOnboardings(onboardings);
+          
           // Logga att användaren har pending onboardings
           await api.logPersonal('Pending onboardings funna', {
             count: onboardings.length,
@@ -1115,6 +1320,7 @@ export default function AuthenticatedApp() {
             });
           }
           
+          // Gå till SHOWING_RESUME - nu har pendingOnboardings redan rätt data
           setAppState(AppState.SHOWING_RESUME);
         } else {
           console.log('[CHECKING_PENDING] ➡️ No pending onboardings - going to READY');
@@ -1181,6 +1387,9 @@ export default function AuthenticatedApp() {
       case AppState.SHOWING_RESUME:
         // Ingen kod här - modalen renderas via JSX nedan
         // State machine väntar på att en callback triggas
+        console.log('[SHOWING_RESUME] 🎭 State entered!');
+        console.log('[SHOWING_RESUME] pendingOnboardings:', pendingOnboardings);
+        console.log('[SHOWING_RESUME] pendingOnboardings.length:', pendingOnboardings?.length);
         break;
         
       // =========================================================================
@@ -1200,51 +1409,99 @@ export default function AuthenticatedApp() {
         
         try {
           // Hämta all data från server
+          console.log('[RESUMING] 📡 Fetching metadata for:', activeCase);
           const metadata = await api.fetchMetadata(
             activeCase.companyId, 
             activeCase.onboardingId
           );
+          console.log('[RESUMING] ✅ Metadata received:', metadata);
+          console.log('[RESUMING]   - version:', metadata.version);
+          console.log('[RESUMING]   - lastModified:', metadata.lastModified);
+          console.log('[RESUMING]   - modifiedBy:', metadata.modifiedBy);
+          console.log('[RESUMING]   - pages:', Object.keys(metadata.pages || {}));
           
-          // Spara till localStorage (så det överlever refresh)
-          storage.setFormData(metadata.formData || {});
-          storage.setCompletedSlides(metadata.completedSlides || []);
-          storage.setActiveCase(activeCase);
+          // 🆕 NEW: Extract pages directly (no unwrapping needed!)
+          const pagesData = metadata.pages || {};
+          console.log('[RESUMING] 📦 Pages data:', pagesData);
+          
+          console.log('[RESUMING] 🧹 Clearing localStorage for THIS case only...');
+          // Selektiv rensning: endast nycklar för detta specifika case
+          const prefix = `onboarding::${activeCase.companyId}::${activeCase.onboardingId}::${user?.id}::`;
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith(prefix)) {
+              console.log(`[RESUMING]   🗑️ Removing: ${key}`);
+              localStorage.removeItem(key);
+            }
+          });
+          
+          console.log('[RESUMING] 🔄 Setting isDraftMode=false (permanent case)');
+          setIsDraftMode(false);
+          storage.setIsDraftMode(false);
+          
+          // 🆕 NEW: Save each page SEPARATELY to PERMANENT localStorage keys
+          console.log('[RESUMING] 💾 Saving pages to PERMANENT localStorage keys...');
+          Object.entries(pagesData).forEach(([slideKey, slideData]) => {
+            storage.setSlideData(slideKey, slideData);
+            console.log(`[RESUMING]   ✓ Saved ${slideKey}:`, slideData);
+          });
+          
+          // Save activeCase and completedSlides
+          const permanentCompletedSlidesKey = StorageKeyBuilder.buildPermanentKey(
+            activeCase.companyId,
+            activeCase.onboardingId,
+            user?.id,
+            'completedSlides'
+          );
+          const permanentActiveCaseKey = StorageKeyBuilder.buildPermanentKey(
+            activeCase.companyId,
+            activeCase.onboardingId,
+            user?.id,
+            'activeCase'
+          );
+          
+          localStorage.setItem(permanentCompletedSlidesKey, JSON.stringify(metadata.completedSlides || []));
+          localStorage.setItem(permanentActiveCaseKey, JSON.stringify(activeCase));
+          console.log('[RESUMING] ✅ Saved metadata to permanent keys');
           
           // 📌 SPARA SERVER VERSION för conflict detection
-          const serverVersion = metadata?.metadata?.version || metadata?.version || 0;
+          const serverVersion = metadata.version || 0;
           const versionStorageKey = `case_${activeCase.companyId}_${activeCase.onboardingId}_version`;
           localStorage.setItem(versionStorageKey, JSON.stringify({
             version: serverVersion,
-            timestamp: new Date().toISOString(),
+            timestamp: metadata.lastModified || new Date().toISOString(),
             syncedFromServer: true
           }));
           console.log('[RESUMING] 📌 Sparade server version:', serverVersion);
           
-          // Uppdatera React state
-          setFormData(metadata.formData || {});
+          // Uppdatera React state med rätt data
+          console.log('[RESUMING] 🔄 Updating React state...');
+          setFormData(pagesData);
           setCompletedSlides(metadata.completedSlides || []);
+          console.log('[RESUMING] ✅ React state updated with pages data');
           
           // ─────────────────────────────────────────────────────────────────
           // 🔓 ROARING DATA - Lås upp företagsdata-slides om data finns
           // ─────────────────────────────────────────────────────────────────
           //
-          // Om användaren har betalat för extern API-anrop (Roaring.io) så
-          // finns roaring_data i metadata. Sätt state så att sidebar-slides
-          // för 'verksamhet', 'agarstruktur', 'styrelse', 'ovriga-data' låses upp.
+          // Om användaren har betalat för Roaring.io-data, finns minst en av
+          // result-slides i pages. Kolla om någon av dessa finns:
+          // - verksamhet
+          // - agarstruktur
+          // - styrelse
+          // - ovriga-data
           //
-          // OBS: Server returnerar snake_case (roaring_data), vi konverterar till camelCase
-          //
-          if (metadata.roaring_data) {
-            console.log('[RESUMING] 🔓 Roaring data found - unlocking företagsdata slides');
-            setRoaringData(metadata.roaring_data);
-          } else if (metadata.has_roaring_data) {
-            // Fallback: Om bara boolean finns, sätt ett truthy objekt
-            console.log('[RESUMING] 🔓 has_roaring_data=true - unlocking företagsdata slides');
+          const resultSlides = ['verksamhet', 'agarstruktur', 'styrelse', 'ovriga-data'];
+          const hasRoaringData = resultSlides.some(slideKey => pagesData[slideKey]);
+          
+          if (hasRoaringData) {
+            console.log('[RESUMING] 🔓 Result slides found in pages - unlocking företagsdata slides');
             setRoaringData({ _unlocked: true });
           }
           
           // Navigera till där användaren var senast
-          const lastSlide = metadata.lastSlide || 'uppdragsval';
+          // Server returnerar current_slide (snake_case), inte lastSlide
+          const lastSlide = metadata.current_slide || metadata.lastSlide || 'uppdragsval';
+          console.log('[RESUMING] 🧭 Navigating to slide:', lastSlide);
           setCurrentSlideKey(lastSlide);
           
           const slide = SLIDE_ORDER.find(s => s.key === lastSlide);
@@ -1484,20 +1741,378 @@ export default function AuthenticatedApp() {
       // =========================================================================
       //
       // NÄR: Allt är laddat och klart
-      // VAD: Ingenting! Vi väntar på att användaren interagerar.
-      //      Handlers (handleNext, handleFieldChange, etc.) tar över härifrån.
+      // VAD: Väntar på användarinteraktion (formulär, navigation)
       //
       case AppState.READY:
         console.log('[READY] ✅ App is ready! Waiting for user interaction...');
         console.log('[READY] Current slide:', currentSlideKey);
         console.log('[READY] Draft mode:', isDraftMode);
         console.log('[READY] Active case:', activeCase);
-        // Normal drift - väntar på användarinteraktion
-        // Alla handlers är aktiva, användaren kan:
-        // - Navigera med sidebar
-        // - Fylla i formulär
-        // - Klicka Nästa/Tillbaka
+        // Normal drift - användaren kan interagera fritt
         break;
+      
+      // =========================================================================
+      // PROCESSING_NEXT - Användaren klickade "Nästa"
+      // =========================================================================
+      //
+      // State machine avgör vad som händer baserat på vilken slide vi är på
+      //
+      case AppState.PROCESSING_NEXT: {
+        console.log(`[PROCESSING_NEXT] Processing Next from slide: ${currentSlideKey}`);
+        
+        const currentIndex = SLIDE_ORDER.findIndex(s => s.key === currentSlideKey);
+        if (currentIndex >= SLIDE_ORDER.length - 1) {
+          console.log('[PROCESSING_NEXT] Already at last slide');
+          setAppState(AppState.READY);
+          break;
+        }
+        
+        // Switch baserat på nuvarande slide
+        switch (currentSlideKey) {
+          
+          // ───────────────────────────────────────────────────────────────
+          // UPPDRAGSVAL - Special case, hanteras av wrapper
+          // ───────────────────────────────────────────────────────────────
+          case 'uppdragsval':
+            console.log('[PROCESSING_NEXT] uppdragsval - handled by UppdragsvalsSlide wrapper');
+            setAppState(AppState.READY);
+            break;
+          
+          // ───────────────────────────────────────────────────────────────
+          // RISKFRÅGOR (steg 1) - Payment check
+          // ───────────────────────────────────────────────────────────────
+          case 'riskfragor':
+            if (!hasAgreement && !isDraftMode) {
+              // VIKTIGT: Spara först till servern INNAN vi visar betalningsmodalen!
+              // Annars försvinner datan när användaren återvänder från Stripe.
+              console.log('[PROCESSING_NEXT] riskfragor: No agreement - saving before showing modal');
+              
+              try {
+                setIsLoading(true);
+                setSyncStatus('saving');
+                
+                // Spara till server - använd generiska endpoint (samma som alla andra slides)
+                const companyId = activeCase?.companyId;
+                const caseId = activeCase?.caseId;
+                const slideData = formData[currentSlideKey] || {};
+                
+                if (companyId && caseId) {
+                  // Generiskt endpoint: POST /onboarding/{company_id}/{slide_key}
+                  const response = await api.post(
+                    `/onboarding/${companyId}/${currentSlideKey}`,
+                    {
+                      data: slideData,
+                      onboarding_id: caseId,
+                      // expected_version: currentVersion  // TODO: Hämta från localStorage
+                    }
+                  );
+                  
+                  if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    
+                    // FastAPI validation errors returnerar detail som array av objekt
+                    let errorMsg = 'Kunde inte spara till servern';
+                    if (errorData.detail) {
+                      if (Array.isArray(errorData.detail)) {
+                        // Pydantic validation errors: [{loc: [...], msg: "...", type: "..."}]
+                        errorMsg = errorData.detail.map(err => err.msg || JSON.stringify(err)).join(', ');
+                      } else if (typeof errorData.detail === 'string') {
+                        errorMsg = errorData.detail;
+                      } else {
+                        errorMsg = JSON.stringify(errorData.detail);
+                      }
+                    }
+                    
+                    console.error('[PROCESSING_NEXT] riskfragor: Server error:', errorData);
+                    throw new Error(errorMsg);
+                  }
+                  
+                  const result = await response.json();
+                  console.log('[PROCESSING_NEXT] riskfragor: ✅ Saved to server, version:', result.version);
+                  
+                  // Uppdatera lokal version
+                  const versionKey = `case_${companyId}_${caseId}_version`;
+                  localStorage.setItem(versionKey, JSON.stringify({
+                    version: result.version,
+                    timestamp: new Date().toISOString(),
+                    lastSlide: currentSlideKey,
+                  }));
+                  
+                  setSyncStatus('saved');
+                } else {
+                  console.warn('[PROCESSING_NEXT] riskfragor: No companyId/caseId, skipping server save');
+                }
+                
+                setIsLoading(false);
+                
+                // Nu är det säkert att visa betalningsmodalen
+                console.log('[PROCESSING_NEXT] riskfragor: Showing payment modal');
+                setShowAgreementModal(true);
+                setAppState(AppState.READY); // Stay in READY - modal handles Stripe redirect
+                
+              } catch (err) {
+                console.error('[PROCESSING_NEXT] riskfragor: ❌ Save error:', err);
+                setError(err.message);
+                setIsLoading(false);
+                setSyncStatus('idle');
+                setAppState(AppState.ERROR);
+              }
+            } else {
+              // Har redan betalat eller är i draft mode
+              console.log('[PROCESSING_NEXT] riskfragor: Has agreement or draft - save and navigate');
+              await saveSlideAndNavigate(currentSlideKey, currentIndex);
+            }
+            break;
+          
+          // ───────────────────────────────────────────────────────────────
+          // ALLA ANDRA SLIDES - Standard save & navigate
+          // ───────────────────────────────────────────────────────────────
+          default:
+            console.log(`[PROCESSING_NEXT] ${currentSlideKey}: Standard save and navigate`);
+            await saveSlideAndNavigate(currentSlideKey, currentIndex);
+            break;
+        }
+        break;
+      }
+      
+      // =========================================================================
+      // =========================================================================
+      // PROCESSING_BACK - Användaren klickade "Tillbaka"
+      // =========================================================================
+      //
+      case AppState.PROCESSING_BACK: {
+        console.log(`[PROCESSING_BACK] Processing Back from slide: ${currentSlideKey}`);
+        
+        const currentIndex = SLIDE_ORDER.findIndex(s => s.key === currentSlideKey);
+        if (currentIndex <= 0) {
+          console.log('[PROCESSING_BACK] Already at first slide');
+          setAppState(AppState.READY);
+          break;
+        }
+        
+        const prevSlide = SLIDE_ORDER[currentIndex - 1];
+        
+        // Navigera bakåt (ingen server-save vid bakåt-navigation)
+        console.log(`[PROCESSING_BACK] Navigating back to: ${prevSlide.key}`);
+        setCurrentSlideKey(prevSlide.key);
+        navigate(prevSlide.path);
+        
+        // Logga navigation history
+        setNavigationHistory(prev => [...prev, {
+          slideKey: prevSlide.key,
+          timestamp: Date.now(),
+          action: 'back',
+          fromSlide: currentSlideKey,
+        }]);
+        
+        setAppState(AppState.READY);
+        break;
+      }
+      
+      // =========================================================================
+      // INITIATING_PAYMENT - Skapar Stripe session och redirectar
+      // =========================================================================
+      //
+      // NÄR: Användaren klickade "Engångsavtal" i AgreementModal
+      // VAD: 
+      //   1. Anropa POST /subscription för att skapa Stripe session
+      //   2. Spara pending_payment till localStorage (backup)
+      //   3. Backend uppdaterar metadata.pending_payment automatiskt
+      //   4. Redirect till Stripe checkout
+      // SEDAN: Användaren kommer tillbaka via backend callback till /payment-success
+      //
+      case AppState.INITIATING_PAYMENT: {
+        console.log('[INITIATING_PAYMENT] 💳 Creating Stripe session...');
+        setIsLoading(true);
+        
+        // 📝 Logga till server (överlever page reload)
+        await api.logPersonal('Initierar betalning', {
+          companyId: activeCase?.companyId,
+          caseId: activeCase?.caseId,
+          slideKey: 'riskfragor',
+          timestamp: new Date().toISOString()
+        });
+        
+        try {
+          const companyId = activeCase?.companyId;
+          const caseId = activeCase?.caseId;
+          const personnummer = formData['riskfragor']?.personnummer || '';
+          
+          if (!companyId || !caseId) {
+            throw new Error('Saknar company_id eller case_id. Gå tillbaka till Uppdragsval.');
+          }
+          
+          console.log('[INITIATING_PAYMENT] Calling POST /subscription...');
+          const response = await api.post(
+            `/onboarding/${companyId}/subscription?onboarding_id=${caseId}`,
+            {
+              type: 'trial',
+              personnummer: personnummer
+            }
+          );
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            
+            // Kolla om trial-limit är nådd (402)
+            if (response.status === 402) {
+              throw new Error(errorData.detail?.message || 'Du har använt alla gratistester. Uppgradera till Enterprise.');
+            }
+            throw new Error(errorData.detail || 'Kunde inte initiera betalning');
+          }
+          
+          const data = await response.json();
+          console.log('[INITIATING_PAYMENT] ✅ Stripe session created:', data);
+          
+          if (!data.payment_url) {
+            throw new Error('Ingen betalnings-URL returnerades från servern');
+          }
+          
+          // 📌 Spara till localStorage som backup (om användaren kommer tillbaka)
+          localStorage.setItem('pending_payment', JSON.stringify({
+            companyId,
+            caseId,
+            slideKey: 'riskfragor',
+            initiatedAt: new Date().toISOString()
+          }));
+          console.log('[INITIATING_PAYMENT] 💾 Saved pending_payment to localStorage');
+          
+          // Backend uppdaterar metadata.pending_payment automatiskt när session skapas
+          // Ingen extra API-anrop behövs här!
+          
+          console.log('[INITIATING_PAYMENT] 🔄 Redirecting to Stripe checkout...');
+          
+          // 📝 Logga innan redirect (sista chansen!)
+          await api.logPersonal('Redirectar till Stripe', {
+            paymentUrl: data.payment_url,
+            companyId,
+            caseId,
+            timestamp: new Date().toISOString()
+          });
+          
+          // Redirect till Stripe checkout
+          window.location.href = data.payment_url;
+          
+        } catch (err) {
+          console.error('[INITIATING_PAYMENT] ❌ Error:', err);
+          setError(err.message);
+          setIsLoading(false);
+          setAppState(AppState.ERROR);
+        }
+        
+        // OBS: Vi kommer inte hit om redirect lyckas (sidan lämnas)
+        // Men om något går fel innan redirect, går vi till ERROR state
+        break;
+      }
+      
+      // =========================================================================
+      // VERIFYING_PAYMENT - Verifierar betalning efter Stripe redirect
+      // =========================================================================
+      //
+      // NÄR: Användaren redirectas från Stripe till /payment-success?session_id=xxx
+      // VAD: Anropa /subscription/status endpoint för att verifiera betalning
+      // SEDAN: Sätt paymentVerificationStatus till 'success' eller 'error'
+      //        PaymentSuccessSlide renderar baserat på denna status
+      //
+      case AppState.VERIFYING_PAYMENT: {
+        console.log('[VERIFYING_PAYMENT] 💳 Verifying payment...');
+        
+        // 📝 Logga till server (vi är tillbaka från Stripe!)
+        const urlParams = new URLSearchParams(window.location.search);
+        await api.logPersonal('Tillbaka från Stripe - verifierar betalning', {
+          pathname: window.location.pathname,
+          sessionId: urlParams.get('session_id'),
+          hasPaymentParam: urlParams.get('payment'),
+          companyId: activeCase?.companyId,
+          caseId: activeCase?.caseId,
+          timestamp: new Date().toISOString()
+        });
+        
+        try {
+          // Hämta session_id från URL
+          const params = new URLSearchParams(window.location.search);
+          const sessionId = params.get('session_id');
+          
+          if (!sessionId) {
+            throw new Error('Ingen session ID i URL');
+          }
+          
+          if (!activeCase?.companyId || !activeCase?.caseId) {
+            throw new Error('Saknar företagsinformation');
+          }
+          
+          console.log('[VERIFYING_PAYMENT]   Session ID:', sessionId);
+          console.log('[VERIFYING_PAYMENT]   Company ID:', activeCase.companyId);
+          console.log('[VERIFYING_PAYMENT]   Case ID:', activeCase.caseId);
+          
+          // Anropa backend endpoint
+          const response = await api.fetch(
+            `/onboarding/${activeCase.companyId}/subscription/status?onboarding_id=${activeCase.caseId}&session_id=${sessionId}`
+          );
+          
+          if (!response.ok) {
+            throw new Error('Kunde inte bekräfta betalning');
+          }
+          
+          const data = await response.json();
+          
+          if (!data.success || data.subscription?.status !== 'active') {
+            throw new Error('Betalning ej genomförd');
+          }
+          
+          console.log('[VERIFYING_PAYMENT] ✅ Payment verified successfully!');
+          
+          // 📝 Logga lyckad betalning
+          await api.logPersonal('Betalning verifierad - SUCCESS!', {
+            sessionId,
+            companyId: activeCase.companyId,
+            caseId: activeCase.caseId,
+            subscriptionStatus: data.subscription?.status,
+            timestamp: new Date().toISOString()
+          });
+          
+          // Uppdatera status så PaymentSuccessSlide visar success
+          setPaymentVerificationStatus('success');
+          setPaymentVerificationMessage('');
+          
+          // 📌 VIKTIGT: Rensa pending_payment från localStorage
+          localStorage.removeItem('pending_payment');
+          
+          // 📌 VIKTIGT: Uppdatera server metadata - ta bort pending_payment flag
+          try {
+            await api.post(
+              `/onboarding/${activeCase.companyId}/save?onboarding_id=${activeCase.caseId}`,
+              {
+                pending_payment: false,
+                payment_completed_at: new Date().toISOString()
+              }
+            );
+            console.log('[VERIFYING_PAYMENT] ✅ Cleared pending_payment from server metadata');
+          } catch (metadataErr) {
+            console.warn('[VERIFYING_PAYMENT] ⚠️ Could not clear pending_payment from server:', metadataErr);
+            // Fortsätt ändå - betalningen är bekräftad
+          }
+          
+        } catch (err) {
+          console.error('[VERIFYING_PAYMENT] ❌ Error:', err);
+          
+          // 📝 Logga fel vid verifiering
+          await api.logPersonal('Betalningsverifiering MISSLYCKADES', {
+            error: err.message,
+            companyId: activeCase?.companyId,
+            caseId: activeCase?.caseId,
+            timestamp: new Date().toISOString()
+          });
+          
+          // Uppdatera status så PaymentSuccessSlide visar error
+          setPaymentVerificationStatus('error');
+          setPaymentVerificationMessage(err.message);
+        }
+        
+        // Gå till READY (PaymentSuccessSlide tar över UI)
+        setAppState(AppState.READY);
+        break;
+      }
         
       // =========================================================================
       // ERROR - Något gick fel
@@ -1537,6 +2152,244 @@ export default function AuthenticatedApp() {
   useEffect(() => {
     processState();
   }, [appState, processState]);
+
+  // ===========================================================================
+  // 🔄 LOAD SLIDE DATA - Per-slide konfliktdetektering (need-to-know basis)
+  // ===========================================================================
+  //
+  // När användaren navigerar till en slide:
+  // 1. Hämta localStorage data för DENNA slide
+  // 2. Hämta server metadata.pages[slideKey] för DENNA slide
+  // 3. Jämför innehåll (JSON.stringify)
+  //    - Om samma innehåll → Ladda tyst (ingen modal, även om global version skiljer)
+  //    - Om olika innehåll OCH annan användare → Visa modal
+  //    - Om olika innehåll men samma användare → Ladda tyst (användarens egna ändringar)
+  //
+  // VIKTIGT: Konfliktdetektering sker endast vid SAVE (checkVersionConflict).
+  // Need-to-know: Användaren informeras ENDAST om ändringar som påverkar DENNA slide.
+  //
+  // Exempel:
+  // - Användare A har version 5 lokalt
+  // - Användare B uppdaterar riskfragor → server version 6
+  // - A navigerar till verksamhet:
+  //   * Server verksamhet-data === localStorage verksamhet-data
+  //   * → INGEN MODAL (same content, need-to-know: A behöver inte veta om riskfragor)
+  // - A navigerar till riskfragor:
+  //   * Server riskfragor-data ≠ localStorage riskfragor-data
+  //   * OCH modified_by = "user_b@example.com" ≠ A
+  //   * → MODAL VISAS (different content AND different user)
+  // - A klickar "Nästa" på verksamhet:
+  //   * POST med expected_version: 5, server har version: 6
+  //   * → 409 Conflict → MODAL VISAS (save-time conflict)
+  //
+  useEffect(() => {
+    // Skippa om vi inte är redo
+    if (appState !== AppState.READY) return;
+    
+    // Skippa om ingen slide är vald
+    if (!currentSlideKey) return;
+    
+    // Skippa om vi är i draft mode (ingen server-data ännu)
+    if (isDraftMode) {
+      console.log(`[SLIDE-LOAD] 📝 Draft mode - using localStorage only`);
+      const localData = storage.getSlideData(currentSlideKey);
+      if (localData && Object.keys(localData).length > 0) {
+        setFormData(prev => ({ ...prev, [currentSlideKey]: localData }));
+      }
+      return;
+    }
+    
+    // Skippa om data redan finns i state (redan hydrated)
+    if (formData[currentSlideKey] && Object.keys(formData[currentSlideKey]).length > 0) {
+      console.log(`[SLIDE-LOAD] ✓ Data already in state for '${currentSlideKey}'`);
+      return;
+    }
+    
+    // ASYNC per-slide konfliktdetektering
+    const loadSlideData = async () => {
+      console.log(`[SLIDE-LOAD] 🔄 Loading '${currentSlideKey}' (need-to-know check)...`);
+      
+      if (!activeCase?.companyId || !activeCase?.caseId) {
+        console.log(`[SLIDE-LOAD] ⚠️ No active case, skipping`);
+        return;
+      }
+      
+      // ─────────────────────────────────────────────────────────────────
+      // Steg 1: Hämta localStorage data för DENNA slide
+      // ─────────────────────────────────────────────────────────────────
+      const localSlideData = storage.getSlideData(currentSlideKey);
+      const hasLocalData = localSlideData && Object.keys(localSlideData).length > 0;
+      
+      console.log(`[SLIDE-LOAD] localStorage['${currentSlideKey}']: ${hasLocalData ? '✅ HAS DATA' : '❌ NO DATA'}`);
+      
+      // ─────────────────────────────────────────────────────────────────
+      // Steg 2: Hämta server data för DENNA slide
+      // ─────────────────────────────────────────────────────────────────
+      let serverMeta = null;
+      let serverSlideData = null;
+      let serverGlobalVersion = 0;
+      
+      try {
+        console.log(`[SLIDE-LOAD] 🌐 Fetching metadata from server...`);
+        serverMeta = await api.fetchMetadata(activeCase.companyId, activeCase.caseId);
+        serverSlideData = serverMeta?.metadata?.pages?.[currentSlideKey];
+        serverGlobalVersion = serverMeta?.metadata?.version || 0;
+        
+        const hasServerData = serverSlideData && Object.keys(serverSlideData).length > 0;
+        console.log(`[SLIDE-LOAD] Server['${currentSlideKey}']: ${hasServerData ? '✅ HAS DATA' : '❌ NO DATA'} (global version: ${serverGlobalVersion})`);
+      } catch (err) {
+        console.warn(`[SLIDE-LOAD] ⚠️ Failed to fetch from server:`, err.message);
+        // Om server fetch misslyckas, använd localStorage
+        if (hasLocalData) {
+          setFormData(prev => ({ ...prev, [currentSlideKey]: localSlideData }));
+          console.log(`[SLIDE-LOAD] 🏁 Using localStorage (server unavailable)`);
+        }
+        return;
+      }
+      
+      // ─────────────────────────────────────────────────────────────────
+      // Steg 3: Hantera olika datakällor
+      // ─────────────────────────────────────────────────────────────────
+      const hasServerData = serverSlideData && Object.keys(serverSlideData).length > 0;
+      
+      if (!hasServerData && !hasLocalData) {
+        // Ingen data finns - init tom
+        console.log(`[SLIDE-LOAD] 📝 Initializing empty slide`);
+        setFormData(prev => ({ ...prev, [currentSlideKey]: {} }));
+        return;
+      }
+      
+      if (!hasServerData && hasLocalData) {
+        // Bara localStorage har data - använd den
+        console.log(`[SLIDE-LOAD] ✅ Using localStorage (only source)`);
+        setFormData(prev => ({ ...prev, [currentSlideKey]: localSlideData }));
+        return;
+      }
+      
+      if (hasServerData && !hasLocalData) {
+        // Bara server har data - använd den
+        console.log(`[SLIDE-LOAD] ✅ Using server (only source)`);
+        setFormData(prev => ({ ...prev, [currentSlideKey]: serverSlideData }));
+        return;
+      }
+      
+      // ─────────────────────────────────────────────────────────────────
+      // Båda källor har data - jämför INNEHÅLL (need-to-know!)
+      // ─────────────────────────────────────────────────────────────────
+      const localStr = JSON.stringify(localSlideData);
+      const serverStr = JSON.stringify(serverSlideData);
+      
+      if (localStr === serverStr) {
+        // ✅ SAMMA INNEHÅLL - ladda tyst (spelar ingen roll om global version skiljer)
+        console.log(`[SLIDE-LOAD] ✅ Same content - using SERVER (no conflict, need-to-know: not affected)`);
+        setFormData(prev => ({ ...prev, [currentSlideKey]: serverSlideData }));
+        return;
+      }
+      
+      // ⚠️ OLIKA INNEHÅLL - kolla vem som ändrade
+      console.log(`[SLIDE-LOAD] ⚠️ Different content detected - checking who modified...`);
+      
+      // Vi behöver veta VEM som senast uppdaterade DENNA slide
+      // Detta kräver per-slide metadata som backend inte har ännu
+      // WORKAROUND: Använd global modified_by (förutsätter att senaste ändringen på ärende = senaste ändring på slide)
+      const serverModifiedBy = serverMeta?.metadata?.updated_by || serverMeta?.updated_by;
+      const currentUserEmail = user?.email;
+      
+      console.log(`[SLIDE-LOAD]   Server modified by: ${serverModifiedBy}`);
+      console.log(`[SLIDE-LOAD]   Current user: ${currentUserEmail}`);
+      
+      const isDifferentUser = serverModifiedBy && 
+                             currentUserEmail && 
+                             serverModifiedBy !== currentUserEmail;
+      
+      if (isDifferentUser) {
+        // ⚠️ KONFLIKT! Annan användare har ändrat DENNA slide
+        console.log(`[SLIDE-LOAD] 🛑 CONFLICT! User '${serverModifiedBy}' modified this slide`);
+        
+        // Spara konflikt-info för modal
+        setConflictInfo({
+          slide_key: currentSlideKey,
+          your_version: 0, // Vi har inget per-slide version ännu
+          server_version: serverGlobalVersion,
+          server_last_modified: serverMeta?.metadata?.lastModified,
+          modified_by: serverModifiedBy,
+          conflicting_slides: [{
+            slide_id: currentSlideKey,
+            modified_by: serverModifiedBy,
+            modified_at: serverMeta?.metadata?.lastModified
+          }],
+          message: `Användare '${serverModifiedBy}' har uppdaterat sidan '${currentSlideKey}'.`,
+          local_data: localSlideData,
+          server_data: serverSlideData
+        });
+        setShowConflictModal(true);
+        
+        // Ladda INTE data - vänta på användarens val
+        console.log(`[SLIDE-LOAD] 🛑 Blocking load - waiting for user decision`);
+        return;
+      } else {
+        // Samma användare har olika innehåll - använd localStorage (kan ha osparade ändringar)
+        console.log(`[SLIDE-LOAD] ✅ Same user, different content - using LOCALSTORAGE (local changes)`);
+        setFormData(prev => ({ ...prev, [currentSlideKey]: localSlideData }));
+        return;
+      }
+    };
+    
+    loadSlideData();
+  }, [currentSlideKey, appState, isDraftMode, activeCase, storage, api, formData, user, setConflictInfo, setShowConflictModal]);
+
+  // ===========================================================================
+  // PAYMENT VERIFICATION - Trigger när URL är /payment-success
+  // ===========================================================================
+  // PAYMENT VERIFICATION - Trigger när URL är /payment-success
+  // ===========================================================================
+  //
+  // När användaren redirectas från Stripe till /payment-success?session_id=xxx
+  // → Sätt state till VERIFYING_PAYMENT
+  // → State machine anropar /subscription/status endpoint
+  //
+  // DEFENSIV: Hanterar både:
+  //   1. /payment-success?session_id=xxx (primärt format)
+  //   2. ?payment=success (legacy format, om backend inte uppdaterat än)
+  //
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const hasSessionId = params.get('session_id');
+    const hasPaymentSuccess = params.get('payment') === 'success';
+    
+    // Kolla om vi är på payment-success sidan ELLER har payment=success parameter
+    const isPaymentCallback = window.location.pathname.includes('/payment-success') || hasPaymentSuccess;
+    
+    if (isPaymentCallback && appState === AppState.READY) {
+      console.log('[PAYMENT-CALLBACK] 🔔 Detected payment callback!');
+      console.log('[PAYMENT-CALLBACK]   pathname:', window.location.pathname);
+      console.log('[PAYMENT-CALLBACK]   hasSessionId:', hasSessionId);
+      console.log('[PAYMENT-CALLBACK]   hasPaymentSuccess:', hasPaymentSuccess);
+      
+      // 📝 Logga till server (viktigt för debugging efter page reload!)
+      api.logPersonal('Payment callback detekterad i useEffect', {
+        pathname: window.location.pathname,
+        hasSessionId: !!hasSessionId,
+        hasPaymentSuccess: hasPaymentSuccess,
+        appState: appState,
+        timestamp: new Date().toISOString()
+      }).catch(err => console.error('[PAYMENT-CALLBACK] Failed to log:', err));
+      
+      setAppState(AppState.VERIFYING_PAYMENT);
+    }
+  }, [window.location.pathname, window.location.search, appState, api]);
+
+  // ===========================================================================
+  // PAYMENT CALLBACK HANTERAS I PaymentSuccessSlide VIA CALLBACK
+  // ===========================================================================
+  //
+  // State machine (VERIFYING_PAYMENT) anropar /subscription/status
+  // PaymentSuccessSlide visar UI baserat på paymentVerificationStatus
+  // Användaren klickar "OK" → onPaymentConfirmed() callback
+  //
+  // Backend redirectar till:
+  //   Success: /payment-success?session_id=cs_xxx
+  //
 
   // ===========================================================================
   // 🎮 HANDLERS - Factory-anrop till props/ (se respektive fil för detaljer)
@@ -1664,32 +2517,25 @@ export default function AuthenticatedApp() {
     }
   };
   
-  // handleNext - Gå till nästa slide med server-push (se props/handleNext.js)
-  // VIKTIGT: Måste definieras före handleConfirmCompanySelection som beror på den!
-  const handleNext = createHandleNext({
-    SLIDE_ORDER,
-    currentSlideKey,
-    isDraftMode,
-    checkVersionConflict,
-    hasAgreement,
-    setShowAgreementModal,
-    setIsLoading,
-    setSyncStatus,
-    setError,
-    formData,
-    activeCase,
-    api,
-    setConflictInfo,
-    setShowConflictModal,
-    storage,
-    completedSlides,
-    setCompletedSlides,
-    tempCaseId,
-    user,
-    setNavigationHistory,
-    setCurrentSlideKey,
-    navigate
-  });
+  // ===========================================================================
+  // handleNext - Enkel event dispatcher till state machine
+  // ===========================================================================
+  //
+  // TIDIGARE: handleNext gjorde allt (validering, server-push, navigation)
+  // NU: Bara rapporterar "användaren klickade Nästa" till state-maskinen
+  //
+  const handleNext = () => {
+    console.log(`[HANDLE_NEXT] User clicked Next on slide: ${currentSlideKey}`);
+    setAppState(AppState.PROCESSING_NEXT);
+  };
+  
+  // ===========================================================================
+  // handleBack - Enkel event dispatcher till state machine
+  // ===========================================================================
+  const handleBack = () => {
+    console.log(`[HANDLE_BACK] User clicked Back on slide: ${currentSlideKey}`);
+    setAppState(AppState.PROCESSING_BACK);
+  };
   
   // 🎯 handleConfirmCompanySelection - POINT OF NO RETURN (se props/handleConfirmCompanySelection.js)
   const handleConfirmCompanySelection = createHandleConfirmCompanySelection({
@@ -1729,16 +2575,29 @@ export default function AuthenticatedApp() {
   
   // 💳 handleSelectEngångsavtal - Stripe checkout (se props/handleSelectEngångsavtal.js)
   const handleSelectEngångsavtal = createHandleSelectEngångsavtal({
-    activeCase,
-    formData,
-    api,
-    setPaymentStatus,
-    setError
+    setShowAgreementModal,
+    setAppState,
+    AppState
   });
   
   // 🏢 handleSelectFöretagsavtal - Enterprise (se props/handleSelectFöretagsavtal.js)
   const handleSelectFöretagsavtal = createHandleSelectFöretagsavtal({
-    setShowAgreementModal
+    setShowAgreementModal,
+    navigate,
+    setAppState,
+    AppState
+  });
+  
+  // 💳 handlePaymentConfirmed - Callback från PaymentSuccessSlide (se props/handlePaymentConfirmed.js)
+  const handlePaymentConfirmed = createHandlePaymentConfirmed({
+    setHasAgreement,
+    setPaymentPending,
+    setShowAgreementModal,
+    setCurrentSlideKey,
+    navigate,
+    setAppState,
+    AppState,
+    SLIDE_ORDER
   });
   
   // ❌ handleCancelOnboarding - Avbryt och rensa (se props/handleCancelOnboarding.js)
@@ -1791,21 +2650,7 @@ export default function AuthenticatedApp() {
   });
   
   // handleSidebarLock - Avgör om slide är låst (se props/handleSidebarLock.js)
-  const handleSidebarLock = createHandleSidebarLock({ roaringData });
-  
-  // handleBack - Gå tillbaka till föregående slide (se props/handleBack.js)
-  const handleBack = createHandleBack({
-    SLIDE_ORDER,
-    currentSlideKey,
-    setNavigationHistory,
-    activeCase,
-    isDraftMode,
-    tempCaseId,
-    user,
-    storage,
-    setCurrentSlideKey,
-    navigate
-  });
+  const handleSidebarLock = createHandleSidebarLock({ formData });
   
   // handleFieldChange - Uppdatera formulärfält (se props/handleFieldChange.js)
   const handleFieldChange = createHandleFieldChange({
@@ -2072,7 +2917,7 @@ export default function AuthenticatedApp() {
             
             <Route path="/verksamhet" element={
               <VerksamhetSlide 
-                roaringData={roaringData}
+                formData={formData['verksamhet'] || {}}
                 onNext={handleNext}
                 onBack={handleBack}
               />
@@ -2080,7 +2925,7 @@ export default function AuthenticatedApp() {
             
             <Route path="/agarstruktur" element={
               <AgarstrukturSlide 
-                roaringData={roaringData}
+                formData={formData['agarstruktur'] || {}}
                 onNext={handleNext}
                 onBack={handleBack}
               />
@@ -2088,7 +2933,7 @@ export default function AuthenticatedApp() {
             
             <Route path="/styrelse" element={
               <StyrelseSlide 
-                roaringData={roaringData}
+                formData={formData['styrelse'] || {}}
                 onNext={handleNext}
                 onBack={handleBack}
               />
@@ -2096,7 +2941,7 @@ export default function AuthenticatedApp() {
             
             <Route path="/ovriga-data" element={
               <OvrigaDataSlide 
-                roaringData={roaringData}
+                formData={formData['ovriga-data'] || {}}
                 onNext={handleNext}
                 onBack={handleBack}
               />
@@ -2156,7 +3001,6 @@ export default function AuthenticatedApp() {
             <Route path="/riskbedomning" element={
               <RiskbedomningSlide 
                 formData={formData}
-                roaringData={roaringData}
                 onNext={handleNext}
                 onBack={handleBack}
               />
@@ -2172,9 +3016,10 @@ export default function AuthenticatedApp() {
             
             <Route path="/payment-success" element={
               <PaymentSuccessSlide 
-                activeCase={activeCase}
-                onNext={handleNext}
-                onBack={handleBack}
+                status={paymentVerificationStatus}
+                message={paymentVerificationMessage}
+                onPaymentConfirmed={handlePaymentConfirmed}
+                onRetry={() => setAppState(AppState.VERIFYING_PAYMENT)}
               />
             } />
             
@@ -2366,7 +3211,7 @@ export default function AuthenticatedApp() {
           <div>Mode: {isDraftMode ? '📝 DRAFT' : '✅ PERMANENT'}</div>
           <div className="truncate">TempID: {tempCaseId || 'none'}</div>
           {activeCase && (
-            <div className="truncate">Case: {activeCase.companyName} ({activeCase.caseId || 'no case_id'})</div>
+            <div className="truncate">Case: {activeCase.companyName} ({activeCase.onboardingId || activeCase.caseId || 'no case_id'})</div>
           )}
         </div>
       )}

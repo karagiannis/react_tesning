@@ -125,7 +125,7 @@ export default function RiskFragorSlide({
               disabled={isLocked}
               className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
               rows={3}
-              placeholder="Beskriv kort företagets verksamhet..."
+              placeholder="Beskriv kort företagets verksamhet (minst 10 tecken)..."
             />
           </div>
 

@@ -1,10 +1,9 @@
 import React from 'react';
-import useRoaringData from '../../../legacy/hooks/useRoaringData';
 
-export default function VerksamhetSlide({ onNext, onBack, hideNavigation = false }) {
-  const { data: roaringData, loading, error } = useRoaringData();
+export default function VerksamhetSlide({ onNext, onBack, hideNavigation = false, formData = {} }) {
+  const companyData = formData;
   
-  if (loading) {
+  if (!companyData.organizationNumber) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center">
         <div className="text-center">
@@ -15,18 +14,10 @@ export default function VerksamhetSlide({ onNext, onBack, hideNavigation = false
     );
   }
   
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
-        <div className="bg-red-50 border border-red-200 rounded-card p-6 max-w-md">
-          <p className="text-red-700">⚠️ {error}</p>
-        </div>
-      </div>
-    );
-  }
+  // Use formData directly (same pattern as all other slides)
+  const data = companyData;
   
-  const data = roaringData?.verksamhet;
-  if (!data) {
+  if (!data || Object.keys(data).length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
         <div className="bg-amber-50 border border-amber-200 rounded-card p-6 max-w-md">

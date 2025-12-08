@@ -1,9 +1,8 @@
 import React from 'react';
-import { mockRoaringData } from '../../../data/mockRoaringData';
 
-export default function AgarstrukturSlide({ onNext, onBack }) {
-  const ownerData = mockRoaringData.ownerStructure;
-  const beneficialOwnerData = mockRoaringData.beneficialOwner;
+export default function AgarstrukturSlide({ onNext, onBack, formData = {} }) {
+  const ownerData = formData.ownerStructure || {};
+  const beneficialOwnerData = formData.beneficialOwner || {};
   
   // Get the primary beneficial owner
   const beneficialOwner = beneficialOwnerData.beneficialOwners && beneficialOwnerData.beneficialOwners[0] 

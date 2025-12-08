@@ -1,6 +1,6 @@
 /**
  * handleLogout
- * Normal logout - rensar draft eller behåller permanent data
+ * Rensar localStorage selektivt för detta case - server är source of truth
  */
 export const createHandleLogout = ({
   api,
@@ -12,7 +12,7 @@ export const createHandleLogout = ({
   navigate
 }) => {
   return async () => {
-    console.log(`[LOGOUT] Normal logout initiated. isDraftMode=${isDraftMode}`);
+    console.log(`[LOGOUT] Logout initiated. isDraftMode=${isDraftMode}`);
 
     // Logga för audit trail
     await api.log(`Användare ${user?.name} loggade ut`, {
@@ -21,19 +21,28 @@ export const createHandleLogout = ({
       activeCase,
     });
 
+    // ═══════════════════════════════════════════════════════════════════
+    // RENSA localStorage SELEKTIVT för detta specifika case
+    // Server är source of truth - vid nästa login hämtas allt via RESUMING
+    // ═══════════════════════════════════════════════════════════════════
+    console.log('[LOGOUT] Clearing localStorage for THIS case only...');
+    
+    let prefix;
     if (isDraftMode) {
-      // ═══════════════════════════════════════════════════════════════════
-      // DRAFT MODE: Rensa allt! Ingenting har sparats på servern.
-      // ═══════════════════════════════════════════════════════════════════
-      console.log('[LOGOUT] Draft mode - clearing all draft data');
-      storage.clearAllDraftData();
-    } else {
-      // ═══════════════════════════════════════════════════════════════════
-      // PERMANENT MODE: Behåll data! Det finns ett riktigt case på servern.
-      // ═══════════════════════════════════════════════════════════════════
-      console.log('[LOGOUT] Permanent mode - keeping localStorage data');
-      // Rensa bara temp_case_id och is_draft_mode (inte formData etc.)
-      storage.clearTempCaseId();
+      // Draft mode: rensa alla draft-nycklar för denna user
+      prefix = `onboarding::draft::${tempCaseId}::${user?.id}::`;
+    } else if (activeCase) {
+      // Permanent mode: rensa nycklar för detta specifika case
+      prefix = `onboarding::${activeCase.companyId}::${activeCase.onboardingId}::${user?.id}::`;
+    }
+    
+    if (prefix) {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith(prefix)) {
+          console.log(`[LOGOUT]   🗑️ Removing: ${key}`);
+          localStorage.removeItem(key);
+        }
+      });
     }
 
     // Rensa tab session (sessionStorage)
