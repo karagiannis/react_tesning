@@ -154,6 +154,17 @@ import { createHandlePaymentConfirmed } from './props/handlePaymentConfirmed';
 import StorageKeyBuilder from './utils/StorageKeyBuilder';
 
 // =============================================================================
+// STATE MACHINE HANDLERS
+// =============================================================================
+import AppState from './stateMachine/AppState';
+import { 
+  createHandleInitializing,
+  createHandleRestoringSession,
+  createHandleResuming,
+  createHandleProcessingNext,
+} from './stateMachine';
+
+// =============================================================================
 // SLIDE ORDER - Explicit lista
 // =============================================================================
 const SLIDE_ORDER = [
@@ -177,73 +188,6 @@ const SLIDE_ORDER = [
   { key: 'payment-success', path: '/payment-success' },
   { key: 'support', path: '/support' },
 ];
-
-// =============================================================================
-// APP STATES - Tillståndsmaskin
-// =============================================================================
-// 
-// Varje state representerar VAR i flödet vi befinner oss.
-// State machine garanterar att vi alltid vet exakt vad som händer.
-//
-// Fördelar med state machine:
-// 1. Tydligt flöde - lätt att följa vad som händer
-// 2. Inga race conditions - en sak i taget
-// 3. Lätt att debugga - bara titta på appState
-// 4. Lätt att lägga till nya states
-//
-const AppState = {
-  // ─────────────────────────────────────────────────────────────────────────
-  // INITIAL STATES (körs automatiskt vid mount)
-  // ─────────────────────────────────────────────────────────────────────────
-  UNINITIALIZED: 'UNINITIALIZED',   // Komponenten har precis mountats
-                                     // → Går automatiskt till INITIALIZING
-  
-  INITIALIZING: 'INITIALIZING',     // Laddar token, user, localStorage
-                                     // → Går till CHECKING_PENDING när klart
-  
-  CHECKING_PENDING: 'CHECKING_PENDING', // Frågar API om pågående onboardings
-                                         // → SHOWING_RESUME om finns, annars READY
-  
-  // ─────────────────────────────────────────────────────────────────────────
-  // RESUME STATES (användaren har pågående onboardings)
-  // ─────────────────────────────────────────────────────────────────────────
-  SHOWING_RESUME: 'SHOWING_RESUME', // Visar modal "Vill du fortsätta?"
-                                     // → Väntar på handleResumeChoice() eller handleStartNew()
-  
-  RESUMING: 'RESUMING',             // Hämtar metadata från server
-                                     // → Går till READY när klart
-  
-  RESTORING_SESSION: 'RESTORING_SESSION', // Page reload under aktiv session
-                                           // → Hydrate från localStorage + server
-                                           // → Skippar resume-modal!
-  
-  // ─────────────────────────────────────────────────────────────────────────
-  // NORMAL DRIFT
-  // ─────────────────────────────────────────────────────────────────────────
-  READY: 'READY',                   // Normal drift - väntar på användarinteraktion
-                                     // Användaren kan navigera, fylla i formulär, etc.
-  
-  PROCESSING_NEXT: 'PROCESSING_NEXT', // Användaren klickade "Nästa" - processar logik
-  PROCESSING_BACK: 'PROCESSING_BACK', // Användaren klickade "Tillbaka" - processar logik
-  
-  INITIATING_PAYMENT: 'INITIATING_PAYMENT', // Skapar Stripe session och redirectar
-                                             // → Anropar POST /subscription
-                                             // → Sparar pending_payment till localStorage
-                                             // → window.location.href = stripe_url
-  
-  VERIFYING_PAYMENT: 'VERIFYING_PAYMENT', // Verifierar betalning efter Stripe redirect
-                                           // → Anropar /subscription/status
-                                           // → Går till READY när klart
-  
-  NAVIGATING: 'NAVIGATING',         // (Framtida) Byter slide
-  SAVING: 'SAVING',                 // (Framtida) Sparar till server
-  
-  // ─────────────────────────────────────────────────────────────────────────
-  // ERROR
-  // ─────────────────────────────────────────────────────────────────────────
-  ERROR: 'ERROR',                   // Något gick fel
-                                     // → Visar felmeddelande, väntar på handleClearError()
-};
 
 // =============================================================================
 // API BASE URL
@@ -315,8 +259,9 @@ export default function AuthenticatedApp() {
   // ─────────────────────────────────────────────────────────────────────────
   // Extern data (från Roaring.io och SIE-fil)
   // ─────────────────────────────────────────────────────────────────────────
-  const [roaringData, setRoaringData] = useState(null);
-  // roaringData = { company: {...}, owners: [...], board: [...] }
+  // 🔓 isPaymentConfirmed - Låser upp företagsdata-slides (Verksamhet, Ägarstruktur, etc.)
+  //    Sätts till true när subscription.payment_confirmed_at finns i metadata
+  const [isPaymentConfirmed, setIsPaymentConfirmed] = useState(false);
   
   const [sieData, setSieData] = useState(null);
   // sieData = { accounts: [...], transactions: [...] }
@@ -937,6 +882,59 @@ export default function AuthenticatedApp() {
   };
 
   // ===========================================================================
+  // STATE MACHINE HANDLERS - Factory-instantiering
+  // ===========================================================================
+  //
+  // Getter callbacks för att alltid hämta AKTUELLA värden (closure pattern)
+  // Detta löser problemet med stale state i handlers.
+  //
+  const getState = () => ({
+    currentSlideKey,
+    hasAgreement,
+    isDraftMode,
+    activeCase,
+    formData,
+    completedSlides,
+    tempCaseId,
+    user,
+  });
+  
+  const getActions = () => ({
+    setIsLoading,
+    setError,
+    setAppState,
+    setTempCaseId,
+    setIsDraftMode,
+    setUser,
+    setFormData,
+    setCompletedSlides,
+    setActiveCase,
+    setIsPaymentConfirmed,
+    setCurrentSlideKey,
+    setSyncStatus,
+    setShowAgreementModal,
+    setNavigationHistory,
+    setConflictInfo,
+    setShowConflictModal,
+  });
+  
+  const services = {
+    storage,
+    api,
+    navigate,
+    SLIDE_ORDER,
+    AppState,
+    // checkVersionConflict läggs till efter det är definierat
+  };
+  
+  // Instantiera handlers (de skapas en gång, men hämtar state vid varje anrop)
+  const handleInitializingAction = createHandleInitializing(getState, getActions, services);
+  const handleRestoringSessionAction = createHandleRestoringSession(getState, getActions, services);
+  const handleResumingAction = createHandleResuming(getState, getActions, services);
+  // handleProcessingNext behöver checkVersionConflict som inte är definierad än
+  // Vi skapar den senare i koden
+
+  // ===========================================================================
   // 🔄 AUTO-SAVE HOOK - Sparar till localStorage vid varje formData-ändring
   // ===========================================================================
   //
@@ -1110,170 +1108,10 @@ export default function AuthenticatedApp() {
         break;
         
       // =========================================================================
-      // INITIALIZING - Ladda allt vi behöver
+      // INITIALIZING - Delegerat till handleInitializingAction
       // =========================================================================
-      //
-      // NÄR: Direkt efter UNINITIALIZED
-      // VAD: 
-      //   1. Kolla att token finns (annars ERROR)
-      //   2. Hämta/generera tempCaseId för draft-läge
-      //   3. Hämta användarinfo
-      //   4. Logga inloggning till server
-      //   5. Kolla om vi har en pågående session i denna flik
-      // OM PÅGÅENDE SESSION:
-      //   → Gå till RESTORING_SESSION
-      // ANNARS:    
-      //    → Gå till CHECKING_PENDING
       case AppState.INITIALIZING: {
-        setIsLoading(true);
-        
-        // ─────────────────────────────────────────────────────────────────
-        // Steg 1: Verifiera att vi har en token
-        // ─────────────────────────────────────────────────────────────────
-        const token = storage.getToken();
-        if (!token) {
-          setError('Ingen token hittad - du måste logga in igen');
-          setAppState(AppState.ERROR);
-          break;  // VIKTIGT: Avbryt här, gå inte vidare!
-        }
-        
-        // ─────────────────────────────────────────────────────────────────
-        // Steg 2: Hantera tempCaseId och draft-läge
-        // ─────────────────────────────────────────────────────────────────
-        //
-        // Om användaren refreshar sidan behöver vi behålla tempCaseId
-        // så att vi kan hitta rätt data i localStorage.
-        //
-        // Om det är första gången (ny session) genererar vi ett nytt.
-        //
-        let currentTempCaseId = storage.getTempCaseId();
-        const currentIsDraftMode = storage.getIsDraftMode();
-        
-        if (!currentTempCaseId) {
-          // Första gången - generera nytt tempCaseId
-          currentTempCaseId = StorageKeyBuilder.generateTempCaseId();
-          storage.setTempCaseId(currentTempCaseId);
-          console.log(`[INIT] Generated new tempCaseId: ${currentTempCaseId}`);
-        } else {
-          console.log(`[INIT] Using existing tempCaseId: ${currentTempCaseId}`);
-        }
-        
-        setTempCaseId(currentTempCaseId);
-        setIsDraftMode(currentIsDraftMode);
-        console.log(`[INIT] isDraftMode: ${currentIsDraftMode}`);
-        
-        // ─────────────────────────────────────────────────────────────────
-        // Steg 3: Hämta användarinfo från /api/me
-        // ─────────────────────────────────────────────────────────────────
-        //
-        // GET /api/me dekoderar JWT på servern och returnerar:
-        // - id: user UUID
-        // - email: från JWT
-        // - name: display_name från profile.json
-        // - role: user | admin
-        // - org_id: organisation ID om tilldelad
-        // - login_time: aktuell tid (server)
-        // - browser: user-agent (server läser från request)
-        //
-        let userInfo;
-        try {
-          userInfo = await api.fetchMe();
-          console.log('[INIT] Fetched user info from /api/me:', userInfo);
-        } catch (e) {
-          console.error('[INIT] Failed to fetch /api/me:', e);
-          setError('Kunde inte hämta användarinfo - försök logga in igen');
-          setAppState(AppState.ERROR);
-          break;
-        }
-        setUser(userInfo);
-        
-        // ─────────────────────────────────────────────────────────────────
-        // Steg 4: Logga inloggning till server (audit trail)
-        // ─────────────────────────────────────────────────────────────────
-        //
-        // Två typer av loggning:
-        // - api.log() = central audit log (admins ser)
-        // - api.logPersonal() = användarens personliga logg
-        //
-        await api.log(`Användare ${userInfo.name} är inloggad`, {
-          userId: userInfo.id,
-          email: userInfo.email,
-          role: userInfo.role,
-          tempCaseId: currentTempCaseId,
-          isDraftMode: currentIsDraftMode,
-        });
-        
-        // Logga också till personlig logg
-        await api.logPersonal('Session startad', {
-          tempCaseId: currentTempCaseId,
-          isDraftMode: currentIsDraftMode,
-        });
-        
-        // ─────────────────────────────────────────────────────────────────
-        // Steg 5: Kolla om vi har en AKTIV SESSION i denna flik (page reload)
-        // ─────────────────────────────────────────────────────────────────
-        //
-        // SYFTE: Avgöra om detta är:
-        //   A) Page reload under pågående session → RESTORING_SESSION
-        //   B) Ny login (eller efter logout) → CHECKING_PENDING
-        //
-        // VIKTIGT: Vi använder sessionStorage (unik per flik!) för att
-        //          identifiera vilken session DENNA FLIK arbetar med.
-        //
-        // SESSION-ID FORMAT:
-        //   onboarding::{company_id}::{case_id}::{user_id}
-        //   Exempel: onboarding::556677::case_001::user_42
-        //
-        // TAB SESSION innehåller:
-        //   - sessionId: Den fullständiga session-ID:n
-        //   - currentSlide: Vilken slide användaren var på
-        //   - lastActivity: Tidsstämpel för senaste aktivitet
-        //
-        // FLÖDE:
-        //   Om currentTabSession finns → RESTORING_SESSION (skippa resume-modal!)
-        //   Om currentTabSession INTE finns → CHECKING_PENDING (normal flow)
-        //
-        const currentTabSession = storage.getCurrentTabSession();
-        
-        setIsLoading(false);
-        
-        // ─────────────────────────────────────────────────────────────────
-        // VIKTIG VALIDERING: Kontrollera att sessionen tillhör DENNA användare!
-        // ─────────────────────────────────────────────────────────────────
-        // SessionID har formatet: onboarding::{companyId}::{caseId}::{userId}
-        // eller: onboarding::draft::{tempCaseId}::{userId}
-        // Vi måste verifiera att userId i sessionId matchar den inloggade användaren.
-        //
-        let sessionBelongsToUser = false;
-        if (currentTabSession && currentTabSession.sessionId && user?.id) {
-          const sessionParts = currentTabSession.sessionId.split('::');
-          const sessionUserId = sessionParts[sessionParts.length - 1];
-          sessionBelongsToUser = (sessionUserId === user.id);
-          
-          if (!sessionBelongsToUser) {
-            console.warn('[INIT] ⚠️ Session belongs to different user!');
-            console.warn(`[INIT]   Session user: ${sessionUserId}`);
-            console.warn(`[INIT]   Current user: ${user.id}`);
-            console.log('[INIT] Clearing stale tab session...');
-            storage.clearCurrentTabSession();
-          }
-        }
-        
-        if (currentTabSession && currentTabSession.sessionId && sessionBelongsToUser) {
-          // ═══════════════════════════════════════════════════════════════
-          // PAGE RELOAD: Användaren var mitt i en session i denna flik
-          // ═══════════════════════════════════════════════════════════════
-          console.log('[INIT] 🔄 Tab session found:', currentTabSession);
-          console.log('[INIT] → Going to RESTORING_SESSION (skipping resume modal)');
-          setAppState(AppState.RESTORING_SESSION);
-        } else {
-          // ═══════════════════════════════════════════════════════════════
-          // NY LOGIN/NY FLIK: Ingen aktiv session - kolla pending på servern
-          // ═══════════════════════════════════════════════════════════════
-          console.log('[INIT] No valid tab session found for this user');
-          console.log('[INIT] → Going to CHECKING_PENDING');
-          setAppState(AppState.CHECKING_PENDING);
-        }
+        await handleInitializingAction();
         break;
       }
         
@@ -1394,356 +1232,21 @@ export default function AuthenticatedApp() {
         break;
         
       // =========================================================================
-      // RESUMING - Användaren valde att återuppta
+      // RESUMING - Delegerat till handleResumingAction
       // =========================================================================
-      //
-      // NÄR: Användaren klickade "Fortsätt" i resume-modalen
-      // VAD:
-      //   1. Hämta metadata från server (formData, completedSlides, lastSlide)
-      //   2. Spara till localStorage
-      //   3. Uppdatera state
-      //   4. Navigera till senaste slide
-      // SEDAN: Gå till READY
-      //
       case AppState.RESUMING: {
-        setIsLoading(true);
-        
-        try {
-          // Hämta all data från server
-          console.log('[RESUMING] 📡 Fetching metadata for:', activeCase);
-          const metadata = await api.fetchMetadata(
-            activeCase.companyId, 
-            activeCase.onboardingId
-          );
-          console.log('[RESUMING] ✅ Metadata received:', metadata);
-          console.log('[RESUMING]   - version:', metadata.version);
-          console.log('[RESUMING]   - lastModified:', metadata.lastModified);
-          console.log('[RESUMING]   - modifiedBy:', metadata.modifiedBy);
-          console.log('[RESUMING]   - pages:', Object.keys(metadata.pages || {}));
-          
-          // 🆕 NEW: Extract pages directly (no unwrapping needed!)
-          const pagesData = metadata.pages || {};
-          console.log('[RESUMING] 📦 Pages data:', pagesData);
-          
-          console.log('[RESUMING] 🧹 Clearing localStorage for THIS case only...');
-          // Selektiv rensning: endast nycklar för detta specifika case
-          const prefix = `onboarding::${activeCase.companyId}::${activeCase.onboardingId}::${user?.id}::`;
-          Object.keys(localStorage).forEach(key => {
-            if (key.startsWith(prefix)) {
-              console.log(`[RESUMING]   🗑️ Removing: ${key}`);
-              localStorage.removeItem(key);
-            }
-          });
-          
-          console.log('[RESUMING] 🔄 Setting isDraftMode=false (permanent case)');
-          setIsDraftMode(false);
-          storage.setIsDraftMode(false);
-          
-          // 🆕 NEW: Save each page SEPARATELY to PERMANENT localStorage keys
-          console.log('[RESUMING] 💾 Saving pages to PERMANENT localStorage keys...');
-          Object.entries(pagesData).forEach(([slideKey, slideData]) => {
-            storage.setSlideData(slideKey, slideData);
-            console.log(`[RESUMING]   ✓ Saved ${slideKey}:`, slideData);
-          });
-          
-          // Save activeCase and completedSlides
-          const permanentCompletedSlidesKey = StorageKeyBuilder.buildPermanentKey(
-            activeCase.companyId,
-            activeCase.onboardingId,
-            user?.id,
-            'completedSlides'
-          );
-          const permanentActiveCaseKey = StorageKeyBuilder.buildPermanentKey(
-            activeCase.companyId,
-            activeCase.onboardingId,
-            user?.id,
-            'activeCase'
-          );
-          
-          localStorage.setItem(permanentCompletedSlidesKey, JSON.stringify(metadata.completedSlides || []));
-          localStorage.setItem(permanentActiveCaseKey, JSON.stringify(activeCase));
-          console.log('[RESUMING] ✅ Saved metadata to permanent keys');
-          
-          // 📌 SPARA SERVER VERSION för conflict detection
-          const serverVersion = metadata.version || 0;
-          const versionStorageKey = `case_${activeCase.companyId}_${activeCase.onboardingId}_version`;
-          localStorage.setItem(versionStorageKey, JSON.stringify({
-            version: serverVersion,
-            timestamp: metadata.lastModified || new Date().toISOString(),
-            syncedFromServer: true
-          }));
-          console.log('[RESUMING] 📌 Sparade server version:', serverVersion);
-          
-          // Uppdatera React state med rätt data
-          console.log('[RESUMING] 🔄 Updating React state...');
-          setFormData(pagesData);
-          setCompletedSlides(metadata.completedSlides || []);
-          console.log('[RESUMING] ✅ React state updated with pages data');
-          
-          // ─────────────────────────────────────────────────────────────────
-          // 🔓 ROARING DATA - Lås upp företagsdata-slides om data finns
-          // ─────────────────────────────────────────────────────────────────
-          //
-          // Om användaren har betalat för Roaring.io-data, finns minst en av
-          // result-slides i pages. Kolla om någon av dessa finns:
-          // - verksamhet
-          // - agarstruktur
-          // - styrelse
-          // - ovriga-data
-          //
-          const resultSlides = ['verksamhet', 'agarstruktur', 'styrelse', 'ovriga-data'];
-          const hasRoaringData = resultSlides.some(slideKey => pagesData[slideKey]);
-          
-          if (hasRoaringData) {
-            console.log('[RESUMING] 🔓 Result slides found in pages - unlocking företagsdata slides');
-            setRoaringData({ _unlocked: true });
-          }
-          
-          // Navigera till där användaren var senast
-          // Server returnerar current_slide (snake_case), inte lastSlide
-          const lastSlide = metadata.current_slide || metadata.lastSlide || 'uppdragsval';
-          console.log('[RESUMING] 🧭 Navigating to slide:', lastSlide);
-          setCurrentSlideKey(lastSlide);
-          
-          const slide = SLIDE_ORDER.find(s => s.key === lastSlide);
-          if (slide) {
-            navigate(slide.path);
-          }
-          
-          // Sätt tab session för denna flik
-          // OBS: activeCase kan ha antingen caseId (från handleConfirmCompanySelection)
-          // eller onboardingId (från handleResumeChoice) - hantera båda!
-          const caseOrOnboardingId = activeCase.caseId || activeCase.onboardingId;
-          const sessionId = storage.buildSessionId(
-            activeCase.companyId,
-            caseOrOnboardingId,
-            user?.id
-          );
-          storage.setCurrentTabSession({
-            sessionId,
-            currentSlide: lastSlide,
-          });
-          
-          // Logga för audit trail
-          await api.log(`Användare ${user?.name} återupptog onboarding för ${activeCase.companyName}`);
-          
-        } catch (e) {
-          setError(e.message);
-          // OBS: Vi går ändå till READY, men visar felmeddelande
-        }
-        
-        setIsLoading(false);
-        setAppState(AppState.READY);
+        await handleResumingAction();
         break;
       }
       
       // =========================================================================
-      // RESTORING_SESSION - Page reload under aktiv session
+      // RESTORING_SESSION - Delegerat till handleRestoringSessionAction
       // =========================================================================
-      //
-      // NÄR: Användaren refreshade sidan MITT I en pågående session
-      // VAD:
-      //   1. Läs currentTabSession (från sessionStorage) för sessionId och currentSlide
-      //   2. Hydrate formData, completedSlides, activeCase från localStorage
-      //   3. Om INTE draft-läge: Hämta även metadata från server (för synkronisering)
-      //   4. Navigera till currentSlide
-      // SEDAN: Gå direkt till READY (INGEN resume-modal!)
-      //
-      // SKILLNAD MOT RESUMING:
-      // - RESUMING: Användaren klickade på resume-modal (ny login)
-      // - RESTORING_SESSION: Page reload (samma session fortsätter i samma flik)
-      //
       case AppState.RESTORING_SESSION: {
-        setIsLoading(true);
-        
-        // ─────────────────────────────────────────────────────────────────
-        // Steg 1: Läs currentTabSession för sessionInfo
-        // ─────────────────────────────────────────────────────────────────
-        const tabSession = storage.getCurrentTabSession();
-        
-        if (!tabSession || !tabSession.sessionId) {
-          // Något gick fel - gå till CHECKING_PENDING som fallback
-          console.warn('[RESTORE] No tab session found - falling back to CHECKING_PENDING');
-          setIsLoading(false);
-          setAppState(AppState.CHECKING_PENDING);
-          break;
-        }
-        
-        console.log('[RESTORE] Restoring tab session:', tabSession);
-        
-        // ─────────────────────────────────────────────────────────────────
-        // Steg 2: Hydrate från localStorage
-        // ─────────────────────────────────────────────────────────────────
-        const savedFormData = storage.getFormData();
-        const savedCompletedSlides = storage.getCompletedSlides();
-        const savedActiveCase = storage.getActiveCase();
-        
-        setFormData(savedFormData);
-        setCompletedSlides(savedCompletedSlides);
-        if (savedActiveCase) {
-          setActiveCase(savedActiveCase);
-        }
-        
-        console.log('[RESTORE] Hydrated from localStorage:', {
-          formDataKeys: Object.keys(savedFormData),
-          completedSlides: savedCompletedSlides,
-          activeCase: savedActiveCase,
-        });
-        
-        // ─────────────────────────────────────────────────────────────────
-        // Steg 2.5: Validera inkonsistent state (isDraftMode=false men inget activeCase)
-        // ─────────────────────────────────────────────────────────────────
-        //
-        // Om is_draft_mode=false men det inte finns något activeCase,
-        // då är localStorage inkonsistent (t.ex. backend-företaget raderat).
-        // Återställ då till draft mode.
-        //
-        if (!isDraftMode && !savedActiveCase) {
-          console.warn('[RESTORE] ⚠️ Inconsistent state: isDraftMode=false but no activeCase - resetting to draft mode');
-          setIsDraftMode(true);
-          storage.setIsDraftMode(true);
-          
-          // Rensa alla onboarding-nycklar från localStorage
-          const keysToRemove = [];
-          for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.includes('onboarding')) {
-              keysToRemove.push(key);
-            }
-          }
-          keysToRemove.forEach(key => localStorage.removeItem(key));
-          
-          // Rensa sessionStorage
-          storage.clearCurrentTabSession();
-          
-          // Återställ state
-          setActiveCase(null);
-          setFormData({});
-          setCompletedSlides([]);
-          
-          console.log('[RESTORE] ✅ Reset to draft mode - redirecting to CHECKING_PENDING');
-          setIsLoading(false);
-          setAppState(AppState.CHECKING_PENDING);
-          break;
-        }
-        
-        // ─────────────────────────────────────────────────────────────────
-        // Steg 3: Om permanent läge - synka med server
-        // ─────────────────────────────────────────────────────────────────
-        //
-        // Om vi har ett riktigt case (isDraftMode=false), hämta metadata
-        // från servern för att säkerställa att vi är synkade.
-        //
-        if (!isDraftMode && savedActiveCase?.companyId) {
-          try {
-            console.log('[RESTORE] Fetching metadata from server for sync...');
-            const metadata = await api.fetchMetadata(
-              savedActiveCase.companyId,
-              savedActiveCase.caseId || savedActiveCase.onboardingId
-            );
-            
-            // Synka completedSlides från server (servern har auktoritet)
-            if (metadata.completedSlides) {
-              setCompletedSlides(metadata.completedSlides);
-              storage.setCompletedSlides(metadata.completedSlides);
-            }
-            
-            // 📌 SPARA SERVER VERSION för conflict detection
-            const serverVersion = metadata?.metadata?.version || metadata?.version || 0;
-            const caseId = savedActiveCase.caseId || savedActiveCase.onboardingId;
-            const versionStorageKey = `case_${savedActiveCase.companyId}_${caseId}_version`;
-            localStorage.setItem(versionStorageKey, JSON.stringify({
-              version: serverVersion,
-              timestamp: new Date().toISOString(),
-              syncedFromServer: true
-            }));
-            console.log('[RESTORE] 📌 Sparade server version:', serverVersion);
-            
-            // 🔓 Synka roaring_data för att låsa upp företagsdata-slides
-            if (metadata.roaring_data) {
-              console.log('[RESTORE] 🔓 Roaring data found - unlocking företagsdata slides');
-              setRoaringData(metadata.roaring_data);
-            } else if (metadata.has_roaring_data) {
-              console.log('[RESTORE] 🔓 has_roaring_data=true - unlocking företagsdata slides');
-              setRoaringData({ _unlocked: true });
-            }
-            
-            console.log('[RESTORE] Synced with server metadata');
-          } catch (e) {
-            // Om backend returnerar 404 = företaget finns inte längre
-            // Då måste vi rensa localStorage och börja om från början
-            console.error('[RESTORE] ❌ Failed to sync with server:', e);
-            console.log('[RESTORE] Error status:', e.status);
-            
-            if (e.status === 404 || e.message?.includes('404') || e.message?.includes('not found') || e.message?.includes('Not Found')) {
-              console.warn('[RESTORE] 🗑️ Company/case not found on server (404) - clearing localStorage and resetting state');
-              
-              // STEG 1: Sätt isDraftMode=true OMEDELBART
-              setIsDraftMode(true);
-              localStorage.setItem('is_draft_mode', 'true');
-              
-              // STEG 2: Rensa all localStorage-data relaterad till onboarding
-              const keysToRemove = [];
-              for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.includes('onboarding')) {
-                  keysToRemove.push(key);
-                }
-              }
-              keysToRemove.forEach(key => localStorage.removeItem(key));
-              
-              // STEG 3: Rensa även sessionStorage (tab session)
-              storage.clearCurrentTabSession();
-              
-              // STEG 4: Återställ state
-              setActiveCase(null);
-              setFormData({});
-              setCompletedSlides([]);
-              
-              console.log('[RESTORE] 🔄 State reset complete, going to CHECKING_PENDING');
-              
-              // STEG 5: Gå till CHECKING_PENDING för fresh start
-              setIsLoading(false);
-              setAppState(AppState.CHECKING_PENDING);
-              break;
-            }
-            
-            // För andra fel, fortsätt med localStorage-data
-            console.warn('[RESTORE] Using localStorage data despite server sync failure');
-          }
-        }
-        
-        // ─────────────────────────────────────────────────────────────────
-        // Steg 4: Navigera till där användaren var
-        // ─────────────────────────────────────────────────────────────────
-        const targetSlide = tabSession.currentSlide || 'uppdragsval';
-        setCurrentSlideKey(targetSlide);
-        
-        const slide = SLIDE_ORDER.find(s => s.key === targetSlide);
-        if (slide) {
-          navigate(slide.path);
-          console.log(`[RESTORE] Navigated to: ${slide.path}`);
-        }
-        
-        // Logga för audit trail
-        await api.logPersonal('Session restored after page reload', {
-          sessionId: tabSession.sessionId,
-          currentSlide: targetSlide,
-          isDraftMode,
-        });
-        
-        setIsLoading(false);
-        setAppState(AppState.READY);
+        await handleRestoringSessionAction();
         break;
       }
-        
-      // =========================================================================
-      // READY - Normal drift
-      // =========================================================================
-      //
-      // NÄR: Allt är laddat och klart
-      // VAD: Väntar på användarinteraktion (formulär, navigation)
-      //
+
       case AppState.READY:
         console.log('[READY] ✅ App is ready! Waiting for user interaction...');
         console.log('[READY] Current slide:', currentSlideKey);
@@ -2063,6 +1566,10 @@ export default function AuthenticatedApp() {
           
           console.log('[VERIFYING_PAYMENT] ✅ Payment verified successfully!');
           
+          // 🔓 Lås upp sidebar-items (företagsdata-slides)
+          setIsPaymentConfirmed(true);
+          console.log('[VERIFYING_PAYMENT] 🔓 Unlocked sidebar items (isPaymentConfirmed set)');
+          
           // 📝 Logga lyckad betalning
           await api.logPersonal('Betalning verifierad - SUCCESS!', {
             sessionId,
@@ -2217,7 +1724,8 @@ export default function AuthenticatedApp() {
     const loadSlideData = async () => {
       console.log(`[SLIDE-LOAD] 🔄 Loading '${currentSlideKey}' (need-to-know check)...`);
       
-      if (!activeCase?.companyId || !activeCase?.caseId) {
+      const caseOrOnboardingId = activeCase?.caseId || activeCase?.onboardingId;
+      if (!activeCase?.companyId || !caseOrOnboardingId) {
         console.log(`[SLIDE-LOAD] ⚠️ No active case, skipping`);
         return;
       }
@@ -2239,7 +1747,7 @@ export default function AuthenticatedApp() {
       
       try {
         console.log(`[SLIDE-LOAD] 🌐 Fetching metadata from server...`);
-        serverMeta = await api.fetchMetadata(activeCase.companyId, activeCase.caseId);
+        serverMeta = await api.fetchMetadata(activeCase.companyId, caseOrOnboardingId);
         serverSlideData = serverMeta?.metadata?.pages?.[currentSlideKey];
         serverGlobalVersion = serverMeta?.metadata?.version || 0;
         
@@ -2386,7 +1894,7 @@ export default function AuthenticatedApp() {
     };
     
     loadSlideData();
-  }, [currentSlideKey]); // Kör bara när användaren navigerar till ny slide
+  }, [currentSlideKey, activeCase?.companyId, activeCase?.caseId, activeCase?.onboardingId]); // Kör när slide ändras ELLER activeCase uppdateras
 
   // ===========================================================================
   // PAYMENT VERIFICATION - Trigger när URL är /payment-success
@@ -2700,7 +2208,7 @@ export default function AuthenticatedApp() {
   });
   
   // handleSidebarLock - Avgör om slide är låst (se props/handleSidebarLock.js)
-  const handleSidebarLock = createHandleSidebarLock({ formData });
+  const handleSidebarLock = createHandleSidebarLock({ isPaymentConfirmed });
   
   // handleFieldChange - Uppdatera formulärfält (se props/handleFieldChange.js)
   const handleFieldChange = createHandleFieldChange({
