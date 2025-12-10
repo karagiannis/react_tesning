@@ -193,6 +193,9 @@ export function createHandleResuming(getState, getActions, services) {
         console.log('[RESUMING] 💳 Coming from payment-success - staying on PaymentSuccessSlide');
         console.log('[RESUMING] 💳 Payment confirmed:', paymentConfirmed);
         
+        // 🔑 KRITISKT: Sätt currentSlideKey så React vet vilken slide som ska renderas
+        setCurrentSlideKey('payment-success');
+        
         // Sätt tab session men STANNA på payment-success
         const caseOrOnboardingId = activeCase.case_id || activeCase.case_id;
         const sessionId = storage.buildSessionId(
