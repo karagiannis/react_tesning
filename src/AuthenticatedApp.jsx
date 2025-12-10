@@ -1002,14 +1002,15 @@ export default function AuthenticatedApp() {
       if (!isDraftMode && activeCase?.caseId) {
         console.log(`[SAVE] 📤 Pushing slide data: ${slideKey}`);
         
-        const response = await api.fetch(`/onboarding/slide/${slideKey}`, {
-          method: 'POST',
-          body: JSON.stringify({
-            case_id: activeCase.caseId,
-            company_id: activeCase.companyId,
-            slide_data: slideData,
-          }),
-        });
+        // 🎯 Generisk endpoint: POST /onboarding/{company_id}/{slide_key}
+        const response = await api.post(
+          `/onboarding/${activeCase.companyId}/${slideKey}`,
+          {
+            data: slideData,
+            onboarding_id: activeCase.caseId,
+            // expected_version hämtas från localStorage
+          }
+        );
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
@@ -2183,8 +2184,15 @@ export default function AuthenticatedApp() {
   //   * → 409 Conflict → MODAL VISAS (save-time conflict)
   //
   useEffect(() => {
-    // Skippa om vi inte är redo
-    if (appState !== AppState.READY) return;
+    // Skippa under initialisering/resuming (appState hanterar laddning då)
+    // Men tillåt under READY, PROCESSING_NEXT, PROCESSING_BACK (normal drift)
+    const isNormalOperation = [
+      AppState.READY,
+      AppState.PROCESSING_NEXT,
+      AppState.PROCESSING_BACK
+    ].includes(appState);
+    
+    if (!isNormalOperation) return;
     
     // Skippa om ingen slide är vald
     if (!currentSlideKey) return;
@@ -2194,14 +2202,14 @@ export default function AuthenticatedApp() {
       console.log(`[SLIDE-LOAD] 📝 Draft mode - using localStorage only`);
       const localData = storage.getSlideData(currentSlideKey);
       if (localData && Object.keys(localData).length > 0) {
-        setFormData(prev => ({ ...prev, [currentSlideKey]: localData }));
+        setFormData(prev => {
+          // Checka om redan satt för att undvika loop
+          if (prev[currentSlideKey] && Object.keys(prev[currentSlideKey]).length > 0) {
+            return prev; // Data redan där, gör inget
+          }
+          return { ...prev, [currentSlideKey]: localData };
+        });
       }
-      return;
-    }
-    
-    // Skippa om data redan finns i state (redan hydrated)
-    if (formData[currentSlideKey] && Object.keys(formData[currentSlideKey]).length > 0) {
-      console.log(`[SLIDE-LOAD] ✓ Data already in state for '${currentSlideKey}'`);
       return;
     }
     
@@ -2328,15 +2336,57 @@ export default function AuthenticatedApp() {
         console.log(`[SLIDE-LOAD] 🛑 Blocking load - waiting for user decision`);
         return;
       } else {
-        // Samma användare har olika innehåll - använd localStorage (kan ha osparade ändringar)
-        console.log(`[SLIDE-LOAD] ✅ Same user, different content - using LOCALSTORAGE (local changes)`);
-        setFormData(prev => ({ ...prev, [currentSlideKey]: localSlideData }));
-        return;
+        // ═══════════════════════════════════════════════════════════════
+        // Samma användare - men kolla VILKEN data som är nyast!
+        // ═══════════════════════════════════════════════════════════════
+        // 
+        // MULTI-TAB/MULTI-BROWSER SCENARIO:
+        // User kan ha 2 flikar öppna:
+        //   Tab A: Laddade data kl 10:00 (version 5)
+        //   Tab B: Jobbade vidare till kl 10:30 (version 12)
+        //   Tab A: Återvänder kl 10:31 (har fortfarande version 5 i localStorage)
+        // 
+        // Regel: Använd NYASTE data (högsta version)
+        // 
+        console.log(`[SLIDE-LOAD] ⚙️ Same user, different content - checking versions...`);
+        
+        // Hämta local version från localStorage
+        const storageKey = `case_${activeCase.companyId}_${activeCase.caseId}_version`;
+        const localVersionStr = localStorage.getItem(storageKey);
+        const localVersionObj = localVersionStr ? JSON.parse(localVersionStr) : { version: 0 };
+        const localVersion = localVersionObj.version || 0;
+        
+        console.log(`[SLIDE-LOAD]   Local version: ${localVersion}`);
+        console.log(`[SLIDE-LOAD]   Server version: ${serverGlobalVersion}`);
+        
+        if (serverGlobalVersion > localVersion) {
+          // Server har nyare data - använd den (även om det är samma user!)
+          // Detta händer när user jobbar i annan flik/browser
+          console.log(`[SLIDE-LOAD] ✅ Server is NEWER (v${serverGlobalVersion} > v${localVersion}) - using SERVER (multi-tab sync)`);
+          setFormData(prev => ({ ...prev, [currentSlideKey]: serverSlideData }));
+          
+          // 🔄 Uppdatera även localStorage så vi är synkad
+          storage.setSlideData(currentSlideKey, serverSlideData);
+          
+          // 🔄 Uppdatera local version till server version
+          localStorage.setItem(storageKey, JSON.stringify({
+            version: serverGlobalVersion,
+            timestamp: new Date().toISOString()
+          }));
+          
+          console.log(`[SLIDE-LOAD] 🔄 Synced localStorage with server data (v${serverGlobalVersion})`);
+          return;
+        } else {
+          // localStorage har lika eller nyare data - använd den (osparade ändringar)
+          console.log(`[SLIDE-LOAD] ✅ Local is CURRENT (v${localVersion} >= v${serverGlobalVersion}) - using LOCALSTORAGE (unsaved changes)`);
+          setFormData(prev => ({ ...prev, [currentSlideKey]: localSlideData }));
+          return;
+        }
       }
     };
     
     loadSlideData();
-  }, [currentSlideKey, appState, isDraftMode, activeCase, storage, api, formData, user, setConflictInfo, setShowConflictModal]);
+  }, [currentSlideKey]); // Kör bara när användaren navigerar till ny slide
 
   // ===========================================================================
   // PAYMENT VERIFICATION - Trigger när URL är /payment-success
