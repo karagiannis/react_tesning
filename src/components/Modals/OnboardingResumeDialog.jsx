@@ -33,10 +33,10 @@ import { Trash2, ArrowRight, Plus, Clock, TrendingUp } from 'lucide-react';
  * 
  * CALLBACKS:
  * ──────────────────────────────────────────────────────────────────────────────
- * @param {Function} onResume - (companyId, caseId, companyName) => void
+ * @param {Function} onResume - (company_id, case_id, company_name) => void
  *   Anropas när användaren klickar "Fortsätt" på en onboarding
  * 
- * @param {Function} onDelete - (companyId, caseId) => Promise<void>
+ * @param {Function} onDelete - (company_id, case_id) => Promise<void>
  *   Anropas när användaren bekräftar radering
  *   Parent ansvarar för API-anrop och att uppdatera pendingOnboardings
  * 
@@ -58,12 +58,12 @@ import { Trash2, ArrowRight, Plus, Clock, TrendingUp } from 'lucide-react';
  *   → Renderar <OnboardingResumeDialog_v2 ... />
  *   → Väntar på callback
  * 
- * onResume(companyId, caseId, companyName):
- *   → setActiveCase({ companyId, caseId, companyName })
+ * onResume(company_id, case_id, company_name):
+ *   → setActiveCase({ company_id, case_id, company_name })
  *   → setAppState(RESUMING)
  * 
- * onDelete(companyId, caseId):
- *   → API: DELETE /onboarding/delete/{companyId}?onboarding_id={caseId}
+ * onDelete(company_id, case_id):
+ *   → API: DELETE /onboarding/delete/{company_id}?case_id={case_id}
  *   → setPendingOnboardings(prev => prev.filter(...))
  *   → Om listan tom: onStartNew()
  * 
@@ -88,7 +88,7 @@ export default function OnboardingResumeDialog_v2({
   // LOKAL UI-STATE: Endast för visuell feedback
   // ─────────────────────────────────────────────────────────────────────────
   const [deletingId, setDeletingId] = useState(null);
-  // deletingId = "companyId::caseId" när radering pågår
+  // deletingId = "company_id::case_id" när radering pågår
   
   // ─────────────────────────────────────────────────────────────────────────
   // handleDelete - Visa confirm, anropa parent callback
@@ -118,17 +118,14 @@ export default function OnboardingResumeDialog_v2({
   // handleContinue - Anropa parent callback med valda IDs
   // ─────────────────────────────────────────────────────────────────────────
   const handleContinue = (company) => {
-    // Backend returnerar case_id, men frontend använder onboardingId
-    const onboardingId = company.case_id || company.onboarding_id;
+    const case_id = company.case_id;
     console.log('[OnboardingResumeDialog] 🚀 Resume clicked:', {
       company_id: company.company_id,
-      case_id: company.case_id,
-      onboarding_id: company.onboarding_id,
-      resolved_onboardingId: onboardingId
+      case_id: case_id,
     });
     onResume(
       company.company_id,
-      onboardingId,
+      case_id,
       company.company_name
     );
   };

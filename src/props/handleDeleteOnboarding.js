@@ -14,11 +14,11 @@ export const createHandleDeleteOnboarding = ({
   setPendingOnboardings,
   handleStartNew
 }) => {
-  return async (companyId, caseId) => {
-    console.log(`[DELETE] Deleting onboarding: company=${companyId}, case=${caseId}`);
+  return async (company_id, case_id) => {
+    console.log(`[DELETE] Deleting onboarding: company=${company_id}, case=${case_id}`);
 
     try {
-      const response = await api.fetch(`/onboarding/delete/${companyId}?onboarding_id=${caseId}`, {
+      const response = await api.fetch(`/onboarding/delete/${company_id}?case_id=${case_id}`, {
         method: 'DELETE',
       });
 
@@ -29,12 +29,12 @@ export const createHandleDeleteOnboarding = ({
 
       // Uppdatera listan (immutably)
       const newPendingOnboardings = pendingOnboardings.filter(
-        o => !(o.company_id === companyId && (o.case_id === caseId || o.onboarding_id === caseId))
+        o => !(o.company_id === company_id && (o.case_id === case_id || o.case_id === case_id))
       );
       setPendingOnboardings(newPendingOnboardings);
 
       // Logga för audit trail
-      await api.logPersonal('Onboarding raderad', { companyId, caseId });
+      await api.logPersonal('Onboarding raderad', { company_id, case_id });
 
       console.log(`[DELETE] Success. Remaining onboardings: ${newPendingOnboardings.length}`);
 

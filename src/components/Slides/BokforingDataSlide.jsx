@@ -5,7 +5,7 @@ import FileDropZone from '../Shared/FileDropZone';
 import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 export default function BokforingDataSlide({ onNext, onBack }) {
-  const { companyId } = useParams();
+  const { company_id } = useParams();
   
   const QUESTIONS_CONFIG = {
     entireForm: { type: 'object', required: false }
@@ -70,17 +70,17 @@ export default function BokforingDataSlide({ onNext, onBack }) {
 
   const uploadSieFile = async (file) => {
     try {
-      // BUG FIX 2025-11-29: Use companyId from URL params, not orgnr from localStorage
+      // BUG FIX 2025-11-29: Use company_id from URL params, not orgnr from localStorage
       // Old pattern: find_company_id_by_orgnr() could return wrong company if duplicates existed
-      const onboardingId = localStorage.getItem('onboarding_id');
+      const case_id = localStorage.getItem('case_id');
       
-      if (!companyId) {
+      if (!company_id) {
         setUploadStatus('❌ Company ID saknas. Gå tillbaka till Uppdragsval.');
         return;
       }
       
-      if (!onboardingId) {
-        setUploadStatus('❌ onboarding_id saknas. Gå tillbaka till Uppdragsval.');
+      if (!case_id) {
+        setUploadStatus('❌ case_id saknas. Gå tillbaka till Uppdragsval.');
         return;
       }
 
@@ -88,7 +88,7 @@ export default function BokforingDataSlide({ onNext, onBack }) {
       formDataObj.append('file', file);
 
       const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
-      const response = await fetchWithAuth(`${API_BASE}/onboarding/${companyId}/upload-sie?onboarding_id=${onboardingId}`, {
+      const response = await fetchWithAuth(`${API_BASE}/onboarding/${company_id}/upload-sie?case_id=${case_id}`, {
         method: 'POST',
         headers: {},
         body: formDataObj

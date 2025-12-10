@@ -70,7 +70,7 @@ const DEFAULT_FORM_STATE = {
     annat: '',
   },
   orgnr: '',
-  companyName: ''
+  company_name: ''
 };
 
 export default function UppdragsvalsSlide({ 
@@ -95,7 +95,7 @@ export default function UppdragsvalsSlide({
   });
 
   // Autocomplete för företagssök (UI-only)
-  const [companyQuery, setCompanyQuery] = useState(formData.companyName || '');
+  const [companyQuery, setCompanyQuery] = useState(formData.company_name || '');
   const [companySuggestions, setCompanySuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -121,8 +121,8 @@ export default function UppdragsvalsSlide({
 
   // Synka companyQuery med formData (om ändras utifrån)
   useEffect(() => {
-    setCompanyQuery(formData.companyName || '');
-  }, [formData.companyName]);
+    setCompanyQuery(formData.company_name || '');
+  }, [formData.company_name]);
 
   // ═══════════════════════════════════════════════════════════════════════
   // HANDLERS - Anropar onFieldChange uppåt
@@ -156,7 +156,7 @@ export default function UppdragsvalsSlide({
   };
 
   const handleCompanyNameChange = (value) => {
-    onFieldChange('companyName', value);
+    onFieldChange('company_name', value);
   };
 
   // Företagssök med autocomplete
@@ -166,7 +166,7 @@ export default function UppdragsvalsSlide({
     if (query.trim() === '') {
       setCompanySuggestions([]);
       setShowSuggestions(false);
-      onFieldChange('companyName', '');
+      onFieldChange('company_name', '');
       onFieldChange('orgnr', '');
       return;
     }
@@ -193,8 +193,8 @@ export default function UppdragsvalsSlide({
     console.log('[AUTOCOMPLETE] Selected company:', company);
     setCompanyQuery(company.name);
     
-    console.log('[AUTOCOMPLETE] Calling onFieldChange for companyName:', company.name);
-    onFieldChange('companyName', company.name);
+    console.log('[AUTOCOMPLETE] Calling onFieldChange for company_name:', company.name);
+    onFieldChange('company_name', company.name);
     
     console.log('[AUTOCOMPLETE] Calling onFieldChange for orgnr:', company.orgnr);
     onFieldChange('orgnr', company.orgnr);
@@ -237,7 +237,7 @@ export default function UppdragsvalsSlide({
 
   const services = formData.services || DEFAULT_FORM_STATE.services;
   const orgnr = formData.orgnr || '';
-  const companyName = formData.companyName || '';
+  const company_name = formData.company_name || '';
   const displayError = error || localError;
   const canEditOrgnr = !isLocked;
 
@@ -416,15 +416,15 @@ export default function UppdragsvalsSlide({
                 onChange={(e) => handleOrgnrChange(e.target.value)}
                 placeholder="NNNNNN-NNNN"
                 maxLength={11}
-                readOnly={companyName !== '' || !canEditOrgnr}
+                readOnly={company_name !== '' || !canEditOrgnr}
                 className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500 ${
-                  (companyName !== '' || !canEditOrgnr) ? 'bg-gray-100 cursor-not-allowed' : ''
+                  (company_name !== '' || !canEditOrgnr) ? 'bg-gray-100 cursor-not-allowed' : ''
                 }`}
               />
               <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
                 {!canEditOrgnr ? (
                   <><Lock className="w-4 h-4 text-gray-500" /> Organisationsnummer är låst efter att onboardingen startats</>
-                ) : companyName !== '' ? (
+                ) : company_name !== '' ? (
                   <>✅ Fylls i automatiskt från valt företag</>
                 ) : (
                   'Format: 556903-8671 (bindestreck valfritt)'

@@ -142,7 +142,7 @@ function VoucherDetailPage() {
                   </div>
                   <div>
                     <span className="text-gray-500">Skapad av:</span>
-                    <span className="ml-2">{voucherData.createdBy}</span>
+                    <span className="ml-2">{voucherData.created_by}</span>
                   </div>
                 </div>
               </div>
@@ -360,7 +360,7 @@ function getMockVoucherData(voucherId) {
       amount: 850000,
       status: "error",
       flagReason: "Belopp överstiger normalintervall med 340%",
-      createdBy: "System Import",
+      created_by: "System Import",
       createdDate: "2024-01-15",
       rows: [
         { account: "4000", accountName: "Konsultkostnader", debit: 850000, credit: 0 },
@@ -375,7 +375,7 @@ function getMockVoucherData(voucherId) {
       amount: 45000,
       status: "warning",
       flagReason: "Kontanthantering utan verifikation",
-      createdBy: "Fredrik Andersson",
+      created_by: "Fredrik Andersson",
       createdDate: "2024-03-22",
       rows: [
         { account: "6570", accountName: "Diverse kostnader", debit: 45000, credit: 0 },
@@ -390,7 +390,7 @@ function getMockVoucherData(voucherId) {
       amount: 59780,
       status: "error",
       flagReason: "2 festkläder (10 090 SEK) i aggregerad post med 49 dokument",
-      createdBy: "System Import",
+      created_by: "System Import",
       createdDate: "2025-03-15",
       rows: [
         { account: "5410", accountName: "Varor och material", debit: 47823, credit: 0 },
@@ -406,7 +406,7 @@ function getMockVoucherData(voucherId) {
       amount: 125400,
       status: "warning",
       flagReason: "23 affärshändelser i samma verifikation",
-      createdBy: "System Import",
+      created_by: "System Import",
       createdDate: "2024-11-20",
       rows: [
         { account: "5410", accountName: "Varor och material", debit: 100320, credit: 0 },
@@ -422,7 +422,7 @@ function getMockVoucherData(voucherId) {
       amount: 567890,
       status: "warning",
       flagReason: "Ovanligt många kontorader - kontrollera uppdelning",
-      createdBy: "Test Import",
+      created_by: "Test Import",
       createdDate: "2025-01-31",
       rows: [
         { account: "1510", accountName: "Kundfordringar Sverige", debit: 125000, credit: 0 },

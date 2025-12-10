@@ -42,9 +42,9 @@ export const createHandleLogoutAndReset = ({
     storage.clearAllDraftData();
     
     // Om vi är i permanent mode, rensa även permanent data
-    if (!isDraftMode && activeCase?.companyId) {
+    if (!isDraftMode && activeCase?.company_id) {
       // Hitta och rensa permanent-nycklar
-      const permanentPrefix = `onboarding::${activeCase.companyId}::`;
+      const permanentPrefix = `onboarding::${activeCase.company_id}::`;
       for (let i = localStorage.length - 1; i >= 0; i--) {
         const key = localStorage.key(i);
         if (key && key.startsWith(permanentPrefix)) {

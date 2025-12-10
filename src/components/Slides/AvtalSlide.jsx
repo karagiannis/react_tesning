@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
-  const { companyId } = useParams();
+  const { company_id } = useParams();
   
   const QUESTIONS_CONFIG = {
     entireForm: { type: 'object', required: false }
@@ -59,7 +59,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
 
   // Mock customer data
   const mockCustomerData = {
-    companyName: customerData.companyName || 'Företagsnamn AB',
+    company_name: customerData.company_name || 'Företagsnamn AB',
     orgNumber: customerData.orgNumber || '556XXX-XXXX',
     signatoryName: customerData.signatoryName || 'Anna Andersson',
     monthlyPrice: customerData.monthlyPrice || '4 500'
@@ -96,7 +96,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
     // Backend will:
     // 1. Fetch original .tex from /storage/firms/{firmId}/contract_template.tex
     // 2. Create temp copy in /tmp/session-{sessionId}-{timestamp}.tex
-    // 3. Replace placeholders: {{FÖRETAGSNAMN}} → mockCustomerData.companyName
+    // 3. Replace placeholders: {{FÖRETAGSNAMN}} → mockCustomerData.company_name
     // 4. Compile with pdflatex
     // 5. Save to /storage/sessions/{sessionId}/contract_final.pdf
     // 6. Delete temp .tex
@@ -106,7 +106,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
       sessionId: 'session-' + Date.now(),
       templateId: contractTemplate?.templateId,
       customerData: {
-        företagsnamn: mockCustomerData.companyName,
+        företagsnamn: mockCustomerData.company_name,
         orgnummer: mockCustomerData.orgNumber,
         kontaktperson: mockCustomerData.signatoryName,
         email: customerData.email || 'anna@företag.se',
@@ -151,7 +151,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
         <div className="mb-4 p-4 bg-gray-50 border border-gray-300 rounded-box">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-gray-700"><strong>Företag:</strong> {mockCustomerData.companyName}</p>
+              <p className="text-sm text-gray-700"><strong>Företag:</strong> {mockCustomerData.company_name}</p>
               <p className="text-sm text-gray-700"><strong>Org.nr:</strong> {mockCustomerData.orgNumber}</p>
             </div>
             <div>
@@ -172,7 +172,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
                 {isLoadingTemplate 
                   ? 'Laddar avtal...' 
                   : finalContractUrl 
-                    ? `uppdragsavtal_signerat_${mockCustomerData.companyName.replace(/\s+/g, '_')}.pdf`
+                    ? `uppdragsavtal_signerat_${mockCustomerData.company_name.replace(/\s+/g, '_')}.pdf`
                     : contractTemplate?.filename.replace('.tex', '.pdf') || 'uppdragsavtal_exempel.pdf'
                 }
               </span>

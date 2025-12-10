@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 export default function RiskbedomningSlide({ onNext, onBack }) {
-  const { companyId } = useParams();
+  const { company_id } = useParams();
   
   const QUESTIONS_CONFIG = {
     entireForm: { type: 'object', required: false }

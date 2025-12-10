@@ -19,13 +19,14 @@ export const createHandleConflictReload = ({
 
     try {
       // Hämta färsk data från server
-      const serverMeta = await api.fetchMetadata(activeCase.companyId, activeCase.caseId);
-      const serverVersion = serverMeta?.metadata?.version || serverMeta?.version || 0;
+      const serverMeta = await api.fetchMetadata(activeCase.company_id, activeCase.case_id);
+      // 📌 Backend returnerar fält direkt på roten (inte under .metadata)
+      const server_version = serverMeta?.version || 0;
 
-      // Uppdatera lokal state med server-data
-      if (serverMeta?.form_data) {
-        setFormData(serverMeta.form_data);
-        storage.setFormData(serverMeta.form_data);
+      // Uppdatera lokal state med server-data (pages innehåller slide-data)
+      if (serverMeta?.pages) {
+        setFormData(serverMeta.pages);
+        storage.setFormData(serverMeta.pages);
       }
 
       if (serverMeta?.completed_slides) {
@@ -34,14 +35,14 @@ export const createHandleConflictReload = ({
       }
 
       // Uppdatera local version (samma key som checkVersionConflict använder)
-      const storageKey = `case_${activeCase.companyId}_${activeCase.caseId}_version`;
+      const storageKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
       localStorage.setItem(storageKey, JSON.stringify({
-        version: serverVersion,
+        version: server_version,
         timestamp: new Date().toISOString(),
         syncedFromServer: true
       }));
 
-      console.log('[CONFLICT] ✅ Data laddad från server, version:', serverVersion);
+      console.log('[CONFLICT] ✅ Data laddad från server, version:', server_version);
 
     } catch (err) {
       console.error('[CONFLICT] ❌ Fel vid reload:', err);

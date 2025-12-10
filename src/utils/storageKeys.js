@@ -5,7 +5,7 @@
  * PROBLEM: UUID:er innehåller "-" vilket gör det omöjligt att splitta nycklar
  * LÖSNING: Använd "::" som separator mellan delar
  * 
- * FORMAT: onboarding::{userId}::{companyId}::{caseId}::{slideKey}
+ * FORMAT: onboarding::{userId}::{company_id}::{case_id}::{slideKey}
  * 
  * EXEMPEL:
  *   onboarding::63b3d1dd-a9e8-4bb0-994b-43e5aa0c12e6::5593450193_b001da6f::f847d89c-b172-4d69-a39a-7d7029f6254f::uppdragsval
@@ -18,21 +18,21 @@ const SEPARATOR = '::';
  * Bygger en namespaced localStorage-nyckel
  * @param {Object} params - Nyckelparametrar
  * @param {string} params.userId - User ID från JWT
- * @param {string} params.companyId - Company ID (orgnr_uuid)
- * @param {string} params.caseId - Case/Onboarding ID (UUID)
+ * @param {string} params.company_id - Company ID (orgnr_uuid)
+ * @param {string} params.case_id - Case/Onboarding ID (UUID)
  * @param {string} params.slideKey - Slide identifierare (t.ex. "uppdragsval")
  * @param {string} [params.type='data'] - Typ: 'data' | 'draft' | 'cache'
  * @returns {string} Namespaced localStorage key
  */
-export function buildStorageKey({ userId, companyId, caseId, slideKey, type = 'data' }) {
+export function buildStorageKey({ userId, company_id, case_id, slideKey, type = 'data' }) {
   if (!userId || !slideKey) {
     console.warn('buildStorageKey: missing required params', { userId, slideKey });
   }
   
   // Använd 'draft' som fallback för nya onboardings utan ID
   const safeUserId = userId || 'anonymous';
-  const safeCompanyId = companyId || 'draft';
-  const safeCaseId = caseId || 'draft';
+  const safeCompanyId = company_id || 'draft';
+  const safeCaseId = case_id || 'draft';
   
   return `onboarding_${type}${SEPARATOR}${safeUserId}${SEPARATOR}${safeCompanyId}${SEPARATOR}${safeCaseId}${SEPARATOR}${slideKey}`;
 }
@@ -61,8 +61,8 @@ export function parseStorageKey(key) {
   return {
     type,
     userId: parts[1],
-    companyId: parts[2],
-    caseId: parts[3],
+    company_id: parts[2],
+    case_id: parts[3],
     slideKey: parts[4]
   };
 }
@@ -71,11 +71,11 @@ export function parseStorageKey(key) {
  * Hittar alla localStorage-nycklar för en specifik user/case kombination
  * @param {Object} params - Filterparametrar
  * @param {string} [params.userId] - Filtrera på user ID
- * @param {string} [params.companyId] - Filtrera på company ID
- * @param {string} [params.caseId] - Filtrera på case ID
+ * @param {string} [params.company_id] - Filtrera på company ID
+ * @param {string} [params.case_id] - Filtrera på case ID
  * @returns {string[]} Array av matchande nycklar
  */
-export function findStorageKeys({ userId, companyId, caseId } = {}) {
+export function findStorageKeys({ userId, company_id, case_id } = {}) {
   const allKeys = Object.keys(localStorage);
   
   return allKeys.filter(key => {
@@ -83,8 +83,8 @@ export function findStorageKeys({ userId, companyId, caseId } = {}) {
     if (!parsed) return false;
     
     if (userId && parsed.userId !== userId) return false;
-    if (companyId && parsed.companyId !== companyId) return false;
-    if (caseId && parsed.caseId !== caseId) return false;
+    if (company_id && parsed.company_id !== company_id) return false;
+    if (case_id && parsed.case_id !== case_id) return false;
     
     return true;
   });
@@ -94,12 +94,12 @@ export function findStorageKeys({ userId, companyId, caseId } = {}) {
  * Rensar alla localStorage-nycklar för en specifik user/case
  * @param {Object} params - Filterparametrar
  * @param {string} [params.userId] - Filtrera på user ID
- * @param {string} [params.companyId] - Filtrera på company ID
- * @param {string} [params.caseId] - Filtrera på case ID
+ * @param {string} [params.company_id] - Filtrera på company ID
+ * @param {string} [params.case_id] - Filtrera på case ID
  * @returns {number} Antal borttagna nycklar
  */
-export function clearStorageKeys({ userId, companyId, caseId } = {}) {
-  const keysToRemove = findStorageKeys({ userId, companyId, caseId });
+export function clearStorageKeys({ userId, company_id, case_id } = {}) {
+  const keysToRemove = findStorageKeys({ userId, company_id, case_id });
   
   keysToRemove.forEach(key => {
     localStorage.removeItem(key);
@@ -123,7 +123,7 @@ export function migrateOldStorageKeys(userId) {
     errors: []
   };
   
-  // Mönster för gamla nycklar: onboarding-{userId}-{companyId}-{caseId}-{slideKey}
+  // Mönster för gamla nycklar: onboarding-{userId}-{company_id}-{case_id}-{slideKey}
   // OBS: Dessa använder "-" som separator vilket gör parsing svår
   const oldKeyPattern = /^onboarding-([^-]+-[^-]+-[^-]+-[^-]+-[^-]+)-([^-]+_[^-]+)-([^-]+-[^-]+-[^-]+-[^-]+-[^-]+)-(.+)$/;
   
@@ -137,17 +137,17 @@ export function migrateOldStorageKeys(userId) {
     try {
       // Försök identifiera gamla draft-nycklar
       if (key.startsWith('onboarding_draft_')) {
-        // Format: onboarding_draft_{caseId}_{slideKey}
+        // Format: onboarding_draft_{case_id}_{slideKey}
         const match = key.match(/^onboarding_draft_([^_]+(?:_[^_]+)?(?:-[^_]+)*)_([^_]+(?:_[^_]+)*)$/);
         if (match) {
-          const [, caseId, slideKey] = match;
+          const [, case_id, slideKey] = match;
           const value = localStorage.getItem(key);
           
           // Skapa ny nyckel med userId
           const newKey = buildStorageKey({
             userId,
-            companyId: 'unknown', // Vi vet inte companyId från gamla nycklar
-            caseId,
+            company_id: 'unknown', // Vi vet inte company_id från gamla nycklar
+            case_id,
             slideKey,
             type: 'draft'
           });
@@ -218,7 +218,7 @@ export function clearAllOldFormatKeys() {
         key === 'current_company_id' ||  // snake_case
         key === 'currentCompanyName' || // legacy camelCase
         key === 'currentOrgnr' ||       // legacy camelCase
-        key === 'onboardingId' ||       // legacy camelCase
+        key === 'case_id' ||       // legacy camelCase
         key === 'resumeMode' ||         // legacy camelCase
         key === 'activeOnboarding' ||   // legacy camelCase
         key === 'tempCaseId' ||         // legacy camelCase
@@ -359,9 +359,9 @@ export function migrateTempToRealCaseId(tempCaseId, realCaseId) {
   
   // Uppdatera temp_case_id till permanent
   if (localStorage.getItem('temp_case_id') === tempCaseId) {
-    localStorage.setItem('onboarding_id', realCaseId);
+    localStorage.setItem('case_id', realCaseId);
     localStorage.removeItem('temp_case_id');
-    console.log(`🔄 Updated onboarding_id: ${realCaseId}`);
+    console.log(`🔄 Updated case_id: ${realCaseId}`);
   }
   
   return migratedCount;

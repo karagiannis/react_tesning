@@ -18,7 +18,7 @@
  * │     - showResumeModal    → OnboardingResumeDialogV2                      │
  * │     - else               → UppdragsvalsSlide                             │
  * │                                                                          │
- * │  Session-data (companyId, caseId, metadata) hämtas från context.         │
+ * │  Session-data (company_id, case_id, metadata) hämtas från context.         │
  * │                                                                          │
  * └──────────────────────────────────────────────────────────────────────────┘
  * 
@@ -47,9 +47,9 @@ export default function OnboardingPage({ onNext }) {
     pendingOnboardings,
     setActiveCase,
     caseMetadata,
-    companyId,
-    caseId,
-    currentStep,
+    company_id,
+    case_id,
+    current_step,
     hasActiveCase,
     refreshPendingOnboardings,
     deleteOnboarding,
@@ -64,7 +64,7 @@ export default function OnboardingPage({ onNext }) {
    */
   const handleSelectOnboarding = useCallback(async (selected) => {
     const selectedCompanyId = selected.company_id;
-    const selectedCaseId = selected.case_id || selected.onboardingId;
+    const selectedCaseId = selected.case_id || selected.case_id;
     
     // Sätt aktivt case (stänger automatiskt modalen)
     await setActiveCase(selectedCompanyId, selectedCaseId);
@@ -74,7 +74,7 @@ export default function OnboardingPage({ onNext }) {
       loadSubscriptionFromServer(selected.subscription);
     }
     
-    // Navigera till rätt steg om vi har ett currentStep
+    // Navigera till rätt steg om vi har ett current_step
     const step = selected.current_step || 'uppdragsval';
     if (step !== 'uppdragsval') {
       if (step.startsWith('riskfragor')) {
@@ -103,10 +103,10 @@ export default function OnboardingPage({ onNext }) {
       // Fallback: Manuellt DELETE-anrop
       const token = localStorage.getItem('accessToken');
       const companyIdToDelete = selected.company_id;
-      const caseIdToDelete = selected.case_id || selected.onboardingId;
+      const caseIdToDelete = selected.case_id || selected.case_id;
       
       await fetch(
-        `${API_BASE}/onboarding/delete/${companyIdToDelete}?onboarding_id=${caseIdToDelete}`,
+        `${API_BASE}/onboarding/delete/${companyIdToDelete}?case_id=${caseIdToDelete}`,
         {
           method: 'DELETE',
           headers: {
@@ -143,20 +143,20 @@ export default function OnboardingPage({ onNext }) {
   }, [isInitializing, hasActiveCase, caseMetadata, loadSubscriptionFromServer]);
   
   // ══════════════════════════════════════════════════════════════════
-  // Navigera till rätt steg vid resume (om currentStep finns)
+  // Navigera till rätt steg vid resume (om current_step finns)
   // ══════════════════════════════════════════════════════════════════
   useEffect(() => {
-    if (!isInitializing && hasActiveCase && currentStep && currentStep !== 'uppdragsval') {
-      console.log(`🔄 OnboardingPage: Navigating to ${currentStep}/${companyId}/${caseId}`);
+    if (!isInitializing && hasActiveCase && current_step && current_step !== 'uppdragsval') {
+      console.log(`🔄 OnboardingPage: Navigating to ${current_step}/${company_id}/${case_id}`);
       
-      // Navigera med companyId/caseId i URL
-      if (currentStep.startsWith('riskfragor')) {
-        navigate(`/${currentStep}/${companyId}/${caseId}`);
+      // Navigera med company_id/case_id i URL
+      if (current_step.startsWith('riskfragor')) {
+        navigate(`/${current_step}/${company_id}/${case_id}`);
       } else {
-        navigate(`/${currentStep}/${companyId}`);
+        navigate(`/${current_step}/${company_id}`);
       }
     }
-  }, [isInitializing, hasActiveCase, currentStep, companyId, caseId, navigate]);
+  }, [isInitializing, hasActiveCase, current_step, company_id, case_id, navigate]);
 
   // ══════════════════════════════════════════════════════════════════
   // RENDER: Loading

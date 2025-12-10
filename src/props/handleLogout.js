@@ -33,7 +33,7 @@ export const createHandleLogout = ({
       prefix = `onboarding::draft::${tempCaseId}::${user?.id}::`;
     } else if (activeCase) {
       // Permanent mode: rensa nycklar för detta specifika case
-      prefix = `onboarding::${activeCase.companyId}::${activeCase.onboardingId}::${user?.id}::`;
+      prefix = `onboarding::${activeCase.company_id}::${activeCase.case_id}::${user?.id}::`;
     }
     
     if (prefix) {

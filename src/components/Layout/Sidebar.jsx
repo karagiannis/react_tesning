@@ -111,7 +111,7 @@ export default function Sidebar_v2({
             </h2>
             {activeCase && (
               <p className="text-sm text-gray-600 truncate mt-1">
-                {activeCase.companyName}
+                {activeCase.company_name}
               </p>
             )}
           </div>
@@ -150,31 +150,31 @@ export default function Sidebar_v2({
         <GroupHeader title="Riskbedömning" isExpanded={isExpanded} />
         <SlideButton 
           label="Riskfrågor" 
-          isActive={isActive('riskfragor')}
-          isCompleted={isCompleted('riskfragor')}
-          isLocked={isLocked('riskfragor')}
-          onClick={() => handleClick('riskfragor')}
+          isActive={isActive('riskfragor-1')}
+          isCompleted={isCompleted('riskfragor-1')}
+          isLocked={isLocked('riskfragor-1')}
+          onClick={() => handleClick('riskfragor-1')}
         />
         <SlideButton 
           label="Riskfrågor steg 2" 
-          isActive={isActive('riskfragor-steg2')}
-          isCompleted={isCompleted('riskfragor-steg2')}
-          isLocked={isLocked('riskfragor-steg2')}
-          onClick={() => handleClick('riskfragor-steg2')}
+          isActive={isActive('riskfragor-2')}
+          isCompleted={isCompleted('riskfragor-2')}
+          isLocked={isLocked('riskfragor-2')}
+          onClick={() => handleClick('riskfragor-2')}
         />
         <SlideButton 
           label="Riskfrågor steg 3" 
-          isActive={isActive('riskfragor-steg3')}
-          isCompleted={isCompleted('riskfragor-steg3')}
-          isLocked={isLocked('riskfragor-steg3')}
-          onClick={() => handleClick('riskfragor-steg3')}
+          isActive={isActive('riskfragor-3')}
+          isCompleted={isCompleted('riskfragor-3')}
+          isLocked={isLocked('riskfragor-3')}
+          onClick={() => handleClick('riskfragor-3')}
         />
         <SlideButton 
           label="Riskfrågor steg 4" 
-          isActive={isActive('riskfragor-steg4')}
-          isCompleted={isCompleted('riskfragor-steg4')}
-          isLocked={isLocked('riskfragor-steg4')}
-          onClick={() => handleClick('riskfragor-steg4')}
+          isActive={isActive('riskfragor-4')}
+          isCompleted={isCompleted('riskfragor-4')}
+          isLocked={isLocked('riskfragor-4')}
+          onClick={() => handleClick('riskfragor-4')}
         />
         
         {/* ============= FÖRETAGSDATA ============= */}

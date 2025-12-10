@@ -33,15 +33,15 @@ export const createHandleBack = ({
       }]);
 
       // Uppdatera tab session (för page reload)
-      // OBS: activeCase kan ha antingen caseId (från handleConfirmCompanySelection)
-      // eller onboardingId (från handleResumeChoice) - hantera båda!
-      const caseOrOnboardingId = activeCase?.caseId || activeCase?.onboardingId;
+      // OBS: activeCase kan ha antingen case_id (från handleConfirmCompanySelection)
+      // eller case_id (från handleResumeChoice) - hantera båda!
+      const caseOrOnboardingId = activeCase?.case_id || activeCase?.case_id;
       const sessionId = isDraftMode
         ? `onboarding::draft::${tempCaseId}::${user?.id}`
-        : storage.buildSessionId(activeCase?.companyId, caseOrOnboardingId, user?.id);
+        : storage.buildSessionId(activeCase?.company_id, caseOrOnboardingId, user?.id);
       storage.setCurrentTabSession({
         sessionId,
-        currentSlide: prevSlide.key,
+        current_slide: prevSlide.key,
       });
 
       // Navigera

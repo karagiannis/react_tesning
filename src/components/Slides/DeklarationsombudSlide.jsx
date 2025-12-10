@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 export default function DeklarationsombudSlide({ onNext, onBack }) {
-  const { companyId } = useParams();
+  const { company_id } = useParams();
   
   const QUESTIONS_CONFIG = {
     entireForm: { type: 'object', required: false }
@@ -24,9 +24,9 @@ export default function DeklarationsombudSlide({ onNext, onBack }) {
     updateQuestion('entireForm', { hasAddedOmbud, isVerified });
   }, [hasAddedOmbud, isVerified]);
 
-  // Mock byrå data (should come from config in production)
-  const byraOrgNr = customerData.byraOrgNr || '556XXX-XXXX';
-  const byraName = customerData.byraName || 'Redovisningsbyrån AB';
+  // Byrå data (from savedFormData or defaults)
+  const byraOrgNr = savedFormData?.entireForm?.byraOrgNr || '556XXX-XXXX';
+  const byraName = savedFormData?.entireForm?.byraName || 'Redovisningsbyrån AB';
 
   const requiredPermissions = [
     { id: 'fskatt', label: 'Deklarationsombud (F-skatt)', required: true },

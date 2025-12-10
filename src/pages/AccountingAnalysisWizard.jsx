@@ -8,7 +8,7 @@ import { openVoucherWindow, openWindowWithCheck } from '../utils/windowManager';
  */
 function AccountingAnalysisWizard() {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(() => {
+  const [current_step, setCurrentStep] = useState(() => {
     // Återställ från localStorage
     return parseInt(localStorage.getItem('analysis_wizard_step') || '1');
   });
@@ -28,8 +28,8 @@ function AccountingAnalysisWizard() {
   
   // Spara progress i localStorage
   useEffect(() => {
-    localStorage.setItem('analysis_wizard_step', currentStep.toString());
-  }, [currentStep]);
+    localStorage.setItem('analysis_wizard_step', current_step.toString());
+  }, [current_step]);
   
   useEffect(() => {
     localStorage.setItem('analysis_wizard_completed', JSON.stringify(completedSteps));
@@ -46,15 +46,15 @@ function AccountingAnalysisWizard() {
   };
   
   const nextStep = () => {
-    markStepCompleted(currentStep);
-    if (currentStep < 5) {
-      setCurrentStep(currentStep + 1);
+    markStepCompleted(current_step);
+    if (current_step < 5) {
+      setCurrentStep(current_step + 1);
     }
   };
   
   const previousStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+    if (current_step > 1) {
+      setCurrentStep(current_step - 1);
     }
   };
   
@@ -76,25 +76,25 @@ function AccountingAnalysisWizard() {
               <div key={step.id} className="flex items-center flex-1">
                 <button
                   onClick={() => goToStep(step.id)}
-                  disabled={step.id > currentStep && !completedSteps.includes(step.id)}
+                  disabled={step.id > current_step && !completedSteps.includes(step.id)}
                   className={`w-full px-3 py-2 rounded-box font-medium transition-all text-sm ${
-                    step.id === currentStep
+                    step.id === current_step
                       ? 'bg-brand-600 text-white shadow-md'
                       : completedSteps.includes(step.id)
                       ? 'bg-brand-100 text-brand-700 hover:bg-brand-200'
-                      : step.id < currentStep
+                      : step.id < current_step
                       ? 'bg-brand-100 text-gray-600 hover:bg-brand-200'
                       : 'bg-gray-50 text-gray-400 cursor-not-allowed'
                   }`}
                 >
                   <div className="text-left w-full">
                     <div className={`text-xs font-normal mb-0.5 ${
-                      step.id === currentStep ? 'text-white opacity-90' : 'opacity-75'
+                      step.id === current_step ? 'text-white opacity-90' : 'opacity-75'
                     }`}>
                       Steg {step.id}
                     </div>
                     <div className={`font-semibold flex items-center justify-between ${
-                      step.id === currentStep ? 'text-white' : ''
+                      step.id === current_step ? 'text-white' : ''
                     }`}>
                       <span>{step.title}</span>
                       {completedSteps.includes(step.id) && (
@@ -116,11 +116,11 @@ function AccountingAnalysisWizard() {
         
         {/* Content Area */}
         <div>
-          {currentStep === 1 && <Step1_FraudDetection onNext={nextStep} />}
-          {currentStep === 2 && <Step2_ReportArchive onNext={nextStep} onBack={previousStep} />}
-          {currentStep === 3 && <Step3_VATComparison onNext={nextStep} onBack={previousStep} />}
-          {currentStep === 4 && <Step4_TaxComparison onNext={nextStep} onBack={previousStep} />}
-          {currentStep === 5 && <Step5_AnnualReportComparison onBack={previousStep} onFinish={() => navigate('/penningflodes')} />}
+          {current_step === 1 && <Step1_FraudDetection onNext={nextStep} />}
+          {current_step === 2 && <Step2_ReportArchive onNext={nextStep} onBack={previousStep} />}
+          {current_step === 3 && <Step3_VATComparison onNext={nextStep} onBack={previousStep} />}
+          {current_step === 4 && <Step4_TaxComparison onNext={nextStep} onBack={previousStep} />}
+          {current_step === 5 && <Step5_AnnualReportComparison onBack={previousStep} onFinish={() => navigate('/penningflodes')} />}
         </div>
       </div>
     </div>
@@ -145,7 +145,7 @@ function Step1_FraudDetection({ onNext }) {
       amount: 850000,
       status: "error",
       flagReason: "Belopp överstiger normalintervall med 340%",
-      createdBy: "System Import",
+      created_by: "System Import",
       createdDate: "2024-01-15",
       rows: [
         { account: "4000", accountName: "Konsultkostnader", debit: 850000, credit: 0 },
@@ -160,7 +160,7 @@ function Step1_FraudDetection({ onNext }) {
       amount: 45000,
       status: "warning",
       flagReason: "Kontanthantering utan verifikation",
-      createdBy: "Fredrik Andersson",
+      created_by: "Fredrik Andersson",
       createdDate: "2024-03-22",
       rows: [
         { account: "6570", accountName: "Diverse kostnader", debit: 45000, credit: 0 },
@@ -175,7 +175,7 @@ function Step1_FraudDetection({ onNext }) {
       amount: 59780,
       status: "error",
       flagReason: "2 festkläder (10 090 SEK) i aggregerad post med 49 dokument",
-      createdBy: "System Import",
+      created_by: "System Import",
       createdDate: "2025-03-15",
       rows: [
         { account: "5410", accountName: "Varor och material", debit: 47823, credit: 0 },
@@ -191,7 +191,7 @@ function Step1_FraudDetection({ onNext }) {
       amount: 125400,
       status: "warning",
       flagReason: "23 affärshändelser i samma verifikation",
-      createdBy: "System Import",
+      created_by: "System Import",
       createdDate: "2024-11-20",
       rows: [
         { account: "5410", accountName: "Varor och material", debit: 100320, credit: 0 },
@@ -207,7 +207,7 @@ function Step1_FraudDetection({ onNext }) {
       amount: 567890,
       status: "warning",
       flagReason: "Ovanligt många kontorader - kontrollera uppdelning",
-      createdBy: "Test Import",
+      created_by: "Test Import",
       createdDate: "2025-01-31",
       rows: [
         { account: "1510", accountName: "Kundfordringar Sverige", debit: 125000, credit: 0 },
@@ -248,7 +248,7 @@ function Step1_FraudDetection({ onNext }) {
       flagReason: i % 3 === 0 
         ? "Belopp avviker från normalintervall"
         : "Saknar fullständig dokumentation",
-      createdBy: "System Import",
+      created_by: "System Import",
       createdDate: `2025-02-${String(10 + i).padStart(2, '0')}`,
       rows: [
         { account: "6000", accountName: "Diverse kostnader", debit: 15000 + Math.floor(Math.random() * 50000), credit: 0 },
@@ -559,7 +559,7 @@ function Step1_FraudDetection({ onNext }) {
               {/* Metadata */}
               <div className="text-xs text-gray-500 space-y-1">
                 <div>Skapad: {selectedVoucher.createdDate}</div>
-                <div>Skapad av: {selectedVoucher.createdBy}</div>
+                <div>Skapad av: {selectedVoucher.created_by}</div>
               </div>
             </div>
 

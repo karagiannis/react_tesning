@@ -5,19 +5,31 @@
  * Detta är en "dumb component" som bara visar UI baserat på props.
  * INGA API-anrop görs här - allt sker i AuthenticatedApp state machine.
  * 
- * FLÖDE:
- * 1. AuthenticatedApp ser att URL är /payment-success
- * 2. State machine går till VERIFYING_PAYMENT state
- * 3. State machine anropar /subscription/status endpoint
- * 4. State machine sätter paymentVerificationStatus
- * 5. Denna component renderar baserat på status
- * 6. Användaren klickar "OK" → onPaymentConfirmed() callback
+ * FLÖDE (2025-01-13):
+ * 1. Stripe → GET /payment-callback (backend)
+ *    - Verifierar med Stripe API
+ *    - Sätter metadata.subscription.payment_confirmed_at
+ *    - Redirectar till /payment-success
+ * 
+ * 2. Frontend laddas → handleResuming körs
+ *    - Laddar metadata
+ *    - Ser payment_confirmed_at → paymentConfirmed = true
+ *    - Sätter paymentVerificationStatus = 'success'
+ *    - Navigerar till /payment-success → denna component
+ * 
+ * 3. Edge case (payment-callback misslyckades):
+ *    - handleResuming → VERIFYING_PAYMENT
+ *    - VERIFYING_PAYMENT sätter paymentVerificationStatus = 'error'
+ *    - Denna component visar "Försök igen" knapp
+ *    - onRetry = window.location.reload() → handleResuming körs igen
+ * 
+ * 4. Användaren klickar "OK" → onPaymentConfirmed() → nästa slide
  * 
  * PROPS:
  * - status: 'verifying' | 'success' | 'error'
  * - message: Felmeddelande (om error)
  * - onPaymentConfirmed: Callback när användaren klickar OK
- * - onRetry: Callback när användaren klickar Försök igen
+ * - onRetry: Callback när användaren klickar Försök igen (= window.location.reload())
  */
 export default function PaymentSuccessSlide({ 
   status = 'verifying',

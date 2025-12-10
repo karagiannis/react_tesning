@@ -53,13 +53,13 @@ export const createHandleNext = ({
     // 💳 STEG 0.5: Agreement check för riskfragor (Steg 1)
     // ─────────────────────────────────────────────────────────────────────
     //
-    // När användaren trycker "Nästa" på riskfragor slide:
+    // När användaren trycker "Nästa" på riskfragor-1 slide:
     // - Om de inte har betalat (hasAgreement = false), visa AgreementModal
     // - Användaren väljer betalningsmetod → Stripe → callback → fortsätt
     // - Om de HAR betalat (hasAgreement = true), fortsätt normalt
     //
-    if (currentSlideKey === 'riskfragor' && !hasAgreement && !isDraftMode) {
-      console.log('[NEXT] 💳 Riskfrågor utan avtal - visar AgreementModal');
+    if (currentSlideKey === 'riskfragor-1' && !hasAgreement && !isDraftMode) {
+      console.log('[NEXT] 💳 Riskfrågor-1 utan avtal - visar AgreementModal');
       setShowAgreementModal(true);
       return; // Blockera navigation tills betalning är klar
     }
@@ -110,14 +110,14 @@ export const createHandleNext = ({
       //   slide_key: "riskfragor"
       // }
       //
-      if (!isDraftMode && activeCase?.caseId) {
+      if (!isDraftMode && activeCase?.case_id) {
         console.log(`[NEXT] 📤 Pushing slide data: ${currentSlideKey}`);
 
         const response = await api.fetch(`/onboarding/slide/${currentSlideKey}`, {
           method: 'POST',
           body: JSON.stringify({
-            case_id: activeCase.caseId,
-            company_id: activeCase.companyId,
+            case_id: activeCase.case_id,
+            company_id: activeCase.company_id,
             slide_data: slideData,
           }),
         });
@@ -142,11 +142,11 @@ export const createHandleNext = ({
         console.log(`[NEXT] ✅ Server saved slide, new version: ${result.version}`);
 
         // Uppdatera lokal version
-        const versionKey = `case_${activeCase.companyId}_${activeCase.caseId}_version`;
+        const versionKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
         localStorage.setItem(versionKey, JSON.stringify({
           version: result.version,
           timestamp: new Date().toISOString(),
-          lastSlide: currentSlideKey,
+          current_slide: currentSlideKey,
         }));
 
       } else {
@@ -177,10 +177,10 @@ export const createHandleNext = ({
     storage.setFormData(formData);
 
     // 3. Uppdatera local version timestamp
-    localStorage.setItem('localVersion', JSON.stringify({
-      version: (JSON.parse(localStorage.getItem('localVersion') || '{}')?.version || 0) + 1,
+    localStorage.setItem('local_version', JSON.stringify({
+      version: (JSON.parse(localStorage.getItem('local_version') || '{}')?.version || 0) + 1,
       timestamp: new Date().toISOString(),
-      lastSlide: currentSlideKey
+      current_slide: currentSlideKey
     }));
 
     // 4. Lägg till i navigation history
@@ -193,15 +193,15 @@ export const createHandleNext = ({
     }]);
 
     // 5. Uppdatera tab session (för page reload)
-    // OBS: activeCase kan ha antingen caseId (från handleConfirmCompanySelection)
-    // eller onboardingId (från handleResumeChoice) - hantera båda!
-    const caseOrOnboardingId = activeCase?.caseId || activeCase?.onboardingId;
+    // OBS: activeCase kan ha antingen case_id (från handleConfirmCompanySelection)
+    // eller case_id (från handleResumeChoice) - hantera båda!
+    const caseOrOnboardingId = activeCase?.case_id || activeCase?.case_id;
     const sessionId = isDraftMode
       ? `onboarding::draft::${tempCaseId}::${user?.id}`
-      : storage.buildSessionId(activeCase?.companyId, caseOrOnboardingId, user?.id);
+      : storage.buildSessionId(activeCase?.company_id, caseOrOnboardingId, user?.id);
     storage.setCurrentTabSession({
       sessionId,
-      currentSlide: nextSlide.key,
+      current_slide: nextSlide.key,
     });
 
     // 6. Navigera

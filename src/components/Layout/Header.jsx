@@ -13,7 +13,7 @@
  * 
  * Props:
  *   @param {Object} user - Inloggad användare { email, role }
- *   @param {Object} activeCase - Aktivt case { companyName, orgnr }
+ *   @param {Object} activeCase - Aktivt case { company_name, orgnr }
  *   @param {boolean} isLoading - Om data laddas
  *   @param {string} loadingMessage - Vad som laddas
  *   @param {Function} onLogout - Logout callback
@@ -98,7 +98,7 @@ export default function Header({
         {activeCase && (
           <>
             <span className="text-gray-300">|</span>
-            <span className="text-sm font-medium text-gray-700">{activeCase.companyName}</span>
+            <span className="text-sm font-medium text-gray-700">{activeCase.company_name}</span>
             <span className="text-sm text-gray-400">({activeCase.orgnr})</span>
           </>
         )}
@@ -227,7 +227,7 @@ export default function Header({
                     onClick={() => {
                       setShowUserMenu(false);
                       // Bekräftelse innan soft delete
-                      const caseName = activeCase?.companyName || 'pågående onboarding';
+                      const caseName = activeCase?.company_name || 'pågående onboarding';
                       const confirmed = window.confirm(
                         `⚠️ Är du säker på att du vill avsluta och rensa?\n\n` +
                         `Detta kommer att:\n` +

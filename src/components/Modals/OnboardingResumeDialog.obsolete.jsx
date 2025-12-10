@@ -50,9 +50,9 @@ export default function OnboardingResumeDialog({
   }, [handleKeyDown]);
 
   const handleDelete = async (company) => {
-    const companyName = company.company_name || 'detta företag';
+    const company_name = company.company_name || 'detta företag';
     
-    if (!confirm(`Är du säker på att du vill radera onboarding för ${companyName}?\n\nDetta kommer att permanent radera all data för detta företag.`)) {
+    if (!confirm(`Är du säker på att du vill radera onboarding för ${company_name}?\n\nDetta kommer att permanent radera all data för detta företag.`)) {
       return;
     }
 
@@ -134,7 +134,7 @@ export default function OnboardingResumeDialog({
           <div className="space-y-4">
             {companies.map((company) => (
               <div
-                key={`${company.company_id}-${company.case_id || company.onboardingId}`}
+                key={`${company.company_id}-${company.case_id || company.case_id}`}
                 className="flex items-center justify-between p-5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
               >
                 {/* Företagsinfo */}

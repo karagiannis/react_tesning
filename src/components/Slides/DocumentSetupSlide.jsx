@@ -25,7 +25,7 @@ import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 const DocumentSetupSlide = () => {
   const navigate = useNavigate();
-  const { companyId } = useParams();
+  const { company_id } = useParams();
   
   const QUESTIONS_CONFIG = {
     entireForm: { type: 'object', required: false }
@@ -47,7 +47,7 @@ const DocumentSetupSlide = () => {
   }, [selectedProvider, authStatus, folderPath, testStatus]);
 
   // Simulera att vi redan har företagsnamn från tidigare steg
-  const companyName = "Acme AB"; // TODO: Hämta från formData state
+  const company_name = "Acme AB"; // TODO: Hämta från formData state
 
   const handleOAuthCallback = async (code, state) => {
     setAuthStatus('authenticating');
@@ -100,7 +100,7 @@ const DocumentSetupSlide = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          company_name: companyName,
+          company_name: company_name,
           redirect_uri: `${window.location.origin}/dokument-setup`
         })
       });
@@ -124,7 +124,7 @@ const DocumentSetupSlide = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          company_name: companyName,
+          company_name: company_name,
           redirect_uri: `${window.location.origin}/dokument-setup`
         })
       });
@@ -148,7 +148,7 @@ const DocumentSetupSlide = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          company_name: companyName,
+          company_name: company_name,
           redirect_uri: `${window.location.origin}/dokument-setup`
         })
       });
@@ -329,7 +329,7 @@ const DocumentSetupSlide = () => {
                     <li>Du loggar in på Dropbox (om inte redan inloggad)</li>
                     <li>Du godkänner att vi får läsåtkomst till en mapp som heter:<br/>
                       <code className="bg-white px-2 py-1 rounded text-xs mt-1 inline-block">
-                        /{companyName}_Underlag
+                        /{company_name}_Underlag
                       </code>
                     </li>
                     <li>Du återvänder hit automatiskt när det är klart</li>
@@ -428,7 +428,7 @@ const DocumentSetupSlide = () => {
                     <li>Du klickar på "Anslut till Google Drive" nedan</li>
                     <li>Du loggar in med ditt Google-konto</li>
                     <li>Du godkänner att vi får läsåtkomst till en mapp</li>
-                    <li>Vi skapar automatiskt en mapp: <code className="bg-white px-2 py-1 rounded text-xs">{companyName}_Underlag</code></li>
+                    <li>Vi skapar automatiskt en mapp: <code className="bg-white px-2 py-1 rounded text-xs">{company_name}_Underlag</code></li>
                     <li>Du återvänder hit automatiskt när det är klart ✓</li>
                   </ol>
                 </div>
@@ -478,7 +478,7 @@ const DocumentSetupSlide = () => {
                     <li>Du klickar på "Anslut till OneDrive" nedan</li>
                     <li>Du loggar in med ditt Microsoft-konto</li>
                     <li>Du godkänner att vi får läsåtkomst till en mapp</li>
-                    <li>Vi skapar automatiskt en mapp: <code className="bg-white px-2 py-1 rounded text-xs">{companyName}_Underlag</code></li>
+                    <li>Vi skapar automatiskt en mapp: <code className="bg-white px-2 py-1 rounded text-xs">{company_name}_Underlag</code></li>
                     <li>Du återvänder hit automatiskt när det är klart ✓</li>
                   </ol>
                 </div>

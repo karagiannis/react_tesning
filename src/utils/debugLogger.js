@@ -31,7 +31,7 @@ const timestamp = () => new Date().toISOString();
 // Get current case_id from localStorage (for case-specific log files)
 const getCaseId = () => {
   try {
-    return localStorage.getItem('onboarding_id') || 'no_case';
+    return localStorage.getItem('case_id') || 'no_case';
   } catch {
     return 'no_case';
   }
@@ -40,25 +40,23 @@ const getCaseId = () => {
 // Collect ALL localStorage entries that belong to current case/onboarding
 const collectCaseLocalStorage = () => {
   const result = {};
-  const caseId = getCaseId();
-  const onboardingId = localStorage.getItem('onboarding_id');
-  const companyId = localStorage.getItem('current_company_id');
+  const case_id = getCaseId();
+  const company_id = localStorage.getItem('current_company_id');
   
   // Add key metadata
-  result._case_id = caseId;
-  result._onboarding_id = onboardingId;
-  result._company_id = companyId;
+  result._case_id = case_id;
+  result._company_id = company_id;
   
   // Collect all keys that might be relevant
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     
-    // Include if key contains case_id, onboardingId, or companyId
+    // Include if key contains case_id, case_id, or company_id
     // Also include essential session keys
-    const essentialKeys = ['onboarding_id', 'current_company_id', 'accessToken', 'resume_mode', 'user_id'];
+    const essentialKeys = ['case_id', 'current_company_id', 'accessToken', 'resume_mode', 'user_id'];
     const isEssential = essentialKeys.includes(key);
-    const matchesCase = caseId && caseId !== 'no_case' && key.includes(caseId);
-    const matchesCompany = companyId && key.includes(companyId);
+    const matchesCase = case_id && case_id !== 'no_case' && key.includes(case_id);
+    const matchesCompany = company_id && key.includes(company_id);
     const isNamespacedKey = key.includes('::'); // Our namespaced keys use ::
     
     if (isEssential || matchesCase || matchesCompany || isNamespacedKey) {

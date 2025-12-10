@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 export default function DocumentDeliverySlide({ onNext, onBack }) {
-  const { companyId } = useParams();
+  const { company_id } = useParams();
   
   const QUESTIONS_CONFIG = {
     entireForm: { type: 'object', required: false }
@@ -14,7 +14,7 @@ export default function DocumentDeliverySlide({ onNext, onBack }) {
     QUESTIONS_CONFIG
   );
 
-  const [email, setEmail] = useState(savedFormData?.entireForm?.email || customerData.email || '');
+  const [email, setEmail] = useState(savedFormData?.entireForm?.email || '');
   const [confirmEmail, setConfirmEmail] = useState(savedFormData?.entireForm?.confirmEmail || '');
   const [isSending, setIsSending] = useState(false);
   const [isSent, setIsSent] = useState(savedFormData?.entireForm?.isSent || false);
@@ -26,10 +26,10 @@ export default function DocumentDeliverySlide({ onNext, onBack }) {
     updateQuestion('entireForm', { email, confirmEmail, isSent });
   }, [email, confirmEmail, isSent]);
 
-  // Mock customer data
+  // Customer data (from savedFormData or defaults)
   const mockCustomerData = {
-    companyName: customerData.companyName || 'Företagsnamn AB',
-    signatoryName: customerData.signatoryName || 'Anna Andersson'
+    company_name: savedFormData?.entireForm?.company_name || 'Företagsnamn AB',
+    signatoryName: savedFormData?.entireForm?.signatoryName || 'Anna Andersson'
   };
 
   const documents = [
@@ -137,7 +137,7 @@ export default function DocumentDeliverySlide({ onNext, onBack }) {
             <div className="flex-1">
               <h3 className="font-bold text-green-900 text-lg mb-1">Välkommen som kund, {mockCustomerData.signatoryName}! 🎉</h3>
               <p className="text-sm text-green-800">
-                Ditt avtal med {mockCustomerData.companyName} är nu signerat och giltigt. Vi ser fram emot att arbeta tillsammans!
+                Ditt avtal med {mockCustomerData.company_name} är nu signerat och giltigt. Vi ser fram emot att arbeta tillsammans!
               </p>
             </div>
           </div>

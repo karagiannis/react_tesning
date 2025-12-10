@@ -97,7 +97,7 @@ export default function RiskFragorSlide({
         )}
         
         {/* Step Indicator */}
-        <StepIndicator currentStep={1} completedSteps={0} />
+        <StepIndicator current_step={1} completedSteps={0} />
         
         {/* Company Info Display */}
         {companyInfo.name && (

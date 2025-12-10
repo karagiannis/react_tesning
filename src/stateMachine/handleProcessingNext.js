@@ -86,16 +86,16 @@ export function createHandleProcessingNext(getState, getActions, services) {
             setIsLoading(true);
             setSyncStatus('saving');
             
-            const companyId = activeCase?.companyId;
-            const caseId = activeCase?.caseId;
+            const company_id = activeCase?.company_id;
+            const case_id = activeCase?.case_id;
             const slideData = formData[currentSlideKey] || {};
             
-            if (companyId && caseId) {
+            if (company_id && case_id) {
               const response = await api.post(
-                `/onboarding/${companyId}/${currentSlideKey}`,
+                `/onboarding/${company_id}/${currentSlideKey}`,
                 {
                   data: slideData,
-                  onboarding_id: caseId,
+                  case_id: case_id,
                 }
               );
               
@@ -120,16 +120,16 @@ export function createHandleProcessingNext(getState, getActions, services) {
               const result = await response.json();
               console.log('[PROCESSING_NEXT] riskfragor: ✅ Saved to server, version:', result.version);
               
-              const versionKey = `case_${companyId}_${caseId}_version`;
+              const versionKey = `case_${company_id}_${case_id}_version`;
               localStorage.setItem(versionKey, JSON.stringify({
                 version: result.version,
                 timestamp: new Date().toISOString(),
-                lastSlide: currentSlideKey,
+                current_slide: currentSlideKey,
               }));
               
               setSyncStatus('saved');
             } else {
-              console.warn('[PROCESSING_NEXT] riskfragor: No companyId/caseId, skipping server save');
+              console.warn('[PROCESSING_NEXT] riskfragor: No company_id/case_id, skipping server save');
             }
             
             setIsLoading(false);
@@ -186,14 +186,14 @@ export function createHandleProcessingNext(getState, getActions, services) {
         }
         
         // Steg 2: Push till server (om permanent mode)
-        if (!isDraftMode && activeCase?.caseId) {
+        if (!isDraftMode && activeCase?.case_id) {
           console.log(`[SAVE] 📤 Pushing slide data: ${currentSlideKey}`);
           
           const response = await api.post(
-            `/onboarding/${activeCase.companyId}/${currentSlideKey}`,
+            `/onboarding/${activeCase.company_id}/${currentSlideKey}`,
             {
               data: slideData,
-              onboarding_id: activeCase.caseId,
+              case_id: activeCase.case_id,
             }
           );
           
@@ -216,11 +216,11 @@ export function createHandleProcessingNext(getState, getActions, services) {
           const result = await response.json();
           console.log(`[SAVE] ✅ Server saved slide, new version: ${result.version}`);
           
-          const versionKey = `case_${activeCase.companyId}_${activeCase.caseId}_version`;
+          const versionKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
           localStorage.setItem(versionKey, JSON.stringify({
             version: result.version,
             timestamp: new Date().toISOString(),
-            lastSlide: currentSlideKey,
+            current_slide: currentSlideKey,
           }));
         } else {
           console.log(`[SAVE] 📝 Draft mode - only saving to localStorage`);
@@ -246,13 +246,13 @@ export function createHandleProcessingNext(getState, getActions, services) {
         }]);
         
         // Uppdatera session
-        const caseOrOnboardingId = activeCase?.caseId || activeCase?.onboardingId;
+        const caseOrOnboardingId = activeCase?.case_id || activeCase?.case_id;
         const sessionId = isDraftMode
           ? `onboarding::draft::${tempCaseId}::${user?.id}`
-          : storage.buildSessionId(activeCase?.companyId, caseOrOnboardingId, user?.id);
+          : storage.buildSessionId(activeCase?.company_id, caseOrOnboardingId, user?.id);
         storage.setCurrentTabSession({
           sessionId,
-          currentSlide: nextSlide.key,
+          current_slide: nextSlide.key,
         });
         
         setCurrentSlideKey(nextSlide.key);

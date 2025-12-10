@@ -31,7 +31,7 @@ export const createHandleStartNew = ({
     const sessionId = `onboarding::draft::${tempCaseId}::${user?.id}`;
     storage.setCurrentTabSession({
       sessionId,
-      currentSlide: 'uppdragsval',
+      current_slide: 'uppdragsval',
     });
 
     // 4. Navigera till första sliden

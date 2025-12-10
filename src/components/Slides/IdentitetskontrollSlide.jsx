@@ -13,22 +13,22 @@ import Icon from '../Shared/Icon';
  */
 
 export default function IdentitetskontrollSlide({ onNext }) {
-  const { companyId } = useParams();
+  const { company_id } = useParams();
   const navigate = useNavigate();
   
   // Hämta sparat filnamn från localStorage
   const getStoredFilename = () => {
-    const caseId = localStorage.getItem('onboarding_id');
-    if (!companyId || !caseId) return null;
-    const key = `id_photo_${companyId}_${caseId}`;
+    const case_id = localStorage.getItem('case_id');
+    if (!company_id || !case_id) return null;
+    const key = `id_photo_${company_id}_${case_id}`;
     return localStorage.getItem(key);
   };
   
   // Spara filnamn till localStorage
   const storeFilename = (filename) => {
-    const caseId = localStorage.getItem('onboarding_id');
-    if (!companyId || !caseId) return;
-    const key = `id_photo_${companyId}_${caseId}`;
+    const case_id = localStorage.getItem('case_id');
+    if (!company_id || !case_id) return;
+    const key = `id_photo_${company_id}_${case_id}`;
     localStorage.setItem(key, filename);
   };
 
@@ -256,11 +256,11 @@ export default function IdentitetskontrollSlide({ onNext }) {
                       // Create FormData for multipart upload
                       const formDataUpload = new FormData();
                       formDataUpload.append('photo', blob, 'identity_photo.png');
-                      formDataUpload.append('orgnr', companyId);
+                      formDataUpload.append('orgnr', company_id);
                       
                       // Upload to backend
                       const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
-                      const response = await fetchWithAuth(`${API_BASE}/onboarding/${companyId}/upload-identity-photo`, {
+                      const response = await fetchWithAuth(`${API_BASE}/onboarding/${company_id}/upload-identity-photo`, {
                         method: 'POST',
                         headers: {},
                         body: formDataUpload

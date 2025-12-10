@@ -43,7 +43,7 @@ const Upload = ({ className }) => (
 );
 
 export default function ForetagsdokumentationSlide({ onNext, onBack }) {
-  const { companyId } = useParams();
+  const { company_id } = useParams();
   
   const QUESTIONS_CONFIG = {
     entireForm: { type: 'object', required: false }
@@ -91,12 +91,12 @@ export default function ForetagsdokumentationSlide({ onNext, onBack }) {
   // Fetch existing uploads from metadata.json
   useEffect(() => {
     const fetchExistingUploads = async () => {
-      if (!orgnr) return;
+      if (!company_id) return;
       
       try {
         const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
 const response = await fetchWithAuth(
-          `${API_BASE}/onboarding/${orgnr}/roaring-data`,
+          `${API_BASE}/onboarding/${company_id}/roaring-data`,
           {
             headers: {}
           }
@@ -118,7 +118,7 @@ const response = await fetchWithAuth(
     };
     
     fetchExistingUploads();
-  }, [orgnr]);
+  }, [company_id]);
 
   const handleFileSelect = (field, e) => {
     const file = e.target.files[0];
@@ -164,7 +164,7 @@ const formDataUpload = new FormData();
       
       const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
       const response = await fetchWithAuth(
-        `${API_BASE}/onboarding/${orgnr}/upload-document`,
+        `${API_BASE}/onboarding/${company_id}/upload-document`,
         {
           method: 'POST',
           headers: {},

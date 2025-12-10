@@ -13,7 +13,7 @@ const SettingsPage = () => {
   
   // Mock data för firmakonfiguration
   const [firmConfig, setFirmConfig] = useState({
-    companyName: 'Exempel Redovisningsbyrå AB',
+    company_name: 'Exempel Redovisningsbyrå AB',
     orgNumber: '556123-4567',
     supportEmail: 'support@exempel.se',
     supportPhone: '08-123 45 67',
@@ -198,8 +198,8 @@ const SettingsPage = () => {
                   </label>
                   <input
                     type="text"
-                    value={firmConfig.companyName}
-                    onChange={(e) => setFirmConfig({...firmConfig, companyName: e.target.value})}
+                    value={firmConfig.company_name}
+                    onChange={(e) => setFirmConfig({...firmConfig, company_name: e.target.value})}
                     className="w-full px-4 py-2 border border-brand-300 rounded-box focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                   />
                 </div>

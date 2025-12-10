@@ -42,7 +42,7 @@ const FileIcon = ({ className }) => (
 );
 
 export default function BokforingsunderlagSlide({ onNext, onBack }) {
-  const { companyId } = useParams();
+  const { company_id } = useParams();
   
   const QUESTIONS_CONFIG = {
     entireForm: { type: 'object', required: false }

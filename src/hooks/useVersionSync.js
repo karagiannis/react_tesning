@@ -9,7 +9,7 @@
  * 
  * Vid varje slide-navigation:
  *   1. Hämta metadata.version från server
- *   2. Jämför med localStorage localVersion
+ *   2. Jämför med localStorage local_version
  *   3. Om server.version > local.version → KONFLIKT
  *   4. Visa MergeConflictModal
  * 
@@ -46,7 +46,7 @@ export default function useVersionSync({ activeCase, storage, api }) {
   // Check version - anropas vid slide-navigation
   // ─────────────────────────────────────────────────────────────────────────
   const checkVersion = useCallback(async () => {
-    if (!activeCase?.companyId || !activeCase?.caseId) {
+    if (!activeCase?.company_id || !activeCase?.case_id) {
       console.log('[VERSION-SYNC] No active case, skipping check');
       return { hasConflict: false };
     }
@@ -56,17 +56,17 @@ export default function useVersionSync({ activeCase, storage, api }) {
     try {
       // 1. Hämta server metadata
       const serverMetadata = await api.fetchMetadata(
-        activeCase.companyId,
-        activeCase.caseId
+        activeCase.company_id,
+        activeCase.case_id
       );
 
       // 2. Hämta local version number
-      const localVersionStr = localStorage.getItem('localVersion');
+      const localVersionStr = localStorage.getItem('local_version');
       const localVersionData = localVersionStr ? JSON.parse(localVersionStr) : null;
-      const localVersion = localVersionData?.version || 0;
+      const local_version = localVersionData?.version || 0;
       
       // 3. Hämta server version number
-      const serverVersion = serverMetadata.version || 0;
+      const server_version = serverMetadata.version || 0;
       
       // 4. Hämta local formData
       const localFormData = storage.getFormData();
@@ -77,16 +77,16 @@ export default function useVersionSync({ activeCase, storage, api }) {
       const currentUserEmail = currentUser?.email || currentUser?.user_id || currentUser?.sub;
       
       // 6. Hämta vem som senast modifierade på server
-      const serverModifiedBy = serverMetadata.modifiedBy || serverMetadata.modified_by || serverMetadata.updated_by;
+      const serverModifiedBy = serverMetadata.modified_by || serverMetadata.modified_by || serverMetadata.updated_by;
 
       console.log('[VERSION-SYNC] Comparing versions:');
-      console.log('  Server version:', serverVersion);
-      console.log('  Local version:', localVersion);
+      console.log('  Server version:', server_version);
+      console.log('  Local version:', local_version);
       console.log('  Server modified_by:', serverModifiedBy);
       console.log('  Current user:', currentUserEmail);
 
       // 7. Kolla om server har nyare version
-      const serverIsNewer = serverVersion > localVersion;
+      const serverIsNewer = server_version > local_version;
       
       // 8. CRITICAL: Kolla om det är SAMMA användare
       const sameUser = serverModifiedBy && currentUserEmail && 
@@ -97,18 +97,18 @@ export default function useVersionSync({ activeCase, storage, api }) {
       if (serverIsNewer && !sameUser) {
         // KONFLIKT! Någon ANNAN användare har ändrat
         console.log('[VERSION-SYNC] ⚠️ CONFLICT DETECTED - Different user modified!');
-        console.log(`  Server version ${serverVersion} > Local version ${localVersion}`);
+        console.log(`  Server version ${server_version} > Local version ${local_version}`);
         
         setServerData({
           formData: serverMetadata.formData,
-          version: serverVersion,
-          lastModified: serverMetadata.lastModified || serverMetadata.last_modified,
-          modifiedBy: serverModifiedBy,
+          version: server_version,
+          last_modified: serverMetadata.last_modified || serverMetadata.last_modified,
+          modified_by: serverModifiedBy,
         });
         
         setLocalData({
           formData: localFormData,
-          version: localVersion,
+          version: local_version,
         });
         
         setHasConflict(true);
@@ -124,13 +124,13 @@ export default function useVersionSync({ activeCase, storage, api }) {
       // Om server har nyare version MEN det är samma användare → AUTO-SYNC
       if (serverIsNewer && sameUser) {
         console.log('[VERSION-SYNC] ✅ Server version is newer but SAME USER - Auto-syncing...');
-        console.log(`  Server version ${serverVersion} > Local version ${localVersion}`);
+        console.log(`  Server version ${server_version} > Local version ${local_version}`);
         
         // Uppdatera local storage med serverns data (tyst sync)
         if (serverMetadata.formData) {
           storage.setFormData(serverMetadata.formData);
-          localStorage.setItem('localVersion', JSON.stringify({
-            version: serverVersion,
+          localStorage.setItem('local_version', JSON.stringify({
+            version: server_version,
             timestamp: new Date().toISOString(),
             formDataHash: 'auto-synced',
           }));
@@ -147,7 +147,7 @@ export default function useVersionSync({ activeCase, storage, api }) {
       }
 
       console.log('[VERSION-SYNC] ✅ No conflict - local is up to date');
-      console.log(`  Server version ${serverVersion} === Local version ${localVersion}`);
+      console.log(`  Server version ${server_version} === Local version ${local_version}`);
       setHasConflict(false);
       setIsChecking(false);
       
@@ -186,8 +186,8 @@ export default function useVersionSync({ activeCase, storage, api }) {
       // Uppdatera local storage med serverns data
       if (serverData?.formData) {
         storage.setFormData(serverData.formData);
-        localStorage.setItem('localVersion', JSON.stringify({
-          timestamp: serverData.lastModified?.toISOString() || new Date().toISOString(),
+        localStorage.setItem('local_version', JSON.stringify({
+          timestamp: serverData.last_modified?.toISOString() || new Date().toISOString(),
           formDataHash: 'synced-from-server',
         }));
       }

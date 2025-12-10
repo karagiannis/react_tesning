@@ -6,9 +6,9 @@
  * ═══════════════════════════════════════════════════════════════════════════════
  * 
  * PROPS:
- *   - currentSlide: string        - Vilken slide användaren är på ('riskfragor', etc.)
+ *   - current_slide: string        - Vilken slide användaren är på ('riskfragor', etc.)
  *   - formData: object            - All insamlad data { riskfragor: {...}, ... }
- *   - companyInfo: object         - { companyName, orgnr }
+ *   - companyInfo: object         - { company_name, orgnr }
  *   - onClose: () => void         - Stäng panelen
  *   - onSendMessage: (msg) => Promise<response>  - För framtida backend-LLM
  * 
@@ -42,7 +42,7 @@ const SLIDE_CONTEXT = {
 };
 
 export default function LLMPanel({ 
-  currentSlide = 'unknown',
+  current_slide = 'unknown',
   formData = {},
   companyInfo = {},
   onClose,
@@ -55,14 +55,14 @@ export default function LLMPanel({
 
   // Bygg kontextmedvetet välkomstmeddelande
   useEffect(() => {
-    const slideInfo = SLIDE_CONTEXT[currentSlide] || { name: currentSlide, description: '', ptlTips: '' };
-    const companyName = companyInfo?.companyName || 'valt företag';
+    const slideInfo = SLIDE_CONTEXT[current_slide] || { name: current_slide, description: '', ptlTips: '' };
+    const company_name = companyInfo?.company_name || 'valt företag';
     
     const welcomeMessage = {
       role: 'assistant',
       content: `Hej! Jag är din PTL-assistent. 🏛️
 
-Du arbetar just nu med **${companyName}** på steget **${slideInfo.name}**.
+Du arbetar just nu med **${company_name}** på steget **${slideInfo.name}**.
 
 ${slideInfo.ptlTips ? `💡 **Tips:** ${slideInfo.ptlTips}` : ''}
 
@@ -76,7 +76,7 @@ Ställ gärna en fråga!`,
     };
     
     setMessages([welcomeMessage]);
-  }, [currentSlide, companyInfo?.companyName]);
+  }, [current_slide, companyInfo?.company_name]);
 
   // Auto-scroll till senaste meddelande
   useEffect(() => {
@@ -85,8 +85,8 @@ Ställ gärna en fråga!`,
 
   // Generera kontextmedvetet mocksvar
   const generateMockResponse = (userQuestion) => {
-    const slideData = formData[currentSlide] || {};
-    const slideInfo = SLIDE_CONTEXT[currentSlide] || {};
+    const slideData = formData[current_slide] || {};
+    const slideInfo = SLIDE_CONTEXT[current_slide] || {};
     
     // Kolla om användaren frågar om specifika fält
     if (userQuestion.toLowerCase().includes('utländska') || userQuestion.toLowerCase().includes('leverantör')) {
@@ -127,8 +127,8 @@ Vill du ha en checklista för PEP-hantering?`;
     // Generiskt svar med kontext
     return `Tack för din fråga om "${userQuestion}".
 
-**Nuvarande steg:** ${slideInfo.name || currentSlide}
-**Företag:** ${companyInfo?.companyName || 'Ej valt'}
+**Nuvarande steg:** ${slideInfo.name || current_slide}
+**Företag:** ${companyInfo?.company_name || 'Ej valt'}
 
 Jag analyserar den data du samlat in hittills. I produktion kommer jag kunna ge mer specifika svar baserat på:
 • Bolagsverkets data
@@ -193,9 +193,9 @@ Finns det något specifikt om PTL eller riskbedömning du undrar över?`;
       {/* Context bar - visar nuvarande slide */}
       <div className="px-4 py-2 bg-brand-50 border-b border-brand-100 text-xs">
         <span className="text-brand-600 font-medium">Kontext:</span>{' '}
-        <span className="text-brand-800">{SLIDE_CONTEXT[currentSlide]?.name || currentSlide}</span>
-        {companyInfo?.companyName && (
-          <span className="text-brand-600"> • {companyInfo.companyName}</span>
+        <span className="text-brand-800">{SLIDE_CONTEXT[current_slide]?.name || current_slide}</span>
+        {companyInfo?.company_name && (
+          <span className="text-brand-600"> • {companyInfo.company_name}</span>
         )}
       </div>
 

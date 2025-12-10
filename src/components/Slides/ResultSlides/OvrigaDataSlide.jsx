@@ -1,12 +1,41 @@
 import React from 'react';
 
+// Helper för att formatera tal säkert
+const formatNumber = (value, divisor = 1, decimals = 0, suffix = '') => {
+  if (value === undefined || value === null || isNaN(value)) return 'N/A';
+  return (value / divisor).toFixed(decimals) + suffix;
+};
+
 export default function OvrigaDataSlide({ onNext, onBack, formData = {} }) {
+  // ═══════════════════════════════════════════════════════════════════════
+  // DEFENSIVE: Early return om data inte finns (async loading pågår)
+  // Samma mönster som VerksamhetSlide
+  // ═══════════════════════════════════════════════════════════════════════
+  if (!formData || Object.keys(formData).length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
+        <div className="bg-white rounded-card shadow-2xl p-8 max-w-md w-full text-center">
+          <div className="animate-spin h-12 w-12 border-4 border-brand-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-brand-900">Laddar övriga data...</h2>
+          <p className="text-sm text-brand-600 mt-2">Hämtar information från server</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Extrahera data med fallbacks
   const propertyData = formData.propertyInformation || {};
   const engagementsData = formData.companyEngagements || {};
   const caseData = formData.companyCaseRegister || {};
   const financialData = formData.financialInformation || {};
-  const establishmentsData = formData.establishments || {};
-  const shareData = formData.shareFacts || mockRoaringData.shareFacts;
+  const establishmentsData = formData.establishments || [];
+  const shareData = formData.shareFacts || {};
+
+  // Säkra arrayer (kan vara undefined)
+  const properties = propertyData.properties || [];
+  const engagements = engagementsData.engagements || [];
+  const cases = caseData.cases || [];
+  const shareClasses = shareData.shareClasses || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
@@ -26,92 +55,92 @@ export default function OvrigaDataSlide({ onNext, onBack, formData = {} }) {
             <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Ekonomisk information ({financialData.latestYear})
+            Ekonomisk information ({financialData.latestYear || 'N/A'})
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-4 bg-white rounded-box border border-brand-200">
               <div className="text-sm text-gray-600 mb-1">Omsättning</div>
               <div className="text-page-title text-gray-800">
-                {(financialData.revenue / 1000000).toFixed(1)}M
+                {formatNumber(financialData.revenue, 1000000, 1, 'M')}
               </div>
-              <div className="text-xs text-gray-500">{financialData.currency}</div>
+              <div className="text-xs text-gray-500">{financialData.currency || ''}</div>
             </div>
             <div className="p-4 bg-white rounded-box border border-brand-200">
               <div className="text-sm text-gray-600 mb-1">Rörelseresultat</div>
               <div className="text-page-title text-green-600">
-                {(financialData.operatingProfit / 1000).toFixed(0)}k
+                {formatNumber(financialData.operatingProfit, 1000, 0, 'k')}
               </div>
-              <div className="text-xs text-gray-500">{financialData.currency}</div>
+              <div className="text-xs text-gray-500">{financialData.currency || ''}</div>
             </div>
             <div className="p-4 bg-white rounded-box border border-brand-200">
               <div className="text-sm text-gray-600 mb-1">Resultat efter skatt</div>
               <div className="text-page-title text-green-600">
-                {(financialData.profitAfterTax / 1000).toFixed(0)}k
+                {formatNumber(financialData.profitAfterTax, 1000, 0, 'k')}
               </div>
-              <div className="text-xs text-gray-500">{financialData.currency}</div>
+              <div className="text-xs text-gray-500">{financialData.currency || ''}</div>
             </div>
             <div className="p-4 bg-white rounded-box border border-brand-200">
               <div className="text-sm text-gray-600 mb-1">Eget kapital</div>
               <div className="text-page-title text-gray-800">
-                {(financialData.equity / 1000000).toFixed(1)}M
+                {formatNumber(financialData.equity, 1000000, 1, 'M')}
               </div>
-              <div className="text-xs text-gray-500">{financialData.currency}</div>
+              <div className="text-xs text-gray-500">{financialData.currency || ''}</div>
             </div>
           </div>
           <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-3 bg-white rounded-box border border-brand-200 text-center">
               <div className="text-xs text-gray-600 mb-1">Vinstmarginal</div>
-              <div className="text-section-title text-gray-800">{financialData.profitMargin}%</div>
+              <div className="text-section-title text-gray-800">{financialData.profitMargin ?? 'N/A'}%</div>
             </div>
             <div className="p-3 bg-white rounded-box border border-brand-200 text-center">
               <div className="text-xs text-gray-600 mb-1">Soliditet</div>
-              <div className="text-section-title text-gray-800">{financialData.equityRatio}%</div>
+              <div className="text-section-title text-gray-800">{financialData.equityRatio ?? 'N/A'}%</div>
             </div>
             <div className="p-3 bg-white rounded-box border border-brand-200 text-center">
               <div className="text-xs text-gray-600 mb-1">Avkastning EK</div>
-              <div className="text-section-title text-gray-800">{financialData.returnOnEquity}%</div>
+              <div className="text-section-title text-gray-800">{financialData.returnOnEquity ?? 'N/A'}%</div>
             </div>
             <div className="p-3 bg-white rounded-box border border-brand-200 text-center">
               <div className="text-xs text-gray-600 mb-1">Anställda</div>
-              <div className="text-section-title text-gray-800">{financialData.numberOfEmployees}</div>
+              <div className="text-section-title text-gray-800">{financialData.numberOfEmployees ?? 'N/A'}</div>
             </div>
           </div>
         </div>
 
-        {/* Fastighetsinnehav */}
-        {propertyData.properties.length > 0 && (
+        {/* Fastighetsinnehav - DEFENSIV: Använd säker array */}
+        {properties.length > 0 && (
           <div className="mb-6 p-6 bg-brand-50 rounded-card border border-brand-200">
             <h2 className="text-subsection-title font-semibold text-gray-800 mb-4 flex items-center">
               <svg className="w-6 h-6 mr-2 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-              Fastighetsinnehav ({propertyData.properties.length})
+              Fastighetsinnehav ({properties.length})
             </h2>
             <div className="space-y-3">
-              {propertyData.properties.map((property, index) => (
+              {properties.map((property, index) => (
                 <div key={index} className="p-4 bg-white rounded-box border border-brand-200">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <div className="font-semibold text-gray-800">{property.propertyId}</div>
-                      <div className="text-sm text-sm text-brand-700">{property.address}</div>
+                      <div className="font-semibold text-gray-800">{property.propertyId || 'N/A'}</div>
+                      <div className="text-sm text-brand-700">{property.address || 'N/A'}</div>
                     </div>
                     <div className="text-right">
                       <div className="font-bold text-brand-600">
-                        {(property.taxAssessedValue / 1000000).toFixed(1)}M SEK
+                        {formatNumber(property.taxAssessedValue, 1000000, 1, 'M SEK')}
                       </div>
                       <div className="text-xs text-gray-500">Taxeringsvärde</div>
                     </div>
                   </div>
-                  <div className="flex gap-4 text-sm text-sm text-brand-700">
-                    <span>Ägarandel: {property.ownershipPercent}%</span>
-                    <span>Förvärvsdatum: {property.acquisitionDate}</span>
+                  <div className="flex gap-4 text-sm text-brand-700">
+                    <span>Ägarandel: {property.ownershipPercent ?? 'N/A'}%</span>
+                    <span>Förvärvsdatum: {property.acquisitionDate || 'N/A'}</span>
                   </div>
                 </div>
               ))}
               <div className="p-3 bg-brand-100 rounded-box border border-brand-300 text-center">
                 <span className="text-gray-700 font-medium">Totalt taxeringsvärde: </span>
                 <span className="text-section-title text-brand-700">
-                  {(propertyData.totalTaxAssessedValue / 1000000).toFixed(1)}M SEK
+                  {formatNumber(propertyData.totalTaxAssessedValue, 1000000, 1, 'M SEK')}
                 </span>
               </div>
             </div>
@@ -128,34 +157,34 @@ export default function OvrigaDataSlide({ onNext, onBack, formData = {} }) {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
             <div className="p-4 bg-brand-50 rounded-box border border-brand-200 text-center">
-              <div className="text-page-title text-brand-600">{engagementsData.currentEngagements}</div>
-              <div className="text-sm text-sm text-brand-700">Nuvarande uppdrag</div>
+              <div className="text-page-title text-brand-600">{engagementsData.currentEngagements ?? 0}</div>
+              <div className="text-sm text-brand-700">Nuvarande uppdrag</div>
             </div>
             <div className="p-4 bg-brand-50 rounded-box border border-brand-200 text-center">
-              <div className="text-page-title text-sm text-brand-700">{engagementsData.historicalEngagements}</div>
-              <div className="text-sm text-sm text-brand-700">Historiska uppdrag</div>
+              <div className="text-page-title text-brand-700">{engagementsData.historicalEngagements ?? 0}</div>
+              <div className="text-sm text-brand-700">Historiska uppdrag</div>
             </div>
             <div className="p-4 bg-brand-50 rounded-box border border-brand-200 text-center">
               <div className="text-page-title text-gray-800">
-                {engagementsData.currentEngagements + engagementsData.historicalEngagements}
+                {(engagementsData.currentEngagements ?? 0) + (engagementsData.historicalEngagements ?? 0)}
               </div>
-              <div className="text-sm text-sm text-brand-700">Totalt</div>
+              <div className="text-sm text-brand-700">Totalt</div>
             </div>
           </div>
-          {engagementsData.engagements.length > 0 && (
+          {engagements.length > 0 && (
             <div className="space-y-2">
               <h3 className="font-semibold text-gray-700 text-sm">Aktuella uppdrag:</h3>
-              {engagementsData.engagements.filter(e => e.status === 'Active').map((engagement, index) => (
+              {engagements.filter(e => e.status === 'Active').map((engagement, index) => (
                 <div key={index} className="p-3 bg-white rounded-box border border-brand-200 flex justify-between items-center">
                   <div>
-                    <div className="font-medium text-gray-800">{engagement.companyName}</div>
-                    <div className="text-xs text-gray-500">{engagement.organizationNumber}</div>
+                    <div className="font-medium text-gray-800">{engagement.company_name || 'N/A'}</div>
+                    <div className="text-xs text-gray-500">{engagement.organizationNumber || 'N/A'}</div>
                   </div>
                   <div className="text-right">
                     <div className="px-3 py-1 bg-brand-100 text-brand-800 rounded-full text-sm font-medium">
-                      {engagement.role}
+                      {engagement.role || 'N/A'}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">Sedan {engagement.from}</div>
+                    <div className="text-xs text-gray-500 mt-1">Sedan {engagement.from || 'N/A'}</div>
                   </div>
                 </div>
               ))}
@@ -173,34 +202,34 @@ export default function OvrigaDataSlide({ onNext, onBack, formData = {} }) {
           </h2>
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="p-4 bg-white rounded-box border border-brand-200 text-center">
-              <div className="text-page-title text-brand-600">{caseData.openCases}</div>
-              <div className="text-sm text-sm text-brand-700">Öppna ärenden</div>
+              <div className="text-page-title text-brand-600">{caseData.openCases ?? 0}</div>
+              <div className="text-sm text-brand-700">Öppna ärenden</div>
             </div>
             <div className="p-4 bg-white rounded-box border border-brand-200 text-center">
-              <div className="text-page-title text-sm text-brand-700">{caseData.closedCases}</div>
-              <div className="text-sm text-sm text-brand-700">Avslutade ärenden</div>
+              <div className="text-page-title text-brand-700">{caseData.closedCases ?? 0}</div>
+              <div className="text-sm text-brand-700">Avslutade ärenden</div>
             </div>
           </div>
-          {caseData.cases.length > 0 && (
+          {cases.length > 0 && (
             <div className="space-y-2">
               <h3 className="font-semibold text-gray-700 text-sm">Senaste ärenden:</h3>
-              {caseData.cases.map((caseItem, index) => (
+              {cases.map((caseItem, index) => (
                 <div key={index} className="p-3 bg-white rounded-box border border-brand-200">
                   <div className="flex justify-between items-start">
                     <div>
-                      <div className="font-medium text-gray-800">{caseItem.caseType}</div>
-                      <div className="text-xs text-gray-500">Ärende: {caseItem.caseNumber}</div>
+                      <div className="font-medium text-gray-800">{caseItem.caseType || 'N/A'}</div>
+                      <div className="text-xs text-gray-500">Ärende: {caseItem.caseNumber || 'N/A'}</div>
                     </div>
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                       caseItem.status === 'Closed' 
                         ? 'bg-green-100 text-green-800'
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
-                      {caseItem.status}
+                      {caseItem.status || 'N/A'}
                     </span>
                   </div>
-                  <div className="mt-2 text-xs text-sm text-brand-700">
-                    Registrerad: {caseItem.registrationDate}
+                  <div className="mt-2 text-xs text-brand-700">
+                    Registrerad: {caseItem.registrationDate || 'N/A'}
                     {caseItem.closedDate && ` • Avslutad: ${caseItem.closedDate}`}
                   </div>
                 </div>
@@ -220,34 +249,34 @@ export default function OvrigaDataSlide({ onNext, onBack, formData = {} }) {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <div className="p-4 bg-white rounded-box border border-brand-200 text-center">
               <div className="text-page-title text-brand-600">
-                {(shareData.shareCapital / 1000).toFixed(0)}k
+                {formatNumber(shareData.shareCapital, 1000, 0, 'k')}
               </div>
-              <div className="text-sm text-sm text-brand-700">Aktiekapital (SEK)</div>
+              <div className="text-sm text-brand-700">Aktiekapital (SEK)</div>
             </div>
             <div className="p-4 bg-white rounded-box border border-brand-200 text-center">
-              <div className="text-page-title text-gray-800">{shareData.numberOfShares.toLocaleString()}</div>
-              <div className="text-sm text-sm text-brand-700">Antal aktier</div>
+              <div className="text-page-title text-gray-800">{shareData.numberOfShares?.toLocaleString() ?? 'N/A'}</div>
+              <div className="text-sm text-brand-700">Antal aktier</div>
             </div>
             <div className="p-4 bg-white rounded-box border border-brand-200 text-center">
-              <div className="text-page-title text-gray-800">{shareData.shareValue}</div>
-              <div className="text-sm text-sm text-brand-700">Kvotvärde (SEK)</div>
+              <div className="text-page-title text-gray-800">{shareData.shareValue ?? 'N/A'}</div>
+              <div className="text-sm text-brand-700">Kvotvärde (SEK)</div>
             </div>
             <div className="p-4 bg-white rounded-box border border-brand-200 text-center">
-              <div className="text-page-title text-gray-800">{shareData.shareClasses.length}</div>
-              <div className="text-sm text-sm text-brand-700">Aktieklasser</div>
+              <div className="text-page-title text-gray-800">{shareClasses.length}</div>
+              <div className="text-sm text-brand-700">Aktieklasser</div>
             </div>
           </div>
-          {shareData.shareClasses.length > 0 && (
+          {shareClasses.length > 0 && (
             <div className="space-y-2">
               <h3 className="font-semibold text-gray-700 text-sm">Aktieklasser:</h3>
-              {shareData.shareClasses.map((shareClass, index) => (
+              {shareClasses.map((shareClass, index) => (
                 <div key={index} className="p-3 bg-white rounded-box border border-brand-200 flex justify-between items-center">
                   <div>
-                    <span className="font-medium text-gray-800">Klass {shareClass.class}</span>
-                    <span className="text-sm text-gray-600 ml-3">{shareClass.shares.toLocaleString()} aktier</span>
+                    <span className="font-medium text-gray-800">Klass {shareClass.class || 'N/A'}</span>
+                    <span className="text-sm text-gray-600 ml-3">{shareClass.shares?.toLocaleString() ?? 'N/A'} aktier</span>
                   </div>
-                  <div className="text-sm text-sm text-brand-700">
-                    {shareClass.votesPerShare} röst{shareClass.votesPerShare !== 1 ? 'er' : ''} per aktie
+                  <div className="text-sm text-brand-700">
+                    {shareClass.votesPerShare ?? 'N/A'} röst{shareClass.votesPerShare !== 1 ? 'er' : ''} per aktie
                   </div>
                 </div>
               ))}
@@ -255,8 +284,8 @@ export default function OvrigaDataSlide({ onNext, onBack, formData = {} }) {
           )}
         </div>
 
-        {/* Etableringar */}
-        {establishmentsData.length > 0 && (
+        {/* Etableringar - DEFENSIV: Kontrollera att det är en array */}
+        {Array.isArray(establishmentsData) && establishmentsData.length > 0 && (
           <div className="mb-8 p-6 bg-gray-50 rounded-card border border-gray-200">
             <h2 className="text-subsection-title font-semibold text-gray-800 mb-4 flex items-center">
               <svg className="w-6 h-6 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -269,18 +298,18 @@ export default function OvrigaDataSlide({ onNext, onBack, formData = {} }) {
                 <div key={index} className="p-4 bg-white rounded-box border border-gray-200">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <div className="font-semibold text-gray-800">{establishment.name}</div>
-                      <div className="text-sm text-sm text-brand-700">
-                        {establishment.address.street}, {establishment.address.postalCode} {establishment.address.city}
+                      <div className="font-semibold text-gray-800">{establishment.name || 'N/A'}</div>
+                      <div className="text-sm text-brand-700">
+                        {establishment.address?.street || 'N/A'}, {establishment.address?.postalCode || ''} {establishment.address?.city || ''}
                       </div>
                     </div>
                     <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
-                      {establishment.establishmentType}
+                      {establishment.establishmentType || 'N/A'}
                     </span>
                   </div>
-                  <div className="flex gap-4 text-sm text-sm text-brand-700">
-                    <span>Anställda: {establishment.numberOfEmployees}</span>
-                    <span>Etableringsnr: {establishment.establishmentNumber}</span>
+                  <div className="flex gap-4 text-sm text-brand-700">
+                    <span>Anställda: {establishment.numberOfEmployees ?? 'N/A'}</span>
+                    <span>Etableringsnr: {establishment.establishmentNumber || 'N/A'}</span>
                   </div>
                 </div>
               ))}

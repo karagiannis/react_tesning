@@ -13,7 +13,7 @@
  * FUNKTIONALITET:
  * 1. Lyssnar på formData-ändringar
  * 2. Debounced save till localStorage (300ms)
- * 3. Uppdaterar localVersion timestamp
+ * 3. Uppdaterar local_version timestamp
  * 4. Synkar med server periodiskt (optional)
  * 
  * ANVÄNDNING:

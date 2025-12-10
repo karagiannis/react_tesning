@@ -53,8 +53,8 @@ export default function ExampleSlide_v2() {
             </label>
             <input
               type="text"
-              value={slideData.companyName || ''}
-              onChange={(e) => actions.updateField('example', 'companyName', e.target.value)}
+              value={slideData.company_name || ''}
+              onChange={(e) => actions.updateField('example', 'company_name', e.target.value)}
               className="w-full px-4 py-2 border rounded-box focus:ring-2 focus:ring-brand-500"
               placeholder="Ange företagsnamn"
             />
@@ -121,7 +121,7 @@ export default function ExampleSlide_v2() {
         {import.meta.env.DEV && (
           <div className="mt-8 p-4 bg-gray-100 rounded text-xs">
             <strong>Debug:</strong>
-            <pre>{JSON.stringify({ slideData, currentSlide: state.currentSlideKey }, null, 2)}</pre>
+            <pre>{JSON.stringify({ slideData, current_slide: state.currentSlideKey }, null, 2)}</pre>
           </div>
         )}
         

@@ -49,9 +49,9 @@ const AppState = {
                                              // → Sparar pending_payment till localStorage
                                              // → window.location.href = stripe_url
   
-  VERIFYING_PAYMENT: 'VERIFYING_PAYMENT', // Verifierar betalning efter Stripe redirect
-                                           // → Anropar /subscription/status
-                                           // → Går till READY när klart
+  VERIFYING_PAYMENT: 'VERIFYING_PAYMENT', // Edge case: payment-callback misslyckades
+                                           // → Visar fel-UI med "Försök igen"
+                                           // → Retry = reload → handleResuming körs igen
   
   NAVIGATING: 'NAVIGATING',         // (Framtida) Byter slide
   SAVING: 'SAVING',                 // (Framtida) Sparar till server

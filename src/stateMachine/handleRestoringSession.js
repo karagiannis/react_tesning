@@ -56,11 +56,72 @@ export function createHandleRestoringSession(getState, getActions, services) {
     console.log('[RESTORE] Restoring tab session:', tabSession);
     
     // ─────────────────────────────────────────────────────────────────
-    // Steg 2: Hydrate från localStorage
+    // Steg 1.5: Parsa sessionId för att avgöra om det är draft eller permanent
+    // Format: onboarding::company_id::case_id::user_id (permanent)
+    // Format: onboarding::draft::temp_xxx::user_id (draft)
     // ─────────────────────────────────────────────────────────────────
-    const savedFormData = storage.getFormData();
-    const savedCompletedSlides = storage.getCompletedSlides();
-    const savedActiveCase = storage.getActiveCase();
+    const sessionParts = tabSession.sessionId.split('::');
+    const isPermanentSession = sessionParts.length >= 4 && sessionParts[1] !== 'draft';
+    
+    console.log('[RESTORE] Session type:', isPermanentSession ? 'PERMANENT' : 'DRAFT');
+    console.log('[RESTORE] Session parts:', sessionParts);
+    
+    let savedActiveCase = null;
+    let savedFormData = {};
+    let savedCompletedSlides = [];
+    
+    if (isPermanentSession) {
+      // ═══════════════════════════════════════════════════════════════
+      // PERMANENT CASE: Läs från permanent nycklar
+      // ═══════════════════════════════════════════════════════════════
+      const [, company_id, case_id, user_id] = sessionParts;
+      console.log('[RESTORE] Permanent case detected:', { company_id, case_id, user_id });
+      
+      // Bygg activeCase objekt från sessionId
+      savedActiveCase = {
+        company_id,
+        case_id,
+        // Dessa kan vara null, men fylls i från server om vi behöver synka
+        company_name: null,
+      };
+      
+      // Läs slide-data från permanenta nycklar
+      const permanentPrefix = `onboarding::${company_id}::${case_id}::${user_id}::`;
+      console.log('[RESTORE] Looking for permanent keys with prefix:', permanentPrefix);
+      
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(permanentPrefix)) {
+          const slideKey = key.replace(permanentPrefix, '');
+          try {
+            const value = JSON.parse(localStorage.getItem(key));
+            if (slideKey === 'completedSlides') {
+              savedCompletedSlides = value || [];
+            } else if (slideKey === 'activeCase') {
+              savedActiveCase = value;
+            } else {
+              // Det är slide-data
+              savedFormData[slideKey] = value;
+            }
+            console.log('[RESTORE]   Found:', slideKey);
+          } catch (e) {
+            console.warn('[RESTORE]   Failed to parse:', key, e);
+          }
+        }
+      }
+      
+      // Sätt isDraftMode=false för permanent case
+      setIsDraftMode(false);
+      storage.setIsDraftMode(false);
+      
+    } else {
+      // ═══════════════════════════════════════════════════════════════
+      // DRAFT CASE: Läs från draft-nycklar (befintlig logik)
+      // ═══════════════════════════════════════════════════════════════
+      savedFormData = storage.getFormData();
+      savedCompletedSlides = storage.getCompletedSlides();
+      savedActiveCase = storage.getActiveCase();
+    }
     
     setFormData(savedFormData);
     setCompletedSlides(savedCompletedSlides);
@@ -75,10 +136,21 @@ export function createHandleRestoringSession(getState, getActions, services) {
     });
     
     // ─────────────────────────────────────────────────────────────────
-    // Steg 2.5: Validera inkonsistent state (isDraftMode=false men inget activeCase)
+    // Steg 2.5: Validera inkonsistent state
+    // Om permanent session men ingen data hittades → gå till CHECKING_PENDING
+    // (servern har datan, vi behöver bara hämta den via resume-flödet)
     // ─────────────────────────────────────────────────────────────────
-    if (!isDraftMode && !savedActiveCase) {
-      console.warn('[RESTORE] ⚠️ Inconsistent state: isDraftMode=false but no activeCase - resetting to draft mode');
+    if (isPermanentSession && Object.keys(savedFormData).length === 0) {
+      console.warn('[RESTORE] ⚠️ Permanent session but no local data - fetching from server');
+      // Rensa tab session så vi inte hamnar i loop
+      storage.clearCurrentTabSession();
+      setIsLoading(false);
+      setAppState(AppState.CHECKING_PENDING);
+      return;
+    }
+    
+    if (!isPermanentSession && !savedActiveCase) {
+      console.warn('[RESTORE] ⚠️ Draft session but no activeCase - resetting to draft mode');
       setIsDraftMode(true);
       storage.setIsDraftMode(true);
       
@@ -109,12 +181,12 @@ export function createHandleRestoringSession(getState, getActions, services) {
     // ─────────────────────────────────────────────────────────────────
     // Steg 3: Om permanent läge - synka med server
     // ─────────────────────────────────────────────────────────────────
-    if (!isDraftMode && savedActiveCase?.companyId) {
+    if (isPermanentSession && savedActiveCase?.company_id) {
       try {
         console.log('[RESTORE] Fetching metadata from server for sync...');
         const metadata = await api.fetchMetadata(
-          savedActiveCase.companyId,
-          savedActiveCase.caseId || savedActiveCase.onboardingId
+          savedActiveCase.company_id,
+          savedActiveCase.case_id || savedActiveCase.case_id
         );
         
         // Synka completedSlides från server (servern har auktoritet)
@@ -124,19 +196,19 @@ export function createHandleRestoringSession(getState, getActions, services) {
         }
         
         // 📌 SPARA SERVER VERSION för conflict detection
-        const serverVersion = metadata?.metadata?.version || metadata?.version || 0;
-        const caseId = savedActiveCase.caseId || savedActiveCase.onboardingId;
-        const versionStorageKey = `case_${savedActiveCase.companyId}_${caseId}_version`;
+        // Backend returnerar fält direkt på roten (inte under .metadata)
+        const server_version = metadata?.version || 0;
+        const case_id = savedActiveCase.case_id || savedActiveCase.case_id;
+        const versionStorageKey = `case_${savedActiveCase.company_id}_${case_id}_version`;
         localStorage.setItem(versionStorageKey, JSON.stringify({
-          version: serverVersion,
+          version: server_version,
           timestamp: new Date().toISOString(),
           syncedFromServer: true
         }));
-        console.log('[RESTORE] 📌 Sparade server version:', serverVersion);
+        console.log('[RESTORE] 📌 Sparade server version:', server_version);
         
         // 🔓 Synka betalningsstatus för att låsa upp företagsdata-slides
-        const paymentConfirmed = metadata.subscription?.payment_confirmed_at ||
-                                  metadata.metadata?.subscription?.payment_confirmed_at;
+        const paymentConfirmed = metadata.subscription?.payment_confirmed_at;
         if (paymentConfirmed) {
           console.log('[RESTORE] 🔓 Payment confirmed - unlocking företagsdata slides');
           setIsPaymentConfirmed(true);
@@ -188,7 +260,7 @@ export function createHandleRestoringSession(getState, getActions, services) {
     // ─────────────────────────────────────────────────────────────────
     // Steg 4: Navigera till där användaren var
     // ─────────────────────────────────────────────────────────────────
-    const targetSlide = tabSession.currentSlide || 'uppdragsval';
+    const targetSlide = tabSession.current_slide || 'uppdragsval';
     setCurrentSlideKey(targetSlide);
     
     const slide = SLIDE_ORDER.find(s => s.key === targetSlide);
@@ -200,7 +272,7 @@ export function createHandleRestoringSession(getState, getActions, services) {
     // Logga för audit trail
     await api.logPersonal('Session restored after page reload', {
       sessionId: tabSession.sessionId,
-      currentSlide: targetSlide,
+      current_slide: targetSlide,
       isDraftMode,
     });
     

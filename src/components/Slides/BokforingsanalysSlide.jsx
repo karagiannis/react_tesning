@@ -15,7 +15,7 @@ export default function BokforingsanalysSlide({ onNext, onBack }) {
       amount: 850000,
       status: "error",
       flagReason: "Belopp överstiger normalintervall med 340%",
-      createdBy: "System Import",
+      created_by: "System Import",
       createdDate: "2024-01-15",
       rows: [
         { account: "4000", accountName: "Konsultkostnader", debit: 850000, credit: 0 },
@@ -29,7 +29,7 @@ export default function BokforingsanalysSlide({ onNext, onBack }) {
       amount: 45000,
       status: "warning",
       flagReason: "Kontanthantering utan verifikation",
-      createdBy: "Fredrik Andersson",
+      created_by: "Fredrik Andersson",
       createdDate: "2024-03-22",
       rows: [
         { account: "6570", accountName: "Diverse kostnader", debit: 45000, credit: 0 },
@@ -43,7 +43,7 @@ export default function BokforingsanalysSlide({ onNext, onBack }) {
       amount: 8500,
       status: "warning",
       flagReason: "Kontantutlägg utan original kvitto",
-      createdBy: "Fredrik Andersson",
+      created_by: "Fredrik Andersson",
       createdDate: "2024-09-20",
       rows: [
         { account: "5410", accountName: "Reseersättningar", debit: 8500, credit: 0 },
@@ -57,7 +57,7 @@ export default function BokforingsanalysSlide({ onNext, onBack }) {
       amount: 320000,
       status: "error",
       flagReason: "Utlandsbetalning till skatteparadis utan F-skatt",
-      createdBy: "System Import",
+      created_by: "System Import",
       createdDate: "2024-10-12",
       rows: [
         { account: "4000", accountName: "Konsultkostnader", debit: 320000, credit: 0 },
@@ -283,7 +283,7 @@ export default function BokforingsanalysSlide({ onNext, onBack }) {
                         </p>
                       )}
                       <p className="text-xs text-gray-600 mt-2">
-                        Skapad: {selectedVoucher.createdDate} av {selectedVoucher.createdBy}
+                        Skapad: {selectedVoucher.createdDate} av {selectedVoucher.created_by}
                       </p>
                     </div>
                   </div>

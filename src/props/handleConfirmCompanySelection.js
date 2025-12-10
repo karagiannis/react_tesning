@@ -29,8 +29,8 @@ export const createHandleConfirmCompanySelection = ({
   setActiveCase,
   SLIDE_ORDER,
 }) => {
-  return async (companyId, companyName, orgnr) => {
-    console.log(`[POINT OF NO RETURN] Company selected: ${companyName} (${orgnr})`);
+  return async (company_id, company_name, orgnr) => {
+    console.log(`[POINT OF NO RETURN] Company selected: ${company_name} (${orgnr})`);
     console.log(`[POINT OF NO RETURN] Sending temp_case_id: ${tempCaseId}`);
     
     setIsLoading(true);
@@ -51,9 +51,9 @@ export const createHandleConfirmCompanySelection = ({
         method: 'POST',
         body: JSON.stringify({
           case_id: tempCaseId,           // "temp_1701234567890_abc123"
-          company_id: companyId || '',    // Om vi redan har company_id
+          company_id: company_id || '',    // Om vi redan har company_id
           orgnr: orgnr,
-          company_name: companyName,
+          company_name: company_name,
           form_data: formData['uppdragsval'] || {},  // Formulärdata från Uppdragsval
         }),
       });
@@ -70,7 +70,7 @@ export const createHandleConfirmCompanySelection = ({
       // - company_id: "5566778899_abc123" (genererat eller befintligt)
       // - was_temp: true (om det var en temp-session)
       
-      const serverCaseId = result.case_id || result.onboarding_id;
+      const serverCaseId = result.case_id || result.case_id;
       const serverCompanyId = result.company_id;
       
       console.log(`[POINT OF NO RETURN] Server created case: ${serverCaseId}`);
@@ -91,9 +91,9 @@ export const createHandleConfirmCompanySelection = ({
       // ─────────────────────────────────────────────────────────────────
       setIsDraftMode(false);
       setActiveCase({
-        companyId: serverCompanyId,
-        caseId: serverCaseId,
-        companyName: result.company_name || companyName,
+        company_id: serverCompanyId,
+        case_id: serverCaseId,
+        company_name: result.company_name || company_name,
         orgnr: result.orgnr || orgnr,
       });
       
@@ -101,10 +101,10 @@ export const createHandleConfirmCompanySelection = ({
       // Steg 4: Logga för audit trail
       // ─────────────────────────────────────────────────────────────────
       await api.log(`POINT OF NO RETURN: ${user.name} bekräftade företagsval`, {
-        companyId: serverCompanyId,
-        companyName: result.company_name || companyName,
+        company_id: serverCompanyId,
+        company_name: result.company_name || company_name,
         orgnr: result.orgnr || orgnr,
-        caseId: serverCaseId,
+        case_id: serverCaseId,
         previousTempCaseId: tempCaseId,
         wasTemp: result.was_temp,
       });
@@ -123,8 +123,8 @@ export const createHandleConfirmCompanySelection = ({
       
       return {
         success: true,
-        companyId: serverCompanyId,
-        caseId: serverCaseId,
+        company_id: serverCompanyId,
+        case_id: serverCaseId,
         nextSlide: nextSlide || null,
       };
       

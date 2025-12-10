@@ -59,15 +59,15 @@ const StorageKeyBuilder = {
    * Används EFTER "point of no return" - data är nu kopplad till ett
    * specifikt företag och case på servern.
    */
-  buildPermanentKey: (companyId, caseId, userId, dataType) => {
-    return `onboarding::${companyId}::${caseId}::${userId}::${dataType}`;
+  buildPermanentKey: (company_id, case_id, userId, dataType) => {
+    return `onboarding::${company_id}::${case_id}::${userId}::${dataType}`;
   },
   
   /**
    * Parsa en nyckel för att extrahera komponenter
    * 
    * Input:  "onboarding::draft::temp_123::user_456::formData"
-   * Output: { type: 'onboarding', companyId: 'draft', caseId: 'temp_123', 
+   * Output: { type: 'onboarding', company_id: 'draft', case_id: 'temp_123', 
    *           userId: 'user_456', dataType: 'formData', isDraft: true }
    */
   parseKey: (key) => {
@@ -77,8 +77,8 @@ const StorageKeyBuilder = {
     }
     return {
       type: parts[0],
-      companyId: parts[1],
-      caseId: parts[2],
+      company_id: parts[1],
+      case_id: parts[2],
       userId: parts[3],
       dataType: parts[4],
       isDraft: parts[1] === 'draft',

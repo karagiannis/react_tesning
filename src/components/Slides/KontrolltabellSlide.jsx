@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 export default function KontrolltabellSlide({ onNext }) {
-  const { companyId } = useParams();
+  const { company_id } = useParams();
   
   const QUESTIONS_CONFIG = {
     viewed: { type: 'boolean', required: false }

@@ -38,8 +38,8 @@ export default function MergeConflictModal({
         <div className="p-6 overflow-y-auto max-h-[50vh]">
           {/* Meta info */}
           <div className="mb-6 text-sm text-gray-600">
-            <p>Ändrad av: <strong>{data.updatedBy || 'Okänd'}</strong></p>
-            <p>Tid: <strong>{data.updatedAt ? new Date(data.updatedAt).toLocaleString('sv-SE') : 'Okänd'}</strong></p>
+            <p>Ändrad av: <strong>{data.updated_by || 'Okänd'}</strong></p>
+            <p>Tid: <strong>{data.updated_at ? new Date(data.updated_at).toLocaleString('sv-SE') : 'Okänd'}</strong></p>
           </div>
           
           {/* Comparison */}

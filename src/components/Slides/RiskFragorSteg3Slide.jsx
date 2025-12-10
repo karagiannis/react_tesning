@@ -16,7 +16,7 @@ const QUESTIONS_CONFIG = {
 };
 
 export default function RiskFragorSteg3Slide({ onNext }) {
-  const { companyId, caseId } = useParams();
+  const { company_id, case_id } = useParams();
   const navigate = useNavigate();
   const [expandedInfo, setExpandedInfo] = useState({});
   
@@ -86,17 +86,17 @@ export default function RiskFragorSteg3Slide({ onNext }) {
     await pushToServer();
     
     if (onNext) {
-      onNext(companyId, caseId);
+      onNext(company_id, case_id);
     }
 
     // Send data to backend via PATCH
-    const onboardingId = localStorage.getItem('onboarding_id');
+    const case_id = localStorage.getItem('case_id');
 
-    if (onboardingId && companyId) {
+    if (case_id && company_id) {
       try {
         const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
         const response = await fetchWithAuth(
-          `${API_BASE}/onboarding/${companyId}/risk-assessment-extended?onboarding_id=${onboardingId}`,
+          `${API_BASE}/onboarding/${company_id}/risk-assessment-extended?case_id=${case_id}`,
           {
             method: 'PATCH',
             headers: {'Content-Type': 'application/json'
@@ -127,7 +127,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
   };
 
   const handleBack = () => {
-    navigate(`/riskfragor/steg2/${companyId}/${caseId}`);
+    navigate(`/riskfragor/steg2/${company_id}/${case_id}`);
   };
 
   const showKontanterFollowUp = formData.betalmetoder.kontanter;
@@ -141,7 +141,7 @@ export default function RiskFragorSteg3Slide({ onNext }) {
         </h1>
         
         {/* Step Indicator */}
-        <StepIndicator currentStep={3} completedSteps={2} />
+        <StepIndicator current_step={3} completedSteps={2} />
 
         <p className="text-sm text-brand-700 mb-6">
           PTL kräver att vi bedömer risker förknippade med olika betalningsmetoder (3 kap. 4-6 §§) och övervakar transaktionsmönster (4 kap. 1 §).

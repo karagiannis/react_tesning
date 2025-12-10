@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
  * StepIndicator - Klickbara completion dots för multistep wizard
  * Visar progression mellan steg 1-4 och tillåter navigation
  * 
- * @param {number} currentStep - Aktuellt steg (1-4)
+ * @param {number} current_step - Aktuellt steg (1-4)
  * @param {number} completedSteps - Antal slutförda steg (0-4)
  */
-export default function StepIndicator({ currentStep, completedSteps = 0 }) {
+export default function StepIndicator({ current_step, completedSteps = 0 }) {
   const navigate = useNavigate();
 
   const steps = [
@@ -27,7 +27,7 @@ export default function StepIndicator({ currentStep, completedSteps = 0 }) {
   return (
     <div className="flex items-center justify-center gap-3 mb-6">
       {steps.map((step, index) => {
-        const isActive = step.number === currentStep;
+        const isActive = step.number === current_step;
         const isCompleted = step.number <= completedSteps;
         const isClickable = step.number <= completedSteps + 1;
 

@@ -4,7 +4,7 @@ import useSlideStateController from '../../legacy/hooks/useSlideStateController'
 import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 export default function BankRattigheterSlide({ onNext, onBack }) {
-  const { companyId } = useParams();
+  const { company_id } = useParams();
   
   const QUESTIONS_CONFIG = {
     entireForm: { type: 'object', required: false }
@@ -34,9 +34,9 @@ export default function BankRattigheterSlide({ onNext, onBack }) {
     updateQuestion('entireForm', { selectedBank, hasGrantedAccess, showConfirmation });
   }, [selectedBank, hasGrantedAccess, showConfirmation]);
 
-  // Mock byrå data (should come from config in production)
-  const byraOrgNr = customerData.byraOrgNr || '556XXX-XXXX';
-  const byraName = customerData.byraName || 'Redovisningsbyrån AB';
+  // Byrå data (from metadata or defaults)
+  const byraOrgNr = metadata?.byraOrgNr || '556XXX-XXXX';
+  const byraName = metadata?.byraName || 'Redovisningsbyrån AB';
 
   const banks = [
     {

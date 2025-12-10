@@ -3,12 +3,23 @@ import React from 'react';
 export default function VerksamhetSlide({ onNext, onBack, hideNavigation = false, formData = {} }) {
   const companyData = formData;
   
-  if (!companyData.organizationNumber) {
+  // 🆕 2025-12-10: Visa informativt meddelande om data saknas (inte evig spinner)
+  // Data ska komma via props från AuthenticatedApp (som hämtar från metadata.json)
+  if (!companyData || Object.keys(companyData).length === 0 || !companyData.organizationNumber) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mx-auto mb-4"></div>
-          <p className="text-brand-700">Laddar verksamhetsdata...</p>
+      <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
+        <div className="bg-amber-50 border border-amber-200 rounded-card p-6 max-w-md text-center">
+          <svg className="w-12 h-12 text-amber-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <h2 className="text-lg font-semibold text-amber-800 mb-2">Verksamhetsdata saknas</h2>
+          <p className="text-amber-700 text-sm mb-4">
+            Företagsdata har inte hämtats från Roaring.io ännu.
+            Detta sker automatiskt efter betalning.
+          </p>
+          <p className="text-amber-600 text-xs">
+            Om du nyss betalat, vänligen ladda om sidan eller navigera tillbaka och framåt igen.
+          </p>
         </div>
       </div>
     );
@@ -16,16 +27,6 @@ export default function VerksamhetSlide({ onNext, onBack, hideNavigation = false
   
   // Use formData directly (same pattern as all other slides)
   const data = companyData;
-  
-  if (!data || Object.keys(data).length === 0) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
-        <div className="bg-amber-50 border border-amber-200 rounded-card p-6 max-w-md">
-          <p className="text-amber-700">Verksamhetsdata saknas</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center p-6">
@@ -50,7 +51,7 @@ export default function VerksamhetSlide({ onNext, onBack, hideNavigation = false
           <div className="space-y-2">
             <div className="flex justify-between items-start">
                 <span className="text-sm text-gray-600 font-medium">Företagsnamn:</span>
-              <span className="text-sm text-gray-800 font-semibold text-right">{data.companyName}</span>
+              <span className="text-sm text-gray-800 font-semibold text-right">{data.company_name}</span>
             </div>
             <div className="flex justify-between items-start">
               <span className="text-sm text-gray-600 font-medium">Organisationsnummer:</span>

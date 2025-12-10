@@ -136,6 +136,19 @@ export function createHandleInitializing(getState, getActions, services) {
       // ═══════════════════════════════════════════════════════════════
       // PAGE RELOAD: Användaren var mitt i en session i denna flik
       // ═══════════════════════════════════════════════════════════════
+      
+      // 🔒 SPECIAL CASE: Om vi är på /payment-success, gå till CHECKING_PENDING
+      // så att RESUMING kan hämta activeCase och sedan verifiera betalningen.
+      // useEffect i AuthenticatedApp kommer trigga VERIFYING_PAYMENT när vi är READY.
+      const isPaymentSuccessPage = window.location.pathname === '/payment-success' ||
+                                   window.location.search.includes('session_id');
+      if (isPaymentSuccessPage) {
+        console.log('[INIT] 💳 On payment-success page - going to CHECKING_PENDING to get activeCase first');
+        storage.clearCurrentTabSession();
+        setAppState(AppState.CHECKING_PENDING);
+        return;
+      }
+      
       console.log('[INIT] 🔄 Tab session found:', currentTabSession);
       console.log('[INIT] → Going to RESTORING_SESSION (skipping resume modal)');
       setAppState(AppState.RESTORING_SESSION);

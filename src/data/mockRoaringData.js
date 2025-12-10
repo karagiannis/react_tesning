@@ -5,7 +5,7 @@ export const mockRoaringData = {
   // Company Activity API
   companyActivity: {
     organizationNumber: "556500-2465",
-    companyName: "Celestial Redovisning AB",
+    company_name: "Celestial Redovisning AB",
     description: "Redovisningstjänster och skatterådgivning för små och medelstora företag",
     sniCodes: [
       {
@@ -136,7 +136,7 @@ export const mockRoaringData = {
     historicalEngagements: 7,
     engagements: [
       {
-        companyName: "Celestial Redovisning AB",
+        company_name: "Celestial Redovisning AB",
         organizationNumber: "556500-2465",
         role: "Styrelseordförande",
         from: "2015-03-15",
@@ -144,7 +144,7 @@ export const mockRoaringData = {
         status: "Active"
       },
       {
-        companyName: "Tech Startup AB",
+        company_name: "Tech Startup AB",
         organizationNumber: "559123-4567",
         role: "Styrelseledamot",
         from: "2018-01-10",

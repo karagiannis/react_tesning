@@ -16,7 +16,7 @@ const QUESTIONS_CONFIG = {
 };
 
 export default function RiskFragorSteg4Slide({ onNext }) {
-  const { companyId } = useParams();
+  const { company_id, case_id } = useParams();
   const navigate = useNavigate();
   const [expandedInfo, setExpandedInfo] = useState({});
   
@@ -93,13 +93,13 @@ export default function RiskFragorSteg4Slide({ onNext }) {
     }
 
     // Send data to backend via PATCH
-    const onboardingId = localStorage.getItem('onboarding_id');
+    const case_id = localStorage.getItem('case_id');
 
-    if (onboardingId && companyId) {
+    if (case_id && company_id) {
       try {
         const API_BASE = import.meta.env.VITE_API_URL || `${import.meta.env.VITE_API_BASE_URL}/api`;
         const response = await fetchWithAuth(
-          `${API_BASE}/onboarding/${companyId}/risk-assessment-extended?onboarding_id=${onboardingId}`,
+          `${API_BASE}/onboarding/${company_id}/risk-assessment-extended?case_id=${case_id}`,
           {
             method: 'PATCH',
             headers: {'Content-Type': 'application/json'
@@ -121,7 +121,7 @@ export default function RiskFragorSteg4Slide({ onNext }) {
   };
 
   const handleBack = () => {
-    navigate(`/riskfragor/steg3/${companyId}/${caseId}`);
+    navigate(`/riskfragor/steg3/${company_id}/${case_id}`);
   };
 
   return (
@@ -135,7 +135,7 @@ export default function RiskFragorSteg4Slide({ onNext }) {
         </p>
         
         {/* Step Indicator */}
-        <StepIndicator currentStep={4} completedSteps={3} />
+        <StepIndicator current_step={4} completedSteps={3} />
 
         <div className="space-y-6">
           {/* 1. Ekonomiska medels ursprung */}

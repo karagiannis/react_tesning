@@ -27,7 +27,7 @@ export default function VerksamhetSlide({ onNext, onBack, hideNavigation = false
           <div className="space-y-3">
             <div className="flex justify-between items-start">
               <span className="text-gray-600 font-medium">Företagsnamn:</span>
-              <span className="text-gray-800 font-semibold text-right">{data.companyName}</span>
+              <span className="text-gray-800 font-semibold text-right">{data.company_name}</span>
             </div>
             <div className="flex justify-between items-start">
               <span className="text-gray-600 font-medium">Organisationsnummer:</span>

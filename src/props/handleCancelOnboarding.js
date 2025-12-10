@@ -25,12 +25,12 @@ export const createHandleCancelOnboarding = ({
     setShowAgreementModal(false);
     
     try {
-      const companyId = activeCase?.companyId;
-      const caseId = activeCase?.caseId;
+      const company_id = activeCase?.company_id;
+      const case_id = activeCase?.case_id;
       
-      if (companyId && caseId) {
+      if (company_id && case_id) {
         // Soft-delete case på server
-        await api.delete(`/onboarding/delete/${companyId}?onboarding_id=${caseId}`);
+        await api.delete(`/onboarding/delete/${company_id}?case_id=${case_id}`);
         console.log('[PAYMENT] Case soft-deleted on server');
       }
     } catch (err) {

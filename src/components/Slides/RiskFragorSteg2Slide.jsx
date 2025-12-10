@@ -23,7 +23,7 @@ const QUESTIONS_CONFIG = {
 };
 
 export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
-  const { companyId, caseId } = useParams();
+  const { company_id, case_id } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [expandedInfo, setExpandedInfo] = useState({});
@@ -137,9 +137,9 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
       if (success) {
         console.log('✅ Riskfrågor Steg 2 saved');
         
-        // Pass companyId + caseId to parent
+        // Pass company_id + case_id to parent
         if (onNext) {
-          onNext(companyId, caseId);
+          onNext(company_id, case_id);
         }
       } else {
         alert('⚠️ Kunde inte spara till server');
@@ -151,7 +151,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
   };
 
   const handleBack = () => {
-    navigate(`/riskfragor/${companyId}/${caseId}`);
+    navigate(`/riskfragor/${company_id}/${case_id}`);
   };
 
   return (
@@ -174,7 +174,7 @@ export default function RiskFragorSteg2Slide({ onNext, formDataFromSteg1 }) {
         </h1>
         
         {/* Step Indicator */}
-        <StepIndicator currentStep={2} completedSteps={1} />
+        <StepIndicator current_step={2} completedSteps={1} />
 
         <div className="space-y-8">
           {/* ============================================================ */}

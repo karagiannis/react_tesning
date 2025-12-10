@@ -110,7 +110,7 @@ export default function LoginSlide({ onNext, onRegister }) {
     }
 
     // Clear old onboarding data before login
-    localStorage.removeItem('onboarding_id');
+    localStorage.removeItem('case_id');
     localStorage.removeItem('onboarding-wizard-steg1');
     localStorage.removeItem('uppdragsval-services');
 
@@ -243,7 +243,7 @@ export default function LoginSlide({ onNext, onRegister }) {
   // Handle Google OAuth callback
   const handleGoogleCallback = async (code) => {
     // Clear old onboarding data before Google OAuth login
-    localStorage.removeItem('onboarding_id');
+    localStorage.removeItem('case_id');
     localStorage.removeItem('onboarding-wizard-steg1');
     localStorage.removeItem('uppdragsval-services');
 

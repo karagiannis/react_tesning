@@ -3,7 +3,6 @@ import { legalTexts } from '../../data/legalTexts';
 import useQuestionnaireForm from '../../legacy/hooks/useQuestionnaireForm';
 
 export default function SkyldigheterSlide({ onNext, onBack }) {
-  const { companyId } = useParams();
   
   const QUESTIONS_CONFIG = {
     entireForm: { type: 'object', required: false }

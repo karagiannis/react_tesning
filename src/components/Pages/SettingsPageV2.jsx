@@ -17,7 +17,7 @@ const SettingsPageV2 = () => {
   
   // Mock data för firmakonfiguration
   const [firmConfig, setFirmConfig] = useState({
-    companyName: 'Exempel Redovisningsbyrå AB',
+    company_name: 'Exempel Redovisningsbyrå AB',
     orgNumber: '556123-4567',
     supportEmail: 'support@exempel.se',
     supportPhone: '08-123 45 67',
@@ -74,7 +74,7 @@ const SettingsPageV2 = () => {
         signedAt: "2025-11-10 09:45",
         signerName: "Erik Johansson",
         signerPersonnr: "19920520-XXXX",
-        companyName: "Johanssons Bygg AB",
+        company_name: "Johanssons Bygg AB",
         companyOrgnr: "556123-4567",
         costs: { staticKyc: 18, layering: { "2024": 90, "2023": 1600, "2022": 400 }, total: 2108 },
         status: "Genomförd"
@@ -84,7 +84,7 @@ const SettingsPageV2 = () => {
         signedAt: "2025-11-08 14:20",
         signerName: "Maria Svensson",
         signerPersonnr: "19880712-XXXX",
-        companyName: "Svenssons Handel AB",
+        company_name: "Svenssons Handel AB",
         companyOrgnr: "559876-5432",
         costs: { staticKyc: 18, layering: { "2024": 50, "2023": 800, "2022": 200 }, total: 1068 },
         status: "Genomförd"
@@ -94,7 +94,7 @@ const SettingsPageV2 = () => {
         signedAt: "2025-11-05 11:30",
         signerName: "Anders Berg",
         signerPersonnr: "19750422-XXXX",
-        companyName: "Bergströms Consulting AB",
+        company_name: "Bergströms Consulting AB",
         companyOrgnr: "556234-7890",
         costs: { staticKyc: 18, layering: { "2024": 120 }, total: 138 },
         status: "Genomförd"
@@ -176,27 +176,27 @@ const SettingsPageV2 = () => {
     {
       id: 1,
       accessCode: 'tiger-3847',
-      companyName: 'Acme AB',
+      company_name: 'Acme AB',
       orgNr: '556123-4567',
       contactPerson: 'Erik Johansson',
       contactEmail: 'erik@acmeab.se',
       clientLink: 'https://app.celestial.se/o/tiger-3847',
       accountantLink: 'https://app.celestial.se/session/tiger-3847?token=JWT_ABC',
       status: 'Aktiv',
-      createdAt: '2025-11-01 09:15',
+      created_at: '2025-11-01 09:15',
       expiresAt: '2025-11-08 09:15'
     },
     {
       id: 2,
       accessCode: 'lion-1234',
-      companyName: 'Beta Corp AB',
+      company_name: 'Beta Corp AB',
       orgNr: '559876-5432',
       contactPerson: 'Maria Svensson',
       contactEmail: 'maria@betacorp.se',
       clientLink: 'https://app.celestial.se/o/lion-1234',
       accountantLink: 'https://app.celestial.se/session/lion-1234?token=JWT_DEF',
       status: 'Genomförd',
-      createdAt: '2025-10-25 14:20',
+      created_at: '2025-10-25 14:20',
       expiresAt: '2025-11-01 14:20'
     }
   ]);
@@ -213,7 +213,7 @@ const SettingsPageV2 = () => {
       accessLink: 'https://app.celestial.se/shadow/wolf-5621?token=JWT_GHI',
       permissions: 'Läsvy (kan ej ändra)',
       status: 'Aktiv',
-      createdAt: '2025-11-01 10:30',
+      created_at: '2025-11-01 10:30',
       expiresAt: 'Till sessionens slut'
     }
   ]);
@@ -387,8 +387,8 @@ const SettingsPageV2 = () => {
                     <label className="block text-sm font-medium text-brand-900 mb-2">Företagsnamn</label>
                     <input
                       type="text"
-                      value={firmConfig.companyName}
-                      onChange={(e) => setFirmConfig({...firmConfig, companyName: e.target.value})}
+                      value={firmConfig.company_name}
+                      onChange={(e) => setFirmConfig({...firmConfig, company_name: e.target.value})}
                       className="w-full px-4 py-2 border border-brand-200 rounded-box"
                     />
                   </div>
@@ -505,7 +505,7 @@ const SettingsPageV2 = () => {
                             </td>
                             <td className="px-4 py-3">
                               <div>
-                                <p className="font-medium">{session.companyName}</p>
+                                <p className="font-medium">{session.company_name}</p>
                                 <p className="text-gray-500 text-xs">{session.orgNr}</p>
                               </div>
                             </td>
@@ -522,7 +522,7 @@ const SettingsPageV2 = () => {
                                 {session.status}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-gray-600">{session.createdAt}</td>
+                            <td className="px-4 py-3 text-gray-600">{session.created_at}</td>
                             <td className="px-4 py-3 text-center">
                               <button 
                                 onClick={() => {
@@ -931,7 +931,7 @@ const SettingsPageV2 = () => {
                                 <td className="px-4 py-3">{assignment.agreementNumber}</td>
                                 <td className="px-4 py-3">
                                   <div>
-                                    <p className="font-medium">{assignment.companyName}</p>
+                                    <p className="font-medium">{assignment.company_name}</p>
                                     <p className="text-gray-500 text-xs">{assignment.companyOrgnr}</p>
                                   </div>
                                 </td>
@@ -1773,10 +1773,10 @@ const SettingsPageV2 = () => {
               </button>
               <button
                 onClick={() => {
-                  const companyName = document.getElementById('remoteCompanyName').value;
+                  const company_name = document.getElementById('remoteCompanyName').value;
                   const email = document.getElementById('remoteEmail').value;
-                  if (companyName && email) {
-                    alert(`Session skapad för ${companyName}! Email skickat till ${email}`);
+                  if (company_name && email) {
+                    alert(`Session skapad för ${company_name}! Email skickat till ${email}`);
                     setShowRemoteSessionModal(false);
                   } else {
                     alert('Vänligen fyll i företagsnamn och e-postadress');
@@ -1837,7 +1837,7 @@ const SettingsPageV2 = () => {
                 >
                   {remoteSessions.filter(s => s.status === 'Aktiv').map(session => (
                     <option key={session.id} value={session.accessCode}>
-                      {session.companyName} ({session.accessCode})
+                      {session.company_name} ({session.accessCode})
                     </option>
                   ))}
                 </select>

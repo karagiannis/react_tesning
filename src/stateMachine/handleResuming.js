@@ -4,6 +4,8 @@
  * State Machine Handler: RESUMING
  * 
  * NÄR: Användaren klickade "Fortsätt" i resume-modal (ny login, har pending onboarding)
+ *      ELLER: Användaren kommer tillbaka från Stripe (URL = /payment-success)
+ * 
  * VAD:
  *   1. Hämta metadata från server för activeCase
  *   2. Rensa localStorage för detta case (selektiv rensning)
@@ -11,10 +13,19 @@
  *   4. Spara pages till permanent localStorage-nycklar
  *   5. Uppdatera React state med pages data
  *   6. Lås upp roaring data om det finns
- *   7. Navigera till senaste slide
- *   8. Sätt tab session
+ *   7. Kolla betalningsstatus (metadata.subscription.payment_confirmed_at)
+ *   8. Navigera till rätt slide
+ *   9. Sätt tab session
  * 
- * → READY
+ * 🆕 BETALNINGSFLÖDE (2025-01-13) - WEBHOOK-ARKITEKTUR:
+ *   - Stripe redirect → frontend /payment-success DIREKT
+ *   - Stripe skickar webhook till POST /stripe-webhook (asynkront)
+ *   - handleResuming kollar metadata.subscription.payment_confirmed_at
+ *   - Om confirmed → READY
+ *   - Om EJ confirmed → VERIFYING_PAYMENT (pollar tills webhook anlänt)
+ * 
+ * → READY (normal case, betalning OK eller ingen betalning ännu)
+ * → VERIFYING_PAYMENT (polling: webhook inte anlänt ännu)
  */
 
 import StorageKeyBuilder from '../utils/StorageKeyBuilder';
@@ -27,6 +38,10 @@ import StorageKeyBuilder from '../utils/StorageKeyBuilder';
  * @param {Object} services - Objekt med api, storage, navigate, SLIDE_ORDER, AppState
  * @returns {Function} - Handler-funktion som kan anropas av state machine
  */
+
+// Guard mot dubbla anrop (React StrictMode kör effects 2 gånger)
+let resumingInProgress = false; // Enkel boolean - bara ett resume åt gången
+
 export function createHandleResuming(getState, getActions, services) {
   return async function handleResuming() {
     const { activeCase, user } = getState();
@@ -45,19 +60,44 @@ export function createHandleResuming(getState, getActions, services) {
     
     const { storage, api, navigate, SLIDE_ORDER, AppState } = services;
     
+    // 🛡️ GUARD: Förhindra att handleResuming körs flera gånger samtidigt
+    // (React StrictMode kör effects 2 gånger)
+    if (resumingInProgress) {
+      console.log('[RESUMING] ⚠️ Already resuming, skipping duplicate call');
+      return;
+    }
+    resumingInProgress = true;
+    
     setIsLoading(true);
+    
+    // 🧹 KRITISKT: Spara om vi kommer från payment-success så vi kan navigera bort senare
+    // Vi väntar med navigeringen tills vi vet var vi ska (metadata.current_slide)
+    const comingFromPaymentSuccess = window.location.pathname === '/payment-success' || 
+        window.location.search.includes('session_id');
+    if (comingFromPaymentSuccess) {
+      console.log('[RESUMING] 🧹 Coming from payment-success, will navigate to correct slide after loading');
+    }
+
+    // 🧹 RENSA temp_case_id - vi har nu ett permanent case
+    
+    // Deklarera paymentConfirmed utanför try-blocket så den är tillgänglig senare
+    let paymentConfirmed = false;
+    if (storage.getTempCaseId()) {
+      console.log('[RESUMING] 🧹 Clearing temp_case_id (have permanent case now)');
+      storage.clearTempCaseId();
+    }
     
     try {
       // Hämta all data från server
       console.log('[RESUMING] 📡 Fetching metadata for:', activeCase);
       const metadata = await api.fetchMetadata(
-        activeCase.companyId, 
-        activeCase.onboardingId
+        activeCase.company_id, 
+        activeCase.case_id
       );
       console.log('[RESUMING] ✅ Metadata received:', metadata);
       console.log('[RESUMING]   - version:', metadata.version);
-      console.log('[RESUMING]   - lastModified:', metadata.lastModified);
-      console.log('[RESUMING]   - modifiedBy:', metadata.modifiedBy);
+      console.log('[RESUMING]   - last_modified:', metadata.last_modified);
+      console.log('[RESUMING]   - modified_by:', metadata.modified_by);
       console.log('[RESUMING]   - pages:', Object.keys(metadata.pages || {}));
       
       // 📦 Extract pages data (alla slides sparas under pages[slideKey])
@@ -67,7 +107,7 @@ export function createHandleResuming(getState, getActions, services) {
       
       console.log('[RESUMING] 🧹 Clearing localStorage for THIS case only...');
       // Selektiv rensning: endast nycklar för detta specifika case
-      const prefix = `onboarding::${activeCase.companyId}::${activeCase.onboardingId}::${user?.id}::`;
+      const prefix = `onboarding::${activeCase.company_id}::${activeCase.case_id}::${user?.id}::`;
       Object.keys(localStorage).forEach(key => {
         if (key.startsWith(prefix)) {
           console.log(`[RESUMING]   🗑️ Removing: ${key}`);
@@ -84,22 +124,31 @@ export function createHandleResuming(getState, getActions, services) {
       setActiveCase(activeCase);
       
       // 🆕 NEW: Save each page SEPARATELY to PERMANENT localStorage keys
+      // VIKTIGT: Vi använder StorageKeyBuilder.buildPermanentKey() direkt istället för
+      // storage.setSlideData() eftersom React state (isDraftMode, activeCase) inte har
+      // uppdaterats synkront ännu och storage._buildKey() skulle läsa gamla värden!
       console.log('[RESUMING] 💾 Saving pages to PERMANENT localStorage keys...');
       Object.entries(pagesData).forEach(([slideKey, slideData]) => {
-        storage.setSlideData(slideKey, slideData);
-        console.log(`[RESUMING]   ✓ Saved ${slideKey}:`, slideData);
+        const permanentKey = StorageKeyBuilder.buildPermanentKey(
+          activeCase.company_id,
+          activeCase.case_id,
+          user?.id,
+          slideKey
+        );
+        localStorage.setItem(permanentKey, JSON.stringify(slideData));
+        console.log(`[RESUMING]   ✓ Saved ${slideKey} to key: ${permanentKey}`);
       });
       
       // Save activeCase and completedSlides
       const permanentCompletedSlidesKey = StorageKeyBuilder.buildPermanentKey(
-        activeCase.companyId,
-        activeCase.onboardingId,
+        activeCase.company_id,
+        activeCase.case_id,
         user?.id,
         'completedSlides'
       );
       const permanentActiveCaseKey = StorageKeyBuilder.buildPermanentKey(
-        activeCase.companyId,
-        activeCase.onboardingId,
+        activeCase.company_id,
+        activeCase.case_id,
         user?.id,
         'activeCase'
       );
@@ -109,14 +158,14 @@ export function createHandleResuming(getState, getActions, services) {
       console.log('[RESUMING] ✅ Saved metadata to permanent keys');
       
       // 📌 SPARA SERVER VERSION för conflict detection
-      const serverVersion = metadata.version || 0;
-      const versionStorageKey = `case_${activeCase.companyId}_${activeCase.onboardingId}_version`;
+      const server_version = metadata.version || 0;
+      const versionStorageKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
       localStorage.setItem(versionStorageKey, JSON.stringify({
-        version: serverVersion,
-        timestamp: metadata.lastModified || new Date().toISOString(),
+        version: server_version,
+        timestamp: metadata.last_modified || new Date().toISOString(),
         syncedFromServer: true
       }));
-      console.log('[RESUMING] 📌 Sparade server version:', serverVersion);
+      console.log('[RESUMING] 📌 Sparade server version:', server_version);
       
       // Uppdatera React state med rätt data
       console.log('[RESUMING] 🔄 Updating React state...');
@@ -127,44 +176,87 @@ export function createHandleResuming(getState, getActions, services) {
       // ─────────────────────────────────────────────────────────────────
       // 🔓 BETALNINGSSTATUS - Lås upp företagsdata-slides om betalning är bekräftad
       // ─────────────────────────────────────────────────────────────────
-      const paymentConfirmed = metadata.subscription?.payment_confirmed_at;
+      paymentConfirmed = !!metadata.subscription?.payment_confirmed_at;
       
       if (paymentConfirmed) {
         console.log('[RESUMING] 🔓 Payment confirmed - unlocking företagsdata slides');
         setIsPaymentConfirmed(true);
       }
       
-      // Navigera till där användaren var senast
-      const lastSlide = metadata.current_slide || metadata.lastSlide || 'uppdragsval';
-      console.log('[RESUMING] 🧭 Navigating to slide:', lastSlide);
-      setCurrentSlideKey(lastSlide);
+      // ─────────────────────────────────────────────────────────────────
+      // 🆕 2025-01-13: PAYMENT SUCCESS - Stanna på PaymentSuccessSlide!
+      // ─────────────────────────────────────────────────────────────────
+      // Om vi kommer från /payment-success ska användaren se bekräftelse-UI
+      // och aktivt klicka "Fortsätt" för att gå vidare.
+      // Vi navigerar INTE bort automatiskt!
+      if (comingFromPaymentSuccess) {
+        console.log('[RESUMING] 💳 Coming from payment-success - staying on PaymentSuccessSlide');
+        console.log('[RESUMING] 💳 Payment confirmed:', paymentConfirmed);
+        
+        // Sätt tab session men STANNA på payment-success
+        const caseOrOnboardingId = activeCase.case_id || activeCase.case_id;
+        const sessionId = storage.buildSessionId(
+          activeCase.company_id,
+          caseOrOnboardingId,
+          user?.id
+        );
+        storage.setCurrentTabSession({
+          sessionId,
+          current_slide: 'payment-success',
+        });
+        
+        // Gå till READY - PaymentSuccessSlide renderas via Route
+        // PaymentSuccessSlide använder paymentVerificationStatus för att visa rätt UI
+        resumingInProgress = false;
+        setIsLoading(false);
+        setAppState(AppState.READY);
+        return; // AVBRYT här - navigera INTE bort!
+      }
       
-      const slide = SLIDE_ORDER.find(s => s.key === lastSlide);
+      // Navigera till rätt slide (endast om vi INTE kommer från payment-success)
+      let targetSlide = metadata.current_slide || 'uppdragsval';
+      
+      console.log('[RESUMING] 🧭 Navigating to slide:', targetSlide);
+      setCurrentSlideKey(targetSlide);
+      
+      const slide = SLIDE_ORDER.find(s => s.key === targetSlide);
       if (slide) {
-        navigate(slide.path);
+        console.log('[RESUMING] 🚀 React Router navigate to:', slide.path, '(replace: true)');
+        navigate(slide.path, { replace: true });
+      } else {
+        console.warn('[RESUMING] ⚠️ Could not find slide in SLIDE_ORDER:', targetSlide);
       }
       
       // Sätt tab session för denna flik
-      const caseOrOnboardingId = activeCase.caseId || activeCase.onboardingId;
+      const caseOrOnboardingId = activeCase.case_id || activeCase.case_id;
       const sessionId = storage.buildSessionId(
-        activeCase.companyId,
+        activeCase.company_id,
         caseOrOnboardingId,
         user?.id
       );
       storage.setCurrentTabSession({
         sessionId,
-        currentSlide: lastSlide,
+        current_slide: targetSlide,
       });
       
       // Logga för audit trail
-      await api.log(`Användare ${user?.name} återupptog onboarding för ${activeCase.companyName}`);
+      await api.log(`Användare ${user?.name} återupptog onboarding för ${activeCase.company_name}`);
       
     } catch (e) {
       setError(e.message);
       // OBS: Vi går ändå till READY, men visar felmeddelande
     }
     
+    // 🛡️ Rensa guard - nu är vi klara
+    resumingInProgress = false;
+    
     setIsLoading(false);
+    
+    // ─────────────────────────────────────────────────────────────────
+    // AVGÖR NÄSTA STATE
+    // ─────────────────────────────────────────────────────────────────
+    // OBS: Om vi kom från payment-success har vi redan returnerat ovan (rad ~210)
+    // Så här kommer vi bara om det INTE var payment-success
     setAppState(AppState.READY);
   };
 }
