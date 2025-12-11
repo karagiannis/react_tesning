@@ -255,6 +255,20 @@ export default function Sidebar_v2({
           isLocked={isLocked('omsattningsanalys')}
           onClick={() => handleClick('omsattningsanalys')}
         />
+        <SlideButton 
+          label="Penningflödesanalys" 
+          isActive={isActive('penningflodes')}
+          isCompleted={isCompleted('penningflodes')}
+          isLocked={isLocked('penningflodes')}
+          onClick={() => handleClick('penningflodes')}
+        />
+        <SlideButton 
+          label="Bokföringsanalys" 
+          isActive={isActive('bokanalys')}
+          isCompleted={isCompleted('bokanalys')}
+          isLocked={isLocked('bokanalys')}
+          onClick={() => handleClick('bokanalys')}
+        />
         
         {/* ============= SLUTFÖR ============= */}
         <GroupHeader title="Slutför" isExpanded={isExpanded} />
@@ -293,12 +307,12 @@ export default function Sidebar_v2({
       {isExpanded && (
         <div className="p-4 border-t border-gray-200">
           <div className="text-sm text-gray-600 mb-2">
-            Progress: {completedSlides.length} / 18 slides
+            Progress: {completedSlides.length} / 21 slides
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
               className="bg-brand-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(completedSlides.length / 18) * 100}%` }}
+              style={{ width: `${(completedSlides.length / 21) * 100}%` }}
             />
           </div>
         </div>

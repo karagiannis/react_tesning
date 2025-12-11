@@ -118,8 +118,8 @@ export function createHandleInitializing(getState, getActions, services) {
     // VIKTIG VALIDERING: Kontrollera att sessionen tillhör DENNA användare!
     // ─────────────────────────────────────────────────────────────────
     let sessionBelongsToUser = false;
-    if (currentTabSession && currentTabSession.sessionId && userInfo?.id) {
-      const sessionParts = currentTabSession.sessionId.split('::');
+    if (currentTabSession && currentTabSession.session_id && userInfo?.id) {
+      const sessionParts = currentTabSession.session_id.split('::');
       const sessionUserId = sessionParts[sessionParts.length - 1];
       sessionBelongsToUser = (sessionUserId === userInfo.id);
       
@@ -132,7 +132,7 @@ export function createHandleInitializing(getState, getActions, services) {
       }
     }
     
-    if (currentTabSession && currentTabSession.sessionId && sessionBelongsToUser) {
+    if (currentTabSession && currentTabSession.session_id && sessionBelongsToUser) {
       // ═══════════════════════════════════════════════════════════════
       // PAGE RELOAD: Användaren var mitt i en session i denna flik
       // ═══════════════════════════════════════════════════════════════

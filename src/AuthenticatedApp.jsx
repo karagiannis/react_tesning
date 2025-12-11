@@ -76,7 +76,7 @@
  *                            Väntar på användarinteraktion
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 
 // =============================================================================
@@ -103,6 +103,8 @@ import BokforingsunderlagSlide from './components/Slides/BokforingsunderlagSlide
 import ResultatanalysSlide from './components/Slides/ResultatanalysSlide';
 import LikviditetsanalysSlide from './components/Slides/LikviditetsanalysSlide';
 import OmsattningsanalysSlide from './components/Slides/OmsattningsanalysSlide';
+import PenningflodesanalysSlide from './components/Slides/PenningflodesanalysSlide';
+import AccountingAnalysisWizard from './pages/AccountingAnalysisWizard';
 import RiskbedomningSlide from './components/Slides/RiskbedomningSlide';
 import AvtalSlide from './components/Slides/AvtalSlide';
 import PaymentSuccessSlide from './components/Slides/PaymentSuccessSlide';
@@ -125,6 +127,7 @@ import LLMPanel from './components/Panels/LLMPanel';
 // =============================================================================
 import useVersionSync from './hooks/useVersionSync';
 import useAutoSave from './hooks/useAutoSave';
+import { useSlideDataLoader } from './hooks/useSlideDataLoader';
 
 // =============================================================================
 // PROPS/HANDLERS
@@ -193,6 +196,8 @@ const SLIDE_ORDER = [
   { key: 'resultatanalys', path: '/resultatanalys' },
   { key: 'likviditetsanalys', path: '/likviditetsanalys' },
   { key: 'omsattningsanalys', path: '/omsattningsanalys' },
+  { key: 'penningflodes', path: '/penningflodes' },
+  { key: 'bokanalys', path: '/bokanalys' },
   { key: 'riskbedomning', path: '/riskbedomning' },
   { key: 'avtal', path: '/avtal' },
   { key: 'payment-success', path: '/payment-success' },
@@ -259,6 +264,20 @@ export default function AuthenticatedApp() {
   // ─────────────────────────────────────────────────────────────────────────
   const [pendingOnboardings, setPendingOnboardings] = useState([]);
   // pendingOnboardings = [{ company_id: 123, company_name: "AB Test", ... }, ...]
+  
+  // ─────────────────────────────────────────────────────────────────────────
+  // State Machine Transition History (för debugging och duplicate-guard)
+  // ─────────────────────────────────────────────────────────────────────────
+  const [transitionHistory, setTransitionHistory] = useState([]);
+  // transitionHistory = [
+  //   { from: null, to: 'INITIALIZING', timestamp: 1733900000000 },
+  //   { from: 'INITIALIZING', to: 'CHECKING_PENDING', timestamp: 1733900001000 },
+  //   ...
+  // ]
+  // → Möjliggör "time travel" debugging och förhindrar dubbelkörningar
+  
+  const lastProcessedStateRef = useRef(null);
+  // Guard: Förhindrar att samma state processas flera gånger (StrictMode-skydd)
   
   // ─────────────────────────────────────────────────────────────────────────
   // Aktivt ärende
@@ -379,6 +398,7 @@ export default function AuthenticatedApp() {
   
   // Instantiera handlers (de skapas en gång, men hämtar state vid varje anrop)
   const handleInitializingAction = createHandleInitializing(getState, getActions, services);
+  const handleCheckingPendingAction = createHandleCheckingPendingState(getState, getActions, services);
   const handleRestoringSessionAction = createHandleRestoringSession(getState, getActions, services);
   const handleResumingAction = createHandleResuming(getState, getActions, services);
   const handleInitiatingPaymentAction = createHandleInitiatingPaymentState(getState, getActions, services);
@@ -417,7 +437,29 @@ export default function AuthenticatedApp() {
   //
   
   const processState = useCallback(async () => {
+    // ═══════════════════════════════════════════════════════════════════════
+    // GUARD: Förhindra dubbelkörning av samma state (StrictMode-skydd)
+    // ═══════════════════════════════════════════════════════════════════════
+    if (lastProcessedStateRef.current === appState) {
+      console.log(`[STATE MACHINE] ⚠️ Duplicate ${appState}, skipping (already processed)`);
+      return;
+    }
+    
+    // Spara i historik INNAN vi processar
+    const previousState = lastProcessedStateRef.current;
+    lastProcessedStateRef.current = appState;
+    
+    setTransitionHistory(prev => [
+      ...prev,
+      {
+        from: previousState,
+        to: appState,
+        timestamp: Date.now(),
+      }
+    ]);
+    
     console.log(`[STATE MACHINE] Processing: ${appState}`);
+    console.log(`[STATE MACHINE] 📜 Transition: ${previousState || 'null'} → ${appState}`);
     
     switch (appState) {
       // =========================================================================
@@ -451,124 +493,19 @@ export default function AuthenticatedApp() {
       //   - Om nej → READY (gå direkt till normal drift)
       //
       case AppState.CHECKING_PENDING: {
-        console.log('[CHECKING_PENDING] 🔍 Starting...');
-        setIsLoading(true);
-        
-        // 🔒 SPECIAL CASE: Kolla om vi är på payment-success
-        const isPaymentSuccessPage = window.location.pathname === '/payment-success' ||
-                                     window.location.search.includes('session_id');
-        
-        console.log('[CHECKING_PENDING] 📡 Calling api.fetchPendingOnboardings()...');
-        // Fråga API om pågående onboardings
-        const onboardings = await api.fetchPendingOnboardings();
-        console.log('[CHECKING_PENDING] ✅ API response:', onboardings);
-        
-        setIsLoading(false);
-        console.log('[CHECKING_PENDING] ⚖️ Deciding next state, onboardings.length =', onboardings.length);
-        
-        // 🔒 SPECIAL CASE: Om vi är på payment-success, gå till VERIFYING_PAYMENT
-        if (isPaymentSuccessPage && onboardings.length > 0) {
-          console.log('[CHECKING_PENDING] 💳 On payment-success page - going to VERIFYING_PAYMENT');
-          // Sätt activeCase från den pending onboardingen
-          const pendingCase = onboardings[0];
-          setActiveCase(pendingCase);
-          setPendingOnboardings(onboardings);
-          setAppState(AppState.VERIFYING_PAYMENT);
-          break;
-        }
-        
-        // Beslut: Visa resume-modal eller gå till normal drift?
-        if (onboardings.length > 0) {
-          console.log('[CHECKING_PENDING] ➡️ Going to SHOWING_RESUME (found pending onboardings)');
-          
-          // 🔥 KRITISKT: Sätt pendingOnboardings INNAN state-övergång
-          // Annars får modal tom array vid första render!
-          setPendingOnboardings(onboardings);
-          
-          // Logga att användaren har pending onboardings
-          await api.logPersonal('Pending onboardings funna', {
-            count: onboardings.length,
-            companies: onboardings.map(o => o.company_name),
-          });
-          
-          // I DEBUG-läge: logga även centralt
-          if (import.meta.env.DEV) {
-            await api.log(`[DEBUG] Användare ${user?.name} har ${onboardings.length} pågående onboardings`, {
-              userId: user?.id,
-              pendingCount: onboardings.length,
-            });
-          }
-          
-          // Gå till SHOWING_RESUME - nu har pendingOnboardings redan rätt data
-          setAppState(AppState.SHOWING_RESUME);
-        } else {
-          console.log('[CHECKING_PENDING] ➡️ No pending onboardings - going to READY');
-          // Ingen pending onboarding - sätt initial tab session (draft mode)
-          const sessionId = `onboarding::draft::${tempCaseId}::${user?.id}`;
-          console.log('[CHECKING_PENDING] 💾 Setting tab session:', sessionId);
-          storage.setCurrentTabSession({
-            sessionId,
-            current_slide: 'uppdragsval',
-          });
-          
-          console.log('[CHECKING_PENDING] 📝 Logging to server...');
-          // Logga ny session till personlig logg
-          await api.logPersonal('Startar ny onboarding-session', {
-            sessionId,
-            startSlide: 'uppdragsval',
-            tempCaseId,
-          });
-          
-          // I DEBUG-läge: logga även centralt
-          if (import.meta.env.DEV) {
-            await api.log(`[DEBUG] Användare ${user?.name} startar ny onboarding-session på Uppdragsval`, {
-              userId: user?.id,
-              sessionId,
-              tempCaseId,
-            });
-          }
-          
-          console.log('[CHECKING_PENDING] ✅ Going to READY state');
-          setAppState(AppState.READY);
-        }
-        console.log('[CHECKING_PENDING] 🏁 Case finished');
+        // Delegera till extern handler (se stateMachine/handleCheckingPendingState.js)
+        await handleCheckingPendingAction();
         break;
       }
         
       // =========================================================================
-      // SHOWING_RESUME - Visar modal med pågående onboardings
+      // SHOWING_RESUME - Väntar på användarval i OnboardingResumeDialog
       // =========================================================================
-      //
-      // NÄR: pendingOnboardings.length > 0 (från CHECKING_PENDING)
-      // 
-      // VAD HÄNDER HÄR:
-      //   - pendingOnboardings är REDAN hämtat (i CHECKING_PENDING)
-      //   - Modal renderas via JSX (conditional rendering nedan)
-      //   - Modal tar emot data via props (slav-pattern)
-      //   - Alla API-anrop görs via handlers här i AuthenticatedApp
-      //
-      // VÄNTAR PÅ CALLBACK FRÅN MODAL:
-      //   - onResume(id, case_id, name) → handleResumeChoice() → RESUMING
-      //   - onDelete(id, case_id) → handleDeleteOnboarding() → uppdaterar lista
-      //   - onStartNew() → handleStartNew() → READY
-      //
-      // TIC-TAC-TOE PATTERN:
-      //   Precis som i tic-tac-toe där Board tar emot squares via props
-      //   och anropar onPlay callback uppåt - så tar OnboardingResumeDialog
-      //   emot pendingOnboardings via props och anropar callbacks uppåt.
-      //   
-      //   STATE MACHINE HAR FULL KONTROLL:
-      //   - Data hämtas centralt (CHECKING_PENDING)
-      //   - Data lagras centralt (pendingOnboardings state)
-      //   - API-anrop görs centralt (handleDeleteOnboarding)
-      //   - State-övergångar sker centralt (setAppState)
+      // Data redan hämtad (CHECKING_PENDING). Modal renderas via JSX.
+      // Callbacks: onResume→RESUMING, onDelete→uppdatera lista, onStartNew→READY
       //
       case AppState.SHOWING_RESUME:
-        // Ingen kod här - modalen renderas via JSX nedan
-        // State machine väntar på att en callback triggas
-        console.log('[SHOWING_RESUME] 🎭 State entered!');
-        console.log('[SHOWING_RESUME] pendingOnboardings:', pendingOnboardings);
-        console.log('[SHOWING_RESUME] pendingOnboardings.length:', pendingOnboardings?.length);
+        console.log('[SHOWING_RESUME] 🎭 Waiting for user choice...');
         break;
         
       // =========================================================================
@@ -820,480 +757,74 @@ export default function AuthenticatedApp() {
   //    - Om olika innehåll OCH annan användare → Visa modal
   //    - Om olika innehåll men samma användare → Ladda tyst (användarens egna ändringar)
   //
-  // VIKTIGT: Konfliktdetektering sker endast vid SAVE (checkVersionConflict).
-  // Need-to-know: Användaren informeras ENDAST om ändringar som påverkar DENNA slide.
+  // Se hooks/useSlideDataLoader.js för implementation.
   //
-  // Exempel:
-  // - Användare A har version 5 lokalt
-  // - Användare B uppdaterar riskfragor → server version 6
-  // - A navigerar till verksamhet:
-  //   * Server verksamhet-data === localStorage verksamhet-data
-  //   * → INGEN MODAL (same content, need-to-know: A behöver inte veta om riskfragor)
-  // - A navigerar till riskfragor:
-  //   * Server riskfragor-data ≠ localStorage riskfragor-data
-  //   * OCH modified_by = "user_b@example.com" ≠ A
-  //   * → MODAL VISAS (different content AND different user)
-  // - A klickar "Nästa" på verksamhet:
-  //   * POST med expected_version: 5, server har version: 6
-  //   * → 409 Conflict → MODAL VISAS (save-time conflict)
-  //
-  useEffect(() => {
-    // Skippa under initialisering/resuming (appState hanterar laddning då)
-    // Men tillåt under READY, PROCESSING_NEXT, PROCESSING_BACK (normal drift)
-    const isNormalOperation = [
-      AppState.READY,
-      AppState.PROCESSING_NEXT,
-      AppState.PROCESSING_BACK
-    ].includes(appState);
-    
-    if (!isNormalOperation) return;
-    
-    // Skippa om ingen slide är vald
-    if (!currentSlideKey) return;
-    
-    // Skippa om vi är i draft mode (ingen server-data ännu)
-    if (isDraftMode) {
-      console.log(`[SLIDE-LOAD] 📝 Draft mode - using localStorage only`);
-      const localData = storage.getSlideData(currentSlideKey);
-      if (localData && Object.keys(localData).length > 0) {
-        setFormData(prev => {
-          // Checka om redan satt för att undvika loop
-          if (prev[currentSlideKey] && Object.keys(prev[currentSlideKey]).length > 0) {
-            return prev; // Data redan där, gör inget
-          }
-          return { ...prev, [currentSlideKey]: localData };
-        });
-      }
-      return;
-    }
-    
-    // ASYNC per-slide konfliktdetektering
-    const loadSlideData = async () => {
-      console.log(`[SLIDE-LOAD] 🔄 Loading '${currentSlideKey}' (need-to-know check)...`);
-      
-      const caseOrOnboardingId = activeCase?.case_id || activeCase?.case_id;
-      if (!activeCase?.company_id || !caseOrOnboardingId) {
-        console.log(`[SLIDE-LOAD] ⚠️ No active case, skipping`);
-        return;
-      }
-      
-      // ─────────────────────────────────────────────────────────────────
-      // Steg 1: Hämta localStorage data för DENNA slide
-      // ─────────────────────────────────────────────────────────────────
-      const localSlideData = storage.getSlideData(currentSlideKey);
-      const hasLocalData = localSlideData && Object.keys(localSlideData).length > 0;
-      
-      console.log(`[SLIDE-LOAD] localStorage['${currentSlideKey}']: ${hasLocalData ? '✅ HAS DATA' : '❌ NO DATA'}`);
-      
-      // ─────────────────────────────────────────────────────────────────
-      // Steg 2: Hämta server data för DENNA slide
-      // ─────────────────────────────────────────────────────────────────
-      let serverMeta = null;
-      let serverSlideData = null;
-      let serverGlobalVersion = 0;
-      
-      try {
-        console.log(`[SLIDE-LOAD] 🌐 Fetching metadata from server...`);
-        serverMeta = await api.fetchMetadata(activeCase.company_id, caseOrOnboardingId);
-        // 📌 Backend returnerar pages direkt på roten (inte under .metadata)
-        serverSlideData = serverMeta?.pages?.[currentSlideKey];
-        serverGlobalVersion = serverMeta?.version || 0;
-        
-        const hasServerData = serverSlideData && Object.keys(serverSlideData).length > 0;
-        console.log(`[SLIDE-LOAD] Server['${currentSlideKey}']: ${hasServerData ? '✅ HAS DATA' : '❌ NO DATA'} (global version: ${serverGlobalVersion})`);
-      } catch (err) {
-        console.warn(`[SLIDE-LOAD] ⚠️ Failed to fetch from server:`, err.message);
-        // Om server fetch misslyckas, använd localStorage
-        if (hasLocalData) {
-          setFormData(prev => ({ ...prev, [currentSlideKey]: localSlideData }));
-          console.log(`[SLIDE-LOAD] 🏁 Using localStorage (server unavailable)`);
-        }
-        return;
-      }
-      
-      // ─────────────────────────────────────────────────────────────────
-      // Steg 3: Hantera olika datakällor
-      // ─────────────────────────────────────────────────────────────────
-      const hasServerData = serverSlideData && Object.keys(serverSlideData).length > 0;
-      
-      if (!hasServerData && !hasLocalData) {
-        // Ingen data finns - init tom
-        console.log(`[SLIDE-LOAD] 📝 Initializing empty slide`);
-        setFormData(prev => ({ ...prev, [currentSlideKey]: {} }));
-        return;
-      }
-      
-      if (!hasServerData && hasLocalData) {
-        // Bara localStorage har data - använd den
-        console.log(`[SLIDE-LOAD] ✅ Using localStorage (only source)`);
-        setFormData(prev => ({ ...prev, [currentSlideKey]: localSlideData }));
-        return;
-      }
-      
-      if (hasServerData && !hasLocalData) {
-        // Bara server har data - använd den
-        console.log(`[SLIDE-LOAD] ✅ Using server (only source)`);
-        setFormData(prev => ({ ...prev, [currentSlideKey]: serverSlideData }));
-        return;
-      }
-      
-      // ─────────────────────────────────────────────────────────────────
-      // Båda källor har data - jämför INNEHÅLL (need-to-know!)
-      // ─────────────────────────────────────────────────────────────────
-      const localStr = JSON.stringify(localSlideData);
-      const serverStr = JSON.stringify(serverSlideData);
-      
-      if (localStr === serverStr) {
-        // ✅ SAMMA INNEHÅLL - ladda tyst (spelar ingen roll om global version skiljer)
-        console.log(`[SLIDE-LOAD] ✅ Same content - using SERVER (no conflict, need-to-know: not affected)`);
-        setFormData(prev => ({ ...prev, [currentSlideKey]: serverSlideData }));
-        return;
-      }
-      
-      // ⚠️ OLIKA INNEHÅLL - kolla vem som ändrade
-      console.log(`[SLIDE-LOAD] ⚠️ Different content detected - checking who modified...`);
-      
-      // Vi behöver veta VEM som senast uppdaterade DENNA slide
-      // Detta kräver per-slide metadata som backend inte har ännu
-      // WORKAROUND: Använd global modified_by (förutsätter att senaste ändringen på ärende = senaste ändring på slide)
-      const serverModifiedBy = serverMeta?.updated_by || serverMeta?.modified_by;
-      const currentUserEmail = user?.email;
-      
-      console.log(`[SLIDE-LOAD]   Server modified by: ${serverModifiedBy}`);
-      console.log(`[SLIDE-LOAD]   Current user: ${currentUserEmail}`);
-      
-      const isDifferentUser = serverModifiedBy && 
-                             currentUserEmail && 
-                             serverModifiedBy !== currentUserEmail;
-      
-      if (isDifferentUser) {
-        // ⚠️ KONFLIKT! Annan användare har ändrat DENNA slide
-        console.log(`[SLIDE-LOAD] 🛑 CONFLICT! User '${serverModifiedBy}' modified this slide`);
-        
-        // Spara konflikt-info för modal
-        setConflictInfo({
-          slide_key: currentSlideKey,
-          your_version: 0, // Vi har inget per-slide version ännu
-          server_version: serverGlobalVersion,
-          server_last_modified: serverMeta?.last_modified,
-          modified_by: serverModifiedBy,
-          conflicting_slides: [{
-            slide_id: currentSlideKey,
-            modified_by: serverModifiedBy,
-            modified_at: serverMeta?.last_modified
-          }],
-          message: `Användare '${serverModifiedBy}' har uppdaterat sidan '${currentSlideKey}'.`,
-          local_data: localSlideData,
-          server_data: serverSlideData
-        });
-        setShowConflictModal(true);
-        
-        // Ladda INTE data - vänta på användarens val
-        console.log(`[SLIDE-LOAD] 🛑 Blocking load - waiting for user decision`);
-        return;
-      } else {
-        // ═══════════════════════════════════════════════════════════════
-        // Samma användare - men kolla VILKEN data som är nyast!
-        // ═══════════════════════════════════════════════════════════════
-        // 
-        // MULTI-TAB/MULTI-BROWSER SCENARIO:
-        // User kan ha 2 flikar öppna:
-        //   Tab A: Laddade data kl 10:00 (version 5)
-        //   Tab B: Jobbade vidare till kl 10:30 (version 12)
-        //   Tab A: Återvänder kl 10:31 (har fortfarande version 5 i localStorage)
-        // 
-        // Regel: Använd NYASTE data (högsta version)
-        // 
-        console.log(`[SLIDE-LOAD] ⚙️ Same user, different content - checking versions...`);
-        
-        // Hämta local version från localStorage
-        const storageKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
-        const localVersionStr = localStorage.getItem(storageKey);
-        const localVersionObj = localVersionStr ? JSON.parse(localVersionStr) : { version: 0 };
-        const local_version = localVersionObj.version || 0;
-        
-        console.log(`[SLIDE-LOAD]   Local version: ${local_version}`);
-        console.log(`[SLIDE-LOAD]   Server version: ${serverGlobalVersion}`);
-        
-        if (serverGlobalVersion > local_version) {
-          // Server har nyare data - använd den (även om det är samma user!)
-          // Detta händer när user jobbar i annan flik/browser
-          console.log(`[SLIDE-LOAD] ✅ Server is NEWER (v${serverGlobalVersion} > v${local_version}) - using SERVER (multi-tab sync)`);
-          setFormData(prev => ({ ...prev, [currentSlideKey]: serverSlideData }));
-          
-          // 🔄 Uppdatera även localStorage så vi är synkad
-          storage.setSlideData(currentSlideKey, serverSlideData);
-          
-          // 🔄 Uppdatera local version till server version
-          localStorage.setItem(storageKey, JSON.stringify({
-            version: serverGlobalVersion,
-            timestamp: new Date().toISOString()
-          }));
-          
-          console.log(`[SLIDE-LOAD] 🔄 Synced localStorage with server data (v${serverGlobalVersion})`);
-          return;
-        } else {
-          // localStorage har lika eller nyare data - använd den (osparade ändringar)
-          console.log(`[SLIDE-LOAD] ✅ Local is CURRENT (v${local_version} >= v${serverGlobalVersion}) - using LOCALSTORAGE (unsaved changes)`);
-          setFormData(prev => ({ ...prev, [currentSlideKey]: localSlideData }));
-          return;
-        }
-      }
-    };
-    
-    loadSlideData();
-  }, [currentSlideKey, activeCase?.company_id, activeCase?.case_id]); // Kör när slide ändras ELLER activeCase uppdateras
+  useSlideDataLoader({appState,AppState,currentSlideKey,isDraftMode,activeCase,user,storage,api,setFormData,setConflictInfo,
+    setShowConflictModal,
+  });
 
   // ===========================================================================
-  // PAYMENT CALLBACK HANTERAS I handleResuming.js (state machine)
+  // STRIPE WEBHOOK-FLÖDE (2025-01-13, uppdaterat 2025-12-11)
   // ===========================================================================
   //
-  // FLÖDE EFTER BETALNING (2025-01-13):
-  //
-  // 1. Stripe → GET /payment-callback (backend)
-  //    - Verifierar betalning via Stripe API
+  // 1. Användaren → Stripe Checkout → betalar
+  // 2. Stripe → POST /stripe-webhook (asynkront, signaturverifierat)
   //    - Sätter metadata.subscription.payment_confirmed_at
+  //    - Sätter confirmed_via: "webhook"
   //    - Hämtar Roaring-data
-  //    - Redirectar till /payment-success
-  //
-  // 2. Frontend laddas → handleResuming.js körs
-  //    - Laddar metadata från /resume/{company_id}
-  //    - Ser payment_confirmed_at → paymentConfirmed = true
-  //    - Om confirmed: → READY + navigerar till riskfragor-2
-  //    - Om EJ confirmed: → VERIFYING_PAYMENT (edge case/fel)
-  //
-  // 3. VERIFYING_PAYMENT (endast edge case):
-  //    - payment-callback kan ha misslyckats (timeout, krasch)
-  //    - Visar fel-meddelande med "Försök igen" (reload)
-  //    - Reload → handleResuming körs igen, kollar metadata
-  //
-  // OBS: Inga API-anrop görs från VERIFYING_PAYMENT.
-  // Allt sker i payment-callback INNAN React laddas.
+  // 3. Stripe → Redirectar till /payment-success
+  // 4. Frontend pollar GET /subscription/status tills confirmed=true
+  // 5. → READY + navigerar till riskfragor-2
   //
 
   // ===========================================================================
-  // 🎮 HANDLERS - Factory-anrop till props/ (se respektive fil för detaljer)
+  // 📦 PROPS - Handler-funktioner som skickas ner till child-komponenter
   // ===========================================================================
-  
-  // handleResumeChoice - Återuppta pågående onboarding (se props/handleResumeChoice.js)
-  const handleResumeChoice = createHandleResumeChoice({
-    setActiveCase,
-    setAppState,
-    AppState
-  });
-  
-  // handleStartNew - Börja ny onboarding (se props/handleStartNew.js)
-  const handleStartNew = createHandleStartNew({
-    storage,
-    setFormData,
-    setActiveCase,
-    setCompletedSlides,
-    tempCaseId,
-    user,
-    setCurrentSlideKey,
-    navigate,
-    setAppState,
-    AppState
-  });
-  
-  // handleDeleteOnboarding - Radera pågående onboarding (se props/handleDeleteOnboarding.js)
-  const handleDeleteOnboarding = createHandleDeleteOnboarding({
-    api,
-    pendingOnboardings,
-    setPendingOnboardings,
-    handleStartNew
-  });
-  
-  // handleRetryPending - Försök hämta pending igen (se props/handleRetryPending.js)
-  const handleRetryPending = createHandleRetryPending({
-    setError,
-    setAppState,
-    AppState
-  });
-  
-  // ===========================================================================
-  // handleNext - Enkel event dispatcher till state machine
-  // ===========================================================================
+  // 
+  // Dessa är "props" i React-bemärkelse: funktioner som parent skapar och
+  // skickar ner till children via props. Children anropar dem som callbacks.
   //
-  // TIDIGARE: handleNext gjorde allt (validering, server-push, navigation)
-  // NU: Bara rapporterar "användaren klickade Nästa" till state-maskinen
+  // PATTERN: createHandle*() är factory-funktioner som skapar handlers.
+  // Se respektive fil i props/ för implementation.
   //
-  const handleNext = () => {
-    console.log(`[HANDLE_NEXT] User clicked Next on slide: ${currentSlideKey}`);
-    setAppState(AppState.PROCESSING_NEXT);
-  };
   
-  // ===========================================================================
-  // handleBack - Enkel event dispatcher till state machine
-  // ===========================================================================
-  const handleBack = () => {
-    console.log(`[HANDLE_BACK] User clicked Back on slide: ${currentSlideKey}`);
-    setAppState(AppState.PROCESSING_BACK);
-  };
+  // ─── Resume Modal Props ────────────────────────────────────────────────────
+  const handleResumeChoice = createHandleResumeChoice({ setActiveCase, setAppState, AppState });
+  const handleStartNew = createHandleStartNew({ storage, setFormData, setActiveCase, setCompletedSlides, tempCaseId, user, setCurrentSlideKey, navigate, setAppState, AppState });
+  const handleDeleteOnboarding = createHandleDeleteOnboarding({ api, pendingOnboardings, setPendingOnboardings, handleStartNew });
+  const handleRetryPending = createHandleRetryPending({ setError, setAppState, AppState });
   
-  // 🎯 handleConfirmCompanySelection - POINT OF NO RETURN (se props/handleConfirmCompanySelection.js)
-  const handleConfirmCompanySelection = createHandleConfirmCompanySelection({
-    tempCaseId,
-    formData,
-    api,
-    storage,
-    user,
-    setIsLoading,
-    setError,
-    setIsDraftMode,
-    setActiveCase,
-    SLIDE_ORDER,
-  });
-  
-  // 🚪 handleLogout - Normal utloggning (se props/handleLogout.js)
-  const handleLogout = createHandleLogout({
-    api,
-    user,
-    isDraftMode,
-    tempCaseId,
-    activeCase,
-    storage,
-    navigate
-  });
-  
-  // 🗑️ handleLogoutAndReset - Avsluta & rensa (rensar ALLT, se props/handleLogoutAndReset.js)
-  const handleLogoutAndReset = createHandleLogoutAndReset({
-    api,
-    user,
-    tempCaseId,
-    isDraftMode,
-    activeCase,
-    storage,
-    navigate
-  });
-  
-  // 💳 handleSelectEngångsavtal - Stripe checkout (se props/handleSelectEngångsavtal.js)
-  const handleSelectEngångsavtal = createHandleSelectEngångsavtal({
-    setShowAgreementModal,
-    setAppState,
-    AppState
-  });
-  
-  // 🏢 handleSelectFöretagsavtal - Enterprise (se props/handleSelectFöretagsavtal.js)
-  const handleSelectFöretagsavtal = createHandleSelectFöretagsavtal({
-    setShowAgreementModal,
-    navigate,
-    setAppState,
-    AppState
-  });
-  
-  // 💳 handlePaymentConfirmed - Callback från PaymentSuccessSlide (se props/handlePaymentConfirmed.js)
-  const handlePaymentConfirmed = createHandlePaymentConfirmed({
-    setHasAgreement,
-    setPaymentPending,
-    setShowAgreementModal,
-    setCurrentSlideKey,
-    setIsPaymentConfirmed,
-    navigate,
-    setAppState,
-    AppState,
-    SLIDE_ORDER
-  });
-  
-  // ❌ handleCancelOnboarding - Avbryt och rensa (se props/handleCancelOnboarding.js)
-  const handleCancelOnboarding = createHandleCancelOnboarding({
-    activeCase,
-    api,
-    setShowAgreementModal,
-    handleLogoutAndReset
-  });
-  
-  // handleConflictReload - Ladda om från server (se props/handleConflictReload.js)
-  const handleConflictReload = createHandleConflictReload({
-    setShowConflictModal,
-    setConflictInfo,
-    api,
-    activeCase,
-    setFormData,
-    storage,
-    setCompletedSlides,
-    setError
-  });
-  
-  // handleConflictForceSave - Skriv över server (se props/handleConflictForceSave.js)
-  const handleConflictForceSave = createHandleConflictForceSave({
-    setShowConflictModal,
-    conflictInfo,
-    activeCase,
-    setConflictInfo
-  });
-  
-  // handleConflictCancel - Avbryt konflikthantering (se props/handleConflictCancel.js)
-  const handleConflictCancel = createHandleConflictCancel({
-    setShowConflictModal,
-    setConflictInfo
-  });
-  
-  // handleSidebarClick - Navigera via sidebar (se props/handleSidebarClick.js)
-  const handleSidebarClick = createHandleSidebarClick({
-    SLIDE_ORDER,
-    checkVersionConflict,
-    setNavigationHistory,
-    currentSlideKey,
-    activeCase,
-    isDraftMode,
-    tempCaseId,
-    user,
-    storage,
-    setCurrentSlideKey,
-    navigate
-  });
-  
-  // handleSidebarLock - Avgör om slide är låst (se props/handleSidebarLock.js)
+  // ─── Navigation Props ──────────────────────────────────────────────────────
+  const handleNext = () => { console.log(`[HANDLE_NEXT] ${currentSlideKey}`); setAppState(AppState.PROCESSING_NEXT); };
+  const handleBack = () => { console.log(`[HANDLE_BACK] ${currentSlideKey}`); setAppState(AppState.PROCESSING_BACK); };
+  const handleSidebarClick = createHandleSidebarClick({ SLIDE_ORDER, checkVersionConflict, setNavigationHistory, currentSlideKey, activeCase, isDraftMode, tempCaseId, user, storage, setCurrentSlideKey, navigate });
   const handleSidebarLock = createHandleSidebarLock({ isPaymentConfirmed });
   
-  // handleFieldChange - Uppdatera formulärfält (se props/handleFieldChange.js)
-  const handleFieldChange = createHandleFieldChange({
-    setFormHistory,
-    formData,
-    setFormData
-  });
+  // ─── Form Props ────────────────────────────────────────────────────────────
+  const handleFieldChange = createHandleFieldChange({ setFormHistory, formData, setFormData });
+  const handleConfirmCompanySelection = createHandleConfirmCompanySelection({ tempCaseId, formData, api, storage, user, setIsLoading, setError, setIsDraftMode, setActiveCase, SLIDE_ORDER });
   
-  // handleClearError - Rensa felmeddelande (se props/handleClearError.js)
-  const handleClearError = createHandleClearError({
-    setError,
-    appState,
-    AppState,
-    setAppState
-  });
+  // ─── Auth/Session Props ────────────────────────────────────────────────────
+  const handleLogout = createHandleLogout({ api, user, isDraftMode, tempCaseId, activeCase, storage, navigate });
+  const handleLogoutAndReset = createHandleLogoutAndReset({ api, user, tempCaseId, isDraftMode, activeCase, storage, navigate });
+  
+  // ─── Payment/Agreement Props ───────────────────────────────────────────────
+  const handleSelectEngångsavtal = createHandleSelectEngångsavtal({ setShowAgreementModal, setAppState, AppState });
+  const handleSelectFöretagsavtal = createHandleSelectFöretagsavtal({ setShowAgreementModal, navigate, setAppState, AppState });
+  const handlePaymentConfirmed = createHandlePaymentConfirmed({ setHasAgreement, setPaymentPending, setShowAgreementModal, setCurrentSlideKey, setIsPaymentConfirmed, navigate, setAppState, AppState, SLIDE_ORDER });
+  const handleCancelOnboarding = createHandleCancelOnboarding({ activeCase, api, setShowAgreementModal, handleLogoutAndReset });
+  
+  // ─── Conflict Modal Props ──────────────────────────────────────────────────
+  const handleConflictReload = createHandleConflictReload({ setShowConflictModal, setConflictInfo, api, activeCase, setFormData, storage, setCompletedSlides, setError });
+  const handleConflictForceSave = createHandleConflictForceSave({ setShowConflictModal, conflictInfo, activeCase, setConflictInfo });
+  const handleConflictCancel = createHandleConflictCancel({ setShowConflictModal, setConflictInfo });
+  
+  // ─── Error Props ───────────────────────────────────────────────────────────
+  const handleClearError = createHandleClearError({ setError, appState, AppState, setAppState });
 
   // ===========================================================================
-  // 🎨 RENDER - JSX
+  // 🎨 RENDER - JSX (tic-tac-toe pattern: data ↓, events ↑)
   // ===========================================================================
-  //
-  // JÄMFÖR MED TIC-TAC-TOE:
-  //
-  // I tic-tac-toe:
-  //   return (
-  //     <div className="game">
-  //       <div className="game-board">
-  //         <Board squares={squares} onSquareClick={handleClick} />
-  //       </div>
-  //       <div className="game-info">...</div>
-  //     </div>
-  //   );
-  //
-  // Här:
-  //   return (
-  //     <div className="flex h-screen">
-  //       <Sidebar ... />
-  //       <main>
-  //         <Routes>
-  //           <Route ... />
-  //         </Routes>
-  //       </main>
-  //     </div>
-  //   );
-  //
-  // SAMMA MÖNSTER:
-  // - Data flödar NER via props (squares → Board, formData → UppdragsvalsSlide)
-  // - Events flödar UPP via callbacks (onSquareClick, onFieldChange)
-  //
   return (
     <div className="flex h-screen bg-gray-100">
       {/* ─────────────────────────────────────────────────────────────────────
@@ -1588,6 +1119,20 @@ export default function AuthenticatedApp() {
             <Route path="/omsattningsanalys" element={
               <OmsattningsanalysSlide 
                 sieData={sieData}
+                onNext={handleNext}
+                onBack={handleBack}
+              />
+            } />
+            
+            <Route path="/penningflodes" element={
+              <PenningflodesanalysSlide 
+                onNext={handleNext}
+                onBack={handleBack}
+              />
+            } />
+            
+            <Route path="/bokanalys" element={
+              <AccountingAnalysisWizard 
                 onNext={handleNext}
                 onBack={handleBack}
               />

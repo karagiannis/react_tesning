@@ -1,31 +1,56 @@
 /**
- * handleResuming.js
+ * handleResumingState.js
  * 
- * State Machine Handler: RESUMING
+ * STATE: RESUMING
  * 
- * NÄR: Användaren klickade "Fortsätt" i resume-modal (ny login, har pending onboarding)
- *      ELLER: Användaren kommer tillbaka från Stripe (URL = /payment-success)
+ * ═══════════════════════════════════════════════════════════════════════════
+ * PRIMÄR INGÅNG: Från SHOWING_RESUME
+ * ═══════════════════════════════════════════════════════════════════════════
  * 
- * VAD:
- *   1. Hämta metadata från server för activeCase
- *   2. Rensa localStorage för detta case (selektiv rensning)
- *   3. Sätt isDraftMode=false (permanent case)
- *   4. Spara pages till permanent localStorage-nycklar
- *   5. Uppdatera React state med pages data
- *   6. Lås upp roaring data om det finns
- *   7. Kolla betalningsstatus (metadata.subscription.payment_confirmed_at)
- *   8. Navigera till rätt slide
- *   9. Sätt tab session
+ * FLÖDE:
+ *   CHECKING_PENDING → SHOWING_RESUME (modal visas)
+ *          │
+ *          │ Användaren klickar "Fortsätt" på en pending onboarding
+ *          ▼
+ *   handleResumeChoice(company_id, case_id, name)
+ *          │
+ *          │ setActiveCase({ company_id, case_id, company_name })
+ *          │ setAppState(RESUMING)
+ *          ▼
+ *       RESUMING (denna handler)
+ *          │
+ *          │ 1. Hämta metadata från server för activeCase
+ *          │ 2. Rensa localStorage för detta case (selektiv rensning)
+ *          │ 3. Sätt isDraftMode=false (permanent case)
+ *          │ 4. Spara pages till permanent localStorage-nycklar
+ *          │ 5. Uppdatera React state med pages data
+ *          │ 6. Lås upp roaring data om betalning bekräftad
+ *          │ 7. Navigera till rätt slide
+ *          │ 8. Sätt tab session
+ *          ▼
+ *        READY
  * 
- * 🆕 BETALNINGSFLÖDE (2025-01-13) - WEBHOOK-ARKITEKTUR:
- *   - Stripe redirect → frontend /payment-success DIREKT
- *   - Stripe skickar webhook till POST /stripe-webhook (asynkront)
- *   - handleResuming kollar metadata.subscription.payment_confirmed_at
- *   - Om confirmed → READY
- *   - Om EJ confirmed → VERIFYING_PAYMENT (pollar tills webhook anlänt)
+ * ═══════════════════════════════════════════════════════════════════════════
+ * EDGE CASE: Payment Success Fallback (defense in depth)
+ * ═══════════════════════════════════════════════════════════════════════════
  * 
- * → READY (normal case, betalning OK eller ingen betalning ännu)
- * → VERIFYING_PAYMENT (polling: webhook inte anlänt ännu)
+ * NORMALT FLÖDE EFTER STRIPE:
+ *   Stripe redirect → /payment-success → CHECKING_PENDING → VERIFYING_PAYMENT
+ * 
+ * MEN denna handler har en fallback för edge cases:
+ *   - CHECKING_PENDING buggade/missade payment-success URL
+ *   - Manuell URL-navigering till /payment-success
+ *   - Race condition mellan state-övergångar
+ * 
+ * Om `comingFromPaymentSuccess` === true:
+ *   → Stannar på PaymentSuccessSlide istället för att navigera bort
+ *   → Användaren ser bekräftelse-UI
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ * UTGÅNGAR:
+ * ═══════════════════════════════════════════════════════════════════════════
+ *   → READY (normal case - navigerar till metadata.current_slide)
+ *   → READY (payment-success fallback - stannar på /payment-success)
  */
 
 import StorageKeyBuilder from '../utils/StorageKeyBuilder';
@@ -184,7 +209,7 @@ export function createHandleResuming(getState, getActions, services) {
       }
       
       // ─────────────────────────────────────────────────────────────────
-      // 🆕 2025-01-13: PAYMENT SUCCESS - Stanna på PaymentSuccessSlide!
+      // 🆕 2025-12-10: PAYMENT SUCCESS - Stanna på PaymentSuccessSlide!
       // ─────────────────────────────────────────────────────────────────
       // Om vi kommer från /payment-success ska användaren se bekräftelse-UI
       // och aktivt klicka "Fortsätt" för att gå vidare.
@@ -197,14 +222,13 @@ export function createHandleResuming(getState, getActions, services) {
         setCurrentSlideKey('payment-success');
         
         // Sätt tab session men STANNA på payment-success
-        const caseOrOnboardingId = activeCase.case_id || activeCase.case_id;
         const sessionId = storage.buildSessionId(
           activeCase.company_id,
-          caseOrOnboardingId,
+          activeCase.case_id,
           user?.id
         );
         storage.setCurrentTabSession({
-          sessionId,
+          session_id: sessionId,
           current_slide: 'payment-success',
         });
         
@@ -231,14 +255,13 @@ export function createHandleResuming(getState, getActions, services) {
       }
       
       // Sätt tab session för denna flik
-      const caseOrOnboardingId = activeCase.case_id || activeCase.case_id;
       const sessionId = storage.buildSessionId(
         activeCase.company_id,
-        caseOrOnboardingId,
+        activeCase.case_id,
         user?.id
       );
       storage.setCurrentTabSession({
-        sessionId,
+        session_id: sessionId,
         current_slide: targetSlide,
       });
       

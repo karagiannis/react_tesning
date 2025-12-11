@@ -98,12 +98,12 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
     // 2. Create temp copy in /tmp/session-{sessionId}-{timestamp}.tex
     // 3. Replace placeholders: {{FÖRETAGSNAMN}} → mockCustomerData.company_name
     // 4. Compile with pdflatex
-    // 5. Save to /storage/sessions/{sessionId}/contract_final.pdf
+    // 5. Save to /storage/sessions/{session_id}/contract_final.pdf
     // 6. Delete temp .tex
     // 7. Return final PDF URL
     
     const requestPayload = {
-      sessionId: 'session-' + Date.now(),
+      session_id: 'session-' + Date.now(),
       templateId: contractTemplate?.templateId,
       customerData: {
         företagsnamn: mockCustomerData.company_name,
@@ -124,7 +124,7 @@ export default function AvtalSlide({ onNext, onBack, customerData = {} }) {
     
     setTimeout(() => {
       // Mock: Return unique final PDF URL
-      const finalPdfUrl = `/contracts/session-${requestPayload.sessionId}-final.pdf`;
+      const finalPdfUrl = `/contracts/session-${requestPayload.session_id}-final.pdf`;
       setFinalContractUrl(finalPdfUrl);
       setIsGeneratingContract(false);
       console.log('✅ Final contract generated:', finalPdfUrl);

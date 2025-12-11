@@ -46,7 +46,7 @@ export function createHandleRestoringSession(getState, getActions, services) {
     // ─────────────────────────────────────────────────────────────────
     const tabSession = storage.getCurrentTabSession();
     
-    if (!tabSession || !tabSession.sessionId) {
+    if (!tabSession || !tabSession.session_id) {
       console.warn('[RESTORE] No tab session found - falling back to CHECKING_PENDING');
       setIsLoading(false);
       setAppState(AppState.CHECKING_PENDING);
@@ -60,7 +60,7 @@ export function createHandleRestoringSession(getState, getActions, services) {
     // Format: onboarding::company_id::case_id::user_id (permanent)
     // Format: onboarding::draft::temp_xxx::user_id (draft)
     // ─────────────────────────────────────────────────────────────────
-    const sessionParts = tabSession.sessionId.split('::');
+    const sessionParts = tabSession.session_id.split('::');
     const isPermanentSession = sessionParts.length >= 4 && sessionParts[1] !== 'draft';
     
     console.log('[RESTORE] Session type:', isPermanentSession ? 'PERMANENT' : 'DRAFT');
@@ -271,7 +271,7 @@ export function createHandleRestoringSession(getState, getActions, services) {
     
     // Logga för audit trail
     await api.logPersonal('Session restored after page reload', {
-      sessionId: tabSession.sessionId,
+      session_id: tabSession.session_id,
       current_slide: targetSlide,
       isDraftMode,
     });
