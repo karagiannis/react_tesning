@@ -146,7 +146,7 @@ export function createApi(storage) {
           orgnr: c.orgnr,
           case_id: c.case_id,
           current_slide: c.current_slide,
-          updated_at: c.updated_at,
+          last_modified: c.last_modified,
           services: c.services,
         }));
       }

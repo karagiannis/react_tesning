@@ -5,18 +5,32 @@
  * 
  * ANSVAR: Polla webhook-bekräftelse (max 20 sekunder)
  * 
- * INGÅNG: Från RESUMING (när användaren kom från /payment-success)
+ * ═══════════════════════════════════════════════════════════════════════════
+ * INGÅNG: Från CHECKING_PENDING (när URL är /payment-success)
+ * ═══════════════════════════════════════════════════════════════════════════
  * 
+ * handleCheckingPendingState.js rad 48-55:
+ *   if (isPaymentSuccessPage && onboardings.length > 0) {
+ *     setActiveCase(onboardings[0]);
+ *     setAppState(AppState.VERIFYING_PAYMENT);  ← HIT!
+ *   }
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
  * UTGÅNGAR:
+ * ═══════════════════════════════════════════════════════════════════════════
  *   → READY  (betalning bekräftad eller timeout)
  *   → ERROR  (saknar activeCase)
  * 
+ * ═══════════════════════════════════════════════════════════════════════════
  * FLÖDE:
- *   1. Stripe Checkout → redirect till /payment-success
- *   2. Stripe webhook → POST /stripe-webhook (asynkront)
- *   3. Webhook sätter metadata.subscription.payment_confirmed_at
- *   4. Frontend pollar GET /subscription/status var 2 sek
- *   5. När confirmed=true → READY
+ * ═══════════════════════════════════════════════════════════════════════════
+ *   1. Stripe Checkout → redirect till /payment-success?session_id=xxx
+ *   2. App startar om → UNINITIALIZED → INITIALIZING → CHECKING_PENDING
+ *   3. CHECKING_PENDING detekterar payment-success URL → VERIFYING_PAYMENT
+ *   4. Stripe webhook → POST /stripe-webhook (asynkront, kan redan ha kört)
+ *   5. Webhook sätter metadata.subscription.payment_confirmed_at
+ *   6. Denna handler pollar GET /subscription/status var 2 sek (max 20s)
+ *   7. När confirmed=true → READY
  */
 
 import AppState from './AppState';
@@ -52,8 +66,12 @@ export function createHandleVerifyingPaymentState(getState, getActions, services
     // ─────────────────────────────────────────────────────────────────
     // Polling-loop
     // ─────────────────────────────────────────────────────────────────
+    // Stripe sandbox webhook tar typiskt 10-15 sekunder.
+    // Produktion är oftast snabbare (1-5 sek).
+    // Vid timeout visas retry-knapp i PaymentSuccessSlide.
+    //
     const POLL_INTERVAL_MS = 2000;  // 2 sekunder
-    const MAX_POLL_TIME_MS = 20000; // Max 20 sekunder
+    const MAX_POLL_TIME_MS = 30000; // Max 30 sekunder (ökad från 20s)
     const startTime = Date.now();
 
     let pollCount = 0;

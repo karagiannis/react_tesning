@@ -4,7 +4,7 @@
  * STATE: RESUMING
  * 
  * ═══════════════════════════════════════════════════════════════════════════
- * PRIMÄR INGÅNG: Från SHOWING_RESUME
+ * ENDA INGÅNG: Från SHOWING_RESUME (användaren klickar "Fortsätt" i modal)
  * ═══════════════════════════════════════════════════════════════════════════
  * 
  * FLÖDE:
@@ -25,32 +25,47 @@
  *          │ 4. Spara pages till permanent localStorage-nycklar
  *          │ 5. Uppdatera React state med pages data
  *          │ 6. Lås upp roaring data om betalning bekräftad
- *          │ 7. Navigera till rätt slide
+ *          │ 7. Navigera till rätt slide (metadata.current_slide)
  *          │ 8. Sätt tab session
  *          ▼
  *        READY
  * 
  * ═══════════════════════════════════════════════════════════════════════════
- * EDGE CASE: Payment Success Fallback (defense in depth)
+ * ⚠️  VIKTIGT: DETTA STATE PASSERAS *INTE* EFTER STRIPE-BETALNING!
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * NORMALT FLÖDE EFTER STRIPE:
- *   Stripe redirect → /payment-success → CHECKING_PENDING → VERIFYING_PAYMENT
+ * NORMALT FLÖDE EFTER STRIPE (lyckad betalning):
+ *   Stripe redirect → /payment-success?session_id=xxx
+ *          ↓
+ *   UNINITIALIZED → INITIALIZING → CHECKING_PENDING → VERIFYING_PAYMENT → READY
+ *                                  (detekterar payment-success URL)
  * 
- * MEN denna handler har en fallback för edge cases:
- *   - CHECKING_PENDING buggade/missade payment-success URL
- *   - Manuell URL-navigering till /payment-success
- *   - Race condition mellan state-övergångar
+ * SHOWING_RESUME och RESUMING passeras ALDRIG efter Stripe-retur!
  * 
- * Om `comingFromPaymentSuccess` === true:
- *   → Stannar på PaymentSuccessSlide istället för att navigera bort
- *   → Användaren ser bekräftelse-UI
+ * Varför?
+ *   - handleCheckingPendingState.js kollar `isPaymentSuccessPage` FÖRST
+ *   - Om true + pending finns → går direkt till VERIFYING_PAYMENT
+ *   - SHOWING_RESUME triggas bara om pending finns OCH vi INTE är på payment-success
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 🧟 DEAD CODE: comingFromPaymentSuccess (rad ~100 och ~217)
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Koden som kollar `comingFromPaymentSuccess` borde ALDRIG köras i normalt flöde
+ * eftersom man inte kan nå RESUMING från /payment-success.
+ * 
+ * Koden behålls som "defense in depth" för edge cases:
+ *   - Bug i CHECKING_PENDING som missar payment-success URL
+ *   - Manuell URL-navigering till /payment-success efter SHOWING_RESUME
+ *   - Race conditions eller oväntade state-övergångar
+ * 
+ * Om koden aldrig loggar "[RESUMING] 💳 Coming from payment-success" i produktion
+ * under en längre tid, kan den tas bort.
  * 
  * ═══════════════════════════════════════════════════════════════════════════
  * UTGÅNGAR:
  * ═══════════════════════════════════════════════════════════════════════════
- *   → READY (normal case - navigerar till metadata.current_slide)
- *   → READY (payment-success fallback - stannar på /payment-success)
+ *   → READY (navigerar till metadata.current_slide)
  */
 
 import StorageKeyBuilder from '../utils/StorageKeyBuilder';
@@ -79,8 +94,10 @@ export function createHandleResuming(getState, getActions, services) {
       setFormData,
       setCompletedSlides,
       setIsPaymentConfirmed,
+      setHasAgreement,
       setCurrentSlideKey,
       setActiveCase,
+      setTempCaseId,
     } = getActions();
     
     const { storage, api, navigate, SLIDE_ORDER, AppState } = services;
@@ -95,12 +112,24 @@ export function createHandleResuming(getState, getActions, services) {
     
     setIsLoading(true);
     
-    // 🧹 KRITISKT: Spara om vi kommer från payment-success så vi kan navigera bort senare
-    // Vi väntar med navigeringen tills vi vet var vi ska (metadata.current_slide)
+    // ═══════════════════════════════════════════════════════════════════════
+    // 🧟 DEAD CODE WARNING: comingFromPaymentSuccess
+    // ═══════════════════════════════════════════════════════════════════════
+    // Denna variabel borde ALDRIG vara true i normalt flöde!
+    // 
+    // Efter Stripe-betalning går flödet:
+    //   /payment-success → CHECKING_PENDING → VERIFYING_PAYMENT → READY
+    // 
+    // RESUMING nås bara från SHOWING_RESUME (modal), som ALDRIG visas på
+    // /payment-success eftersom handleCheckingPendingState.js kollar URL först.
+    // 
+    // Koden behålls som "defense in depth" - om den loggar i produktion
+    // har vi en bug i CHECKING_PENDING.
+    // ═══════════════════════════════════════════════════════════════════════
     const comingFromPaymentSuccess = window.location.pathname === '/payment-success' || 
         window.location.search.includes('session_id');
     if (comingFromPaymentSuccess) {
-      console.log('[RESUMING] 🧹 Coming from payment-success, will navigate to correct slide after loading');
+      console.warn('[RESUMING] ⚠️ UNEXPECTED: Coming from payment-success! This should go via VERIFYING_PAYMENT instead.');
     }
 
     // 🧹 RENSA temp_case_id - vi har nu ett permanent case
@@ -110,6 +139,7 @@ export function createHandleResuming(getState, getActions, services) {
     if (storage.getTempCaseId()) {
       console.log('[RESUMING] 🧹 Clearing temp_case_id (have permanent case now)');
       storage.clearTempCaseId();
+      setTempCaseId(null);  // Clear from React state too
     }
     
     try {
@@ -206,17 +236,26 @@ export function createHandleResuming(getState, getActions, services) {
       if (paymentConfirmed) {
         console.log('[RESUMING] 🔓 Payment confirmed - unlocking företagsdata slides');
         setIsPaymentConfirmed(true);
+        setHasAgreement(true);  // 🔓 Låser upp betalvägg för riskfragor-1 → riskfragor-2
       }
       
-      // ─────────────────────────────────────────────────────────────────
-      // 🆕 2025-12-10: PAYMENT SUCCESS - Stanna på PaymentSuccessSlide!
-      // ─────────────────────────────────────────────────────────────────
-      // Om vi kommer från /payment-success ska användaren se bekräftelse-UI
-      // och aktivt klicka "Fortsätt" för att gå vidare.
-      // Vi navigerar INTE bort automatiskt!
+      // ═══════════════════════════════════════════════════════════════════
+      // 🧟 DEAD CODE: comingFromPaymentSuccess fallback
+      // ═══════════════════════════════════════════════════════════════════
+      // Denna kod borde ALDRIG köras!
+      // 
+      // I normalt flöde efter Stripe:
+      //   /payment-success → CHECKING_PENDING → VERIFYING_PAYMENT → READY
+      // 
+      // RESUMING nås bara från SHOWING_RESUME modal, som inte visas på
+      // /payment-success. Om denna kod körs har vi en bug.
+      // 
+      // Behålls som "defense in depth" - om loggen syns i produktion,
+      // undersök varför CHECKING_PENDING inte fångade payment-success URL.
+      // ═══════════════════════════════════════════════════════════════════
       if (comingFromPaymentSuccess) {
-        console.log('[RESUMING] 💳 Coming from payment-success - staying on PaymentSuccessSlide');
-        console.log('[RESUMING] 💳 Payment confirmed:', paymentConfirmed);
+        console.error('[RESUMING] 🚨 BUG: Reached RESUMING from payment-success! Should have gone via VERIFYING_PAYMENT.');
+        console.error('[RESUMING] 🚨 Payment confirmed:', paymentConfirmed);
         
         // 🔑 KRITISKT: Sätt currentSlideKey så React vet vilken slide som ska renderas
         setCurrentSlideKey('payment-success');

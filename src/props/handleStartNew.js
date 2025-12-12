@@ -28,9 +28,9 @@ export const createHandleStartNew = ({
     setCompletedSlides([]);
 
     // 3. Sätt initial tab session (draft mode)
-    const sessionId = `onboarding::draft::${tempCaseId}::${user?.id}`;
+    const session_id = `onboarding::draft::${tempCaseId}::${user?.id}`;
     storage.setCurrentTabSession({
-      sessionId,
+      session_id,
       current_slide: 'uppdragsval',
     });
 

@@ -163,16 +163,13 @@ import { createCheckVersionConflict, createSaveSlideAndNavigate } from './utils/
 // STATE MACHINE HANDLERS
 // =============================================================================
 import AppState from './stateMachine/AppState';
+import { createHandleUppdragsvalsSubState } from './stateMachine/handleUppdragsvalsSubState';
+import { createHandleRiskfragorSubState } from './stateMachine/handleRiskfragorSubState';
 import { 
   createHandleInitializing,
   createHandleRestoringSession,
   createHandleResuming,
-  createHandleProcessingNext,
   createHandleCheckingPendingState,
-  createHandleShowingResumeState,
-  createHandleReadyState,
-  createHandleProcessingBackState,
-  createHandleErrorState,
   createHandleInitiatingPaymentState,
   createHandleVerifyingPaymentState,
 } from './stateMachine';
@@ -387,7 +384,7 @@ export default function AuthenticatedApp() {
   // Getter callbacks för att alltid hämta AKTUELLA värden (closure pattern)
   
   const getState = () => ({ currentSlideKey, hasAgreement, isDraftMode, activeCase, formData, completedSlides, tempCaseId, user, pendingOnboardings, error });
-  const getActions = () => ({ setIsLoading, setError, setAppState, setTempCaseId, setIsDraftMode, setUser, setFormData, setCompletedSlides, setActiveCase, setIsPaymentConfirmed, setCurrentSlideKey, setSyncStatus, setShowAgreementModal, setNavigationHistory, setConflictInfo, setShowConflictModal, setPaymentVerificationStatus, setPaymentVerificationMessage, setPendingOnboardings });
+  const getActions = () => ({ setIsLoading, setError, setAppState, setTempCaseId, setIsDraftMode, setUser, setFormData, setCompletedSlides, setActiveCase, setIsPaymentConfirmed, setHasAgreement, setCurrentSlideKey, setSyncStatus, setShowAgreementModal, setNavigationHistory, setConflictInfo, setShowConflictModal, setPaymentVerificationStatus, setPaymentVerificationMessage, setPendingOnboardings });
   const services = { storage, api, navigate, SLIDE_ORDER, AppState };
 
   // ===========================================================================
@@ -403,6 +400,22 @@ export default function AuthenticatedApp() {
   const handleResumingAction = createHandleResuming(getState, getActions, services);
   const handleInitiatingPaymentAction = createHandleInitiatingPaymentState(getState, getActions, services);
   const handleVerifyingPaymentAction = createHandleVerifyingPaymentState(getState, getActions, services);
+  
+  // ─── Form Props (declared early for substate handlers) ─────────────────────
+  const handleConfirmCompanySelection = createHandleConfirmCompanySelection({ 
+    tempCaseId, formData, api, storage, user, setIsLoading, setError, setIsDraftMode, 
+    setActiveCase, SLIDE_ORDER, activeCase,
+    // 🆕 Version conflict callbacks
+    setShowConflictModal, setConflictInfo,
+  });
+  
+  // Sub-state handlers för PROCESSING_NEXT special cases
+  const handleUppdragsvalsNext = createHandleUppdragsvalsSubState(getState, getActions, {
+    ...services, handleConfirmCompanySelection, AppState,
+  });
+  const handleRiskfragorNext = createHandleRiskfragorSubState(getState, getActions, {
+    ...services, saveSlideAndNavigate, AppState,
+  });
 
   // ===========================================================================
   // 🔄 AUTO-SAVE HOOK - Sparar till localStorage vid varje formData-ändring
@@ -548,110 +561,12 @@ export default function AuthenticatedApp() {
           break;
         }
         
-        // Switch baserat på nuvarande slide
+        // Switch baserat på nuvarande slide - special cases extraherade till egna filer
         switch (currentSlideKey) {
-          
-          // ───────────────────────────────────────────────────────────────
-          // UPPDRAGSVAL - Special case, hanteras av wrapper
-          // ───────────────────────────────────────────────────────────────
-          case 'uppdragsval':
-            console.log('[PROCESSING_NEXT] uppdragsval - handled by UppdragsvalsSlide wrapper');
-            setAppState(AppState.READY);
-            break;
-          
-          // ───────────────────────────────────────────────────────────────
-          // RISKFRÅGOR (steg 1) - Payment check
-          // ───────────────────────────────────────────────────────────────
-          case 'riskfragor-1':
-            if (!hasAgreement && !isDraftMode) {
-              // VIKTIGT: Spara först till servern INNAN vi visar betalningsmodalen!
-              // Annars försvinner datan när användaren återvänder från Stripe.
-              console.log('[PROCESSING_NEXT] riskfragor: No agreement - saving before showing modal');
-              
-              try {
-                setIsLoading(true);
-                setSyncStatus('saving');
-                
-                // Spara till server - använd generiska endpoint (samma som alla andra slides)
-                const company_id = activeCase?.company_id;
-                const case_id = activeCase?.case_id;
-                const slideData = formData[currentSlideKey] || {};
-                
-                if (company_id && case_id) {
-                  // Generiskt endpoint: POST /onboarding/{company_id}/{slide_key}
-                  const response = await api.post(
-                    `/onboarding/${company_id}/${currentSlideKey}`,
-                    {
-                      data: slideData,
-                      case_id: case_id,
-                      // expected_version: currentVersion  // TODO: Hämta från localStorage
-                    }
-                  );
-                  
-                  if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    
-                    // FastAPI validation errors returnerar detail som array av objekt
-                    let errorMsg = 'Kunde inte spara till servern';
-                    if (errorData.detail) {
-                      if (Array.isArray(errorData.detail)) {
-                        // Pydantic validation errors: [{loc: [...], msg: "...", type: "..."}]
-                        errorMsg = errorData.detail.map(err => err.msg || JSON.stringify(err)).join(', ');
-                      } else if (typeof errorData.detail === 'string') {
-                        errorMsg = errorData.detail;
-                      } else {
-                        errorMsg = JSON.stringify(errorData.detail);
-                      }
-                    }
-                    
-                    console.error('[PROCESSING_NEXT] riskfragor: Server error:', errorData);
-                    throw new Error(errorMsg);
-                  }
-                  
-                  const result = await response.json();
-                  console.log('[PROCESSING_NEXT] riskfragor: ✅ Saved to server, version:', result.version);
-                  
-                  // Uppdatera lokal version
-                  const versionKey = `case_${company_id}_${case_id}_version`;
-                  localStorage.setItem(versionKey, JSON.stringify({
-                    version: result.version,
-                    timestamp: new Date().toISOString(),
-                    current_slide: currentSlideKey,
-                  }));
-                  
-                  setSyncStatus('saved');
-                } else {
-                  console.warn('[PROCESSING_NEXT] riskfragor: No company_id/case_id, skipping server save');
-                }
-                
-                setIsLoading(false);
-                
-                // Nu är det säkert att visa betalningsmodalen
-                console.log('[PROCESSING_NEXT] riskfragor: Showing payment modal');
-                setShowAgreementModal(true);
-                setAppState(AppState.READY); // Stay in READY - modal handles Stripe redirect
-                
-              } catch (err) {
-                console.error('[PROCESSING_NEXT] riskfragor: ❌ Save error:', err);
-                setError(err.message);
-                setIsLoading(false);
-                setSyncStatus('idle');
-                setAppState(AppState.ERROR);
-              }
-            } else {
-              // Har redan betalat eller är i draft mode
-              console.log('[PROCESSING_NEXT] riskfragor: Has agreement or draft - save and navigate');
-              await saveSlideAndNavigate(currentSlideKey, currentIndex);
-            }
-            break;
-          
-          // ───────────────────────────────────────────────────────────────
-          // ALLA ANDRA SLIDES - Standard save & navigate
-          // ───────────────────────────────────────────────────────────────
+          case 'uppdragsval':  await handleUppdragsvalsNext(); break;
+          case 'riskfragor-1': await handleRiskfragorNext(currentIndex); break;
           default:
-            console.log(`[PROCESSING_NEXT] ${currentSlideKey}: Standard save and navigate`);
             await saveSlideAndNavigate(currentSlideKey, currentIndex);
-            break;
         }
         break;
       }
@@ -802,7 +717,7 @@ export default function AuthenticatedApp() {
   
   // ─── Form Props ────────────────────────────────────────────────────────────
   const handleFieldChange = createHandleFieldChange({ setFormHistory, formData, setFormData });
-  const handleConfirmCompanySelection = createHandleConfirmCompanySelection({ tempCaseId, formData, api, storage, user, setIsLoading, setError, setIsDraftMode, setActiveCase, SLIDE_ORDER });
+  // NOTE: handleConfirmCompanySelection declared earlier (before substate handlers)
   
   // ─── Auth/Session Props ────────────────────────────────────────────────────
   const handleLogout = createHandleLogout({ api, user, isDraftMode, tempCaseId, activeCase, storage, navigate });
@@ -916,73 +831,11 @@ export default function AuthenticatedApp() {
                 UppdragsvalsSlide - POINT OF NO RETURN slide
                 ─────────────────────────────────────────────────────────────
                 
-                Denna slide har en extra callback: onConfirmCompanySelection
-                
-                NÄR användaren klickar "Fortsätt" efter att ha valt företag:
-                → handleConfirmCompanySelection anropas
-                → Draft konverteras till permanent
-                → isDraftMode = false
-                
-                Detta är "point of no return" - efter detta sparas all data
-                permanent under company_id istället för draft.
-                
-                🆕 REFAKTORERAD 2025-12-04:
-                - Sliden är nu "dum" och anropar bara onNext()
-                - onNext för DENNA slide är handleUppdragsvalsNext som:
-                  1. Hämtar company_name/orgnr från formData['uppdragsval']
-                  2. Anropar handleConfirmCompanySelection()
-                  3. Den i sin tur navigerar vidare efter commit
             */}
             <Route path="/uppdragsval" element={
               <UppdragsvalsSlide 
                 formData={formData['uppdragsval'] || {}}
-                onNext={async () => {
-                  // WRAPPER: När sliden kallar onNext(), 
-                  // triggar vi /commit med data från formData
-                  const uppdragsvalsData = formData['uppdragsval'] || {};
-                  const orgnr = uppdragsvalsData.orgnr || '';
-                  const company_name = uppdragsvalsData.company_name || uppdragsvalsData.company_name || '';
-                  
-                  console.log('[UPPDRAGSVAL WRAPPER] formData:', uppdragsvalsData);
-                  console.log('[UPPDRAGSVAL WRAPPER] company_name:', company_name);
-                  console.log('[UPPDRAGSVAL WRAPPER] orgnr:', orgnr);
-                  
-                  if (!orgnr) {
-                    console.error('[UPPDRAGSVAL] Ingen orgnr i formData!');
-                    setError('Organisationsnummer saknas');
-                    return;
-                  }
-                  
-                  // Anropa /commit - får tillbaka { success, company_id, case_id, nextSlide }
-                  const result = await handleConfirmCompanySelection(null, company_name, orgnr);
-                  
-                  if (!result || !result.success) {
-                    console.error('[UPPDRAGSVAL WRAPPER] Commit failed:', result?.error);
-                    return; // Error redan satt av handleConfirmCompanySelection
-                  }
-                  
-                  // ✅ SUCCESS - Nu hanterar VI routing här i AuthenticatedApp!
-                  console.log('[UPPDRAGSVAL WRAPPER] ✅ Commit successful, handling navigation...');
-                  
-                  const { company_id, case_id, nextSlide } = result;
-                  
-                  if (nextSlide) {
-                    console.log(`[UPPDRAGSVAL WRAPPER] Navigating to: ${nextSlide.path}`);
-                    setCurrentSlideKey(nextSlide.key);
-                    
-                    // Uppdatera tab session
-                    const sessionId = storage.buildSessionId(company_id, case_id, user.id);
-                    storage.setCurrentTabSession({
-                      sessionId,
-                      current_slide: nextSlide.key,
-                    });
-                    
-                    navigate(nextSlide.path);
-                  } else {
-                    console.warn('[UPPDRAGSVAL WRAPPER] No next slide found!');
-                  }
-                }}
-                onBack={handleBack}
+                onNext={handleNext}  // ✅ TIC-TAC-TOE: Bara informera om klick!
                 onFieldChange={(field, value) => handleFieldChange('uppdragsval', field, value)}
                 isLocked={!isDraftMode}
                 isLoading={isLoading}
@@ -1236,10 +1089,11 @@ export default function AuthenticatedApp() {
       */}
       {showConflictModal && (
         <MergeConflictModal
-          conflictInfo={conflictInfo}
-          onReload={handleConflictReload}
-          onForceSave={handleConflictForceSave}
-          onCancel={handleConflictCancel}
+          data={conflictInfo}
+          onKeepTheirs={handleConflictReload}
+          onKeepMine={handleConflictForceSave}
+          onMerge={handleConflictForceSave}
+          onClose={handleConflictCancel}
         />
       )}
       
@@ -1256,7 +1110,7 @@ export default function AuthenticatedApp() {
             - onCancel() → handleCancelOnboarding → Stäng modal, gå tillbaka
           
           PROPS:
-            - trialsUsed/trialsMax: Visar hur många gratis onboardings som är kvar
+            - trials_used/trials_max: Visar hur många gratis onboardings som är kvar (snake_case från backend)
             - isLoading: Visar spinner under paymentStatus === 'initiating'
             - error: Visar felmeddelande om Stripe-anrop misslyckas
       */}
@@ -1265,8 +1119,8 @@ export default function AuthenticatedApp() {
           onSelectEngångsavtal={handleSelectEngångsavtal}
           onSelectFöretagsavtal={handleSelectFöretagsavtal}
           onCancel={handleCancelOnboarding}
-          trialsUsed={user?.trialsUsed || 0}
-          trialsMax={user?.trialsMax || 3}
+          trialsUsed={user?.trials_used || 0}
+          trialsMax={user?.trials_max || 3}
           isLoading={paymentStatus === 'initiating'}
           error={error}
         />

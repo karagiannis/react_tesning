@@ -28,10 +28,27 @@ export const createHandleConfirmCompanySelection = ({
   setIsDraftMode,
   setActiveCase,
   SLIDE_ORDER,
+  activeCase,  // Befintligt case vid resume
+  // 🆕 Version conflict callbacks
+  setShowConflictModal,
+  setConflictInfo,
 }) => {
   return async (company_id, company_name, orgnr) => {
+    // ─────────────────────────────────────────────────────────────────
+    // RESUME FIX: Om vi har ett befintligt permanent case_id, använd det!
+    // ─────────────────────────────────────────────────────────────────
+    const existingCaseId = activeCase?.case_id;
+    const existingCompanyId = activeCase?.company_id;  // 🆕 Hämta company_id från activeCase
+    const isResumingExistingCase = existingCaseId && !existingCaseId.startsWith('temp_');
+    const caseIdToSend = isResumingExistingCase ? existingCaseId : tempCaseId;
+    const companyIdToUse = isResumingExistingCase ? (existingCompanyId || company_id || '') : (company_id || '');  // 🆕 Använd activeCase.company_id vid resume
+    
     console.log(`[POINT OF NO RETURN] Company selected: ${company_name} (${orgnr})`);
-    console.log(`[POINT OF NO RETURN] Sending temp_case_id: ${tempCaseId}`);
+    console.log(`[POINT OF NO RETURN] activeCase.case_id: ${existingCaseId}`);
+    console.log(`[POINT OF NO RETURN] activeCase.company_id: ${existingCompanyId}`);  // 🆕 Logga
+    console.log(`[POINT OF NO RETURN] isResumingExistingCase: ${isResumingExistingCase}`);
+    console.log(`[POINT OF NO RETURN] Sending case_id: ${caseIdToSend}`);
+    console.log(`[POINT OF NO RETURN] Sending company_id: ${companyIdToUse}`);  // 🆕 Logga
     
     setIsLoading(true);
     
@@ -41,25 +58,84 @@ export const createHandleConfirmCompanySelection = ({
       // ─────────────────────────────────────────────────────────────────
       //
       // Servern förväntar sig:
-      // - case_id: "temp_xxx" (vi skickar vårt temp_case_id)
+      // - case_id: "temp_xxx" för ny session ELLER permanent case_id vid resume
       // - company_id: Om känt (kan vara tomt för nya företag)
       // - orgnr: Organisationsnummer
       // - company_name: Företagsnamn
       // - form_data: All formulärdata (opak dict)
+      // - expected_version: För optimistic locking (konfliktdetektering)
       //
+      
+      // Hämta expected_version för befintliga cases
+      let expected_version = null;
+      if (isResumingExistingCase && companyIdToUse) {  // 🆕 Använd companyIdToUse
+        const versionKey = `case_${companyIdToUse}_${existingCaseId}_version`;
+        const versionStr = localStorage.getItem(versionKey);
+        if (versionStr) {
+          try {
+            const versionObj = JSON.parse(versionStr);
+            expected_version = versionObj.version || 0;
+            console.log(`[POINT OF NO RETURN] Sending expected_version: ${expected_version}`);
+          } catch (e) {
+            console.warn('[POINT OF NO RETURN] Could not parse version from localStorage');
+          }
+        }
+      }
+      
       const response = await api.fetch('/onboarding/commit', {
         method: 'POST',
         body: JSON.stringify({
-          case_id: tempCaseId,           // "temp_1701234567890_abc123"
-          company_id: company_id || '',    // Om vi redan har company_id
+          case_id: caseIdToSend,              // Permanent case_id vid resume, annars temp_xxx
+          company_id: companyIdToUse,         // 🆕 Använd companyIdToUse
           orgnr: orgnr,
           company_name: company_name,
           form_data: formData['uppdragsval'] || {},  // Formulärdata från Uppdragsval
+          expected_version: expected_version,        // Optimistic locking
         }),
       });
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        
+        // 🆕 Handle version conflict (409)
+        if (response.status === 409) {
+          console.log('[POINT OF NO RETURN] ⚠️ VERSION CONFLICT DETECTED!');
+          console.log('[POINT OF NO RETURN] Server version:', errorData.server_version);
+          console.log('[POINT OF NO RETURN] Modified by:', errorData.modified_by);
+          console.log('[POINT OF NO RETURN] setShowConflictModal exists:', !!setShowConflictModal);
+          console.log('[POINT OF NO RETURN] setConflictInfo exists:', !!setConflictInfo);
+          
+          // Hämta lokal data för diff-visning
+          const localUppdragsvalData = formData['uppdragsval'] || {};
+          console.log('[POINT OF NO RETURN] Local data for comparison:', localUppdragsvalData);
+          
+          // Visa conflict modal om callbacks finns
+          if (setShowConflictModal && setConflictInfo) {
+            console.log('[POINT OF NO RETURN] 🎯 CALLING setConflictInfo and setShowConflictModal');
+            setConflictInfo({
+              ...errorData,
+              slide_key: 'uppdragsval',
+              // Inkludera lokal data för diff-visning
+              localData: {
+                selected_services: localUppdragsvalData.selected_services || [],
+                other_services: localUppdragsvalData.other_services || '',
+              },
+            });
+            setShowConflictModal(true);
+            console.log('[POINT OF NO RETURN] ✅ Modal should be visible now');
+          } else {
+            console.error('[POINT OF NO RETURN] ❌ Missing callbacks - cannot show modal!');
+          }
+          
+          setIsLoading(false);
+          return {
+            success: false,
+            error: 'Version conflict',
+            conflict: true,
+            conflictInfo: errorData,
+          };
+        }
+        
         throw new Error(errorData.detail || 'Kunde inte skapa ärende på server');
       }
       

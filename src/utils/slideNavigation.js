@@ -134,11 +134,18 @@ export function createSaveSlideAndNavigate(getState, getActions, services, check
       if (!isDraftMode && activeCase?.case_id) {
         console.log(`[SAVE] 📤 Pushing slide data: ${slideKey}`);
         
+        // Hämta local version för optimistic locking
+        const versionKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
+        const localVersionStr = localStorage.getItem(versionKey);
+        const localVersionObj = localVersionStr ? JSON.parse(localVersionStr) : { version: 0 };
+        const expected_version = localVersionObj.version || 0;
+        
         const response = await api.post(
           `/onboarding/${activeCase.company_id}/${slideKey}`,
           {
             data: slideData,
             case_id: activeCase.case_id,
+            expected_version: expected_version,  // Optimistic locking - server rejects if version mismatch
           }
         );
         
@@ -161,8 +168,7 @@ export function createSaveSlideAndNavigate(getState, getActions, services, check
         const result = await response.json();
         console.log(`[SAVE] ✅ Server saved slide, new version: ${result.version}`);
         
-        // Uppdatera lokal version
-        const versionKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
+        // Uppdatera lokal version (versionKey deklarerad ovan)
         localStorage.setItem(versionKey, JSON.stringify({
           version: result.version,
           timestamp: new Date().toISOString(),
@@ -199,11 +205,11 @@ export function createSaveSlideAndNavigate(getState, getActions, services, check
       
       // Uppdatera session
       const caseOrOnboardingId = activeCase?.case_id;
-      const sessionId = isDraftMode
+      const session_id = isDraftMode
         ? `onboarding::draft::${tempCaseId}::${user?.id}`
         : storage.buildSessionId(activeCase?.company_id, caseOrOnboardingId, user?.id);
       storage.setCurrentTabSession({
-        sessionId,
+        session_id,
         current_slide: nextSlide.key,
       });
       

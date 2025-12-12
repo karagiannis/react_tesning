@@ -60,20 +60,20 @@ export function createStorage(getState) {
     // Tab Session (sessionStorage - unik per flik)
     // ─────────────────────────────────────────────────────────────────────
     getCurrentTabSession: () => {
-      const data = sessionStorage.getItem('currentTabSession');
+      const data = sessionStorage.getItem('current_tab_session');
       console.log('[STORAGE] getCurrentTabSession:', data);
       return data ? JSON.parse(data) : null;
     },
     setCurrentTabSession: (sessionData) => {
       console.log('[STORAGE] setCurrentTabSession:', sessionData);
-      sessionStorage.setItem('currentTabSession', JSON.stringify({
+      sessionStorage.setItem('current_tab_session', JSON.stringify({
         ...sessionData,
-        lastActivity: new Date().toISOString(),
+        last_activity: new Date().toISOString(),
       }));
     },
     clearCurrentTabSession: () => {
       console.log('[STORAGE] clearCurrentTabSession');
-      sessionStorage.removeItem('currentTabSession');
+      sessionStorage.removeItem('current_tab_session');
     },
     
     // ─────────────────────────────────────────────────────────────────────
@@ -89,7 +89,7 @@ export function createStorage(getState) {
     setSessionData: (sessionId, sessionData) => {
       const key = `session::${sessionId}`;
       console.log(`[STORAGE] setSessionData to key: ${key}`);
-      localStorage.setItem(key, JSON.stringify({ ...sessionData, lastActivity: new Date().toISOString() }));
+      localStorage.setItem(key, JSON.stringify({ ...sessionData, last_activity: new Date().toISOString() }));
     },
     clearSessionData: (sessionId) => {
       const key = `session::${sessionId}`;

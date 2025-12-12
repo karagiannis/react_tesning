@@ -77,7 +77,6 @@ export default function UppdragsvalsSlide({
   formData = DEFAULT_FORM_STATE,
   onFieldChange,
   onNext,
-  onBack,
   isLocked = false,
   isLoading = false,
   error = null,

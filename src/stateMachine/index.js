@@ -16,18 +16,29 @@
 // ═══════════════════════════════════════════════════════════════════════════
 // STATE HANDLERS (alfabetisk ordning)
 // ═══════════════════════════════════════════════════════════════════════════
+// 
+// OBS: Endast handlers som faktiskt ANROPAS av state machine exporteras här.
+// States som hanteras INLINE i switch-case (READY, PROCESSING_BACK, ERROR, etc.)
+// eller via JSX-callbacks (SHOWING_RESUME) har INGA handler-filer.
+//
 
 export { createHandleCheckingPendingState } from './handleCheckingPendingState';
-export { createHandleErrorState } from './handleErrorState';
 export { createHandleInitializing } from './handleInitializingState';
 export { createHandleInitiatingPaymentState } from './handleInitiatingPaymentState';
-export { createHandleProcessingBackState } from './handleProcessingBackState';
-export { createHandleProcessingNext } from './handleProcessingNextState';
-export { createHandleReadyState } from './handleReadyState';
 export { createHandleRestoringSession } from './handleRestoringSessionState';
 export { createHandleResuming } from './handleResumingState';
-export { createHandleShowingResumeState } from './handleShowingResumeState';
 export { createHandleVerifyingPaymentState } from './handleVerifyingPaymentState';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SUB-STATE HANDLERS (extracted from PROCESSING_NEXT switch)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Dessa hanterar specifika slides i PROCESSING_NEXT som har special-logik.
+// Default-beteende är saveSlideAndNavigate() i slideNavigation.js
+//
+
+export { createHandleUppdragsvalsSubState } from './handleUppdragsvalsSubState';
+export { createHandleRiskfragorSubState } from './handleRiskfragorSubState';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // AppState enum

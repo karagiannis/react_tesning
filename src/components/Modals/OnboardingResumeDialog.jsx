@@ -245,7 +245,7 @@ export default function OnboardingResumeDialog_v2({
                       Org.nr: {company.orgnr_formatted || company.orgnr}
                     </p>
                     
-                    {/* Metadata: Last modified + current step */}
+                    {/* Metadata: Last modified + current slide */}
                     <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
                       <div className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
@@ -254,7 +254,7 @@ export default function OnboardingResumeDialog_v2({
                       <div className="flex items-center gap-1">
                         <TrendingUp className="w-3 h-3" />
                         <span className="capitalize">
-                          {company.current_step?.replace(/-/g, ' ') || 'Ej påbörjad'}
+                          {company.current_slide?.replace(/-/g, ' ')}
                         </span>
                       </div>
                     </div>

@@ -21,7 +21,9 @@ export function createHandleCheckingPendingState(getState, getActions, services)
       setIsLoading, 
       setAppState, 
       setPendingOnboardings,
-      setActiveCase
+      setActiveCase,
+      setIsDraftMode,
+      setCurrentSlideKey
     } = getActions();
 
     console.log('[CHECKING_PENDING] 🔍 Starting...');
@@ -52,6 +54,7 @@ export function createHandleCheckingPendingState(getState, getActions, services)
       const pendingCase = onboardings[0];
       setActiveCase(pendingCase);
       setPendingOnboardings(onboardings);
+      setCurrentSlideKey('payment-success');  // Sync debug panel with actual route
       setAppState(AppState.VERIFYING_PAYMENT);
       console.log('[CHECKING_PENDING] 🏁 Case finished');
       return;
@@ -93,18 +96,24 @@ export function createHandleCheckingPendingState(getState, getActions, services)
       // ═══════════════════════════════════════════════════════════════
       console.log('[CHECKING_PENDING] ➡️ No pending onboardings - going to READY');
       
+      // 🔒 KRITISKT: Sätt isDraftMode = true för ny session
+      // localStorage kan ha gammalt värde från tidigare session
+      setIsDraftMode(true);
+      storage.setIsDraftMode(true);
+      console.log('[CHECKING_PENDING] 🔓 Set isDraftMode = true for new draft session');
+      
       // Sätt initial tab session (draft mode)
-      const sessionId = `onboarding::draft::${tempCaseId}::${user?.id}`;
-      console.log('[CHECKING_PENDING] 💾 Setting tab session:', sessionId);
+      const session_id = `onboarding::draft::${tempCaseId}::${user?.id}`;
+      console.log('[CHECKING_PENDING] 💾 Setting tab session:', session_id);
       storage.setCurrentTabSession({
-        sessionId,
+        session_id,
         current_slide: 'uppdragsval',
       });
 
       console.log('[CHECKING_PENDING] 📝 Logging to server...');
       // Logga ny session till personlig logg
       await api.logPersonal('Startar ny onboarding-session', {
-        sessionId,
+        session_id,
         startSlide: 'uppdragsval',
         tempCaseId,
       });
@@ -113,7 +122,7 @@ export function createHandleCheckingPendingState(getState, getActions, services)
       if (import.meta.env.DEV) {
         await api.log(`[DEBUG] Användare ${user?.name} startar ny onboarding-session på Uppdragsval`, {
           userId: user?.id,
-          sessionId,
+          session_id,
           tempCaseId,
         });
       }

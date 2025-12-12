@@ -36,11 +36,11 @@ export const createHandleBack = ({
       // OBS: activeCase kan ha antingen case_id (från handleConfirmCompanySelection)
       // eller case_id (från handleResumeChoice) - hantera båda!
       const caseOrOnboardingId = activeCase?.case_id || activeCase?.case_id;
-      const sessionId = isDraftMode
+      const session_id = isDraftMode
         ? `onboarding::draft::${tempCaseId}::${user?.id}`
         : storage.buildSessionId(activeCase?.company_id, caseOrOnboardingId, user?.id);
       storage.setCurrentTabSession({
-        sessionId,
+        session_id,
         current_slide: prevSlide.key,
       });
 
