@@ -212,15 +212,16 @@ export function createHandleResuming(getState, getActions, services) {
       localStorage.setItem(permanentActiveCaseKey, JSON.stringify(activeCase));
       console.log('[RESUMING] ✅ Saved metadata to permanent keys');
       
-      // 📌 SPARA SERVER VERSION för conflict detection
+      // 📌 SPARA SERVER VERSION för conflict detection via storage API
       const server_version = metadata.version || 0;
-      const versionStorageKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
-      localStorage.setItem(versionStorageKey, JSON.stringify({
-        version: server_version,
-        timestamp: metadata.last_modified || new Date().toISOString(),
-        syncedFromServer: true
-      }));
-      console.log('[RESUMING] 📌 Sparade server version:', server_version);
+      const permanentVersionKey = StorageKeyBuilder.buildPermanentKey(
+        activeCase.company_id,
+        activeCase.case_id,
+        user?.id,
+        'metadata::version'
+      );
+      localStorage.setItem(permanentVersionKey, String(server_version));
+      console.log('[RESUMING] 📌 Saved server version:', server_version, 'to key:', permanentVersionKey);
       
       // Uppdatera React state med rätt data
       console.log('[RESUMING] 🔄 Updating React state...');

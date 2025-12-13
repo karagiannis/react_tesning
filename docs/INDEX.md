@@ -2,7 +2,7 @@
 
 **Princip:** Det som inte finns i detta index FINNS INTE!
 **Skapad:** 2025-10-28
-**Senast uppdaterad:** 2025-10-28
+**Senast uppdaterad:** 2025-12-13
 
 ---
 
@@ -18,8 +18,20 @@ docs/
 ├── PROJECT/              # Projektledning, milestones, beslut
 ├── RISK_SCORE_ALGORITHM/ # Riskbedömningsalgoritmer
 ├── specifications/       # Tekniska specifikationer (LaTeX, UI/UX)
-└── STRATEGI/             # Strategiska beslut (datakällor, API, affärsmodell)
+├── STRATEGI/             # Strategiska beslut (datakällor, API, affärsmodell)
+└── [Root Documentation] # Arkitektur, kod-recensioner, teknisk design
 ```
+
+---
+
+## 🆕 Senaste Uppdateringar (2025-12-13)
+
+**Tic-Tac-Toe Pattern Review:**
+- ✅ `REVIEW_SUMMARY.md` (7KB) - Snabb sammanfattning av kodgranskning
+- ✅ `TIC_TAC_TOE_PATTERN_REVIEW.md` (17KB) - Omfattande analys av arkitektur
+- ✅ `CODE_QUALITY_SUGGESTIONS.md` (5KB) - Valfria förbättringar
+
+**Status:** Koden följer strikt tic-tac-toe-mönstret från React.dev tutorial ✅
 
 ---
 
@@ -59,6 +71,27 @@ docs/
 - Regelmotor
 
 **Index:** [`RISK_SCORE_ALGORITHM/INDEX.md`](./RISK_SCORE_ALGORITHM/INDEX.md)
+
+---
+
+## 0. Rot-Dokumentation (Code Reviews & Architecture)
+
+**Syfte:** Arkitektur-dokumentation, kodgranskningar, state machine
+
+**Dokument:**
+- `REVIEW_SUMMARY.md` (7KB) - **START HÄR** - Snabb sammanfattning av tic-tac-toe pattern review
+- `TIC_TAC_TOE_PATTERN_REVIEW.md` (17KB) - Omfattande analys av arkitektur mot React.dev tutorial
+- `CODE_QUALITY_SUGGESTIONS.md` (5KB) - Valfria defensive programming-förbättringar
+- `STATE_MACHINE_OVERVIEW.md` (91KB) - Komplett dokumentation av state machine med flödesscheman
+- `MULTI_USER_EDITING.md` (7KB) - Version conflict detection och merge strategies
+- `CENTRALIZED_STYLES.md` (10KB) - CSS/Tailwind stilguide
+- `COMPACT_SPACING_MIGRATION.md` (13KB) - UI spacing guidelines
+- `FORTNOX_DESIGN_ANALYSIS.md` (107KB) - Fortnox UI/UX analys för design-inspiration
+
+**Viktigt:**
+- ✅ **REVIEW_SUMMARY.md** - Börja här för översikt av kodgranskning
+- ✅ **TIC_TAC_TOE_PATTERN_REVIEW.md** - Djupdykning i arkitektur
+- ✅ **STATE_MACHINE_OVERVIEW.md** - Komplett state machine referens
 
 ---
 

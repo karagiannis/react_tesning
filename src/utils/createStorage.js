@@ -166,6 +166,26 @@ export function createStorage(getState) {
       localStorage.removeItem(key);
     },
     
+    // ─────────────────────────────────────────────────────────────────────
+    // Version tracking (för konfliktdetektering)
+    // ─────────────────────────────────────────────────────────────────────
+    getVersion: () => {
+      const key = storage._buildKey('metadata::version');
+      const data = localStorage.getItem(key);
+      console.log(`[STORAGE] getVersion from key: ${key} = ${data}`);
+      return data ? parseInt(data, 10) : 0;
+    },
+    setVersion: (version) => {
+      const key = storage._buildKey('metadata::version');
+      console.log(`[STORAGE] setVersion to key: ${key} = ${version}`);
+      localStorage.setItem(key, String(version));
+    },
+    clearVersion: () => {
+      const key = storage._buildKey('metadata::version');
+      console.log(`[STORAGE] clearVersion from key: ${key}`);
+      localStorage.removeItem(key);
+    },
+    
     getAllSlidesData: () => {
       const { isDraftMode, activeCase, tempCaseId, user } = getState();
       const allSlides = {};

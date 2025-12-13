@@ -5,16 +5,23 @@
  * 
  * NÄR: Användaren navigerar till en ny slide (currentSlideKey ändras)
  * 
- * VAD:
- *   1. Hämta localStorage data för DENNA slide
- *   2. Hämta server metadata.pages[slideKey] för DENNA slide  
- *   3. Jämför innehåll (JSON.stringify)
- *      - Om samma innehåll → Ladda tyst
- *      - Om olika innehåll OCH annan användare → Visa konflikt-modal
- *      - Om olika innehåll men samma användare → Använd nyaste version
+ * LOGIK (prioritetsordning):
+ *   1. Hämta server metadata (version, pages, modified_by)
+ *   2. Hämta localStorage (version, slideData)
+ *   3. JÄMFÖR VERSIONER:
+ *      - Om localVersion >= serverVersion → localStorage VINNER
+ *        (användaren browsear runt med osparade ändringar)
+ *      - Om serverVersion > localVersion OCH annan användare → KONFLIKT MODAL
+ *      - Om serverVersion > localVersion OCH samma användare → server VINNER
+ *        (användarens egna ändringar från annan session/enhet)
  * 
  * VIKTIGT: Konfliktdetektering sker "need-to-know" basis.
- * Användaren informeras ENDAST om ändringar som påverkar DENNA slide.
+ * Användaren informeras ENDAST om ändringar som påverkar DENNA slide
+ * OCH som gjorts av EN ANNAN användare.
+ * 
+ * STORAGE FORMAT:
+ * - Slide data: onboarding::company_id::case_id::user_id::slideKey
+ * - Version:    onboarding::company_id::case_id::user_id::metadata::version
  */
 
 import { useEffect } from 'react';
@@ -72,10 +79,10 @@ export function useSlideDataLoader({
     }
     
     // ═══════════════════════════════════════════════════════════════════════
-    // ASYNC: Per-slide konfliktdetektering
+    // ASYNC: Per-slide konfliktdetektering med version-prioritet
     // ═══════════════════════════════════════════════════════════════════════
     const loadSlideData = async () => {
-      console.log(`[SLIDE-LOAD] 🔄 Loading '${currentSlideKey}' (need-to-know check)...`);
+      console.log(`[SLIDE-LOAD] 🔄 Loading '${currentSlideKey}' (version-based priority)...`);
       
       const caseOrOnboardingId = activeCase?.case_id;
       if (!activeCase?.company_id || !caseOrOnboardingId) {
@@ -84,29 +91,42 @@ export function useSlideDataLoader({
       }
       
       // ─────────────────────────────────────────────────────────────────
-      // Steg 1: Hämta localStorage data för DENNA slide
+      // Steg 1: Hämta localStorage data för DENNA slide + version
       // ─────────────────────────────────────────────────────────────────
       const localSlideData = storage.getSlideData(currentSlideKey);
+      const localVersion = storage.getVersion(); // metadata::version
       const hasLocalData = localSlideData && Object.keys(localSlideData).length > 0;
       
       console.log(`[SLIDE-LOAD] localStorage['${currentSlideKey}']: ${hasLocalData ? '✅ HAS DATA' : '❌ NO DATA'}`);
+      console.log(`[SLIDE-LOAD] localStorage version: ${localVersion}`);
+      if (hasLocalData) {
+        console.log(`[SLIDE-LOAD]   Local data keys: ${Object.keys(localSlideData).join(', ')}`);
+      }
       
       // ─────────────────────────────────────────────────────────────────
       // Steg 2: Hämta server data för DENNA slide
       // ─────────────────────────────────────────────────────────────────
       let serverMeta = null;
       let serverSlideData = null;
-      let serverGlobalVersion = 0;
+      let serverVersion = 0;
       
       try {
         console.log(`[SLIDE-LOAD] 🌐 Fetching metadata from server...`);
         serverMeta = await api.fetchMetadata(activeCase.company_id, caseOrOnboardingId);
-        // 📌 Backend returnerar pages direkt på roten (inte under .metadata)
+        
+        // Backend returnerar pages direkt på roten
         serverSlideData = serverMeta?.pages?.[currentSlideKey];
-        serverGlobalVersion = serverMeta?.version || 0;
+        serverVersion = serverMeta?.version || 0;
         
         const hasServerData = serverSlideData && Object.keys(serverSlideData).length > 0;
-        console.log(`[SLIDE-LOAD] Server['${currentSlideKey}']: ${hasServerData ? '✅ HAS DATA' : '❌ NO DATA'} (global version: ${serverGlobalVersion})`);
+        console.log(`[SLIDE-LOAD] Server['${currentSlideKey}']: ${hasServerData ? '✅ HAS DATA' : '❌ NO DATA'}`);
+        console.log(`[SLIDE-LOAD]   Server version: ${serverVersion}`);
+        console.log(`[SLIDE-LOAD]   Server modified_by: ${serverMeta?.modified_by || 'N/A'}`);
+        console.log(`[SLIDE-LOAD]   Server modified_by_email: ${serverMeta?.modified_by_email || 'N/A'}`);
+        
+        if (hasServerData) {
+          console.log(`[SLIDE-LOAD]   Server data keys: ${Object.keys(serverSlideData).join(', ')}`);
+        }
       } catch (err) {
         console.warn(`[SLIDE-LOAD] ⚠️ Failed to fetch from server:`, err.message);
         // Om server fetch misslyckas, använd localStorage
@@ -118,7 +138,7 @@ export function useSlideDataLoader({
       }
       
       // ─────────────────────────────────────────────────────────────────
-      // Steg 3: Hantera olika datakällor
+      // Steg 3: Hantera basfall (ingen data)
       // ─────────────────────────────────────────────────────────────────
       const hasServerData = serverSlideData && Object.keys(serverSlideData).length > 0;
       
@@ -137,117 +157,135 @@ export function useSlideDataLoader({
       }
       
       if (hasServerData && !hasLocalData) {
-        // Bara server har data - använd den
-        console.log(`[SLIDE-LOAD] ✅ Using server (only source)`);
+        // Bara server har data - använd den och synka till localStorage
+        console.log(`[SLIDE-LOAD] ✅ Using server (only source) + syncing to localStorage`);
         setFormData(prev => ({ ...prev, [currentSlideKey]: serverSlideData }));
+        storage.setSlideData(currentSlideKey, serverSlideData);
+        storage.setVersion(serverVersion); // Synka version också
         return;
       }
       
       // ─────────────────────────────────────────────────────────────────
-      // Steg 4: Båda källor har data - jämför INNEHÅLL (need-to-know!)
+      // Steg 4: Båda källor har data - JÄMFÖR VERSIONER FÖRST
+      // ─────────────────────────────────────────────────────────────────
+      console.log(`[SLIDE-LOAD] 📊 Version comparison: local=${localVersion}, server=${serverVersion}`);
+      
+      if (localVersion >= serverVersion) {
+        // ═══════════════════════════════════════════════════════════════
+        // localStorage VINNER - användaren browsear med osparade ändringar
+        // ═══════════════════════════════════════════════════════════════
+        console.log(`[SLIDE-LOAD] ✅ localStorage WINS (version ${localVersion} >= ${serverVersion})`);
+        console.log(`[SLIDE-LOAD]   User is browsing with unsaved changes - keeping local data`);
+        setFormData(prev => ({ ...prev, [currentSlideKey]: localSlideData }));
+        return;
+      }
+      
+      // ─────────────────────────────────────────────────────────────────
+      // Steg 5: Server har HÖGRE version - kolla INNEHÅLL och VEM
       // ─────────────────────────────────────────────────────────────────
       const localStr = JSON.stringify(localSlideData);
       const serverStr = JSON.stringify(serverSlideData);
       
       if (localStr === serverStr) {
-        // ✅ SAMMA INNEHÅLL - ladda tyst (spelar ingen roll om global version skiljer)
-        console.log(`[SLIDE-LOAD] ✅ Same content - using SERVER (no conflict, need-to-know: not affected)`);
+        // Samma innehåll trots versionsskillnad - synka version
+        console.log(`[SLIDE-LOAD] ✅ Same content - syncing version to ${serverVersion}`);
         setFormData(prev => ({ ...prev, [currentSlideKey]: serverSlideData }));
+        storage.setVersion(serverVersion);
         return;
       }
       
       // ─────────────────────────────────────────────────────────────────
-      // Steg 5: OLIKA INNEHÅLL - kolla vem som ändrade
+      // Steg 6: Server har HÖGRE version + OLIKA innehåll - kolla VEM
       // ─────────────────────────────────────────────────────────────────
-      console.log(`[SLIDE-LOAD] ⚠️ Different content detected - checking who modified...`);
+      console.log(`[SLIDE-LOAD] ⚠️ Server has newer version (${serverVersion}) with different content!`);
+      console.log(`[SLIDE-LOAD]   Local:  ${localStr.substring(0, 100)}...`);
+      console.log(`[SLIDE-LOAD]   Server: ${serverStr.substring(0, 100)}...`);
       
-      const serverModifiedBy = serverMeta?.updated_by || serverMeta?.modified_by;
+      // Identifiera server-modifierare
+      const serverModifiedByEmail = serverMeta?.modified_by_email;
+      const serverModifiedById = serverMeta?.modified_by || serverMeta?.updated_by;
+      
+      // Identifiera nuvarande användare
       const currentUserEmail = user?.email;
+      const currentUserId = user?.user_id || user?.sub || user?.id;
       
-      console.log(`[SLIDE-LOAD]   Server modified by: ${serverModifiedBy}`);
-      console.log(`[SLIDE-LOAD]   Current user: ${currentUserEmail}`);
+      console.log(`[SLIDE-LOAD] Comparing users:`);
+      console.log(`[SLIDE-LOAD]   Server user (email): "${serverModifiedByEmail}"`);
+      console.log(`[SLIDE-LOAD]   Server user (id): "${serverModifiedById}"`);
+      console.log(`[SLIDE-LOAD]   Current user (email): "${currentUserEmail}"`);
+      console.log(`[SLIDE-LOAD]   Current user (id): "${currentUserId}"`);
       
-      const isDifferentUser = serverModifiedBy && 
-                             currentUserEmail && 
-                             serverModifiedBy !== currentUserEmail;
+      // Avgör om det är en annan användare
+      const isDifferentUser = (() => {
+        // Prioritera email-jämförelse (mest tillförlitlig)
+        if (serverModifiedByEmail && currentUserEmail) {
+          const different = serverModifiedByEmail.toLowerCase() !== currentUserEmail.toLowerCase();
+          console.log(`[SLIDE-LOAD]   Email comparison: ${different ? 'DIFFERENT' : 'SAME'}`);
+          return different;
+        }
+        // Fallback till user_id
+        if (serverModifiedById && currentUserId) {
+          const different = serverModifiedById !== currentUserId;
+          console.log(`[SLIDE-LOAD]   ID comparison: ${different ? 'DIFFERENT' : 'SAME'}`);
+          return different;
+        }
+        // Kan inte avgöra - logga och fortsätt med server-data
+        console.log(`[SLIDE-LOAD]   ⚠️ Cannot determine user - will use server (authoritative)`);
+        return false;
+      })();
       
       if (isDifferentUser) {
         // ═══════════════════════════════════════════════════════════════
-        // KONFLIKT! Annan användare har ändrat DENNA slide
+        // KONFLIKT! Server version högre + Annan användare har ändrat
+        // Visa modal så användaren kan välja
         // ═══════════════════════════════════════════════════════════════
-        console.log(`[SLIDE-LOAD] 🛑 CONFLICT! User '${serverModifiedBy}' modified this slide`);
+        const displayName = serverModifiedByEmail || serverModifiedById || 'annan användare';
+        console.log(`[SLIDE-LOAD] 🛑 CONFLICT! User '${displayName}' modified this slide (v${serverVersion})`);
+        console.log(`[SLIDE-LOAD] 🛑 Showing conflict modal...`);
         
-        // Spara konflikt-info för modal
         setConflictInfo({
           slide_key: currentSlideKey,
-          your_version: 0, // Vi har inget per-slide version ännu
-          server_version: serverGlobalVersion,
+          your_version: localVersion,
+          server_version: serverVersion,
           server_last_modified: serverMeta?.last_modified,
-          modified_by: serverModifiedBy,
+          modified_by: serverModifiedById,
+          modified_by_email: serverModifiedByEmail,
           conflicting_slides: [{
             slide_id: currentSlideKey,
-            modified_by: serverModifiedBy,
+            modified_by: displayName,
             modified_at: serverMeta?.last_modified
           }],
-          message: `Användare '${serverModifiedBy}' har uppdaterat sidan '${currentSlideKey}'.`,
+          message: `Användare '${displayName}' har uppdaterat sidan '${currentSlideKey}' (version ${serverVersion}).`,
           local_data: localSlideData,
           server_data: serverSlideData
         });
         setShowConflictModal(true);
         
-        // Ladda INTE data - vänta på användarens val
-        console.log(`[SLIDE-LOAD] 🛑 Blocking load - waiting for user decision`);
+        // Ladda INTE data - vänta på användarens val i modal
         return;
       }
       
       // ═══════════════════════════════════════════════════════════════
-      // Steg 6: Samma användare - kolla VILKEN data som är nyast
+      // Steg 7: Server version högre + Samma användare → Server vinner
       // ═══════════════════════════════════════════════════════════════
       // 
-      // MULTI-TAB/MULTI-BROWSER SCENARIO:
-      // User kan ha 2 flikar öppna:
-      //   Tab A: Laddade data kl 10:00 (version 5)
-      //   Tab B: Jobbade vidare till kl 10:30 (version 12)
-      //   Tab A: Återvänder kl 10:31 (har fortfarande version 5 i localStorage)
-      // 
-      // Regel: Använd NYASTE data (högsta version)
+      // Användarens egna ändringar från annan session/enhet.
+      // Synka localStorage med serverns nyare data.
       //
-      console.log(`[SLIDE-LOAD] ⚙️ Same user, different content - checking versions...`);
+      console.log(`[SLIDE-LOAD] ✅ Same user - SERVER WINS (newer version ${serverVersion})`);
+      console.log(`[SLIDE-LOAD]   Syncing localStorage with server data`);
       
-      // Hämta local version från localStorage
-      const storageKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
-      const localVersionStr = localStorage.getItem(storageKey);
-      const localVersionObj = localVersionStr ? JSON.parse(localVersionStr) : { version: 0 };
-      const local_version = localVersionObj.version || 0;
+      setFormData(prev => ({ ...prev, [currentSlideKey]: serverSlideData }));
       
-      console.log(`[SLIDE-LOAD]   Local version: ${local_version}`);
-      console.log(`[SLIDE-LOAD]   Server version: ${serverGlobalVersion}`);
+      // Synka localStorage med serverns data OCH version
+      storage.setSlideData(currentSlideKey, serverSlideData);
+      storage.setVersion(serverVersion);
       
-      if (serverGlobalVersion > local_version) {
-        // Server har nyare data - använd den (även om det är samma user!)
-        // Detta händer när user jobbar i annan flik/browser
-        console.log(`[SLIDE-LOAD] ✅ Server is NEWER (v${serverGlobalVersion} > v${local_version}) - using SERVER (multi-tab sync)`);
-        setFormData(prev => ({ ...prev, [currentSlideKey]: serverSlideData }));
-        
-        // 🔄 Uppdatera även localStorage så vi är synkad
-        storage.setSlideData(currentSlideKey, serverSlideData);
-        
-        // 🔄 Uppdatera local version till server version
-        localStorage.setItem(storageKey, JSON.stringify({
-          version: serverGlobalVersion,
-          timestamp: new Date().toISOString()
-        }));
-        
-        console.log(`[SLIDE-LOAD] 🔄 Synced localStorage with server data (v${serverGlobalVersion})`);
-      } else {
-        // localStorage har lika eller nyare data - använd den (osparade ändringar)
-        console.log(`[SLIDE-LOAD] ✅ Local is CURRENT (v${local_version} >= v${serverGlobalVersion}) - using LOCALSTORAGE (unsaved changes)`);
-        setFormData(prev => ({ ...prev, [currentSlideKey]: localSlideData }));
-      }
+      console.log(`[SLIDE-LOAD] 🔄 Synced localStorage with server (version ${serverVersion})`);
     };
     
     loadSlideData();
-  }, [currentSlideKey, activeCase?.company_id, activeCase?.case_id]);
+  }, [currentSlideKey, activeCase?.company_id, activeCase?.case_id, appState]);
   
   // Hook returnerar inget - den har bara side effects
 }

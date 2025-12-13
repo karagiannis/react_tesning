@@ -58,8 +58,8 @@ import { Trash2, ArrowRight, Plus, Clock, TrendingUp } from 'lucide-react';
  *   → Renderar <OnboardingResumeDialog_v2 ... />
  *   → Väntar på callback
  * 
- * onResume(company_id, case_id, company_name):
- *   → setActiveCase({ company_id, case_id, company_name })
+ * onResume(company_id, case_id, company_name, orgnr):
+ *   → setActiveCase({ company_id, case_id, company_name, orgnr })
  *   → setAppState(RESUMING)
  * 
  * onDelete(company_id, case_id):
@@ -122,11 +122,13 @@ export default function OnboardingResumeDialog_v2({
     console.log('[OnboardingResumeDialog] 🚀 Resume clicked:', {
       company_id: company.company_id,
       case_id: case_id,
+      orgnr: company.orgnr_formatted || company.orgnr,
     });
     onResume(
       company.company_id,
       case_id,
-      company.company_name
+      company.company_name,
+      company.orgnr_formatted || company.orgnr  // Lägg till orgnr!
     );
   };
   
