@@ -281,7 +281,7 @@ export function useSlideDataLoader({
       storage.setSlideData(currentSlideKey, serverSlideData);
       storage.setVersion(serverVersion);
       
-      console.log(`[SLIDE-LOAD] 🔄 Synced localStorage with server (version ${serverVersion})`)
+      console.log(`[SLIDE-LOAD] 🔄 Synced localStorage with server (version ${serverVersion})`);
     };
     
     loadSlideData();
