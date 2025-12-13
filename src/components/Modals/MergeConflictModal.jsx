@@ -5,6 +5,19 @@
  * (Optimistic locking - "pull before push")
  * 
  * Designad som VS Code git merge conflict view
+ * 
+ * DATA STRUCTURE (from useSlideDataLoader):
+ * {
+ *   slide_key: 'uppdragsval',
+ *   your_version: 0,
+ *   server_version: 5,
+ *   server_last_modified: '2025-12-13T10:00:00Z',
+ *   modified_by: 'user@example.com',
+ *   conflicting_slides: [{ slide_id, modified_by, modified_at }],
+ *   message: '...',
+ *   local_data: { selected_services: [...], ... },
+ *   server_data: { selected_services: [...], ... }
+ * }
  */
 
 import React from 'react';
@@ -30,6 +43,23 @@ const formatServices = (services) => {
   return services.map(formatServiceName);
 };
 
+// Generisk funktion för att visa diff av objekt
+const formatValue = (value, key = '') => {
+  if (value === null || value === undefined) return '(tomt)';
+  if (typeof value === 'boolean') return value ? 'Ja' : 'Nej';
+  if (Array.isArray(value)) {
+    if (value.length === 0) return '(tom lista)';
+    // Endast formatera som tjänster om det är selected_services
+    if (key === 'selected_services') {
+      return value.map(formatServiceName).join(', ');
+    }
+    // Annars visa rå array
+    return value.join(', ');
+  }
+  if (typeof value === 'object') return JSON.stringify(value, null, 2);
+  return String(value);
+};
+
 export default function MergeConflictModal({ 
   data, 
   onKeepTheirs, 
@@ -39,16 +69,39 @@ export default function MergeConflictModal({
 }) {
   if (!data) return null;
 
-  const serverServices = formatServices(data.server_services);
-  const localServices = formatServices(data.localData?.selected_services);
+  // Hämta data med rätt property-namn (server_data/local_data från useSlideDataLoader)
+  const serverData = data.server_data || {};
+  const localData = data.local_data || {};
+  const slideKey = data.slide_key || 'okänd';
   
-  // Hitta skillnader
-  const serverSet = new Set(data.server_services || []);
-  const localSet = new Set(data.localData?.selected_services || []);
+  // För uppdragsval-slide: visa tjänster specifikt
+  const isUppdragsval = slideKey === 'uppdragsval';
+  const serverServices = serverData.selected_services || [];
+  const localServices = localData.selected_services || [];
   
+  // Hitta skillnader för tjänster
+  const serverSet = new Set(serverServices);
+  const localSet = new Set(localServices);
   const onlyOnServer = [...serverSet].filter(s => !localSet.has(s));
   const onlyLocal = [...localSet].filter(s => !serverSet.has(s));
-  const inBoth = [...serverSet].filter(s => localSet.has(s));
+  
+  // Generellt: hitta alla nycklar som skiljer sig
+  const allKeys = new Set([...Object.keys(serverData), ...Object.keys(localData)]);
+  const changedKeys = [...allKeys].filter(key => {
+    const serverVal = JSON.stringify(serverData[key]);
+    const localVal = JSON.stringify(localData[key]);
+    return serverVal !== localVal;
+  });
+
+  // Formatera tidsstämpel
+  const formatTime = (isoString) => {
+    if (!isoString) return 'Okänd tid';
+    try {
+      return new Date(isoString).toLocaleString('sv-SE');
+    } catch {
+      return isoString;
+    }
+  };
   
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
@@ -89,7 +142,7 @@ export default function MergeConflictModal({
               <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <span>Ändrad av: <strong className="text-gray-900">{data.modified_by?.slice(0, 8) || 'Okänd'}...</strong></span>
+              <span>Ändrad av: <strong className="text-gray-900">{data.modified_by_email || data.modified_by?.slice(0, 8) || 'Okänd'}</strong></span>
             </div>
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,9 +156,9 @@ export default function MergeConflictModal({
           <div className="border border-gray-200 rounded-lg overflow-hidden font-mono text-sm">
             {/* Diff header */}
             <div className="bg-gray-100 border-b border-gray-200 px-4 py-2 flex items-center justify-between">
-              <span className="text-gray-600 text-xs">uppdragsval / selected_services</span>
+              <span className="text-gray-600 text-xs">{slideKey} / {isUppdragsval ? 'selected_services' : 'data'}</span>
               <span className="text-xs text-gray-500">
-                {onlyOnServer.length + onlyLocal.length} ändringar
+                {changedKeys.length} ändrade fält
               </span>
             </div>
             
@@ -116,19 +169,32 @@ export default function MergeConflictModal({
                 <div className="bg-blue-100 px-4 py-1.5 text-xs text-blue-700 flex items-center gap-2 border-l-4 border-blue-500">
                   <span className="font-bold">{'<<<<<<< SERVER (DERAS)'}</span>
                   <span className="text-blue-500">v{data.server_version}</span>
+                  <span className="text-blue-400 ml-2">{formatTime(data.server_last_modified)}</span>
                 </div>
                 <div className="px-4 py-3 space-y-1">
-                  {serverServices.map((service, i) => {
-                    const key = data.server_services?.[i];
-                    const isOnlyOnServer = key && onlyOnServer.includes(key);
-                    return (
-                      <div key={i} className={`flex items-center gap-2 ${isOnlyOnServer ? 'text-blue-700 font-medium' : 'text-gray-600'}`}>
-                        {isOnlyOnServer && <span className="text-blue-500 text-xs">+</span>}
-                        <span>{service}</span>
-                        {isOnlyOnServer && <span className="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">endast server</span>}
+                  {isUppdragsval ? (
+                    // Visa tjänster för uppdragsval
+                    (serverServices.length > 0 ? serverServices : ['(Inga tjänster valda)']).map((serviceKey, i) => {
+                      const isOnlyOnServer = onlyOnServer.includes(serviceKey);
+                      const displayName = formatServiceName(serviceKey);
+                      return (
+                        <div key={i} className={`flex items-center gap-2 ${isOnlyOnServer ? 'text-blue-700 font-medium' : 'text-gray-600'}`}>
+                          {isOnlyOnServer && <span className="text-blue-500 text-xs">+</span>}
+                          <span>{displayName}</span>
+                          {isOnlyOnServer && <span className="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">endast server</span>}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    // Visa ändrade fält för andra slides
+                    changedKeys.map((key, i) => (
+                      <div key={i} className="flex items-start gap-2 text-gray-600">
+                        <span className="text-blue-500 text-xs mt-1">•</span>
+                        <span className="font-medium text-gray-700">{key}:</span>
+                        <span className="text-blue-700">{formatValue(serverData[key], key)}</span>
                       </div>
-                    );
-                  })}
+                    ))
+                  )}
                 </div>
               </div>
               
@@ -140,17 +206,29 @@ export default function MergeConflictModal({
               {/* Local version (MINE) */}
               <div className="bg-green-50/50">
                 <div className="px-4 py-3 space-y-1">
-                  {localServices.map((service, i) => {
-                    const key = data.localData?.selected_services?.[i];
-                    const isOnlyLocal = key && onlyLocal.includes(key);
-                    return (
-                      <div key={i} className={`flex items-center gap-2 ${isOnlyLocal ? 'text-green-700 font-medium' : 'text-gray-600'}`}>
-                        {isOnlyLocal && <span className="text-green-500 text-xs">+</span>}
-                        <span>{service}</span>
-                        {isOnlyLocal && <span className="text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded">din ändring</span>}
+                  {isUppdragsval ? (
+                    // Visa tjänster för uppdragsval
+                    (localServices.length > 0 ? localServices : ['(Inga tjänster valda)']).map((serviceKey, i) => {
+                      const isOnlyLocal = onlyLocal.includes(serviceKey);
+                      const displayName = formatServiceName(serviceKey);
+                      return (
+                        <div key={i} className={`flex items-center gap-2 ${isOnlyLocal ? 'text-green-700 font-medium' : 'text-gray-600'}`}>
+                          {isOnlyLocal && <span className="text-green-500 text-xs">+</span>}
+                          <span>{displayName}</span>
+                          {isOnlyLocal && <span className="text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded">din ändring</span>}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    // Visa ändrade fält för andra slides
+                    changedKeys.map((key, i) => (
+                      <div key={i} className="flex items-start gap-2 text-gray-600">
+                        <span className="text-green-500 text-xs mt-1">•</span>
+                        <span className="font-medium text-gray-700">{key}:</span>
+                        <span className="text-green-700">{formatValue(localData[key], key)}</span>
                       </div>
-                    );
-                  })}
+                    ))
+                  )}
                 </div>
                 <div className="bg-green-100 px-4 py-1.5 text-xs text-green-700 flex items-center gap-2 border-l-4 border-green-500">
                   <span className="font-bold">{'>>>>>>> LOKAL (DIN)'}</span>
@@ -160,14 +238,14 @@ export default function MergeConflictModal({
           </div>
           
           {/* Summary */}
-          {(onlyOnServer.length > 0 || onlyLocal.length > 0) && (
+          {isUppdragsval && (onlyOnServer.length > 0 || onlyLocal.length > 0) && (
             <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
               <h4 className="text-sm font-medium text-amber-800 mb-2">Sammanfattning av skillnader:</h4>
               <ul className="text-sm text-amber-700 space-y-1">
                 {onlyOnServer.length > 0 && (
                   <li className="flex items-start gap-2">
                     <span className="text-blue-500">●</span>
-                    <span><strong>Server har:</strong> {onlyOnServer.map(formatServiceName).join(', ')}</span>
+                    <span><strong>Server har lagt till:</strong> {onlyOnServer.map(formatServiceName).join(', ')}</span>
                   </li>
                 )}
                 {onlyLocal.length > 0 && (
@@ -198,7 +276,7 @@ export default function MergeConflictModal({
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>
-                Hämta server-version
+                Behåll deras
               </button>
               <button
                 onClick={onKeepMine}
@@ -207,7 +285,7 @@ export default function MergeConflictModal({
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                Skriv över med min
+                Behåll min
               </button>
             </div>
           </div>

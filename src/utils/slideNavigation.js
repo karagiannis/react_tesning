@@ -44,11 +44,8 @@ export function createCheckVersionConflict(getState, getActions, services) {
       const serverLastModified = serverMeta?.last_modified;
       const serverModifiedBy = serverMeta?.updated_by || 'Annan användare';
       
-      // 2. Hämta local version från localStorage
-      const storageKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
-      const localVersionStr = localStorage.getItem(storageKey);
-      const localVersionObj = localVersionStr ? JSON.parse(localVersionStr) : { version: 0 };
-      const local_version = localVersionObj.version || 0;
+      // 2. Hämta local version från localStorage via storage API
+      const local_version = services.storage.getVersion();
       
       console.log('[VERSION-CHECK] Server version:', server_version, 'Local version:', local_version);
       
@@ -135,10 +132,7 @@ export function createSaveSlideAndNavigate(getState, getActions, services, check
         console.log(`[SAVE] 📤 Pushing slide data: ${slideKey}`);
         
         // Hämta local version för optimistic locking
-        const versionKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
-        const localVersionStr = localStorage.getItem(versionKey);
-        const localVersionObj = localVersionStr ? JSON.parse(localVersionStr) : { version: 0 };
-        const expected_version = localVersionObj.version || 0;
+        const expected_version = storage.getVersion();
         
         const response = await api.post(
           `/onboarding/${activeCase.company_id}/${slideKey}`,
@@ -168,12 +162,8 @@ export function createSaveSlideAndNavigate(getState, getActions, services, check
         const result = await response.json();
         console.log(`[SAVE] ✅ Server saved slide, new version: ${result.version}`);
         
-        // Uppdatera lokal version (versionKey deklarerad ovan)
-        localStorage.setItem(versionKey, JSON.stringify({
-          version: result.version,
-          timestamp: new Date().toISOString(),
-          current_slide: slideKey,
-        }));
+        // Uppdatera lokal version via storage API
+        storage.setVersion(result.version);
       } else {
         console.log(`[SAVE] 📝 Draft mode - only saving to localStorage`);
       }
