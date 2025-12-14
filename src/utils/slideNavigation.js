@@ -8,6 +8,8 @@
  * dependencies via getState/getActions/services.
  */
 
+import { buildConflictInfo } from './conflictDiff';
+
 /**
  * createCheckVersionConflict
  * 
@@ -17,11 +19,11 @@
  * @returns {Function} async () => boolean - true om konflikt finns
  */
 export function createCheckVersionConflict(getState, getActions, services) {
-  const { api } = services;
+  const { api, storage } = services;
   const { setConflictInfo, setShowConflictModal } = getActions();
   
   return async () => {
-    const { activeCase, isDraftMode } = getState();
+    const { activeCase, isDraftMode, user } = getState();
     
     // Skippa check om vi inte har ett aktivt ärende
     if (!activeCase?.company_id || !activeCase?.case_id) {
@@ -42,36 +44,63 @@ export function createCheckVersionConflict(getState, getActions, services) {
       const serverMeta = await api.fetchMetadata(activeCase.company_id, activeCase.case_id);
       const server_version = serverMeta?.version || 0;
       const serverLastModified = serverMeta?.last_modified;
-      const serverModifiedBy = serverMeta?.updated_by || 'Annan användare';
+      const serverModifiedBy = serverMeta?.modified_by || serverMeta?.updated_by || 'Annan användare';
       
-      // 2. Hämta local version från localStorage
-      const storageKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
-      const localVersionStr = localStorage.getItem(storageKey);
-      const localVersionObj = localVersionStr ? JSON.parse(localVersionStr) : { version: 0 };
-      const local_version = localVersionObj.version || 0;
+      // 2. Hämta local version från localStorage (nya 1:1 strukturen)
+      const local_version = storage.getVersion() || 0;
       
       console.log('[VERSION-CHECK] Server version:', server_version, 'Local version:', local_version);
+      console.log('[VERSION-CHECK] Server modified_by:', serverModifiedBy, 'Current user:', user?.id);
       
       // 3. Jämför version (Git-liknande)
+      // Konflikt uppstår ENDAST om:
+      // - Server version > lokal version
+      // - OCH någon ANNAN användare gjorde ändringen
+      // - OCH innehållet faktiskt skiljer sig (diff > 0)
       if (server_version > local_version) {
-        console.log('[VERSION-CHECK] ⚠️ KONFLIKT! Server version', server_version, '> Local version', local_version);
+        const isSameUser = serverModifiedBy === user?.id;
         
-        const conflictingSlides = Object.entries(serverMeta?.services || {})
-          .filter(([_, data]) => data?.modified_at)
-          .map(([slideId, data]) => ({
-            slide_id: slideId,
-            modified_by: data.modified_by || 'unknown',
-            modified_at: data.modified_at
-          }));
+        if (isSameUser) {
+          // Samma användare ändrade från annan flik/enhet - uppdatera tyst
+          console.log('[VERSION-CHECK] ✅ Samma användare, uppdaterar lokal version tyst');
+          storage.setVersion(server_version);
+          storage.setModifiedBy(serverModifiedBy);
+          return false; // Ingen konflikt
+        }
         
-        setConflictInfo({
-          your_version: local_version,
-          server_version,
-          server_last_modified: serverLastModified,
-          modified_by: serverModifiedBy,
-          conflicting_slides: conflictingSlides,
+        // Hämta data för att jämföra INNEHÅLL (inte bara version)
+        const { currentSlideKey, formData } = getState();
+        const localSlideData = formData?.[currentSlideKey] || {};
+        const serverSlideData = serverMeta?.pages?.[currentSlideKey] || {};
+        
+        // ═══════════════════════════════════════════════════════════════
+        // VIKTIGT: Om innehållet är IDENTISKT = ingen konflikt!
+        // Även om annan användare ändrade till samma värde.
+        // ═══════════════════════════════════════════════════════════════
+        const localStr = JSON.stringify(localSlideData);
+        const serverStr = JSON.stringify(serverSlideData);
+        
+        if (localStr === serverStr) {
+          console.log('[VERSION-CHECK] ✅ Samma innehåll (diff=0), uppdaterar version tyst');
+          storage.setVersion(server_version);
+          storage.setModifiedBy(serverModifiedBy);
+          return false; // Ingen konflikt - innehållet är identiskt
+        }
+        
+        console.log('[VERSION-CHECK] ⚠️ KONFLIKT! Server version', server_version, '> Local version', local_version, 'AND different user AND different content');
+        
+        // Bygg färdigberäknad konflikt-info (modal är DUM - ingen logik där!)
+        const conflictData = buildConflictInfo({
+          slideKey: currentSlideKey,
+          serverData: serverSlideData,
+          localData: localSlideData,
+          serverVersion: server_version,
+          modifiedBy: serverModifiedBy,
+          modifiedByEmail: serverMeta?.modified_by_email || serverMeta?.updated_by_email,
+          updatedAt: serverLastModified,
           message: `Servern har version ${server_version}, du har version ${local_version}.`
         });
+        setConflictInfo(conflictData);
         setShowConflictModal(true);
         
         return true; // Konflikt hittad
@@ -134,11 +163,8 @@ export function createSaveSlideAndNavigate(getState, getActions, services, check
       if (!isDraftMode && activeCase?.case_id) {
         console.log(`[SAVE] 📤 Pushing slide data: ${slideKey}`);
         
-        // Hämta local version för optimistic locking
-        const versionKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
-        const localVersionStr = localStorage.getItem(versionKey);
-        const localVersionObj = localVersionStr ? JSON.parse(localVersionStr) : { version: 0 };
-        const expected_version = localVersionObj.version || 0;
+        // Hämta local version för optimistic locking (nya 1:1 strukturen)
+        const expected_version = storage.getVersion() || 0;
         
         const response = await api.post(
           `/onboarding/${activeCase.company_id}/${slideKey}`,
@@ -168,12 +194,10 @@ export function createSaveSlideAndNavigate(getState, getActions, services, check
         const result = await response.json();
         console.log(`[SAVE] ✅ Server saved slide, new version: ${result.version}`);
         
-        // Uppdatera lokal version (versionKey deklarerad ovan)
-        localStorage.setItem(versionKey, JSON.stringify({
-          version: result.version,
-          timestamp: new Date().toISOString(),
-          current_slide: slideKey,
-        }));
+        // Uppdatera lokal metadata (1:1 med server metadata.json)
+        storage.setVersion(result.version);
+        storage.setUpdatedBy(user?.id);
+        storage.setUpdatedAt(new Date().toISOString());
       } else {
         console.log(`[SAVE] 📝 Draft mode - only saving to localStorage`);
       }

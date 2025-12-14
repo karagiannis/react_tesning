@@ -57,10 +57,14 @@ const AppState = {
   SAVING: 'SAVING',                 // (Framtida) Sparar till server
   
   // ─────────────────────────────────────────────────────────────────────────
-  // ERROR
+  // ERROR STATES
   // ─────────────────────────────────────────────────────────────────────────
   ERROR: 'ERROR',                   // Något gick fel
                                      // → Visar felmeddelande, väntar på handleClearError()
+  
+  CONNECTION_ERROR: 'CONNECTION_ERROR', // Backend svarar inte (timeout/nätverksfel)
+                                         // → Visar "Servern svarar inte" med retry-knapp
+                                         // → Retry → går tillbaka till retryState
 };
 
 export default AppState;

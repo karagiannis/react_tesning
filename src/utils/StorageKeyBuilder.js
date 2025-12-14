@@ -19,9 +19,22 @@
  *    - "Logga ut" → localStorage rensas, ingenting sparas (temp försvinner)
  *    - Nästa login → Nytt temp_case_id genereras
  *
- * NYCKELFORMAT:
- * - Draft:     onboarding::draft::temp_abc123::user_456::formData
- * - Permanent: onboarding::556677-8899::case_789::user_456::formData
+ * ============================================================================
+ * NYCKELFORMAT (1:1 med server metadata.json):
+ * ============================================================================
+ * 
+ * Server metadata.json:
+ *   { version: 5, updated_by: "uuid", updated_at: "...", pages: { uppdragsval: {...} } }
+ * 
+ * localStorage:
+ *   onboarding::{company_id}::{case_id}::{user_id}::version = 5
+ *   onboarding::{company_id}::{case_id}::{user_id}::updated_by = "uuid"
+ *   onboarding::{company_id}::{case_id}::{user_id}::updated_at = "..."
+ *   onboarding::{company_id}::{case_id}::{user_id}::pages::uppdragsval = {...}
+ *   onboarding::{company_id}::{case_id}::{user_id}::pages::riskfragor-1 = {...}
+ * 
+ * Draft-nycklar:
+ *   onboarding::draft::{temp_case_id}::{user_id}::pages::uppdragsval = {...}
  */
 
 const StorageKeyBuilder = {
@@ -42,7 +55,7 @@ const StorageKeyBuilder = {
   /**
    * Bygg draft-nyckel (innan företag valts)
    * 
-   * Exempel: "onboarding::draft::temp_1701234567890_abc123::user_456::formData"
+   * Exempel: "onboarding::draft::temp_1701234567890_abc123::user_456::pages::uppdragsval"
    *
    * Används för att spara data INNAN användaren har valt företag.
    * Denna data försvinner om användaren loggar ut utan att klicka "Fortsätt".
@@ -54,7 +67,10 @@ const StorageKeyBuilder = {
   /**
    * Bygg permanent nyckel (efter företag valts)
    * 
-   * Exempel: "onboarding::556677-8899::case_789::user_456::formData"
+   * Exempel: "onboarding::5566778899_abc::abc123-def456::user_456::version"
+   *
+   * OBS: case_id är UUID utan "case_" prefix!
+   * Servern lägger till "case_" i mappnamnet.
    *
    * Används EFTER "point of no return" - data är nu kopplad till ett
    * specifikt företag och case på servern.
@@ -64,24 +80,75 @@ const StorageKeyBuilder = {
   },
   
   /**
+   * Bygg nyckel för slide-data (med ::pages:: prefix)
+   * 
+   * Exempel: "onboarding::5566778899_abc::abc123-def456::user_456::pages::uppdragsval"
+   * 
+   * OBS: case_id är UUID utan "case_" prefix!
+   */
+  buildSlideKey: (company_id, case_id, userId, slideKey) => {
+    return `onboarding::${company_id}::${case_id}::${userId}::pages::${slideKey}`;
+  },
+  
+  /**
+   * Bygg draft slide-nyckel (med ::pages:: prefix)
+   */
+  buildDraftSlideKey: (tempCaseId, userId, slideKey) => {
+    return `onboarding::draft::${tempCaseId}::${userId}::pages::${slideKey}`;
+  },
+  
+  /**
+   * Bygg nyckel för version metadata
+   */
+  buildVersionKey: (company_id, case_id, userId) => {
+    return `onboarding::${company_id}::${case_id}::${userId}::version`;
+  },
+  
+  /**
+   * Bygg nyckel för updated_by metadata
+   */
+  buildUpdatedByKey: (company_id, case_id, userId) => {
+    return `onboarding::${company_id}::${case_id}::${userId}::updated_by`;
+  },
+  
+  /**
+   * Bygg nyckel för updated_at metadata
+   */
+  buildUpdatedAtKey: (company_id, case_id, userId) => {
+    return `onboarding::${company_id}::${case_id}::${userId}::updated_at`;
+  },
+  
+  /**
    * Parsa en nyckel för att extrahera komponenter
    * 
-   * Input:  "onboarding::draft::temp_123::user_456::formData"
+   * Input:  "onboarding::draft::temp_123::user_456::pages::uppdragsval"
    * Output: { type: 'onboarding', company_id: 'draft', case_id: 'temp_123', 
-   *           userId: 'user_456', dataType: 'formData', isDraft: true }
+   *           userId: 'user_456', dataType: 'pages::uppdragsval', isDraft: true, isPageKey: true, slideKey: 'uppdragsval' }
+   *
+   * Input:  "onboarding::5566778899_abc::abc123-def456::user_456::version"
+   * Output: { type: 'onboarding', company_id: '5566778899_abc', case_id: 'abc123-def456',
+   *           userId: 'user_456', dataType: 'version', isDraft: false, isPageKey: false }
+   * 
+   * OBS: case_id i localStorage är UUID utan "case_" prefix!
    */
   parseKey: (key) => {
     const parts = key.split('::');
-    if (parts.length !== 5 || parts[0] !== 'onboarding') {
+    if (parts.length < 5 || parts[0] !== 'onboarding') {
       return null;
     }
+    
+    // Kolla om det är en pages-nyckel (minst 6 delar: onboarding::X::X::X::pages::slideKey)
+    const isPageKey = parts.length >= 6 && parts[4] === 'pages';
+    
     return {
       type: parts[0],
       company_id: parts[1],
       case_id: parts[2],
       userId: parts[3],
-      dataType: parts[4],
+      dataType: isPageKey ? parts.slice(4).join('::') : parts[4],
       isDraft: parts[1] === 'draft',
+      isPageKey,
+      slideKey: isPageKey ? parts[5] : null,
     };
   },
   

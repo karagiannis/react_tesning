@@ -92,18 +92,22 @@ export function createHandleRestoringSession(getState, getActions, services) {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith(permanentPrefix)) {
-          const slideKey = key.replace(permanentPrefix, '');
+          let slideKey = key.replace(permanentPrefix, '');
           try {
             const value = JSON.parse(localStorage.getItem(key));
             if (slideKey === 'completedSlides') {
               savedCompletedSlides = value || [];
             } else if (slideKey === 'activeCase') {
               savedActiveCase = value;
+            } else if (slideKey.startsWith('pages::')) {
+              // 🔧 FIX: Nycklar har ::pages:: prefix - extrahera bara slide-namnet
+              const actualSlideKey = slideKey.replace('pages::', '');
+              savedFormData[actualSlideKey] = value;
+              console.log('[RESTORE]   Found page:', actualSlideKey);
             } else {
-              // Det är slide-data
-              savedFormData[slideKey] = value;
+              // Metadata-nycklar (version, modified_by, etc.) - ignorera
+              console.log('[RESTORE]   Found metadata:', slideKey);
             }
-            console.log('[RESTORE]   Found:', slideKey);
           } catch (e) {
             console.warn('[RESTORE]   Failed to parse:', key, e);
           }
@@ -195,17 +199,13 @@ export function createHandleRestoringSession(getState, getActions, services) {
           storage.setCompletedSlides(metadata.completedSlides);
         }
         
-        // 📌 SPARA SERVER VERSION för conflict detection
+        // 📌 SPARA SERVER VERSION för conflict detection (1:1 med server)
         // Backend returnerar fält direkt på roten (inte under .metadata)
         const server_version = metadata?.version || 0;
-        const case_id = savedActiveCase.case_id || savedActiveCase.case_id;
-        const versionStorageKey = `case_${savedActiveCase.company_id}_${case_id}_version`;
-        localStorage.setItem(versionStorageKey, JSON.stringify({
-          version: server_version,
-          timestamp: new Date().toISOString(),
-          syncedFromServer: true
-        }));
-        console.log('[RESTORE] 📌 Sparade server version:', server_version);
+        storage.setVersion(server_version);
+        storage.setUpdatedBy(metadata?.updated_by || '');
+        storage.setUpdatedAt(metadata?.updated_at || metadata?.last_modified || new Date().toISOString());
+        console.log('[RESTORE] 📌 Sparade server metadata: version =', server_version);
         
         // 🔓 Synka betalningsstatus för att låsa upp företagsdata-slides
         const paymentConfirmed = metadata.subscription?.payment_confirmed_at;

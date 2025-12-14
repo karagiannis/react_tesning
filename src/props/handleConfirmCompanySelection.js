@@ -66,20 +66,11 @@ export const createHandleConfirmCompanySelection = ({
       // - expected_version: För optimistic locking (konfliktdetektering)
       //
       
-      // Hämta expected_version för befintliga cases
+      // Hämta expected_version för befintliga cases (nya 1:1 strukturen)
       let expected_version = null;
       if (isResumingExistingCase && companyIdToUse) {  // 🆕 Använd companyIdToUse
-        const versionKey = `case_${companyIdToUse}_${existingCaseId}_version`;
-        const versionStr = localStorage.getItem(versionKey);
-        if (versionStr) {
-          try {
-            const versionObj = JSON.parse(versionStr);
-            expected_version = versionObj.version || 0;
-            console.log(`[POINT OF NO RETURN] Sending expected_version: ${expected_version}`);
-          } catch (e) {
-            console.warn('[POINT OF NO RETURN] Could not parse version from localStorage');
-          }
-        }
+        expected_version = storage.getVersion() || 0;
+        console.log(`[POINT OF NO RETURN] Sending expected_version: ${expected_version}`);
       }
       
       const response = await api.fetch('/onboarding/commit', {
@@ -157,10 +148,29 @@ export const createHandleConfirmCompanySelection = ({
       // Steg 2: Konvertera localStorage från draft till permanent
       // ─────────────────────────────────────────────────────────────────
       //
-      // Innan: onboarding::draft::temp_xxx::user_456::formData
-      // Efter:  onboarding::5566778899_abc::case_xxx::user_456::formData
+      // Innan: onboarding::draft::temp_xxx::user_456::pages::uppdragsval
+      // Efter:  onboarding::5566778899_abc::abc123-def456::user_456::pages::uppdragsval
       //
-      storage.convertDraftToPermanent(serverCompanyId, serverCaseId, user.id);
+      // OBS: case_id i localStorage är UTAN "case_" prefix!
+      // Servern lägger till "case_" prefix i mappnamnet: case_{case_id}/
+      //
+      // 🆕 Skicka med tempCaseId som parameter så att vi kan rensa även om
+      // localStorage.temp_case_id redan har rensats
+      //
+      storage.convertDraftToPermanent(serverCompanyId, serverCaseId, user.id, tempCaseId);
+      
+      // 🆕 Spara version/updated_by/updated_at från serverns response
+      // Så att nästa save kan skicka rätt expected_version
+      if (result.version !== undefined) {
+        storage.setVersion(result.version);
+        console.log(`[POINT OF NO RETURN] 📝 Saved version: ${result.version}`);
+      }
+      if (result.updated_by) {
+        storage.setUpdatedBy(result.updated_by);
+      }
+      if (result.updated_at) {
+        storage.setUpdatedAt(result.updated_at);
+      }
       
       // ─────────────────────────────────────────────────────────────────
       // Steg 3: Uppdatera React state

@@ -6,9 +6,22 @@
  * REGEL: Slides får ALDRIG anropa localStorage direkt!
  *        Allt går via detta storage-objekt.
  * 
- * NYCKELFORMAT:
- * - Draft:     onboarding::draft::temp_123::user_456::formData
- * - Permanent: onboarding::556677-8899::case_789::user_456::formData
+ * ============================================================================
+ * NYCKELFORMAT (1:1 med server metadata.json):
+ * ============================================================================
+ * 
+ * Server metadata.json:
+ *   { version: 5, updated_by: "uuid", updated_at: "...", pages: { uppdragsval: {...} } }
+ * 
+ * localStorage:
+ *   onboarding::{company_id}::{case_id}::{user_id}::version = 5
+ *   onboarding::{company_id}::{case_id}::{user_id}::updated_by = "uuid"
+ *   onboarding::{company_id}::{case_id}::{user_id}::updated_at = "..."
+ *   onboarding::{company_id}::{case_id}::{user_id}::pages::uppdragsval = {...}
+ *   onboarding::{company_id}::{case_id}::{user_id}::pages::riskfragor-1 = {...}
+ * 
+ * Draft-nycklar:
+ *   onboarding::draft::{temp_case_id}::{user_id}::pages::uppdragsval = {...}
  */
 
 import StorageKeyBuilder from './StorageKeyBuilder';
@@ -34,6 +47,21 @@ export function createStorage(getState) {
           activeCase.case_id,
           user?.id || 'anonymous',
           dataType
+        );
+      }
+    },
+    
+    // HJÄLPFUNKTION: Bygg slide-nyckel med ::pages:: prefix
+    _buildSlideKey: (slideKey) => {
+      const { isDraftMode, activeCase, tempCaseId, user } = getState();
+      if (isDraftMode || !activeCase?.company_id) {
+        return StorageKeyBuilder.buildDraftSlideKey(tempCaseId, user?.id || 'anonymous', slideKey);
+      } else {
+        return StorageKeyBuilder.buildSlideKey(
+          activeCase.company_id,
+          activeCase.case_id,
+          user?.id || 'anonymous',
+          slideKey
         );
       }
     },
@@ -147,42 +175,85 @@ export function createStorage(getState) {
     },
     
     // ─────────────────────────────────────────────────────────────────────
-    // Per-slide data storage (URL-aware)
+    // Per-slide data storage (URL-aware) - USES ::pages:: PREFIX
     // ─────────────────────────────────────────────────────────────────────
     getSlideData: (slideKey) => {
-      const key = storage._buildKey(slideKey);
+      const key = storage._buildSlideKey(slideKey);
       const data = localStorage.getItem(key);
       console.log(`[STORAGE] getSlideData(${slideKey}) from key: ${key}`);
       return data ? JSON.parse(data) : null;
     },
     setSlideData: (slideKey, data) => {
-      const key = storage._buildKey(slideKey);
+      const key = storage._buildSlideKey(slideKey);
       console.log(`[STORAGE] setSlideData(${slideKey}) to key: ${key}`, data);
       localStorage.setItem(key, JSON.stringify(data));
     },
     clearSlideData: (slideKey) => {
-      const key = storage._buildKey(slideKey);
+      const key = storage._buildSlideKey(slideKey);
       console.log(`[STORAGE] clearSlideData(${slideKey}) from key: ${key}`);
       localStorage.removeItem(key);
+    },
+    
+    // ─────────────────────────────────────────────────────────────────────
+    // Metadata storage (version, updated_by, updated_at) - 1:1 med server
+    // ─────────────────────────────────────────────────────────────────────
+    getVersion: () => {
+      const key = storage._buildKey('version');
+      const data = localStorage.getItem(key);
+      console.log(`[STORAGE] getVersion from key: ${key}`, data);
+      return data ? parseInt(data, 10) : null;
+    },
+    setVersion: (version) => {
+      const key = storage._buildKey('version');
+      console.log(`[STORAGE] setVersion(${version}) to key: ${key}`);
+      localStorage.setItem(key, String(version));
+    },
+    
+    getModifiedBy: () => {
+      const key = storage._buildKey('modified_by');
+      const data = localStorage.getItem(key);
+      console.log(`[STORAGE] getModifiedBy from key: ${key}`, data);
+      return data || null;
+    },
+    setModifiedBy: (userId) => {
+      const key = storage._buildKey('modified_by');
+      console.log(`[STORAGE] setModifiedBy(${userId}) to key: ${key}`);
+      localStorage.setItem(key, userId);
+    },
+    
+    // Alias för bakåtkompatibilitet
+    getUpdatedBy: () => storage.getModifiedBy(),
+    setUpdatedBy: (userId) => storage.setModifiedBy(userId),
+    
+    getUpdatedAt: () => {
+      const key = storage._buildKey('updated_at');
+      const data = localStorage.getItem(key);
+      console.log(`[STORAGE] getUpdatedAt from key: ${key}`, data);
+      return data || null;
+    },
+    setUpdatedAt: (timestamp) => {
+      const key = storage._buildKey('updated_at');
+      console.log(`[STORAGE] setUpdatedAt(${timestamp}) to key: ${key}`);
+      localStorage.setItem(key, timestamp);
     },
     
     getAllSlidesData: () => {
       const { isDraftMode, activeCase, tempCaseId, user } = getState();
       const allSlides = {};
-      const prefix = isDraftMode 
-        ? `onboarding::draft::${tempCaseId}::${user?.id || 'anonymous'}::`
-        : `onboarding::${activeCase?.company_id}::${activeCase?.case_id}::${user?.id || 'anonymous'}::`;
+      // Nytt: Sök efter ::pages:: prefix
+      const pagesPrefix = isDraftMode 
+        ? `onboarding::draft::${tempCaseId}::${user?.id || 'anonymous'}::pages::`
+        : `onboarding::${activeCase?.company_id}::${activeCase?.case_id}::${user?.id || 'anonymous'}::pages::`;
       
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith(prefix)) {
-          const slideKey = key.replace(prefix, '');
-          if (!['activeCase', 'completedSlides', 'formData'].includes(slideKey)) {
-            try {
-              allSlides[slideKey] = JSON.parse(localStorage.getItem(key));
-            } catch (e) {
-              console.error(`[STORAGE] Failed to parse ${key}:`, e);
-            }
+        if (key && key.startsWith(pagesPrefix)) {
+          // Extrahera slideKey från pages::slideKey
+          const slideKey = key.replace(pagesPrefix, '');
+          try {
+            allSlides[slideKey] = JSON.parse(localStorage.getItem(key));
+          } catch (e) {
+            console.error(`[STORAGE] Failed to parse ${key}:`, e);
           }
         }
       }
@@ -208,14 +279,16 @@ export function createStorage(getState) {
     // ─────────────────────────────────────────────────────────────────────
     // Convert Draft to Permanent
     // ─────────────────────────────────────────────────────────────────────
-    convertDraftToPermanent: (company_id, case_id, userId) => {
+    convertDraftToPermanent: (company_id, case_id, userId, tempCaseIdParam = null) => {
       console.log(`[STORAGE] 🔄 Converting draft to permanent: company=${company_id}, case=${case_id}`);
       
-      const currentTempCaseId = storage.getTempCaseId();
+      // Använd parameter om den skickas, annars fall back till localStorage
+      const currentTempCaseId = tempCaseIdParam || storage.getTempCaseId();
       if (!currentTempCaseId) {
-        console.warn('[STORAGE] No temp_case_id found, nothing to convert');
+        console.warn('[STORAGE] No temp_case_id found (neither param nor localStorage), nothing to convert');
         return;
       }
+      console.log(`[STORAGE] Using temp_case_id: ${currentTempCaseId}`);
       
       const draftKeys = StorageKeyBuilder.findKeysByTempCaseId(currentTempCaseId);
       console.log(`[STORAGE] Found ${draftKeys.length} draft keys to convert:`, draftKeys);
@@ -233,8 +306,11 @@ export function createStorage(getState) {
         localStorage.removeItem(oldKey);
       }
       
+      // 🧹 Rensa temp_case_id från localStorage efter lyckad konvertering
+      storage.clearTempCaseId();
+      
       storage.setIsDraftMode(false);
-      console.log('[STORAGE] ✅ Conversion complete, isDraftMode = false');
+      console.log('[STORAGE] ✅ Conversion complete, isDraftMode = false, temp_case_id cleared');
     },
     
     // ─────────────────────────────────────────────────────────────────────

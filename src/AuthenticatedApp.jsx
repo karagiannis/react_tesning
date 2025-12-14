@@ -76,7 +76,7 @@
  *                            Väntar på användarinteraktion
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 
 // =============================================================================
@@ -133,6 +133,8 @@ import { useSlideDataLoader } from './hooks/useSlideDataLoader';
 // PROPS/HANDLERS
 // =============================================================================
 import { createHandleClearError } from './props/handleClearError';
+import { createHandleRetryConnection } from './props/handleRetryConnection';
+import { createHandleConnectionErrorLogout } from './props/handleConnectionErrorLogout';
 import { createHandleFieldChange } from './props/handleFieldChange';
 import { createHandleSidebarLock } from './props/handleSidebarLock';
 import { createHandleSidebarClick } from './props/handleSidebarClick';
@@ -300,6 +302,12 @@ export default function AuthenticatedApp() {
   const [syncStatus, setSyncStatus] = useState('idle');
   // syncStatus: 'idle' | 'saving' | 'saved' | 'conflict' | 'offline'
   
+  // Connection Error State - för när backend inte svarar
+  // ─────────────────────────────────────────────────────────────────────────
+  const [connectionError, setConnectionError] = useState(null);
+  // connectionError = { message, isTimeout, isNetworkError, retryState }
+  // retryState = vilket AppState vi ska gå till vid retry
+  
   const [activePanel, setActivePanel] = useState(null);
   // activePanel: null | 'llm' | 'documentation'
   
@@ -366,17 +374,26 @@ export default function AuthenticatedApp() {
   // ===========================================================================
   // LOCALSTORAGE - Skapad via factory (se utils/createStorage.js)
   // ===========================================================================
-  // NYCKELFORMAT:
-  // - Draft:     onboarding::draft::temp_123::user_456::formData
-  // - Permanent: onboarding::556677-8899::case_789::user_456::formData
+  // NYCKELFORMAT (med ::pages:: prefix för slides, 1:1 med server metadata.json):
+  // - Draft:     onboarding::draft::temp_123::user_456::pages::uppdragsval
+  // - Permanent: onboarding::5566778899_abc::abc123-def456::user_456::pages::uppdragsval
+  // - Version:   onboarding::5566778899_abc::abc123-def456::user_456::version
   //
-  const getStorageState = () => ({ isDraftMode, activeCase, tempCaseId, user });
-  const storage = createStorage(getStorageState);
+  // OBS: case_id i localStorage är UUID (abc123-def456), UTAN "case_" prefix!
+  // Servern lägger till "case_" i mappnamnet: case_{case_id}/
+  //
+  // VIKTIGT: useRef för att behålla samma getStorageState-referens mellan renders
+  // Detta undviker att storage och api återskapas vid varje render
+  const stateRef = useRef({ isDraftMode, activeCase, tempCaseId, user });
+  stateRef.current = { isDraftMode, activeCase, tempCaseId, user };
+  
+  const getStorageState = useCallback(() => stateRef.current, []);
+  const storage = useMemo(() => createStorage(getStorageState), [getStorageState]);
 
   // ===========================================================================
   // API - Skapad via factory (se utils/createApi.js)
   // ===========================================================================
-  const api = createApi(storage);
+  const api = useMemo(() => createApi(storage), [storage]);
 
   // ===========================================================================
   // STATE MACHINE HANDLERS - Factory-instantiering
@@ -384,7 +401,7 @@ export default function AuthenticatedApp() {
   // Getter callbacks för att alltid hämta AKTUELLA värden (closure pattern)
   
   const getState = () => ({ currentSlideKey, hasAgreement, isDraftMode, activeCase, formData, completedSlides, tempCaseId, user, pendingOnboardings, error });
-  const getActions = () => ({ setIsLoading, setError, setAppState, setTempCaseId, setIsDraftMode, setUser, setFormData, setCompletedSlides, setActiveCase, setIsPaymentConfirmed, setHasAgreement, setCurrentSlideKey, setSyncStatus, setShowAgreementModal, setNavigationHistory, setConflictInfo, setShowConflictModal, setPaymentVerificationStatus, setPaymentVerificationMessage, setPendingOnboardings });
+  const getActions = () => ({ setIsLoading, setError, setAppState, setTempCaseId, setIsDraftMode, setUser, setFormData, setCompletedSlides, setActiveCase, setIsPaymentConfirmed, setHasAgreement, setCurrentSlideKey, setSyncStatus, setShowAgreementModal, setNavigationHistory, setConflictInfo, setShowConflictModal, setPaymentVerificationStatus, setPaymentVerificationMessage, setPendingOnboardings, setConnectionError });
   const services = { storage, api, navigate, SLIDE_ORDER, AppState };
 
   // ===========================================================================
@@ -635,12 +652,27 @@ export default function AuthenticatedApp() {
         // Felmeddelande visas via render (se JSX nedan)
         // Väntar på att användaren klickar bort felet
         break;
+      
+      // =========================================================================
+      // CONNECTION_ERROR - Backend svarar inte
+      // =========================================================================
+      //
+      // NÄR: Timeout eller nätverksfel vid API-anrop
+      // VAD: Visar "Servern svarar inte" med retry-knapp
+      // VÄNTAR PÅ: handleRetryConnection() → går tillbaka till retryState
+      //
+      case AppState.CONNECTION_ERROR:
+        console.error('[CONNECTION_ERROR] 🔌 Backend unavailable');
+        console.error('[CONNECTION_ERROR] Details:', connectionError);
+        // UI visas via render (se JSX nedan)
+        // Väntar på retry eller avbryt
+        break;
         
       default:
         console.error(`[STATE MACHINE] ⚠️ Unknown state: ${appState}`);
     }
     console.log(`[STATE MACHINE] 🏁 Finished processing state: ${appState}`);
-  }, [appState, user, activeCase, navigate]);
+  }, [appState, user, activeCase, navigate, connectionError]);
 
   // ===========================================================================
   // useEffect - Kör state machine vid state-ändring
@@ -712,7 +744,7 @@ export default function AuthenticatedApp() {
   // ─── Navigation Props ──────────────────────────────────────────────────────
   const handleNext = () => { console.log(`[HANDLE_NEXT] ${currentSlideKey}`); setAppState(AppState.PROCESSING_NEXT); };
   const handleBack = () => { console.log(`[HANDLE_BACK] ${currentSlideKey}`); setAppState(AppState.PROCESSING_BACK); };
-  const handleSidebarClick = createHandleSidebarClick({ SLIDE_ORDER, checkVersionConflict, setNavigationHistory, currentSlideKey, activeCase, isDraftMode, tempCaseId, user, storage, setCurrentSlideKey, navigate });
+  const handleSidebarClick = createHandleSidebarClick({ SLIDE_ORDER, setNavigationHistory, currentSlideKey, activeCase, isDraftMode, tempCaseId, user, storage, setCurrentSlideKey, navigate });
   const handleSidebarLock = createHandleSidebarLock({ isPaymentConfirmed });
   
   // ─── Form Props ────────────────────────────────────────────────────────────
@@ -731,11 +763,15 @@ export default function AuthenticatedApp() {
   
   // ─── Conflict Modal Props ──────────────────────────────────────────────────
   const handleConflictReload = createHandleConflictReload({ setShowConflictModal, setConflictInfo, api, activeCase, setFormData, storage, setCompletedSlides, setError });
-  const handleConflictForceSave = createHandleConflictForceSave({ setShowConflictModal, conflictInfo, activeCase, setConflictInfo });
+  const handleConflictForceSave = createHandleConflictForceSave({ setShowConflictModal, conflictInfo, activeCase, setConflictInfo, storage, user });
   const handleConflictCancel = createHandleConflictCancel({ setShowConflictModal, setConflictInfo });
   
   // ─── Error Props ───────────────────────────────────────────────────────────
   const handleClearError = createHandleClearError({ setError, appState, AppState, setAppState });
+  
+  // ─── Connection Error Props ────────────────────────────────────────────────
+  const handleRetryConnection = createHandleRetryConnection({ connectionError, setConnectionError, setAppState, AppState });
+  const handleConnectionErrorLogout = createHandleConnectionErrorLogout({ setConnectionError, handleLogoutAndReset });
 
   // ===========================================================================
   // 🎨 RENDER - JSX (tic-tac-toe pattern: data ↓, events ↑)
@@ -1168,6 +1204,73 @@ export default function AuthenticatedApp() {
             <div className="flex items-center space-x-3">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
               <span className="text-lg">Laddar...</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* ─────────────────────────────────────────────────────────────────────
+          Connection Error Modal - Visar när backend inte svarar
+          ─────────────────────────────────────────────────────────────────────
+          
+          NÄR: appState === CONNECTION_ERROR
+          VAD: Fullskärmsmodal med felinfo och retry-knapp
+          CALLBACKS: 
+            - "Försök igen" → handleRetryConnection()
+            - "Logga ut" → handleLogout()
+      */}
+      {appState === AppState.CONNECTION_ERROR && connectionError && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 shadow-xl max-w-md w-full mx-4">
+            <div className="text-center">
+              {/* Icon */}
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                {connectionError.isTimeout ? (
+                  <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                ) : (
+                  <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3" />
+                  </svg>
+                )}
+              </div>
+              
+              {/* Title */}
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                {connectionError.isTimeout ? 'Servern svarar inte' : 'Anslutningsfel'}
+              </h3>
+              
+              {/* Message */}
+              <p className="text-gray-600 mb-6">
+                {connectionError.message}
+              </p>
+              
+              {/* Helpful hint */}
+              <p className="text-sm text-gray-500 mb-6">
+                {connectionError.isTimeout 
+                  ? 'Det kan bero på hög belastning. Vänta en stund och försök igen.'
+                  : 'Kontrollera din internetanslutning och att servern är igång.'}
+              </p>
+              
+              {/* Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button
+                  onClick={handleRetryConnection}
+                  className="px-6 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Försök igen
+                </button>
+                <button
+                  onClick={handleConnectionErrorLogout}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Logga ut
+                </button>
+              </div>
             </div>
           </div>
         </div>

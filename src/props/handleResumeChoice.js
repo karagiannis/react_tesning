@@ -23,11 +23,11 @@
  *   - Data flödar uppåt via callback (tic-tac-toe pattern)
  */
 export const createHandleResumeChoice = ({ setActiveCase, setAppState, AppState }) => {
-  return (company_id, case_id, company_name) => {
-    console.log(`[handleResumeChoice] 🔄 Resuming: ${company_name} (${company_id}/${case_id})`);
+  return (company_id, case_id, company_name, orgnr) => {
+    console.log(`[handleResumeChoice] 🔄 Resuming: ${company_name} (${orgnr}) - ${company_id}/${case_id}`);
     
-    // Sätt vilken case vi ska arbeta med
-    setActiveCase({ company_id, case_id, company_name });
+    // Sätt vilken case vi ska arbeta med (inkl orgnr för Header)
+    setActiveCase({ company_id, case_id, company_name, orgnr });
     
     // Trigga state machine → RESUMING hämtar full data
     setAppState(AppState.RESUMING);

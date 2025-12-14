@@ -13,7 +13,6 @@
  */
 export const createHandleSidebarClick = ({
   SLIDE_ORDER,
-  checkVersionConflict,
   setNavigationHistory,
   currentSlideKey,
   activeCase,
@@ -24,21 +23,17 @@ export const createHandleSidebarClick = ({
   setCurrentSlideKey,
   navigate
 }) => {
-  return async (slideKey) => {
+  return (slideKey) => {
     const slide = SLIDE_ORDER.find(s => s.key === slideKey);
     if (!slide) return;
 
     // ─────────────────────────────────────────────────────────────────────
-    // 🔒 STEG 1: Kolla om server har nyare version
+    // 🔄 Konfliktdetektering sker via useSlideDataLoader när ny slide laddas
+    // Vi kollar INTE konflikt här - det är fel tidpunkt (vi lämnar sidan)
     // ─────────────────────────────────────────────────────────────────────
-    const hasConflict = await checkVersionConflict();
-    if (hasConflict) {
-      console.log('[SIDEBAR] ⚠️ Konflikt - blockerar navigation till', slideKey);
-      return; // Modal visas automatiskt av checkVersionConflict
-    }
 
     // ─────────────────────────────────────────────────────────────────────
-    // STEG 2: Lägg till i historik (för audit trail och eventuell undo)
+    // STEG 1: Lägg till i historik (för audit trail och eventuell undo)
     // ─────────────────────────────────────────────────────────────────────
     setNavigationHistory(prev => [...prev, {
       slideKey,

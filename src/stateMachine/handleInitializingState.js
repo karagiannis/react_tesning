@@ -15,9 +15,12 @@
  *   → RESTORING_SESSION
  * ANNARS:    
  *   → CHECKING_PENDING
+ * VID ANSLUTNINGSFEL:
+ *   → CONNECTION_ERROR
  */
 
 import StorageKeyBuilder from '../utils/StorageKeyBuilder';
+import { ApiConnectionError } from '../utils/createApi';
 
 /**
  * Factory function som skapar handleInitializing handler.
@@ -76,7 +79,7 @@ export function createHandleInitializing(getState, getActions, services) {
     console.log(`[INIT] isDraftMode: ${currentIsDraftMode}`);
     
     // ─────────────────────────────────────────────────────────────────
-    // Steg 3: Hämta användarinfo från /api/me
+    // Steg 3: Hämta användarinfo från /api/me (med timeout-hantering!)
     // ─────────────────────────────────────────────────────────────────
     let userInfo;
     try {
@@ -84,6 +87,23 @@ export function createHandleInitializing(getState, getActions, services) {
       console.log('[INIT] Fetched user info from /api/me:', userInfo);
     } catch (e) {
       console.error('[INIT] Failed to fetch /api/me:', e);
+      setIsLoading(false);
+      
+      // Hantera anslutningsfel separat (timeout, nätverksfel)
+      if (e instanceof ApiConnectionError) {
+        console.log('[INIT] 🔌 Connection error - going to CONNECTION_ERROR state');
+        const { setConnectionError } = getActions();
+        setConnectionError({
+          message: e.message,
+          isTimeout: e.isTimeout,
+          isNetworkError: e.isNetworkError,
+          retryState: AppState.INITIALIZING,
+        });
+        setAppState(AppState.CONNECTION_ERROR);
+        return;
+      }
+      
+      // Andra fel - troligen auth-fel
       setError('Kunde inte hämta användarinfo - försök logga in igen');
       setAppState(AppState.ERROR);
       return;

@@ -1,34 +1,26 @@
 /**
  * MergeConflictModal.jsx
  * 
- * Modal som visas när det finns en konflikt mellan lokal och server-data
- * (Optimistic locking - "pull before push")
+ * 🎯 TIC-TAC-TOE PATTERN: DUM KOMPONENT
  * 
- * Designad som VS Code git merge conflict view
+ * Denna modal gör INGEN logik - den renderar bara props och 
+ * informerar parent om klick via callbacks.
+ * 
+ * VALUE PROPS (från parent via data):
+ *   - slideDisplayName: string (färdigöversatt slide-namn)
+ *   - serverVersion: number
+ *   - modifiedByDisplay: string (färdigformaterat)
+ *   - diffs: array (färdigberäknad med formaterade värden)
+ *   - diffCount: number
+ *   - message: string (valfritt meddelande)
+ * 
+ * EVENT CALLBACKS (informerar parent):
+ *   - onKeepTheirs: () => void
+ *   - onKeepMine: () => void  
+ *   - onClose: () => void
  */
 
 import React from 'react';
-
-// Hjälpfunktion för att formatera tjänstenamn
-const SERVICE_LABELS = {
-  'lopande_bokforing': 'Löpande bokföring',
-  'arsbokslut': 'Årsbokslut',
-  'deklarationer': 'Deklarationer',
-  'loneadministration': 'Löneadministration',
-  'ekonomisk_radgivning': 'Ekonomisk rådgivning',
-  'foretagsregistrering': 'Företagsregistrering',
-  'finansiell_rapportering': 'Finansiell rapportering',
-  'foretagsforsaljning': 'Företagsförsäljning/succession',
-};
-
-const formatServiceName = (key) => SERVICE_LABELS[key] || key;
-
-const formatServices = (services) => {
-  if (!services || !Array.isArray(services) || services.length === 0) {
-    return ['(Inga tjänster valda)'];
-  }
-  return services.map(formatServiceName);
-};
 
 export default function MergeConflictModal({ 
   data, 
@@ -37,23 +29,39 @@ export default function MergeConflictModal({
   onMerge, 
   onClose 
 }) {
+  // ═══════════════════════════════════════════════════════════════════════
+  // GUARD: Ingen data = ingen modal
+  // ═══════════════════════════════════════════════════════════════════════
   if (!data) return null;
 
-  const serverServices = formatServices(data.server_services);
-  const localServices = formatServices(data.localData?.selected_services);
-  
-  // Hitta skillnader
-  const serverSet = new Set(data.server_services || []);
-  const localSet = new Set(data.localData?.selected_services || []);
-  
-  const onlyOnServer = [...serverSet].filter(s => !localSet.has(s));
-  const onlyLocal = [...localSet].filter(s => !serverSet.has(s));
-  const inBoth = [...serverSet].filter(s => localSet.has(s));
-  
+  // ═══════════════════════════════════════════════════════════════════════
+  // DESTRUKTURERA FÄRDIGBERÄKNADE PROPS (ingen logik här!)
+  // ═══════════════════════════════════════════════════════════════════════
+  const {
+    slideDisplayName = 'Okänd sida',
+    serverVersion = 0,
+    modifiedByDisplay = 'Okänd',
+    fullComparison = [],  // ALLA fält (som Git)
+    sameFields = [],      // Fält som är lika
+    differentFields = [], // Fält som skiljer (gamla "diffs")
+    diffs = [],           // Bakåtkompatibilitet
+    diffCount = 0,
+  } = data;
+
+  // Använd fullComparison om den finns, annars fallback till diffs
+  const allFields = fullComparison.length > 0 ? fullComparison : diffs;
+  const hasDifferences = differentFields.length > 0 || diffCount > 0;
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // RENDER - Bara JSX, ingen logik!
+  // ═══════════════════════════════════════════════════════════════════════
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden border border-brand-200">
-        {/* Header - Brand colors */}
+      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-brand-200">
+        
+        {/* ─────────────────────────────────────────────────────────────────
+            HEADER
+        ───────────────────────────────────────────────────────────────── */}
         <div className="bg-gradient-to-r from-brand-600 to-brand-700 px-6 py-4">
           <div className="flex items-center">
             <div className="bg-white/20 rounded-full p-2 mr-3">
@@ -66,13 +74,15 @@ export default function MergeConflictModal({
                 Merge-konflikt upptäckt
               </h2>
               <p className="text-sm text-brand-100">
-                Ärendet har ändrats av en annan användare
+                Sidan <strong>{slideDisplayName}</strong> har ändrats av en annan användare
               </p>
             </div>
           </div>
         </div>
         
-        {/* Git-style conflict explanation */}
+        {/* ─────────────────────────────────────────────────────────────────
+            CONFLICT EXPLANATION
+        ───────────────────────────────────────────────────────────────── */}
         <div className="bg-brand-50 border-b border-brand-100 px-6 py-3">
           <p className="text-sm text-brand-800">
             <span className="font-mono bg-brand-100 px-1.5 py-0.5 rounded text-xs mr-2">KONFLIKT</span>
@@ -81,107 +91,155 @@ export default function MergeConflictModal({
           </p>
         </div>
         
-        {/* Content */}
+        {/* ─────────────────────────────────────────────────────────────────
+            CONTENT
+        ───────────────────────────────────────────────────────────────── */}
         <div className="p-6 overflow-y-auto max-h-[50vh]">
+          
           {/* Meta info */}
-          <div className="mb-4 flex items-center gap-4 text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
+          <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <span>Ändrad av: <strong className="text-gray-900">{data.modified_by?.slice(0, 8) || 'Okänd'}...</strong></span>
+              <span>Ändrad av: <strong className="text-gray-900">{modifiedByDisplay}</strong></span>
             </div>
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
               </svg>
-              <span>Version: <strong className="font-mono text-gray-900">v{data.server_version}</strong></span>
+              <span>Server-version: <strong className="font-mono text-gray-900">v{serverVersion}</strong></span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>Sida: <strong className="text-gray-900">{slideDisplayName}</strong></span>
             </div>
           </div>
           
-          {/* VS Code style diff view */}
-          <div className="border border-gray-200 rounded-lg overflow-hidden font-mono text-sm">
-            {/* Diff header */}
-            <div className="bg-gray-100 border-b border-gray-200 px-4 py-2 flex items-center justify-between">
-              <span className="text-gray-600 text-xs">uppdragsval / selected_services</span>
-              <span className="text-xs text-gray-500">
-                {onlyOnServer.length + onlyLocal.length} ändringar
-              </span>
+          {/* ─────────────────────────────────────────────────────────────
+              FULL COMPARISON TABLE (som Git - visar ALLA fält)
+          ───────────────────────────────────────────────────────────── */}
+          {allFields.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>Inga fält att jämföra</p>
+              <p className="text-xs mt-1">(Sidan har ingen data)</p>
             </div>
-            
-            {/* Conflict markers - like git */}
-            <div className="divide-y divide-gray-100">
-              {/* Server version (THEIRS) */}
-              <div className="bg-blue-50/50">
-                <div className="bg-blue-100 px-4 py-1.5 text-xs text-blue-700 flex items-center gap-2 border-l-4 border-blue-500">
-                  <span className="font-bold">{'<<<<<<< SERVER (DERAS)'}</span>
-                  <span className="text-blue-500">v{data.server_version}</span>
+          ) : (
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              {/* Table header */}
+              <div className="bg-gray-100 border-b border-gray-200 grid grid-cols-3 text-xs font-medium text-gray-600">
+                <div className="px-4 py-2 border-r border-gray-200">Fält</div>
+                <div className="px-4 py-2 border-r border-gray-200 bg-blue-50 text-blue-700">
+                  <span className="flex items-center gap-1">
+                    <span>↓</span> Server (deras)
+                  </span>
                 </div>
-                <div className="px-4 py-3 space-y-1">
-                  {serverServices.map((service, i) => {
-                    const key = data.server_services?.[i];
-                    const isOnlyOnServer = key && onlyOnServer.includes(key);
-                    return (
-                      <div key={i} className={`flex items-center gap-2 ${isOnlyOnServer ? 'text-blue-700 font-medium' : 'text-gray-600'}`}>
-                        {isOnlyOnServer && <span className="text-blue-500 text-xs">+</span>}
-                        <span>{service}</span>
-                        {isOnlyOnServer && <span className="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">endast server</span>}
-                      </div>
-                    );
-                  })}
+                <div className="px-4 py-2 bg-green-50 text-green-700">
+                  <span className="flex items-center gap-1">
+                    <span>↑</span> Lokal (din)
+                  </span>
                 </div>
               </div>
               
-              {/* Separator */}
-              <div className="bg-gray-200 px-4 py-1 text-xs text-gray-500 text-center font-bold">
-                {'======='}
-              </div>
-              
-              {/* Local version (MINE) */}
-              <div className="bg-green-50/50">
-                <div className="px-4 py-3 space-y-1">
-                  {localServices.map((service, i) => {
-                    const key = data.localData?.selected_services?.[i];
-                    const isOnlyLocal = key && onlyLocal.includes(key);
-                    return (
-                      <div key={i} className={`flex items-center gap-2 ${isOnlyLocal ? 'text-green-700 font-medium' : 'text-gray-600'}`}>
-                        {isOnlyLocal && <span className="text-green-500 text-xs">+</span>}
-                        <span>{service}</span>
-                        {isOnlyLocal && <span className="text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded">din ändring</span>}
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="bg-green-100 px-4 py-1.5 text-xs text-green-700 flex items-center gap-2 border-l-4 border-green-500">
-                  <span className="font-bold">{'>>>>>>> LOKAL (DIN)'}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Summary */}
-          {(onlyOnServer.length > 0 || onlyLocal.length > 0) && (
-            <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <h4 className="text-sm font-medium text-amber-800 mb-2">Sammanfattning av skillnader:</h4>
-              <ul className="text-sm text-amber-700 space-y-1">
-                {onlyOnServer.length > 0 && (
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-500">●</span>
-                    <span><strong>Server har:</strong> {onlyOnServer.map(formatServiceName).join(', ')}</span>
-                  </li>
+              {/* Alla rader - SKILLNADER FÖRST, sedan lika */}
+              <div className="divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                {/* Skillnader markerade */}
+                {allFields
+                  .filter(f => f.isDifferent)
+                  .map((field, index) => (
+                  <div key={`diff-${index}`} className="grid grid-cols-3 text-sm bg-amber-50/50">
+                    {/* Path - markerad som skillnad */}
+                    <div className="px-4 py-3 border-r border-gray-200 bg-amber-100/50">
+                      <span className="font-mono text-xs text-amber-800 break-all flex items-center gap-1">
+                        <span className="text-amber-600">≠</span>
+                        {field.formattedPath}
+                      </span>
+                    </div>
+                    
+                    {/* Server value */}
+                    <div className="px-4 py-3 border-r border-gray-200 bg-blue-50/50">
+                      <pre className="whitespace-pre-wrap font-mono text-xs text-blue-800 break-all">
+                        {field.formattedServerValue || '(tom)'}
+                      </pre>
+                    </div>
+                    
+                    {/* Local value */}
+                    <div className="px-4 py-3 bg-green-50/50">
+                      <pre className="whitespace-pre-wrap font-mono text-xs text-green-800 break-all">
+                        {field.formattedLocalValue || '(tom)'}
+                      </pre>
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Separator mellan skillnader och lika */}
+                {allFields.filter(f => f.isDifferent).length > 0 && 
+                 allFields.filter(f => !f.isDifferent).length > 0 && (
+                  <div className="bg-gray-200 px-4 py-1 text-xs text-gray-500 text-center">
+                    ── Lika värden ──
+                  </div>
                 )}
-                {onlyLocal.length > 0 && (
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-500">●</span>
-                    <span><strong>Du har lagt till:</strong> {onlyLocal.map(formatServiceName).join(', ')}</span>
-                  </li>
-                )}
-              </ul>
+                
+                {/* Lika värden (svagare styling) */}
+                {allFields
+                  .filter(f => !f.isDifferent)
+                  .map((field, index) => (
+                  <div key={`same-${index}`} className="grid grid-cols-3 text-sm opacity-70 hover:opacity-100 transition-opacity">
+                    {/* Path */}
+                    <div className="px-4 py-2 border-r border-gray-200 bg-gray-50">
+                      <span className="font-mono text-xs text-gray-500 break-all flex items-center gap-1">
+                        <span className="text-green-500">✓</span>
+                        {field.formattedPath}
+                      </span>
+                    </div>
+                    
+                    {/* Server value */}
+                    <div className="px-4 py-2 border-r border-gray-200">
+                      <pre className="whitespace-pre-wrap font-mono text-xs text-gray-500 break-all">
+                        {field.formattedServerValue || '(tom)'}
+                      </pre>
+                    </div>
+                    
+                    {/* Local value */}
+                    <div className="px-4 py-2">
+                      <pre className="whitespace-pre-wrap font-mono text-xs text-gray-500 break-all">
+                        {field.formattedLocalValue || '(tom)'}
+                      </pre>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
+          
+          {/* Diff summary */}
+          <div className={`mt-4 p-3 border rounded-lg ${
+            hasDifferences 
+              ? 'bg-amber-50 border-amber-200' 
+              : 'bg-green-50 border-green-200'
+          }`}>
+            <h4 className={`text-sm font-medium mb-1 ${
+              hasDifferences ? 'text-amber-800' : 'text-green-800'
+            }`}>
+              {hasDifferences 
+                ? `${differentFields.length || diffCount} ${(differentFields.length || diffCount) === 1 ? 'skillnad' : 'skillnader'} hittades`
+                : 'Alla värden är identiska'
+              }
+            </h4>
+            <p className={`text-xs ${hasDifferences ? 'text-amber-700' : 'text-green-700'}`}>
+              {hasDifferences
+                ? 'Välj "Hämta server-version" för att använda den andra användarens ändringar, eller "Skriv över med min" för att behålla dina ändringar.'
+                : 'Data är identisk. Versionskonflikt beror förmodligen på metadata.'
+              }
+            </p>
+          </div>
         </div>
         
-        {/* Actions */}
+        {/* ─────────────────────────────────────────────────────────────────
+            ACTIONS - Callbacks till parent
+        ───────────────────────────────────────────────────────────────── */}
         <div className="border-t border-gray-200 px-6 py-4 bg-gray-50">
           <div className="flex items-center justify-between">
             <button

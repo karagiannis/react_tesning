@@ -21,11 +21,11 @@
  * @returns {Function} async (currentIndex) => void
  */
 export function createHandleRiskfragorSubState(getState, getActions, services) {
-  const { api, saveSlideAndNavigate, AppState } = services;
+  const { api, saveSlideAndNavigate, AppState, storage } = services;
   const { setIsLoading, setSyncStatus, setShowAgreementModal, setAppState, setError, setConflictInfo, setShowConflictModal } = getActions();
   
   return async (currentIndex) => {
-    const { hasAgreement, isDraftMode, activeCase, formData, currentSlideKey } = getState();
+    const { hasAgreement, isDraftMode, activeCase, formData, currentSlideKey, user } = getState();
     
     // Har redan betalat eller är i draft mode - standard save & navigate
     if (hasAgreement || isDraftMode) {
@@ -45,13 +45,13 @@ export function createHandleRiskfragorSubState(getState, getActions, services) {
       const slideData = formData[currentSlideKey] || {};
       
       if (company_id && case_id) {
-        const versionKey = `case_${company_id}_${case_id}_version`;
-        const localVersionObj = JSON.parse(localStorage.getItem(versionKey) || '{"version":0}');
+        // Hämta local version (nya 1:1 strukturen)
+        const localVersion = storage.getVersion() || 0;
         
         const response = await api.post(`/onboarding/${company_id}/${currentSlideKey}`, {
           data: slideData,
           case_id,
-          expected_version: localVersionObj.version || 0,
+          expected_version: localVersion,
         });
         
         if (!response.ok) {
@@ -76,9 +76,12 @@ export function createHandleRiskfragorSubState(getState, getActions, services) {
         
         const result = await response.json();
         console.log('[PROCESSING_NEXT] riskfragor: ✅ Saved, version:', result.version);
-        localStorage.setItem(versionKey, JSON.stringify({
-          version: result.version, timestamp: new Date().toISOString(), current_slide: currentSlideKey,
-        }));
+        
+        // Uppdatera lokal metadata (1:1 med server)
+        storage.setVersion(result.version);
+        storage.setUpdatedBy(user?.id);
+        storage.setUpdatedAt(new Date().toISOString());
+        
         setSyncStatus('saved');
       }
       

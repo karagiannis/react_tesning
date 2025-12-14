@@ -11,9 +11,67 @@
  * 2. Automatisk token refresh vid 401
  * 3. Konsekvent felhantering
  * 4. Lätt att mocka för tester
+ * 5. Timeout på alla anrop (förhindrar oändlig spinner)
  */
 
 import { API_URL } from '../config/api';
+
+// ─────────────────────────────────────────────────────────────────────────
+// Konstanter för timeout
+// ─────────────────────────────────────────────────────────────────────────
+const DEFAULT_TIMEOUT_MS = 15000; // 15 sekunder default timeout
+const CRITICAL_TIMEOUT_MS = 10000; // 10 sekunder för kritiska anrop (auth, init)
+
+/**
+ * Custom error class för nätverksfel och timeouts
+ */
+export class ApiConnectionError extends Error {
+  constructor(message, { isTimeout = false, isNetworkError = false, originalError = null } = {}) {
+    super(message);
+    this.name = 'ApiConnectionError';
+    this.isTimeout = isTimeout;
+    this.isNetworkError = isNetworkError;
+    this.originalError = originalError;
+  }
+}
+
+/**
+ * Fetch med timeout
+ * @param {string} url - URL att hämta
+ * @param {Object} options - Fetch-options
+ * @param {number} timeoutMs - Timeout i millisekunder
+ * @returns {Promise<Response>}
+ */
+async function fetchWithTimeout(url, options = {}, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    return response;
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new ApiConnectionError(
+        `Servern svarar inte (timeout efter ${timeoutMs / 1000} sekunder)`,
+        { isTimeout: true, originalError: error }
+      );
+    }
+    // Nätverksfel (ingen anslutning, DNS-fel, CORS, etc.)
+    // TypeError kan ha olika meddelanden beroende på webbläsare
+    if (error.name === 'TypeError') {
+      throw new ApiConnectionError(
+        'Kunde inte ansluta till servern. Kontrollera din internetanslutning.',
+        { isNetworkError: true, originalError: error }
+      );
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 /**
  * Factory som skapar api-objekt med tillgång till storage.
@@ -26,28 +84,30 @@ export function createApi(storage) {
   
   const api = {
     // ─────────────────────────────────────────────────────────────────────
-    // Generell fetch med autentisering + automatisk token refresh
+    // Generell fetch med autentisering + automatisk token refresh + timeout
     // ─────────────────────────────────────────────────────────────────────
     fetch: async (endpoint, options = {}) => {
       const token = storage.getToken();
-      let response = await fetch(`${API_BASE}${endpoint}`, {
+      const timeoutMs = options.timeout || DEFAULT_TIMEOUT_MS;
+      
+      let response = await fetchWithTimeout(`${API_BASE}${endpoint}`, {
         ...options,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token ? `Bearer ${token}` : '',
           ...options.headers,
         },
-      });
+      }, timeoutMs);
       
       // Om 401 Unauthorized → försök refresha token
       if (response.status === 401 && storage.getRefreshToken()) {
         console.log('[AUTH] Access token expired, refreshing...');
         
-        const refreshResponse = await fetch(`${API_BASE}/auth/refresh`, {
+        const refreshResponse = await fetchWithTimeout(`${API_BASE}/auth/refresh`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refresh_token: storage.getRefreshToken() })
-        });
+        }, CRITICAL_TIMEOUT_MS);
         
         if (refreshResponse.ok) {
           const data = await refreshResponse.json();
@@ -58,14 +118,14 @@ export function createApi(storage) {
           console.log('[AUTH] Token refreshed successfully');
           
           // Försök originalanropet igen med ny token
-          response = await fetch(`${API_BASE}${endpoint}`, {
+          response = await fetchWithTimeout(`${API_BASE}${endpoint}`, {
             ...options,
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${data.access_token}`,
               ...options.headers,
             },
-          });
+          }, timeoutMs);
         } else {
           console.error('[AUTH] Refresh token invalid, logging out');
           storage.clearToken();

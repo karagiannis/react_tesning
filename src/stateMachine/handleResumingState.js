@@ -178,13 +178,13 @@ export function createHandleResuming(getState, getActions, services) {
       console.log('[RESUMING] 📌 Setting activeCase in React state:', activeCase);
       setActiveCase(activeCase);
       
-      // 🆕 NEW: Save each page SEPARATELY to PERMANENT localStorage keys
-      // VIKTIGT: Vi använder StorageKeyBuilder.buildPermanentKey() direkt istället för
+      // 🆕 NEW: Save each page SEPARATELY to PERMANENT localStorage keys with ::pages:: prefix
+      // VIKTIGT: Vi använder StorageKeyBuilder direkt istället för
       // storage.setSlideData() eftersom React state (isDraftMode, activeCase) inte har
       // uppdaterats synkront ännu och storage._buildKey() skulle läsa gamla värden!
-      console.log('[RESUMING] 💾 Saving pages to PERMANENT localStorage keys...');
+      console.log('[RESUMING] 💾 Saving pages to PERMANENT localStorage keys (::pages::)...');
       Object.entries(pagesData).forEach(([slideKey, slideData]) => {
-        const permanentKey = StorageKeyBuilder.buildPermanentKey(
+        const permanentKey = StorageKeyBuilder.buildSlideKey(
           activeCase.company_id,
           activeCase.case_id,
           user?.id,
@@ -193,6 +193,20 @@ export function createHandleResuming(getState, getActions, services) {
         localStorage.setItem(permanentKey, JSON.stringify(slideData));
         console.log(`[RESUMING]   ✓ Saved ${slideKey} to key: ${permanentKey}`);
       });
+      
+      // 🆕 NEW: Save metadata (version, updated_by, updated_at) for conflict detection
+      console.log('[RESUMING] 💾 Saving metadata (version, updated_by, updated_at)...');
+      const versionKey = StorageKeyBuilder.buildVersionKey(activeCase.company_id, activeCase.case_id, user?.id);
+      const updatedByKey = StorageKeyBuilder.buildUpdatedByKey(activeCase.company_id, activeCase.case_id, user?.id);
+      const updatedAtKey = StorageKeyBuilder.buildUpdatedAtKey(activeCase.company_id, activeCase.case_id, user?.id);
+      
+      localStorage.setItem(versionKey, String(metadata.version || 0));
+      localStorage.setItem(updatedByKey, metadata.updated_by || '');
+      localStorage.setItem(updatedAtKey, metadata.updated_at || metadata.last_modified || new Date().toISOString());
+      
+      console.log(`[RESUMING]   ✓ version: ${metadata.version || 0}`);
+      console.log(`[RESUMING]   ✓ updated_by: ${metadata.updated_by || 'N/A'}`);
+      console.log(`[RESUMING]   ✓ updated_at: ${metadata.updated_at || metadata.last_modified || 'N/A'}`);
       
       // Save activeCase and completedSlides
       const permanentCompletedSlidesKey = StorageKeyBuilder.buildPermanentKey(
@@ -210,17 +224,7 @@ export function createHandleResuming(getState, getActions, services) {
       
       localStorage.setItem(permanentCompletedSlidesKey, JSON.stringify(metadata.completedSlides || []));
       localStorage.setItem(permanentActiveCaseKey, JSON.stringify(activeCase));
-      console.log('[RESUMING] ✅ Saved metadata to permanent keys');
-      
-      // 📌 SPARA SERVER VERSION för conflict detection
-      const server_version = metadata.version || 0;
-      const versionStorageKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
-      localStorage.setItem(versionStorageKey, JSON.stringify({
-        version: server_version,
-        timestamp: metadata.last_modified || new Date().toISOString(),
-        syncedFromServer: true
-      }));
-      console.log('[RESUMING] 📌 Sparade server version:', server_version);
+      console.log('[RESUMING] ✅ Saved activeCase and completedSlides to permanent keys');
       
       // Uppdatera React state med rätt data
       console.log('[RESUMING] 🔄 Updating React state...');

@@ -26,7 +26,10 @@ export const createHandleConflictReload = ({
       // Uppdatera lokal state med server-data (pages innehåller slide-data)
       if (serverMeta?.pages) {
         setFormData(serverMeta.pages);
-        storage.setFormData(serverMeta.pages);
+        // Spara varje slide separat med ::pages:: prefix
+        Object.entries(serverMeta.pages).forEach(([slideKey, slideData]) => {
+          storage.setSlideData(slideKey, slideData);
+        });
       }
 
       if (serverMeta?.completed_slides) {
@@ -34,13 +37,10 @@ export const createHandleConflictReload = ({
         storage.setCompletedSlides(serverMeta.completed_slides);
       }
 
-      // Uppdatera local version (samma key som checkVersionConflict använder)
-      const storageKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
-      localStorage.setItem(storageKey, JSON.stringify({
-        version: server_version,
-        timestamp: new Date().toISOString(),
-        syncedFromServer: true
-      }));
+      // Uppdatera local metadata (1:1 med server metadata.json)
+      storage.setVersion(server_version);
+      storage.setModifiedBy(serverMeta?.modified_by || serverMeta?.updated_by || '');
+      storage.setUpdatedAt(serverMeta?.updated_at || serverMeta?.last_modified || new Date().toISOString());
 
       console.log('[CONFLICT] ✅ Data laddad från server, version:', server_version);
 

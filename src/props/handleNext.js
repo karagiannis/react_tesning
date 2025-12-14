@@ -141,13 +141,10 @@ export const createHandleNext = ({
         const result = await response.json();
         console.log(`[NEXT] ✅ Server saved slide, new version: ${result.version}`);
 
-        // Uppdatera lokal version
-        const versionKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
-        localStorage.setItem(versionKey, JSON.stringify({
-          version: result.version,
-          timestamp: new Date().toISOString(),
-          current_slide: currentSlideKey,
-        }));
+        // Uppdatera lokal metadata (1:1 med server metadata.json)
+        storage.setVersion(result.version);
+        storage.setUpdatedBy(user?.id);
+        storage.setUpdatedAt(new Date().toISOString());
 
       } else {
         // Draft mode - bara spara lokalt

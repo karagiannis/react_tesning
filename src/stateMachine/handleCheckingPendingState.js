@@ -11,7 +11,10 @@
  *   → VERIFYING_PAYMENT  (om på /payment-success + har pending)
  *   → SHOWING_RESUME     (om pending onboardings finns)
  *   → READY              (om inga pending finns - starta ny)
+ *   → CONNECTION_ERROR   (om backend inte svarar - timeout/nätverksfel)
  */
+
+import { ApiConnectionError } from '../utils/createApi';
 
 export function createHandleCheckingPendingState(getState, getActions, services) {
   return async function handleCheckingPendingState() {
@@ -23,7 +26,9 @@ export function createHandleCheckingPendingState(getState, getActions, services)
       setPendingOnboardings,
       setActiveCase,
       setIsDraftMode,
-      setCurrentSlideKey
+      setCurrentSlideKey,
+      setError,
+      setConnectionError
     } = getActions();
 
     console.log('[CHECKING_PENDING] 🔍 Starting...');
@@ -36,11 +41,35 @@ export function createHandleCheckingPendingState(getState, getActions, services)
                                  window.location.search.includes('session_id');
 
     // ─────────────────────────────────────────────────────────────────
-    // Steg 2: Hämta pending onboardings från API
+    // Steg 2: Hämta pending onboardings från API (med try-catch!)
     // ─────────────────────────────────────────────────────────────────
-    console.log('[CHECKING_PENDING] 📡 Calling api.fetchPendingOnboardings()...');
-    const onboardings = await api.fetchPendingOnboardings();
-    console.log('[CHECKING_PENDING] ✅ API response:', onboardings);
+    let onboardings = [];
+    try {
+      console.log('[CHECKING_PENDING] 📡 Calling api.fetchPendingOnboardings()...');
+      onboardings = await api.fetchPendingOnboardings();
+      console.log('[CHECKING_PENDING] ✅ API response:', onboardings);
+    } catch (error) {
+      console.error('[CHECKING_PENDING] ❌ API call failed:', error);
+      setIsLoading(false);
+      
+      // Hantera anslutningsfel separat
+      if (error instanceof ApiConnectionError) {
+        console.log('[CHECKING_PENDING] 🔌 Connection error - going to CONNECTION_ERROR state');
+        setConnectionError({
+          message: error.message,
+          isTimeout: error.isTimeout,
+          isNetworkError: error.isNetworkError,
+          retryState: AppState.CHECKING_PENDING,
+        });
+        setAppState(AppState.CONNECTION_ERROR);
+        return;
+      }
+      
+      // Andra fel - visa generiskt felmeddelande
+      setError(`Kunde inte hämta ärenden: ${error.message}`);
+      setAppState(AppState.ERROR);
+      return;
+    }
 
     setIsLoading(false);
     console.log('[CHECKING_PENDING] ⚖️ Deciding next state, onboardings.length =', onboardings.length);

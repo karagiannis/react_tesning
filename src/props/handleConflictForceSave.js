@@ -6,21 +6,21 @@ export const createHandleConflictForceSave = ({
   setShowConflictModal,
   conflictInfo,
   activeCase,
-  setConflictInfo
+  setConflictInfo,
+  storage,
+  user
 }) => {
   return async () => {
     console.log('[CONFLICT] Användaren valde: Skriv över server');
     setShowConflictModal(false);
 
-    const server_version = conflictInfo?.server_version || 0;
+    const server_version = conflictInfo?.server?.version || conflictInfo?.server_version || 0;
 
     // Uppdatera local version till server+1 (vi "tar ägandeskap")
-    const storageKey = `case_${activeCase.company_id}_${activeCase.case_id}_version`;
-    localStorage.setItem(storageKey, JSON.stringify({
-      version: server_version + 1,
-      timestamp: new Date().toISOString(),
-      forcedOverwrite: true
-    }));
+    // Använder nya storage-metoder (1:1 med server metadata.json)
+    storage.setVersion(server_version + 1);
+    storage.setUpdatedBy(user?.id);
+    storage.setUpdatedAt(new Date().toISOString());
 
     setConflictInfo(null);
 
